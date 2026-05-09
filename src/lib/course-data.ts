@@ -67,13 +67,49 @@ export const course = {
   ] satisfies Chapter[],
 };
 
-export const products = [
-  { id: "p1", name: "Gentle Gel Cleanser", brand: "La Roche-Posay", category: "Cleanser", price: "€16", reason: "Non-stripping for your combination skin's morning reset.", tone: "AM + PM" },
-  { id: "p2", name: "Niacinamide 10% Serum", brand: "The Ordinary", category: "Serum", price: "€7", reason: "Calms inflammation and regulates sebum on your t-zone.", tone: "AM" },
-  { id: "p3", name: "Adapalene 0.1% Gel", brand: "Differin", category: "Treatment", price: "€22", reason: "Gold-standard retinoid for clearing your forehead breakouts.", tone: "PM" },
-  { id: "p4", name: "Ceramide Moisturizer", brand: "CeraVe", category: "Moisturizer", price: "€18", reason: "Restores barrier between active ingredient layers.", tone: "AM + PM" },
-  { id: "p5", name: "Mineral SPF 50", brand: "EltaMD UV Clear", category: "Sunscreen", price: "€38", reason: "Non-comedogenic, protects healing skin from PIH.", tone: "AM" },
-  { id: "p6", name: "BHA 2% Exfoliant", brand: "Paula's Choice", category: "Exfoliant", price: "€34", reason: "Unclogs pores 2x weekly without disrupting barrier.", tone: "PM" },
+export type RoutineStep = {
+  step: number;
+  category: string;
+  productName: string;
+  brand: string;
+  howTo: string;
+  amount: string;
+  frequency: string;
+};
+
+export type RoutineBlock = {
+  id: "morning" | "evening";
+  title: string;
+  subtitle: string;
+  totalMinutes: number;
+  steps: RoutineStep[];
+};
+
+export const routine: RoutineBlock[] = [
+  {
+    id: "morning",
+    title: "Morning Ritual",
+    subtitle: "After waking, before breakfast",
+    totalMinutes: 4,
+    steps: [
+      { step: 1, category: "Cleanser", productName: "Gentle Gel Cleanser", brand: "La Roche-Posay", howTo: "Massage onto damp skin for 30 seconds. Rinse with lukewarm water.", amount: "Pea-sized amount", frequency: "Every morning" },
+      { step: 2, category: "Serum", productName: "Niacinamide 10% Serum", brand: "The Ordinary", howTo: "Apply to clean, dry skin. Wait 60 seconds before next step.", amount: "3–4 drops", frequency: "Every morning" },
+      { step: 3, category: "Moisturizer", productName: "Ceramide Moisturizer", brand: "CeraVe", howTo: "Press gently into skin until fully absorbed.", amount: "Pea-sized amount", frequency: "Every morning" },
+      { step: 4, category: "Sunscreen", productName: "Mineral SPF 50", brand: "EltaMD UV Clear", howTo: "Apply as the final step. Reapply every 2 hours outdoors.", amount: "Two-finger length", frequency: "Every morning" },
+    ],
+  },
+  {
+    id: "evening",
+    title: "Evening Ritual",
+    subtitle: "30 minutes before bed",
+    totalMinutes: 6,
+    steps: [
+      { step: 1, category: "Cleanser", productName: "Gentle Gel Cleanser", brand: "La Roche-Posay", howTo: "Double cleanse if you wore SPF or makeup. Rinse thoroughly.", amount: "Pea-sized amount", frequency: "Every evening" },
+      { step: 2, category: "Treatment", productName: "Adapalene 0.1% Gel", brand: "Differin", howTo: "Apply to fully dry skin. Avoid eye area. Mild tingling is normal.", amount: "Pea-sized amount", frequency: "Every evening" },
+      { step: 3, category: "Exfoliant", productName: "BHA 2% Exfoliant", brand: "Paula's Choice", howTo: "Skip on Adapalene nights. Apply on alternate evenings only.", amount: "A few drops", frequency: "2× per week" },
+      { step: 4, category: "Moisturizer", productName: "Ceramide Moisturizer", brand: "CeraVe", howTo: "Layer generously to seal in actives and support overnight repair.", amount: "Generous layer", frequency: "Every evening" },
+    ],
+  },
 ];
 
 export const findLesson = (id: string) => {
