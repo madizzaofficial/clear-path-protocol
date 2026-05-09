@@ -9,15 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProductsRouteImport } from './routes/products'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as CourseRouteImport } from './routes/course'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LessonLessonIdRouteImport } from './routes/lesson.$lessonId'
 
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductsRoute = ProductsRouteImport.update({
   id: '/products',
   path: '/products',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CourseRoute = CourseRouteImport.update({
@@ -45,14 +57,18 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/course': typeof CourseRoute
+  '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
+  '/register': typeof RegisterRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/course': typeof CourseRoute
+  '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
+  '/register': typeof RegisterRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
 }
 export interface FileRoutesById {
@@ -60,20 +76,38 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/course': typeof CourseRoute
+  '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
+  '/register': typeof RegisterRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/course' | '/products' | '/lesson/$lessonId'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/course'
+    | '/login'
+    | '/products'
+    | '/register'
+    | '/lesson/$lessonId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/course' | '/products' | '/lesson/$lessonId'
+  to:
+    | '/'
+    | '/admin'
+    | '/course'
+    | '/login'
+    | '/products'
+    | '/register'
+    | '/lesson/$lessonId'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/course'
+    | '/login'
     | '/products'
+    | '/register'
     | '/lesson/$lessonId'
   fileRoutesById: FileRoutesById
 }
@@ -81,17 +115,33 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   CourseRoute: typeof CourseRoute
+  LoginRoute: typeof LoginRoute
   ProductsRoute: typeof ProductsRoute
+  RegisterRoute: typeof RegisterRoute
   LessonLessonIdRoute: typeof LessonLessonIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/products': {
       id: '/products'
       path: '/products'
       fullPath: '/products'
       preLoaderRoute: typeof ProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/course': {
@@ -129,7 +179,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   CourseRoute: CourseRoute,
+  LoginRoute: LoginRoute,
   ProductsRoute: ProductsRoute,
+  RegisterRoute: RegisterRoute,
   LessonLessonIdRoute: LessonLessonIdRoute,
 }
 export const routeTree = rootRouteImport
