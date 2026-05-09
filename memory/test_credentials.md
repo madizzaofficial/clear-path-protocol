@@ -9,36 +9,36 @@
 - Email/Password
 - Google Sign-In
 
-## Test Accounts
-No test accounts have been pre-seeded. To test:
+## Admin gating
+A user is admin when their Firestore doc `users/{uid}` has **`is_admin: true`**.
+Backward compat: `role: "admin"` still works.
 
-### Create a student account
-1. Go to `/register`
-2. Enter any name + valid email + password (≥6 chars)
-3. Account is created via Firebase Auth, then bootstrapped in Firestore (`users/{uid}`) with `role: "student"`
-
-### Make a user an admin
-After signing up, run this in a terminal to promote to admin (or do it manually in Firebase Console > Firestore > users > {uid} > set role="admin"):
-
+## Promote a user to admin (recommended)
 ```bash
-cd /app/backend && python3 -c "
-import firebase_admin
-from firebase_admin import credentials, firestore
-cred = credentials.Certificate('/app/backend/firebase-admin.json')
-firebase_admin.initialize_app(cred)
-db = firestore.client()
-# Replace EMAIL with the user's email:
-EMAIL = 'your@email.com'
-for d in db.collection('users').where('email', '==', EMAIL).stream():
-    db.collection('users').document(d.id).set({'role': 'admin'}, merge=True)
-    print('Promoted', d.id)
-"
+python /app/backend/scripts/set_admin.py user@example.com           # promote
+python /app/backend/scripts/set_admin.py user@example.com --revoke  # demote
 ```
 
-### Recommended test accounts
-- **Student**: create with email like `student-test@example.com` / password `Lumen123!`
-- **Admin**: create with email `admin-test@example.com` / password `Lumen123!` then run the promote script above
+Or directly in Firebase Console → Firestore → `users` → `<uid>` → set `is_admin: true`.
+
+## Test Accounts
+No accounts are pre-seeded. Workflow:
+1. Sign up at `/register` (creates Firebase Auth user + `users/{uid}` doc with `is_admin: false`).
+2. Promote with the script above.
+3. Reload the page → admin nav link appears, /admin and /admin/students/* unlocked.
+
+### Suggested test pair
+- **Student**: `student-test@example.com` / `Lumen123!`
+- **Admin**: `admin-test@example.com` / `Lumen123!` (then run promote script)
+
+## Routine workflow (NEW)
+1. Student fills intake at `/intake` → submitted; `/products` shows "Your routine is being prepared" banner.
+2. Coach goes to `/admin/students/{uid}` → **Routine** tab.
+3. Coach clicks "Generate draft from intake" (optional starting point) OR adds products manually.
+4. Coach edits each product (category, name, brand, image URL, description, amount, frequency, instructions, affiliate URL).
+5. Coach clicks **Save draft**.
+6. Coach clicks **Publish to student** — student now sees the routine on `/products`.
+7. Coach can **Unpublish** to revert to "preparing" state if needed.
 
 ## Backend Service Account
 Located at `/app/backend/firebase-admin.json` (gitignored).
-Used by FastAPI (`firebase-admin`) to verify ID tokens & operate on Firestore/Storage.
