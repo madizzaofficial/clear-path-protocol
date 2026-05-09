@@ -1,0 +1,39 @@
+{
+  "summary": "First-iteration testing of Lumen (TanStack Start + FastAPI + Firebase). Backend API auth gates, frontend signup E2E, intake quiz, /api/auth/bootstrap, and sign-out all verified. 12/12 backend tests pass. Full client-side signup -> Firebase Auth -> /api/auth/bootstrap (Firestore user doc) -> /intake -> 6-step quiz -> POST /api/intake -> redirect to /products works end-to-end. Sign-out via AppShell user menu also verified.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "AppShell header (e.g. /products after intake submit)", "issues": ["The 'Your personalized routine is ready' success toast appears in the top-right and visually overlaps the user-menu avatar/bell icons; clicking the avatar can be intercepted by the toast for ~5s. Consider moving toaster to top-center or shortening duration."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_lumen_api.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "(Optional/cosmetic) Move sonner Toaster off the same corner as the user-menu trigger, OR reduce duration so it doesn't intercept clicks for 5s.",
+    "(Optional) Initial cold load of TanStack Start client requires ~6-8s before form onSubmit handlers are bound (vite dev mode). Not a real bug, but consider documenting or pre-bundling deps in production build."
+  ],
+  "critical_code_review_comments": [
+    "server.py exposes 9+ endpoints in a single 394-line file; acceptable for first iteration but should be split into routers (auth, intake, checkins, photos, admin) before next feature wave.",
+    "get_admin_user reads Firestore on every admin request (no caching) — fine at low traffic, watch for cost/latency at scale.",
+    "Frontend register.tsx does NOT explicitly call /api/auth/bootstrap — bootstrap is centralized in AuthProvider via onAuthStateChanged, which works; just ensure this remains the single source of truth (don't duplicate from register/login).",
+    "CORS_ORIGINS=* combined with allow_credentials=True is technically invalid per spec; FastAPI accepts it but tighten to explicit origins for production.",
+    "/api/intake POST overwrites users/{uid}/intake/current with .set() (not merge) — this loses prior submittedAt / history. Consider versioning or appending to a subcollection if you want history."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_lumen_api.py (created)"
+  ],
+  "success_rate": {"backend": "100% (12/12)", "frontend": "100% on critical flows (login, register, signup E2E, /api/auth/bootstrap, intake quiz, /api/intake, redirect to /products, user-menu, sign-out, unauth redirect to /login)"},
+  "test_credentials": "Firebase Email/Password is enabled and working. Tests created fresh users like tester+<random>@lumen-test.com / Lumen!Test123 (e.g. tester+izfl5bs3@lumen-test.com, tester+wx42gfxp@lumen-test.com). These are real Firebase users in the methode-clear project — main agent may want to clean them up via Firebase Auth console or admin SDK.",
+  "seed_data_creation": "Three throwaway Firebase Auth users + matching Firestore users/{uid} docs were created during E2E. One of them also has users/{uid}/intake/current populated.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend tests live at /app/backend/tests/test_lumen_api.py and validate health + 401 gating. They do NOT test authenticated endpoints because we'd need a real Firebase ID token; for that, generate one with firebase-admin's create_custom_token + REST sign-in or use the Auth REST API. For the frontend Playwright tests, IMPORTANT: TanStack Start (vite dev) takes 6-8s after DOM is ready before React event handlers are attached — always page.wait_for_timeout(8000) after DOM is ready before clicking submit, otherwise the form does a native browser submit (URL changes from /register to /register?). Real-product signup-bootstrap-intake-products-signout chain is fully working. Google sign-in is intentionally untested (popup needs real Google account).",
+  "rca of the issue": "Initial Playwright run showed 'signup did not navigate' because we clicked submit before TanStack Start's client bundle finished hydrating. Native form GET submitted to /register?. Confirmed by reproducing with an 8-second hydration wait — signup then worked, /api/auth/bootstrap returned 200, /api/intake returned 200, redirect to /products happened, and sign-out worked. Mitigation: Playwright tests must wait for hydration; product code itself has no bug."
+}
