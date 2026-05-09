@@ -129,51 +129,67 @@ def generate_routine(answers: IntakeAnswers) -> Dict[str, Any]:
     """Build a starter AM/PM routine from intake answers."""
     am, pm = [], []
 
+    def aff(name: str, brand: str) -> str:
+        # Placeholder Amazon search; main agent should replace tag at runtime via env if needed.
+        from urllib.parse import quote_plus
+        q = quote_plus(f"{brand} {name}")
+        return f"https://www.amazon.com/s?k={q}"
+
     # Cleanser — gentler if sensitive/dry
     if answers.skinType in {"sensitive", "dry"}:
         am.append({"step": 1, "category": "Cleanser", "productName": "Hydrating Gentle Cleanser",
                    "brand": "CeraVe", "amount": "Pea-sized", "frequency": "Every morning",
-                   "howTo": "Massage onto damp skin for 30s, rinse with lukewarm water."})
+                   "howTo": "Massage onto damp skin for 30s, rinse with lukewarm water.",
+                   "affiliateUrl": aff("Hydrating Cleanser", "CeraVe")})
     else:
         am.append({"step": 1, "category": "Cleanser", "productName": "Gentle Gel Cleanser",
                    "brand": "La Roche-Posay", "amount": "Pea-sized", "frequency": "Every morning",
-                   "howTo": "Massage onto damp skin for 30s, rinse."})
+                   "howTo": "Massage onto damp skin for 30s, rinse.",
+                   "affiliateUrl": aff("Effaclar Gel Cleanser", "La Roche-Posay")})
 
     # Treatment serum
     am.append({"step": 2, "category": "Serum", "productName": "Niacinamide 10%",
                "brand": "The Ordinary", "amount": "3-4 drops", "frequency": "Every morning",
-               "howTo": "Apply to clean dry skin, wait 60s."})
+               "howTo": "Apply to clean dry skin, wait 60s.",
+               "affiliateUrl": aff("Niacinamide 10% Zinc 1%", "The Ordinary")})
 
     am.append({"step": 3, "category": "Moisturizer", "productName": "Ceramide Moisturizer",
                "brand": "CeraVe", "amount": "Pea-sized", "frequency": "Every morning",
-               "howTo": "Press gently into skin until absorbed."})
+               "howTo": "Press gently into skin until absorbed.",
+               "affiliateUrl": aff("Moisturizing Cream", "CeraVe")})
 
     am.append({"step": 4, "category": "Sunscreen", "productName": "Mineral SPF 50",
                "brand": "EltaMD UV Clear", "amount": "Two-finger length", "frequency": "Every morning",
-               "howTo": "Final step. Reapply every 2h outdoors."})
+               "howTo": "Final step. Reapply every 2h outdoors.",
+               "affiliateUrl": aff("UV Clear SPF 46", "EltaMD")})
 
     # PM
     pm.append({"step": 1, "category": "Cleanser", "productName": am[0]["productName"],
                "brand": am[0]["brand"], "amount": "Pea-sized", "frequency": "Every evening",
-               "howTo": "Double cleanse if you wore SPF or makeup."})
+               "howTo": "Double cleanse if you wore SPF or makeup.",
+               "affiliateUrl": am[0]["affiliateUrl"]})
 
     # Active treatment depends on severity & pregnancy
     if answers.pregnancy:
         pm.append({"step": 2, "category": "Treatment", "productName": "Azelaic Acid 10%",
                    "brand": "The Ordinary", "amount": "Pea-sized", "frequency": "Every evening",
-                   "howTo": "Pregnancy-safe alternative to retinoids."})
+                   "howTo": "Pregnancy-safe alternative to retinoids.",
+                   "affiliateUrl": aff("Azelaic Acid Suspension 10%", "The Ordinary")})
     elif answers.severity == "severe":
         pm.append({"step": 2, "category": "Treatment", "productName": "Adapalene 0.1%",
                    "brand": "Differin", "amount": "Pea-sized", "frequency": "Every evening",
-                   "howTo": "Apply to fully dry skin. Mild tingling is normal."})
+                   "howTo": "Apply to fully dry skin. Mild tingling is normal.",
+                   "affiliateUrl": aff("Adapalene Gel 0.1%", "Differin")})
     else:
         pm.append({"step": 2, "category": "Treatment", "productName": "Adapalene 0.1%",
                    "brand": "Differin", "amount": "Pea-sized", "frequency": "3-4× per week",
-                   "howTo": "Build tolerance: every 3rd night for 2 weeks, then nightly."})
+                   "howTo": "Build tolerance: every 3rd night for 2 weeks, then nightly.",
+                   "affiliateUrl": aff("Adapalene Gel 0.1%", "Differin")})
 
     pm.append({"step": 3, "category": "Moisturizer", "productName": "Ceramide Moisturizer",
                "brand": "CeraVe", "amount": "Generous layer", "frequency": "Every evening",
-               "howTo": "Layer to seal in actives and support overnight repair."})
+               "howTo": "Layer to seal in actives and support overnight repair.",
+               "affiliateUrl": aff("Moisturizing Cream", "CeraVe")})
 
     return {
         "morning": {"id": "morning", "title": "Morning Ritual", "subtitle": "After waking, before breakfast",

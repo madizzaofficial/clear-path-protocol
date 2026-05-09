@@ -1,0 +1,52 @@
+{
+  "summary": "Iteration 2 testing of Lumen. Backend: 19/19 tests pass (12 auth-gates + 7 new authenticated integration tests covering affiliate URLs in routine, /api/admin/students/{uid} RBAC, and /api/admin/notes). Frontend: /products affiliate buttons confirmed working with correct attrs; non-admin redirect from /admin/students/{uid} works. CRITICAL FRONTEND BUG: /admin/students/$uid page never mounts — TanStack route tree wires it as a CHILD of AdminRoute, but admin.tsx renders no <Outlet />, so navigating to the URL renders the /admin list instead of the detail component (verified: backend /api/admin/students/{uid} is never called by browser).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "/admin/students/$uid (admin.students.$uid.tsx)",
+        "issue": "Route component never mounts. routeTree.gen.ts wires AdminStudentsUidRoute with getParentRoute: () => AdminRoute, making it a nested child of /admin. admin.tsx is a leaf page and does NOT render <Outlet />, so the child's component (StudentDetail) is never rendered. Browser shows the /admin dashboard at /admin/students/{uid}; backend GET /api/admin/students/{uid} is never called. Tabs (student-tabs, student-name, student-tab-overview/intake/photos/checkins/notes), back-link, notes form — all unreachable.",
+        "selector": "[data-testid=\"student-tabs\"]",
+        "priority": "CRITICAL"
+      }
+    ],
+    "integration_issues": [
+      {
+        "flow": "Admin → click View → student detail",
+        "issue": "Clicking admin-view-{uid} navigates URL correctly to /admin/students/{uid}, but page renders /admin instead of the detail view (no API detail call, no tabs).",
+        "affected_selectors": ["[data-testid='admin-view-*']", "[data-testid='student-tabs']", "[data-testid='note-textarea']", "[data-testid='note-submit-button']"]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_lumen_api.py",
+    "/app/backend/tests/test_lumen_iter2.py",
+    "/app/test_reports/pytest/pytest_iter2_basic.xml",
+    "/app/test_reports/pytest/pytest_iter2_auth.xml"
+  ],
+  "action_items": [
+    "FIX TanStack route nesting for /admin/students/$uid. Two clean options: (a) Rename routes/admin.tsx → routes/admin.index.tsx, then add a tiny routes/admin.tsx layout that returns <AppShell><Outlet/></AppShell> (or just <Outlet/>), so admin.students.$uid renders as a sibling child. (b) Alternatively, use flat route naming: rename admin.students.$uid.tsx so it does NOT inherit AdminRoute as parent (e.g., place it under a separate non-nested file path or define its parent explicitly via createFileRoute('/admin/students/$uid') with route options that bypass the auto-parent — confirm by inspecting routeTree.gen.ts after the rename: getParentRoute should be () => rootRouteImport, not () => AdminRoute).",
+    "After the fix, retest: View link click → tabs visible → switch to Notes → submit → POST /api/admin/notes returns and new note card appears with data-testid='note-{id}'. Also verify intake-empty / photos-empty / checkins-empty render correctly for a brand-new student."
+  ],
+  "critical_code_review_comments": [
+    "products.tsx 'Shop this product' anchor: rel attribute order is 'noopener sponsored noreferrer' — works, but most style guides recommend 'sponsored noopener noreferrer'. Cosmetic only.",
+    "admin.students.$uid.tsx: NotesTab calls onAdded(data.note) without checking the response shape; the backend does return {ok, note}, so OK, but a defensive `if (!data?.note) throw` would be safer.",
+    "admin.students.$uid.tsx: on detail-fetch error it shows toast 'Couldn't load student' AND nav('/admin'). For 404 vs 403 vs network errors the user sees the same toast — minor UX smell.",
+    "server.py generate_routine: affiliateUrl is hard-coded to amazon.com only; if VITE_AMAZON_AFFILIATE_TAG is empty, withTag() falls back to non-tagged URL — works as expected; just noting that revenue is zero until tag is set.",
+    "server.py is now 410 lines and growing — still single-file. Splitting into routers (auth/intake/checkins/photos/admin) is overdue."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_lumen_iter2.py (new — 7 authenticated integration tests, all passing)"
+  ],
+  "success_rate": {"backend": "100% (19/19)", "frontend": "60% — affiliate buttons OK, non-admin redirect OK, /admin list+View OK; but /admin/students/$uid page is unreachable due to route nesting bug."},
+  "test_credentials": "Two scratch users created and CLEANED UP: tester-admin-58de71@lumen-test.com (admin), tester-stu-58de71@lumen-test.com (student). Both deleted from Firebase Auth + Firestore at end of test. Three module-scoped pytest fixtures also create+delete TEST_student_*, TEST_admin_*, TEST_preg_* users automatically. No persistent test seed data remains.",
+  "seed_data_creation": "All seed users + their subcollection docs are deleted by test teardown / cleanup script. The /admin list still contains 4 leftover tester+* users from iteration 1.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend tests live in /app/backend/tests/{test_lumen_api.py,test_lumen_iter2.py}. test_lumen_iter2.py uses firebase-admin to create users + custom-token-exchange to mint ID tokens (signInWithCustomToken). Re-running it is safe — fixtures auto-clean. The CRITICAL bug in this iteration is purely frontend route nesting. To verify the fix: routeTree.gen.ts's `AdminStudentsUidRoute = AdminStudentsUidRouteImport.update({ ... getParentRoute: () => AdminRoute })` must change to `getParentRoute: () => rootRouteImport` (or AdminRoute must itself become a layout that renders <Outlet/>). Use the saved admin user via the firebase-admin promote script in /app/memory/test_credentials.md; then click admin-view-{uid} and assert student-tabs visibility.",
+  "rca of the issue": "TanStack Router file-based routing convention: a file `admin.students.$uid.tsx` sitting alongside `admin.tsx` is auto-treated as a NESTED child of admin.tsx (parent route). The generated routeTree.gen.ts confirms this at line 71: `getParentRoute: () => AdminRoute`. For child routes to render, the parent must include <Outlet />. admin.tsx is a leaf page (renders <AdminPage/> directly inside <AppShell>) with NO Outlet, so when the URL is /admin/students/{uid}, TanStack matches AdminRoute → renders AdminPage (the dashboard list) and never descends into AdminStudentsUidRoute. Reproduced 3× consistently: navigating directly to /admin/students/{uid} as admin → URL is correct, page content is the admin list, only /api/admin/students (list) is hit, /api/admin/students/{uid} (detail) is NEVER called. Mitigation: convert admin.tsx into a layout (return <AppShell><Outlet/></AppShell>) and move current dashboard content to admin.index.tsx. Frontend integration tests (Notes flow, empty states, tab switching) are blocked until this is fixed."
+}
