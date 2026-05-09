@@ -132,7 +132,7 @@ function LessonPage() {
                 <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-soft">
                   <h3 className="font-display text-base font-semibold">Resources</h3>
                   <ul className="mt-3 space-y-2">
-                    {lesson.resources.map((r) => (
+                    {lesson.resources.map((r: { name: string; size: string }) => (
                       <li key={r.name}>
                         <button className="flex w-full items-center gap-3 rounded-xl border border-border/60 bg-background p-3 text-left transition-colors hover:bg-primary-soft/40">
                           <FileText className="h-4 w-4 shrink-0 text-primary" />
