@@ -65,11 +65,12 @@ def get_current_user(creds: Optional[HTTPAuthorizationCredentials] = Depends(bea
 
 
 def get_admin_user(user: Dict[str, Any] = Depends(get_current_user)) -> Dict[str, Any]:
-    """Require user document with role == 'admin'."""
+    """Require user document with `is_admin: true` (or legacy role == 'admin')."""
     uid = user["uid"]
     snap = db.collection("users").document(uid).get()
-    role = (snap.to_dict() or {}).get("role") if snap.exists else None
-    if role != "admin":
+    data = (snap.to_dict() or {}) if snap.exists else {}
+    is_admin = bool(data.get("is_admin")) or data.get("role") == "admin"
+    if not is_admin:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Admin only")
     return user
 
@@ -252,7 +253,8 @@ def bootstrap(payload: ProfileUpsert, user: Dict[str, Any] = Depends(get_current
         "email": payload.email or user.get("email"),
         "fullName": payload.fullName or user.get("name"),
         "photoURL": payload.photoURL or user.get("picture"),
-        "role": "student",
+        "is_admin": False,
+        "role": "student",  # legacy; kept for backward compat
         "intakeCompleted": False,
         "startDate": utcnow_iso(),
         "week": 1,
@@ -266,22 +268,33 @@ def bootstrap(payload: ProfileUpsert, user: Dict[str, Any] = Depends(get_current
 # -------- Intake --------
 @app.post("/api/intake")
 def submit_intake(answers: IntakeAnswers, user: Dict[str, Any] = Depends(get_current_user)):
+    """Store intake answers. Routine is NOT auto-published — coach reviews and publishes."""
     uid = user["uid"]
-    routine = generate_routine(answers)
     intake_doc = {
         "answers": answers.model_dump(),
-        "routine": routine,
         "submittedAt": utcnow_iso(),
     }
     db.collection("users").document(uid).collection("intake").document("current").set(intake_doc)
+
+    # Initialize routine in pending state if not already published.
+    routine_ref = db.collection("users").document(uid).collection("routine").document("current")
+    routine_snap = routine_ref.get()
+    if not routine_snap.exists or (routine_snap.to_dict() or {}).get("status") != "published":
+        routine_ref.set({
+            "status": "pending",
+            "morning": {"id": "morning", "title": "Morning Ritual", "subtitle": "After waking, before breakfast", "totalMinutes": 4, "steps": []},
+            "evening": {"id": "evening", "title": "Evening Ritual", "subtitle": "30 minutes before bed", "totalMinutes": 6, "steps": []},
+            "rationale": [],
+            "updatedAt": utcnow_iso(),
+        }, merge=True)
+
     db.collection("users").document(uid).set({
         "intakeCompleted": True,
-        "currentRoutine": routine,
         "skinType": answers.skinType,
         "severity": answers.severity,
         "updatedAt": utcnow_iso(),
     }, merge=True)
-    return {"ok": True, "routine": routine}
+    return {"ok": True}
 
 
 @app.get("/api/intake")
@@ -291,6 +304,16 @@ def get_intake(user: Dict[str, Any] = Depends(get_current_user)):
     if not snap.exists:
         return {"intake": None}
     return {"intake": snap.to_dict()}
+
+
+# -------- Routine (student-facing) --------
+@app.get("/api/routine")
+def get_my_routine(user: Dict[str, Any] = Depends(get_current_user)):
+    uid = user["uid"]
+    snap = db.collection("users").document(uid).collection("routine").document("current").get()
+    if not snap.exists:
+        return {"routine": None}
+    return {"routine": snap.to_dict()}
 
 
 # -------- Daily Check-ins --------
@@ -344,10 +367,12 @@ def list_photos(user: Dict[str, Any] = Depends(get_current_user)):
 # -------- Admin --------
 @app.get("/api/admin/students")
 def admin_list_students(user: Dict[str, Any] = Depends(get_admin_user)):
-    q = db.collection("users").where("role", "==", "student")
     out = []
-    for d in q.stream():
+    for d in db.collection("users").stream():
         item = d.to_dict() or {}
+        # Skip admins from the student list
+        if item.get("is_admin") is True or item.get("role") == "admin":
+            continue
         item["uid"] = d.id
         out.append({k: v for k, v in item.items() if k != "currentRoutine"})
     return {"items": out}
@@ -363,6 +388,9 @@ def admin_student_detail(uid: str, user: Dict[str, Any] = Depends(get_admin_user
     intake_snap = db.collection("users").document(uid).collection("intake").document("current").get()
     intake = intake_snap.to_dict() if intake_snap.exists else None
 
+    routine_snap = db.collection("users").document(uid).collection("routine").document("current").get()
+    routine = routine_snap.to_dict() if routine_snap.exists else None
+
     photos = []
     for d in db.collection("users").document(uid).collection("photos").order_by("createdAt").stream():
         x = d.to_dict(); x["id"] = d.id; photos.append(x)
@@ -377,7 +405,102 @@ def admin_student_detail(uid: str, user: Dict[str, Any] = Depends(get_admin_user
               .order_by("createdAt", direction=firestore.Query.DESCENDING).stream()):
         x = d.to_dict(); x["id"] = d.id; notes.append(x)
 
-    return {"profile": profile, "intake": intake, "photos": photos, "checkins": checkins, "notes": notes}
+    return {"profile": profile, "intake": intake, "routine": routine,
+            "photos": photos, "checkins": checkins, "notes": notes}
+
+
+# -------- Admin: routine builder --------
+class RoutineStepIn(BaseModel):
+    step: int
+    category: str
+    productName: str
+    brand: Optional[str] = ""
+    amount: Optional[str] = ""
+    frequency: Optional[str] = ""
+    howTo: Optional[str] = ""
+    description: Optional[str] = ""
+    affiliateUrl: Optional[str] = ""
+    imageUrl: Optional[str] = ""
+
+
+class RoutineBlockIn(BaseModel):
+    title: Optional[str] = "Morning Ritual"
+    subtitle: Optional[str] = ""
+    totalMinutes: Optional[int] = 5
+    steps: List[RoutineStepIn] = []
+
+
+class RoutineUpdate(BaseModel):
+    morning: RoutineBlockIn
+    evening: RoutineBlockIn
+    rationale: List[str] = []
+
+
+@app.put("/api/admin/students/{uid}/routine")
+def admin_save_routine(uid: str, body: RoutineUpdate, user: Dict[str, Any] = Depends(get_admin_user)):
+    """Save routine as draft (status=pending) without notifying student."""
+    snap = db.collection("users").document(uid).get()
+    if not snap.exists:
+        raise HTTPException(404, "Student not found")
+    routine_ref = db.collection("users").document(uid).collection("routine").document("current")
+    cur = routine_ref.get().to_dict() or {}
+    routine = {
+        "morning": {"id": "morning", **body.morning.model_dump()},
+        "evening": {"id": "evening", **body.evening.model_dump()},
+        "rationale": body.rationale,
+        "status": cur.get("status") or "pending",
+        "updatedAt": utcnow_iso(),
+        "updatedBy": user.get("name") or user.get("email"),
+    }
+    routine_ref.set(routine, merge=True)
+    return {"ok": True, "routine": routine}
+
+
+@app.post("/api/admin/students/{uid}/routine/publish")
+def admin_publish_routine(uid: str, user: Dict[str, Any] = Depends(get_admin_user)):
+    snap = db.collection("users").document(uid).get()
+    if not snap.exists:
+        raise HTTPException(404, "Student not found")
+    routine_ref = db.collection("users").document(uid).collection("routine").document("current")
+    cur = routine_ref.get()
+    if not cur.exists:
+        raise HTTPException(400, "No routine to publish — save a draft first.")
+    routine_ref.set({
+        "status": "published",
+        "publishedAt": utcnow_iso(),
+        "publishedBy": user.get("name") or user.get("email"),
+    }, merge=True)
+    return {"ok": True}
+
+
+@app.post("/api/admin/students/{uid}/routine/unpublish")
+def admin_unpublish_routine(uid: str, user: Dict[str, Any] = Depends(get_admin_user)):
+    routine_ref = db.collection("users").document(uid).collection("routine").document("current")
+    if not routine_ref.get().exists:
+        raise HTTPException(404, "No routine")
+    routine_ref.set({"status": "pending", "updatedAt": utcnow_iso()}, merge=True)
+    return {"ok": True}
+
+
+@app.post("/api/admin/students/{uid}/routine/draft")
+def admin_generate_draft(uid: str, user: Dict[str, Any] = Depends(get_admin_user)):
+    """Generate a starter draft from intake answers (admin only). Does not publish."""
+    intake_snap = db.collection("users").document(uid).collection("intake").document("current").get()
+    if not intake_snap.exists:
+        raise HTTPException(400, "Student has not completed intake yet.")
+    answers_dict = (intake_snap.to_dict() or {}).get("answers") or {}
+    try:
+        answers = IntakeAnswers(**answers_dict)
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(400, f"Invalid stored intake: {e}") from e
+    routine = generate_routine(answers)
+    routine_ref = db.collection("users").document(uid).collection("routine").document("current")
+    cur = routine_ref.get().to_dict() or {}
+    routine["status"] = cur.get("status") or "pending"
+    routine["updatedAt"] = utcnow_iso()
+    routine["updatedBy"] = user.get("name") or user.get("email")
+    routine_ref.set(routine, merge=True)
+    return {"ok": True, "routine": routine}
 
 
 @app.post("/api/admin/notes")
@@ -398,12 +521,14 @@ def admin_add_note(payload: CoachNote, user: Dict[str, Any] = Depends(get_admin_
 # -------- Misc admin: promote --------
 class PromoteBody(BaseModel):
     uid: str
-    role: str  # student|admin
+    is_admin: bool
 
 
 @app.post("/api/admin/promote")
 def admin_promote(body: PromoteBody, user: Dict[str, Any] = Depends(get_admin_user)):
-    if body.role not in {"student", "admin"}:
-        raise HTTPException(400, "Invalid role")
-    db.collection("users").document(body.uid).set({"role": body.role, "updatedAt": utcnow_iso()}, merge=True)
+    db.collection("users").document(body.uid).set({
+        "is_admin": body.is_admin,
+        "role": "admin" if body.is_admin else "student",  # legacy mirror
+        "updatedAt": utcnow_iso(),
+    }, merge=True)
     return {"ok": True}

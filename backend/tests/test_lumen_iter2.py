@@ -133,8 +133,8 @@ def _h(token: str) -> dict:
 # Affiliate URLs in routine
 # ============================================================
 class TestAffiliateUrls:
-    def test_intake_post_then_get_returns_affiliate_urls(self, student):
-        # Submit intake → triggers routine generation
+    def test_intake_post_then_admin_draft_has_affiliate_urls(self, student, admin_user):
+        # Submit intake (no longer auto-generates routine in iter4)
         payload = {
             "skinType": "oily",
             "concerns": ["acne", "redness"],
@@ -145,16 +145,13 @@ class TestAffiliateUrls:
         }
         r = requests.post(f"{BASE_URL}/api/intake", json=payload, headers=_h(student["id_token"]))
         assert r.status_code == 200, r.text
-        body = r.json()
-        assert body.get("ok") is True
-        assert "routine" in body
+        assert r.json().get("ok") is True
 
-        # Now GET intake and validate every step has an Amazon affiliate URL
-        r2 = requests.get(f"{BASE_URL}/api/intake", headers=_h(student["id_token"]))
-        assert r2.status_code == 200
-        intake = r2.json()["intake"]
-        assert intake is not None
-        routine = intake["routine"]
+        # Admin generates the rule-based draft routine
+        r2 = requests.post(f"{BASE_URL}/api/admin/students/{student['uid']}/routine/draft",
+                           headers=_h(admin_user["id_token"]))
+        assert r2.status_code == 200, r2.text
+        routine = r2.json()["routine"]
         assert "morning" in routine and "evening" in routine
 
         for block_key in ("morning", "evening"):
@@ -174,8 +171,7 @@ class TestAffiliateUrls:
                 assert brand_first in k, f"Brand '{brand_first}' not in search query '{k}'"
 
     def test_pregnancy_routine_uses_azelaic_with_affiliate(self, admin_user):
-        # Use the admin user to test as a different student record
-        # Actually just create a pregnancy intake on a fresh student
+        # Create fresh student with pregnancy=True intake, then admin generates draft
         uid_suffix = uuid.uuid4().hex[:8]
         email = f"TEST_preg_{uid_suffix}@lumen-test.com"
         u = fb_auth.create_user(email=email, password="Lumen!Test123")
@@ -187,14 +183,19 @@ class TestAffiliateUrls:
                 "pregnancy": True,
             }, headers=_h(tok))
             assert r.status_code == 200
-            routine = r.json()["routine"]
+            assert r.json().get("ok") is True
+
+            r2 = requests.post(f"{BASE_URL}/api/admin/students/{u.uid}/routine/draft",
+                               headers=_h(admin_user["id_token"]))
+            assert r2.status_code == 200, r2.text
+            routine = r2.json()["routine"]
             pm_step2 = routine["evening"]["steps"][1]
             assert "azelaic" in pm_step2["productName"].lower()
             assert "amazon." in pm_step2["affiliateUrl"]
         finally:
             try:
                 fb_auth.delete_user(u.uid)
-                for sub in ("intake",):
+                for sub in ("intake", "routine"):
                     for d in db.collection("users").document(u.uid).collection(sub).stream():
                         d.reference.delete()
                 db.collection("users").document(u.uid).delete()
