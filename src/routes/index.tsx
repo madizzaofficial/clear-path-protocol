@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import { course, products, allLessons } from "@/lib/course-data";
+import { course, routine, allLessons } from "@/lib/course-data";
+const featured = routine[1].steps[1];
 import { Play, Check, Sparkles, Sun, Moon, ArrowRight, Flame, TrendingUp } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -114,11 +115,11 @@ function Dashboard() {
                   <Sparkles className="h-6 w-6 text-foreground/70" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold">{products[2].name}</p>
-                  <p className="text-xs text-muted-foreground">{products[2].brand} · {products[2].price}</p>
+                  <p className="text-sm font-semibold">{featured.productName}</p>
+                  <p className="text-xs text-muted-foreground">{featured.brand} · {featured.category}</p>
                 </div>
               </div>
-              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{products[2].reason}</p>
+              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{featured.howTo}</p>
             </Link>
 
             {/* Weekly goal */}
