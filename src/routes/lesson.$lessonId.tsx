@@ -1,7 +1,10 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { course, findLesson, allLessons } from "@/lib/course-data";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, ArrowRight, Check, ChevronDown, Clock, Download, FileText, Lock, Menu, Play, X } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { doc, getDoc, setDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export const Route = createFileRoute("/lesson/$lessonId")({
   head: ({ params }) => {
@@ -28,12 +31,39 @@ function LessonPage() {
   const prev = idx > 0 ? all[idx - 1] : null;
   const next = idx < all.length - 1 ? all[idx + 1] : null;
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user } = useAuth();
+  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  const [marking, setMarking] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    getDoc(doc(db, "progress", user.uid)).then((snap) => {
+      if (snap.exists()) setCompletedLessons(snap.data().completedLessons ?? []);
+    });
+  }, [user]);
+
+  const isCompleted = completedLessons.includes(lesson.id);
+
+  async function toggleComplete() {
+    if (!user || marking) return;
+    setMarking(true);
+    const ref = doc(db, "progress", user.uid);
+    await setDoc(
+      ref,
+      { completedLessons: isCompleted ? arrayRemove(lesson.id) : arrayUnion(lesson.id) },
+      { merge: true }
+    );
+    setCompletedLessons((prev) =>
+      isCompleted ? prev.filter((id) => id !== lesson.id) : [...prev, lesson.id]
+    );
+    setMarking(false);
+  }
 
   return (
     <div className="flex min-h-screen bg-background">
       {/* Desktop sidebar */}
       <aside className="hidden w-80 shrink-0 border-r border-border/60 bg-sidebar lg:block">
-        <SidebarContent currentId={lesson.id} />
+        <SidebarContent currentId={lesson.id} completedLessons={completedLessons} />
       </aside>
 
       {/* Mobile sidebar */}
@@ -44,7 +74,7 @@ function LessonPage() {
             <div className="flex justify-end p-4">
               <button onClick={() => setMenuOpen(false)} className="rounded-full p-2 hover:bg-muted"><X className="h-5 w-5" /></button>
             </div>
-            <SidebarContent currentId={lesson.id} onNavigate={() => setMenuOpen(false)} />
+            <SidebarContent currentId={lesson.id} completedLessons={completedLessons} onNavigate={() => setMenuOpen(false)} />
           </div>
         </div>
       )}
@@ -72,7 +102,7 @@ function LessonPage() {
           <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight md:text-4xl">{lesson.title}</h1>
           <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {lesson.duration}</span>
-            {lesson.completed && <span className="flex items-center gap-1.5 text-primary"><Check className="h-4 w-4" /> Completed</span>}
+            {isCompleted && <span className="flex items-center gap-1.5 text-primary"><Check className="h-4 w-4" /> Completed</span>}
           </div>
 
           {/* Video */}
@@ -174,8 +204,17 @@ function LessonPage() {
               </Link>
             ) : <div />}
             <div className="flex items-center gap-3">
-              <button className="rounded-full border border-border bg-background px-5 py-2.5 text-sm font-medium hover:bg-muted">
-                Mark as complete
+              <button
+                onClick={toggleComplete}
+                disabled={marking}
+                className={`flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-medium transition-colors disabled:opacity-60 ${
+                  isCompleted
+                    ? "border-primary bg-primary-soft text-primary hover:bg-primary-soft/70"
+                    : "border-border bg-background hover:bg-muted"
+                }`}
+              >
+                {isCompleted && <Check className="h-4 w-4" />}
+                {isCompleted ? "Completed" : "Mark as complete"}
               </button>
               {next && (
                 <Link to="/lesson/$lessonId" params={{ lessonId: next.id }} className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background hover:opacity-90">
@@ -190,7 +229,7 @@ function LessonPage() {
   );
 }
 
-function SidebarContent({ currentId, onNavigate }: { currentId: string; onNavigate?: () => void }) {
+function SidebarContent({ currentId, completedLessons, onNavigate }: { currentId: string; completedLessons: string[]; onNavigate?: () => void }) {
   const initialOpen = course.chapters.find((c) => c.lessons.some((l) => l.id === currentId))?.id;
   const [open, setOpen] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(course.chapters.map((c) => [c.id, c.id === initialOpen]))
@@ -211,7 +250,7 @@ function SidebarContent({ currentId, onNavigate }: { currentId: string; onNaviga
       <nav className="flex-1 overflow-y-auto p-4">
         {course.chapters.map((ch, i) => {
           const isOpen = open[ch.id];
-          const cdone = ch.lessons.filter((l) => l.completed).length;
+          const cdone = ch.lessons.filter((l) => completedLessons.includes(l.id)).length;
           const cprog = Math.round((cdone / ch.lessons.length) * 100);
           return (
             <div key={ch.id} className="mb-2">
@@ -235,6 +274,7 @@ function SidebarContent({ currentId, onNavigate }: { currentId: string; onNaviga
                 <ul className="ml-3 mt-1 space-y-0.5 border-l border-border/60 pl-3">
                   {ch.lessons.map((l) => {
                     const active = l.id === currentId;
+                    const done = completedLessons.includes(l.id);
                     return (
                       <li key={l.id}>
                         <Link
@@ -245,8 +285,8 @@ function SidebarContent({ currentId, onNavigate }: { currentId: string; onNaviga
                             active ? "bg-primary-soft font-medium text-foreground" : l.locked ? "cursor-not-allowed text-muted-foreground/60" : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
                           }`}
                         >
-                          <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${l.completed ? "bg-primary text-primary-foreground" : l.locked ? "bg-muted" : active ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
-                            {l.completed ? <Check className="h-3 w-3" /> : l.locked ? <Lock className="h-2.5 w-2.5" /> : active ? <Play className="h-2.5 w-2.5 fill-current" /> : null}
+                          <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${done ? "bg-primary text-primary-foreground" : l.locked ? "bg-muted" : active ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+                            {done ? <Check className="h-3 w-3" /> : l.locked ? <Lock className="h-2.5 w-2.5" /> : active ? <Play className="h-2.5 w-2.5 fill-current" /> : null}
                           </span>
                           <span className="line-clamp-1 flex-1">{l.title}</span>
                           <span className="text-[10px] text-muted-foreground">{l.duration}</span>

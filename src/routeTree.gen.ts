@@ -9,37 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as CourseRouteImport } from './routes/course'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as ProductsRouteImport } from './routes/products'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ProductsRouteImport } from './routes/products'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as JournalRouteImport } from './routes/journal'
+import { Route as IntakeRouteImport } from './routes/intake'
+import { Route as CourseRouteImport } from './routes/course'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as LessonLessonIdRouteImport } from './routes/lesson.$lessonId'
+import { Route as AdminRoutinesRouteImport } from './routes/admin_.routines'
+import { Route as AdminCourseEditorRouteImport } from './routes/admin_.course-editor'
+import { Route as AdminStudentUidRouteImport } from './routes/admin_.student.$uid'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CourseRoute = CourseRouteImport.update({
-  id: '/course',
-  path: '/course',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProductsRoute = ProductsRouteImport.update({
-  id: '/products',
-  path: '/products',
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -47,9 +33,59 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProductsRoute = ProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JournalRoute = JournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntakeRoute = IntakeRouteImport.update({
+  id: '/intake',
+  path: '/intake',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CourseRoute = CourseRouteImport.update({
+  id: '/course',
+  path: '/course',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LessonLessonIdRoute = LessonLessonIdRouteImport.update({
   id: '/lesson/$lessonId',
   path: '/lesson/$lessonId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoutinesRoute = AdminRoutinesRouteImport.update({
+  id: '/admin_/routines',
+  path: '/admin/routines',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCourseEditorRoute = AdminCourseEditorRouteImport.update({
+  id: '/admin_/course-editor',
+  path: '/admin/course-editor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminStudentUidRoute = AdminStudentUidRouteImport.update({
+  id: '/admin_/student/$uid',
+  path: '/admin/student/$uid',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -57,29 +93,47 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/course': typeof CourseRoute
+  '/intake': typeof IntakeRoute
+  '/journal': typeof JournalRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
   '/register': typeof RegisterRoute
+  '/welcome': typeof WelcomeRoute
+  '/admin/course-editor': typeof AdminCourseEditorRoute
+  '/admin/routines': typeof AdminRoutinesRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
+  '/admin/student/$uid': typeof AdminStudentUidRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/course': typeof CourseRoute
+  '/intake': typeof IntakeRoute
+  '/journal': typeof JournalRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
   '/register': typeof RegisterRoute
+  '/welcome': typeof WelcomeRoute
+  '/admin/course-editor': typeof AdminCourseEditorRoute
+  '/admin/routines': typeof AdminRoutinesRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
+  '/admin/student/$uid': typeof AdminStudentUidRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/course': typeof CourseRoute
+  '/intake': typeof IntakeRoute
+  '/journal': typeof JournalRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
   '/register': typeof RegisterRoute
+  '/welcome': typeof WelcomeRoute
+  '/admin_/course-editor': typeof AdminCourseEditorRoute
+  '/admin_/routines': typeof AdminRoutinesRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
+  '/admin_/student/$uid': typeof AdminStudentUidRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -87,75 +141,71 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/course'
+    | '/intake'
+    | '/journal'
     | '/login'
     | '/products'
     | '/register'
+    | '/welcome'
+    | '/admin/course-editor'
+    | '/admin/routines'
     | '/lesson/$lessonId'
+    | '/admin/student/$uid'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
     | '/course'
+    | '/intake'
+    | '/journal'
     | '/login'
     | '/products'
     | '/register'
+    | '/welcome'
+    | '/admin/course-editor'
+    | '/admin/routines'
     | '/lesson/$lessonId'
+    | '/admin/student/$uid'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/course'
+    | '/intake'
+    | '/journal'
     | '/login'
     | '/products'
     | '/register'
+    | '/welcome'
+    | '/admin_/course-editor'
+    | '/admin_/routines'
     | '/lesson/$lessonId'
+    | '/admin_/student/$uid'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   CourseRoute: typeof CourseRoute
+  IntakeRoute: typeof IntakeRoute
+  JournalRoute: typeof JournalRoute
   LoginRoute: typeof LoginRoute
   ProductsRoute: typeof ProductsRoute
   RegisterRoute: typeof RegisterRoute
+  WelcomeRoute: typeof WelcomeRoute
+  AdminCourseEditorRoute: typeof AdminCourseEditorRoute
+  AdminRoutinesRoute: typeof AdminRoutinesRoute
   LessonLessonIdRoute: typeof LessonLessonIdRoute
+  AdminStudentUidRoute: typeof AdminStudentUidRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/course': {
-      id: '/course'
-      path: '/course'
-      fullPath: '/course'
-      preLoaderRoute: typeof CourseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/products': {
-      id: '/products'
-      path: '/products'
-      fullPath: '/products'
-      preLoaderRoute: typeof ProductsRouteImport
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -165,11 +215,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/products': {
+      id: '/products'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof ProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journal': {
+      id: '/journal'
+      path: '/journal'
+      fullPath: '/journal'
+      preLoaderRoute: typeof JournalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/intake': {
+      id: '/intake'
+      path: '/intake'
+      fullPath: '/intake'
+      preLoaderRoute: typeof IntakeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/course': {
+      id: '/course'
+      path: '/course'
+      fullPath: '/course'
+      preLoaderRoute: typeof CourseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lesson/$lessonId': {
       id: '/lesson/$lessonId'
       path: '/lesson/$lessonId'
       fullPath: '/lesson/$lessonId'
       preLoaderRoute: typeof LessonLessonIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin_/routines': {
+      id: '/admin_/routines'
+      path: '/admin/routines'
+      fullPath: '/admin/routines'
+      preLoaderRoute: typeof AdminRoutinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin_/course-editor': {
+      id: '/admin_/course-editor'
+      path: '/admin/course-editor'
+      fullPath: '/admin/course-editor'
+      preLoaderRoute: typeof AdminCourseEditorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin_/student/$uid': {
+      id: '/admin_/student/$uid'
+      path: '/admin/student/$uid'
+      fullPath: '/admin/student/$uid'
+      preLoaderRoute: typeof AdminStudentUidRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -179,10 +299,16 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   CourseRoute: CourseRoute,
+  IntakeRoute: IntakeRoute,
+  JournalRoute: JournalRoute,
   LoginRoute: LoginRoute,
   ProductsRoute: ProductsRoute,
   RegisterRoute: RegisterRoute,
+  WelcomeRoute: WelcomeRoute,
+  AdminCourseEditorRoute: AdminCourseEditorRoute,
+  AdminRoutinesRoute: AdminRoutinesRoute,
   LessonLessonIdRoute: LessonLessonIdRoute,
+  AdminStudentUidRoute: AdminStudentUidRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

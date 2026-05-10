@@ -1,6 +1,24 @@
 import { createStart, createMiddleware } from "@tanstack/react-start";
+import { serve } from "inngest/edge";
 
 import { renderErrorPage } from "./lib/error-page";
+import { inngest } from "./lib/inngest";
+import { welcomeSequence, intakeConfirmation, routineNotification } from "./lib/inngest-functions";
+
+const inngestHandler = serve({
+  client: inngest,
+  functions: [welcomeSequence, intakeConfirmation, routineNotification],
+  servePath: "/api/inngest",
+});
+
+const inngestMiddleware = createMiddleware({ type: "request" }).server(
+  async ({ request, pathname, next }) => {
+    if (pathname === "/api/inngest") {
+      return inngestHandler(request);
+    }
+    return next();
+  }
+);
 
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
@@ -18,5 +36,5 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
 });
 
 export const startInstance = createStart(() => ({
-  requestMiddleware: [errorMiddleware],
+  requestMiddleware: [inngestMiddleware, errorMiddleware],
 }));

@@ -1,6 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import { Search, MoreHorizontal, TrendingUp, Users, CheckCircle2, AlertCircle } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { db } from "@/lib/firebase";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { TrendingUp, Users, CheckCircle2, AlertCircle, BookOpen, Loader2, ClipboardList } from "lucide-react";
+import { course } from "@/lib/course-data";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -12,23 +17,67 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-const students = [
-  { name: "Léa Moreau", email: "lea.m@email.com", week: 3, progress: 72, status: "On track", stage: "Active routine", note: "Consistent, mild flare-up week 2" },
-  { name: "James Carter", email: "j.carter@email.com", week: 6, progress: 88, status: "On track", stage: "Visible results", note: "Excellent adherence" },
-  { name: "Aïsha Diallo", email: "aisha.d@email.com", week: 2, progress: 35, status: "At risk", stage: "Foundations", note: "Missed 4 lessons" },
-  { name: "Marco Bianchi", email: "m.bianchi@email.com", week: 9, progress: 95, status: "Thriving", stage: "Maintenance", note: "Ready for graduation prep" },
-  { name: "Sofia Reyes", email: "s.reyes@email.com", week: 1, progress: 12, status: "New", stage: "Onboarding", note: "Just joined Tuesday" },
-  { name: "Tom Andersen", email: "tom.a@email.com", week: 4, progress: 58, status: "On track", stage: "Active routine", note: "Asked about retinoid timing" },
-];
+const TOTAL_LESSONS = course.chapters.reduce((sum, ch) => sum + ch.lessons.length, 0);
 
-const statusStyles: Record<string, string> = {
-  "On track": "bg-primary-soft text-foreground",
-  "Thriving": "bg-foreground text-background",
-  "At risk": "bg-destructive/10 text-destructive",
-  "New": "bg-muted text-muted-foreground",
+function formatDays(enrolledAt: number): string {
+  const days = Math.floor((Date.now() - enrolledAt) / 86_400_000);
+  if (days < 7) return `J+${days}`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 9) return `${weeks} sem`;
+  return `${Math.floor(days / 30)} mois`;
+}
+
+type StudentDoc = {
+  uid: string;
+  email: string;
+  displayName: string | null;
+  photoURL: string | null;
+  enrolledAt?: number;
 };
 
 function AdminPage() {
+  const { user, loading, isAdmin } = useAuth();
+  const navigate = useNavigate();
+  const [students, setStudents] = useState<StudentDoc[]>([]);
+  const [loadingStudents, setLoadingStudents] = useState(true);
+  const [progressMap, setProgressMap] = useState<Map<string, number>>(new Map());
+
+  useEffect(() => {
+    if (!loading && !user) navigate({ to: "/login" });
+    if (!loading && user && !isAdmin) navigate({ to: "/" });
+  }, [user, loading, isAdmin, navigate]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    async function fetchStudents() {
+      setLoadingStudents(true);
+      try {
+        const snap = await getDocs(collection(db, "users"));
+        const docs = snap.docs.map((d) => d.data() as StudentDoc);
+        setStudents(docs);
+        const progressSnaps = await Promise.all(docs.map((s) => getDoc(doc(db, "progress", s.uid))));
+        const map = new Map<string, number>();
+        progressSnaps.forEach((ps, i) => {
+          if (ps.exists()) map.set(docs[i].uid, (ps.data().completedLessons ?? []).length);
+        });
+        setProgressMap(map);
+      } finally {
+        setLoadingStudents(false);
+      }
+    }
+    fetchStudents();
+  }, [isAdmin]);
+
+  if (loading || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isAdmin) return null;
+
   return (
     <AppShell>
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
@@ -38,9 +87,14 @@ function AdminPage() {
             <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight md:text-5xl">Coach dashboard</h1>
             <p className="mt-2 text-muted-foreground">Monitor protocols, intervene early, celebrate wins.</p>
           </div>
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input placeholder="Search students…" className="h-10 w-72 rounded-full border border-border bg-card pl-9 pr-4 text-sm focus:border-primary focus:outline-none" />
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              to="/admin/course-editor"
+              className="flex items-center gap-2 rounded-full bg-primary-soft px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary-muted"
+            >
+              <BookOpen className="h-4 w-4" />
+              Edit course
+            </Link>
           </div>
         </header>
 
@@ -56,54 +110,94 @@ function AdminPage() {
           {/* Students table */}
           <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft lg:col-span-2">
             <header className="flex items-center justify-between border-b border-border/60 p-6">
-              <h2 className="font-display text-lg font-semibold">Students</h2>
-              <button className="text-sm text-muted-foreground hover:text-foreground">View all</button>
+              <h2 className="font-display text-lg font-semibold">Élèves</h2>
+              <span className="text-sm text-muted-foreground">
+                {loadingStudents ? "…" : `${students.length} inscrits`}
+              </span>
             </header>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border/60 bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
-                    <th className="px-6 py-3 font-medium">Student</th>
-                    <th className="px-6 py-3 font-medium">Week</th>
-                    <th className="px-6 py-3 font-medium">Progress</th>
-                    <th className="px-6 py-3 font-medium">Status</th>
-                    <th className="px-6 py-3"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/60">
-                  {students.map((s) => (
-                    <tr key={s.email} className="hover:bg-primary-soft/30">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-warm text-sm font-semibold">
-                            {s.name.split(" ").map((n) => n[0]).join("")}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-semibold">{s.name}</p>
-                            <p className="truncate text-xs text-muted-foreground">{s.stage}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm tabular-nums">W{s.week}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-1.5 w-24 overflow-hidden rounded-full bg-muted">
-                            <div className="h-full rounded-full bg-primary" style={{ width: `${s.progress}%` }} />
-                          </div>
-                          <span className="text-xs tabular-nums text-muted-foreground">{s.progress}%</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyles[s.status]}`}>{s.status}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <button className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"><MoreHorizontal className="h-4 w-4" /></button>
-                      </td>
+            {loadingStudents ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : students.length === 0 ? (
+              <p className="px-6 py-10 text-center text-sm text-muted-foreground">
+                Aucun élève inscrit pour l'instant.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border/60 bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                      <th className="px-6 py-3 font-medium">Élève</th>
+                      <th className="px-6 py-3 font-medium">Email</th>
+                      <th className="px-6 py-3 font-medium">Progression</th>
+                      <th className="px-6 py-3 font-medium">Durée</th>
+                      <th className="px-6 py-3"></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-border/60">
+                    {students.map((s) => {
+                      const initials = (s.displayName ?? s.email)
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .slice(0, 2)
+                        .toUpperCase();
+                      return (
+                        <tr key={s.uid} className="hover:bg-primary-soft/30">
+                          <td className="px-6 py-4">
+                            <Link
+                              to="/admin/student/$uid"
+                              params={{ uid: s.uid }}
+                              className="flex items-center gap-3 group"
+                            >
+                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-warm text-sm font-semibold">
+                                {initials}
+                              </div>
+                              <p className="text-sm font-semibold group-hover:text-primary transition-colors">
+                                {s.displayName ?? "—"}
+                              </p>
+                            </Link>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-muted-foreground">
+                            {s.email}
+                          </td>
+                          <td className="px-6 py-4">
+                            {(() => {
+                              const done = progressMap.get(s.uid) ?? 0;
+                              const pct = Math.round((done / TOTAL_LESSONS) * 100);
+                              return (
+                                <div className="flex items-center gap-2 min-w-[100px]">
+                                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                                    <div className="h-full rounded-full bg-gradient-primary transition-all" style={{ width: `${pct}%` }} />
+                                  </div>
+                                  <span className="text-xs tabular-nums text-muted-foreground">{done}/{TOTAL_LESSONS}</span>
+                                </div>
+                              );
+                            })()}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-sm tabular-nums text-muted-foreground">
+                              {s.enrolledAt ? formatDays(s.enrolledAt) : "—"}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <Link
+                              to="/admin/routines"
+                              search={{ uid: s.uid }}
+                              className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-primary-muted"
+                            >
+                              <ClipboardList className="h-3.5 w-3.5" />
+                              Routine
+                            </Link>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
           {/* Right column */}

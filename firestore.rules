@@ -1,0 +1,90 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // Fix: if config/admins is absent, return false (no silent admin escalation)
+    function isAdmin() {
+      return isAuth() &&
+        exists(/databases/$(database)/documents/config/admins) &&
+        request.auth.uid in get(/databases/$(database)/documents/config/admins).data.uids;
+    }
+
+    function isOwner(uid) {
+      return isAuth() && request.auth.uid == uid;
+    }
+
+    // ── Config (admin list) ───────────────────────────────────────────────────
+    // Only seeded via Firebase Admin SDK / Console — never via client writes
+    match /config/{doc} {
+      allow read: if isAuth();
+      allow write: if false;
+    }
+
+    // ── Course content ────────────────────────────────────────────────────────
+    // Students can read; only admins can write (prevents UI-bypass mutations)
+    match /courses/{courseId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // ── User profiles ─────────────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // ── Intake answers ────────────────────────────────────────────────────────
+    // Students can only write their own intake once; immutable after submission
+    match /intake_answers/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId)
+        && request.resource.data.uid == userId;
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // ── Daily check-ins ───────────────────────────────────────────────────────
+    match /daily_checkins/{docId} {
+      allow read: if isAuth() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isAuth() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isAuth() && resource.data.uid == request.auth.uid;
+    }
+
+    // ── Progress photos ───────────────────────────────────────────────────────
+    match /progress_photos/{docId} {
+      allow read: if isAuth() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isAuth() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isAuth() && resource.data.uid == request.auth.uid;
+    }
+
+    // ── Coach notes (admin only) ──────────────────────────────────────────────
+    match /coach_notes/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ── Routines ──────────────────────────────────────────────────────────────
+    match /routines/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ── Lesson progress ───────────────────────────────────────────────────────
+    // completedLessons capped at 50 (18 lessons in protocol) to prevent abuse
+    match /progress/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if (isOwner(userId) || isAdmin())
+        && request.resource.data.completedLessons is list
+        && request.resource.data.completedLessons.size() <= 50;
+    }
+
+    // Deny everything else by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,5 +1,5 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, BookOpen, Sparkles, ShieldCheck, Bell, User, Settings, LogOut, UserCircle, CreditCard, HelpCircle, Check } from "lucide-react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Home, BookOpen, Sparkles, ShieldCheck, Bell, User, Settings, LogOut, UserCircle, CreditCard, HelpCircle, Check, Camera } from "lucide-react";
 import { ReactNode } from "react";
 import {
   DropdownMenu,
@@ -9,13 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-const nav = [
-  { to: "/", label: "Home", icon: Home },
-  { to: "/course", label: "Protocol", icon: BookOpen },
-  { to: "/products", label: "Routine", icon: Sparkles },
-  { to: "/admin", label: "Admin", icon: ShieldCheck },
-];
+import { useAuth } from "@/hooks/use-auth";
 
 const notifications = [
   { id: 1, title: "New lesson unlocked", body: "Layering Without Irritation is now available.", time: "2h ago", unread: true },
@@ -70,6 +64,18 @@ function NotificationsMenu() {
 }
 
 function UserMenu() {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleSignOut() {
+    await signOut();
+    navigate({ to: "/login" });
+  }
+
+  const initials = user?.displayName
+    ? user.displayName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+    : user?.email?.slice(0, 2).toUpperCase() ?? "?";
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -80,11 +86,11 @@ function UserMenu() {
       <DropdownMenuContent align="end" className="w-64 rounded-2xl border-border/60 p-0 shadow-elegant">
         <div className="flex items-center gap-3 p-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-primary text-sm font-semibold text-primary-foreground">
-            SM
+            {initials}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold">Sarah Moreau</p>
-            <p className="truncate text-xs text-muted-foreground">sarah@email.com</p>
+            <p className="truncate text-sm font-semibold">{user?.displayName ?? "My account"}</p>
+            <p className="truncate text-xs text-muted-foreground">{user?.email ?? ""}</p>
           </div>
         </div>
         <div className="mx-3 mb-2 rounded-xl bg-primary-soft/60 px-3 py-2">
@@ -108,10 +114,11 @@ function UserMenu() {
         </div>
         <DropdownMenuSeparator />
         <div className="p-1">
-          <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2 text-destructive focus:text-destructive">
-            <Link to="/login">
-              <LogOut className="mr-2 h-4 w-4" /> Sign out
-            </Link>
+          <DropdownMenuItem
+            onClick={handleSignOut}
+            className="cursor-pointer rounded-lg py-2 text-destructive focus:text-destructive"
+          >
+            <LogOut className="mr-2 h-4 w-4" /> Sign out
           </DropdownMenuItem>
         </div>
       </DropdownMenuContent>
@@ -122,6 +129,15 @@ function UserMenu() {
 export function AppShell({ children }: { children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const onLesson = path.startsWith("/lesson");
+  const { isAdmin } = useAuth();
+
+  const nav = [
+    { to: "/", label: "Home", icon: Home },
+    { to: "/course", label: "Protocol", icon: BookOpen },
+    { to: "/products", label: "Routine", icon: Sparkles },
+    { to: "/journal", label: "Journal", icon: Camera },
+    ...(isAdmin ? [{ to: "/admin", label: "Admin", icon: ShieldCheck }] : []),
+  ] as const;
 
   return (
     <div className="min-h-screen bg-background">
