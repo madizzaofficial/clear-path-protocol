@@ -1,6 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { course } from "@/lib/course-data";
+import { useAuth } from "@/hooks/use-auth";
+import { useEffect } from "react";
 import { Play, Check, Lock, Clock, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/course")({
@@ -14,9 +16,18 @@ export const Route = createFileRoute("/course")({
 });
 
 function CoursePage() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) navigate({ to: "/login" });
+  }, [user, loading, navigate]);
+
   const total = course.chapters.reduce((s, c) => s + c.lessons.length, 0);
   const done = course.chapters.reduce((s, c) => s + c.lessons.filter((l) => l.completed).length, 0);
   const progress = Math.round((done / total) * 100);
+
+  if (loading || !user) return null;
 
   return (
     <AppShell>

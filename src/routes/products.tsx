@@ -1,6 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { routine } from "@/lib/course-data";
+import { useAuth } from "@/hooks/use-auth";
+import { useEffect } from "react";
 import { Sun, Moon, Clock, Sparkles, Check, Info, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/products")({
@@ -14,8 +16,17 @@ export const Route = createFileRoute("/products")({
 });
 
 function RoutinePage() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) navigate({ to: "/login" });
+  }, [user, loading, navigate]);
+
   const morning = routine[0];
   const evening = routine[1];
+
+  if (loading || !user) return null;
 
   return (
     <AppShell>

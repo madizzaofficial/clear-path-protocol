@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { course, allLessons } from "@/lib/course-data";
 import { Play, Check, Sparkles, Sun, Moon, ArrowRight, TrendingUp, BookOpen } from "lucide-react";
@@ -46,7 +46,8 @@ function getPosition(enrolledAt: number): { week: number; day: number } {
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 
 function Dashboard() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [data, setData] = useState<HomeData>({
     loading: true,
     completedLessons: [],
@@ -54,6 +55,10 @@ function Dashboard() {
     enrolledAt: null,
     needsIntake: false,
   });
+
+  useEffect(() => {
+    if (!authLoading && !user) navigate({ to: "/login" });
+  }, [user, authLoading, navigate]);
 
   useEffect(() => {
     if (!user) return;
@@ -83,7 +88,9 @@ function Dashboard() {
   const next = lessons.find((l) => !completedLessons.includes(l.id) && !l.locked);
   const allDone = done === lessons.length;
 
-  const firstName = user?.displayName?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "toi";
+  if (authLoading || !user) return null;
+
+  const firstName = user.displayName?.split(" ")[0] ?? user.email?.split("@")[0] ?? "toi";
   const position = enrolledAt ? getPosition(enrolledAt) : { week: 1, day: 1 };
   const daysIn = enrolledAt ? Math.max(0, Math.floor((Date.now() - enrolledAt) / 86_400_000)) : null;
 

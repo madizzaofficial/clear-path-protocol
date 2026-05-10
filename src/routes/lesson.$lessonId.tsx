@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { course, findLesson, allLessons } from "@/lib/course-data";
 import { useState, useEffect } from "react";
 import { ArrowLeft, ArrowRight, Check, ChevronDown, Clock, Download, FileText, Lock, Menu, Play, X } from "lucide-react";
@@ -31,9 +31,14 @@ function LessonPage() {
   const prev = idx > 0 ? all[idx - 1] : null;
   const next = idx < all.length - 1 ? all[idx + 1] : null;
   const [menuOpen, setMenuOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [marking, setMarking] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !user) navigate({ to: "/login" });
+  }, [user, loading, navigate]);
 
   useEffect(() => {
     if (!user) return;
@@ -41,6 +46,8 @@ function LessonPage() {
       if (snap.exists()) setCompletedLessons(snap.data().completedLessons ?? []);
     });
   }, [user]);
+
+  if (loading || !user) return null;
 
   const isCompleted = completedLessons.includes(lesson.id);
 

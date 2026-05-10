@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Sparkles, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/login")({
@@ -14,13 +14,19 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const { signIn, signInWithGoogle } = useAuth();
+  const { user, loading: authLoading, signIn, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && user) navigate({ to: "/" });
+  }, [user, authLoading, navigate]);
+
+  if (authLoading || user) return null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
