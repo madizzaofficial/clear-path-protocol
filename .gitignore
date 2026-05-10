@@ -61,3 +61,4 @@ credentials.json
 *.pem
 *.key
 .credentials
+.vercel/output
