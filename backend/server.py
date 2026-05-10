@@ -112,10 +112,11 @@ class DailyCheckin(BaseModel):
 
 
 class ProgressPhotoMeta(BaseModel):
-    week: int
+    date: str  # YYYY-MM-DD
     angle: str  # front|left|right
     storagePath: str
     downloadURL: str
+    notes: Optional[str] = ""
 
 
 class CoachNote(BaseModel):
@@ -532,3 +533,52 @@ def admin_promote(body: PromoteBody, user: Dict[str, Any] = Depends(get_admin_us
         "updatedAt": utcnow_iso(),
     }, merge=True)
     return {"ok": True}
+
+
+# -------- Course (chapters + lessons) --------
+class LessonResource(BaseModel):
+    name: str
+    size: Optional[str] = ""
+    url: Optional[str] = ""
+
+
+class Lesson(BaseModel):
+    id: str
+    title: str
+    summary: Optional[str] = ""
+    duration: Optional[str] = ""
+    videoUrl: Optional[str] = ""
+    longDescription: Optional[str] = ""
+    resources: List[LessonResource] = []
+    locked: bool = False
+
+
+class Chapter(BaseModel):
+    id: str
+    title: str
+    description: Optional[str] = ""
+    lessons: List[Lesson] = []
+
+
+class CourseDoc(BaseModel):
+    title: Optional[str] = "The Clear Skin Protocol"
+    subtitle: Optional[str] = "A 12-week guided transformation for calmer, healthier skin"
+    estimatedHours: Optional[float] = 6.5
+    chapters: List[Chapter] = []
+
+
+@app.get("/api/course")
+def get_course(user: Dict[str, Any] = Depends(get_current_user)):
+    snap = db.collection("meta").document("course").get()
+    if not snap.exists:
+        return {"course": None}
+    return {"course": snap.to_dict()}
+
+
+@app.put("/api/admin/course")
+def admin_update_course(body: CourseDoc, user: Dict[str, Any] = Depends(get_admin_user)):
+    data = body.model_dump()
+    data["updatedAt"] = utcnow_iso()
+    data["updatedBy"] = user.get("name") or user.get("email")
+    db.collection("meta").document("course").set(data)
+    return {"ok": True, "course": data}
