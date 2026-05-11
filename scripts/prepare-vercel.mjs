@@ -76,9 +76,6 @@ export default async function handler(req, res) {
 console.log("→ Copying static assets…");
 await cp(resolve(root, "dist/client"), resolve(outDir, "static"), { recursive: true });
 
-console.log("→ Copying public folder…");
-await cp(resolve(root, "public"), resolve(outDir, "static"), { recursive: true });
-
 console.log("→ Writing Vercel function config…");
 await writeFile(
   resolve(funcDir, ".vc-config.json"),
@@ -102,22 +99,8 @@ await writeFile(
           headers: { "cache-control": "public, max-age=31536000, immutable" },
           dest: "/assets/$1",
         },
-        // Public folder files served explicitly
-        {
-          src: "^/favicon\\.ico$",
-          headers: { "content-type": "image/x-icon", "cache-control": "public, max-age=86400" },
-          dest: "/favicon.ico",
-        },
-        {
-          src: "^/manifest\\.json$",
-          headers: { "content-type": "application/manifest+json", "cache-control": "public, max-age=86400" },
-          dest: "/manifest.json",
-        },
-        {
-          src: "^/(icon-192\\.png|icon-512\\.png|logo_clear\\.png)$",
-          headers: { "cache-control": "public, max-age=86400" },
-          dest: "/$1",
-        },
+        // Serve any file that exists in .vercel/output/static/ directly (favicon, icons, manifest, etc.)
+        { handle: "filesystem" },
         // Everything else → Node.js serverless function (SSR + server fns + Inngest)
         { src: "^/(.*)$", dest: "/index" },
       ],
