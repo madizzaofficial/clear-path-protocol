@@ -1,0 +1,36 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Intake photos: only the owner and admins can read.
+    // Write allowed only to the authenticated owner, images only, max 10 MB.
+    match /intake_photos/{uid}/{fileName} {
+      allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
+      allow write: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.contentType.matches('image/.*')
+        && request.resource.size <= 10 * 1024 * 1024;
+      allow delete: if false;
+    }
+
+    // Progress photos: same pattern as intake photos
+    match /progress_photos/{uid}/{fileName} {
+      allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
+      allow write: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.contentType.matches('image/.*')
+        && request.resource.size <= 10 * 1024 * 1024;
+      allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Deny everything else
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// Helper: reads admin UIDs from Firestore config/admins
+function isAdmin() {
+  return firestore.get(/databases/(default)/documents/config/admins).data.uids.hasAny([request.auth.uid]);
+}

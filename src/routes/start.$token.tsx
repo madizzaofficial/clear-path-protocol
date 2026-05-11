@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { db, storage } from "@/lib/firebase";
 import { auth } from "@/lib/firebase";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, runTransaction } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
   updateProfile,
@@ -177,6 +177,17 @@ function OnboardingPage() {
   async function saveIntakeAndFinish(fbUser: FirebaseUser, nameOverride?: string) {
     const displayName = nameOverride ?? fbUser.displayName ?? "";
 
+    // Atomic token claim: read + mark used in a single transaction.
+    // If two accounts race on the same link, only one succeeds.
+    await runTransaction(db, async (tx) => {
+      const tokenRef = doc(db, "onboarding_tokens", token);
+      const tokenSnap = await tx.get(tokenRef);
+      if (!tokenSnap.exists() || tokenSnap.data().used || tokenSnap.data().expiresAt < Date.now()) {
+        throw new Error("TOKEN_ALREADY_USED");
+      }
+      tx.update(tokenRef, { used: true, usedAt: Date.now(), usedBy: fbUser.uid });
+    });
+
     const photoUrls: string[] = [];
     for (const file of photoFiles) {
       const storageRef = ref(storage, `intake_photos/${fbUser.uid}/${Date.now()}_${file.name}`);
@@ -204,12 +215,6 @@ function OnboardingPage() {
       },
       { merge: true }
     );
-
-    await updateDoc(doc(db, "onboarding_tokens", token), {
-      used: true,
-      usedAt: Date.now(),
-      usedBy: fbUser.uid,
-    });
 
     const firstName = displayName.split(" ")[0] || fbUser.email?.split("@")[0] || "";
     const eventPayload = { uid: fbUser.uid, email: fbUser.email ?? "", firstName };
