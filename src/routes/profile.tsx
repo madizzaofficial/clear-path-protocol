@@ -26,7 +26,7 @@ const INTENSITY_LABELS: Record<string, string> = {
 };
 
 export const Route = createFileRoute("/profile")({
-  head: () => ({ meta: [{ title: "Mon profil — Lumen" }] }),
+  head: () => ({ meta: [{ title: "Mon profil — Protocole Clear" }] }),
   component: ProfilePage,
 });
 

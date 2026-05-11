@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
 
 export const Route = createFileRoute("/register")({
-  head: () => ({ meta: [{ title: "Accès sur invitation — Lumen" }] }),
+  head: () => ({ meta: [{ title: "Accès sur invitation — Protocole Clear" }] }),
   component: RegisterPage,
 });
 

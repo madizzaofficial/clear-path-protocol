@@ -11,8 +11,8 @@ export const Route = createFileRoute("/lesson/$lessonId")({
     const found = findLesson(params.lessonId);
     return {
       meta: [
-        { title: `${found?.lesson.title ?? "Lesson"} — Lumen` },
-        { name: "description", content: found?.lesson.summary ?? "Lumen lesson" },
+        { title: `${found?.lesson.title ?? "Leçon"} — Protocole Clear` },
+        { name: "description", content: found?.lesson.summary ?? "Protocole Clear" },
       ],
     };
   },
@@ -246,9 +246,9 @@ function SidebarContent({ currentId, completedLessons, onNavigate }: { currentId
       <div className="border-b border-border/60 p-6">
         <Link to="/" className="flex items-center gap-2" onClick={onNavigate}>
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary">
-            <span className="text-sm font-semibold text-primary-foreground">L</span>
+            <span className="text-sm font-semibold text-primary-foreground">C</span>
           </div>
-          <span className="font-display text-lg font-semibold">Lumen</span>
+          <span className="font-display text-lg font-semibold">Protocole Clear</span>
         </Link>
         <p className="mt-4 text-xs font-medium uppercase tracking-[0.2em] text-primary">Protocole</p>
         <p className="mt-1 font-display text-base font-semibold leading-tight">{course.title}</p>

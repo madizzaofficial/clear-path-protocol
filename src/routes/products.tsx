@@ -26,7 +26,7 @@ type UserRoutine = {
 export const Route = createFileRoute("/products")({
   head: () => ({
     meta: [
-      { title: "Ma Routine — Lumen" },
+      { title: "Ma Routine — Protocole Clear" },
       { name: "description", content: "Votre routine skincare personnalisée." },
     ],
   }),

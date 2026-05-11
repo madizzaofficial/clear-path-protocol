@@ -44,7 +44,7 @@ const triggerIntakeFn = createServerFn({ method: "POST" }).handler(async (ctx) =
 // ── Route ─────────────────────────────────────────────────────────────────────
 
 export const Route = createFileRoute("/start/$token")({
-  head: () => ({ meta: [{ title: "Bilan peau — Lumen" }] }),
+  head: () => ({ meta: [{ title: "Bilan peau — Protocole Clear" }] }),
   component: OnboardingPage,
 });
 

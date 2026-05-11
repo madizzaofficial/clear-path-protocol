@@ -8,7 +8,7 @@ import { Play, Check, Lock, Clock, ChevronRight } from "lucide-react";
 export const Route = createFileRoute("/course")({
   head: () => ({
     meta: [
-      { title: "Le Protocole — Lumen" },
+      { title: "Le Protocole — Protocole Clear" },
       { name: "description", content: "Ton protocole guidé de 12 semaines contre l'acné." },
     ],
   }),

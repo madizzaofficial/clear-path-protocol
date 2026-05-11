@@ -3,7 +3,7 @@ import { inngest } from "./inngest";
 async function sendEmail(to: string, subject: string, html: string): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;
-  const from = process.env.RESEND_FROM ?? "Lumen <onboarding@resend.dev>";
+  const from = process.env.RESEND_FROM ?? "Protocole Clear <onboarding@resend.dev>";
   await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
@@ -25,13 +25,13 @@ export const welcomeSequence = inngest.createFunction(
     await step.run("send-welcome-email", () =>
       sendEmail(
         email,
-        `Bienvenue sur Lumen, ${firstName} ✨`,
+        `Bienvenue sur Protocole Clear, ${firstName} ✨`,
         `
         <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#111">
           <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#e879f9,#8b5cf6);display:flex;align-items:center;justify-content:center;margin-bottom:24px">
             <span style="color:#fff;font-weight:700;font-size:18px">L</span>
           </div>
-          <h1 style="font-size:28px;font-weight:700;margin:0 0 12px">Bienvenue sur Lumen, ${firstName} 👋</h1>
+          <h1 style="font-size:28px;font-weight:700;margin:0 0 12px">Bienvenue sur Protocole Clear, ${firstName} 👋</h1>
           <p style="color:#555;line-height:1.6;margin:0 0 24px">
             Ton protocole Clear Skin de 12 semaines est maintenant activé. La prochaine étape : remplir ton bilan peau pour que nous puissions personnaliser chaque détail de ta routine.
           </p>

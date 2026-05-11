@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { ArrowRight, Loader2, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/welcome")({
-  head: () => ({ meta: [{ title: "Bienvenue — Lumen" }] }),
+  head: () => ({ meta: [{ title: "Bienvenue — Protocole Clear" }] }),
   component: WelcomePage,
 });
 
@@ -68,9 +68,9 @@ function WelcomePage() {
       <div className="flex items-center justify-between px-6 py-5">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary">
-            <span className="text-sm font-semibold text-primary-foreground">L</span>
+            <span className="text-sm font-semibold text-primary-foreground">C</span>
           </div>
-          <span className="font-display text-lg font-semibold">Lumen</span>
+          <span className="font-display text-lg font-semibold">Protocole Clear</span>
         </div>
         <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
           Passer →

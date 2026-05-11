@@ -11,7 +11,7 @@ import {
 import { course } from "@/lib/course-data";
 
 export const Route = createFileRoute("/admin_/student/$uid")({
-  head: () => ({ meta: [{ title: "Fiche élève — Lumen" }] }),
+  head: () => ({ meta: [{ title: "Fiche élève — Protocole Clear" }] }),
   component: StudentPage,
 });
 

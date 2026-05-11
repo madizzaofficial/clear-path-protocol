@@ -135,9 +135,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
             <Link to="/" className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary shadow-soft">
-                <span className="text-sm font-semibold text-primary-foreground">L</span>
+                <span className="text-sm font-semibold text-primary-foreground">C</span>
               </div>
-              <span className="font-display text-xl font-semibold tracking-tight">Lumen</span>
+              <span className="font-display text-xl font-semibold tracking-tight">Protocole Clear</span>
             </Link>
             <nav className="hidden items-center gap-1 md:flex">
               {nav.map((n) => {

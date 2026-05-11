@@ -10,7 +10,7 @@ import { course } from "@/lib/course-data";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Admin — Lumen" },
+      { title: "Admin — Protocole Clear" },
       { name: "description", content: "Lumen admin dashboard." },
     ],
   }),
@@ -102,6 +102,17 @@ function AdminPage() {
 
   if (!isAdmin) return null;
 
+  const totalStudents = students.length;
+  const avgCompletion = totalStudents > 0
+    ? Math.round(students.reduce((sum, s) => sum + (progressMap.get(s.uid) ?? 0), 0) / totalStudents / TOTAL_LESSONS * 100)
+    : 0;
+  const completedProtocols = Array.from(progressMap.values()).filter((v) => v === TOTAL_LESSONS).length;
+  const atRisk = students.filter((s) => {
+    const daysIn = s.enrolledAt ? (Date.now() - s.enrolledAt) / 86_400_000 : 0;
+    const pct = (progressMap.get(s.uid) ?? 0) / TOTAL_LESSONS;
+    return daysIn > 14 && pct < 0.25;
+  }).length;
+
   return (
     <AppShell>
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
@@ -161,10 +172,10 @@ function AdminPage() {
 
         {/* Stats */}
         <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <AdminStat icon={Users} label="Élèves actifs" value="248" delta="+18 ce mois" />
-          <AdminStat icon={TrendingUp} label="Taux de complétion" value="64%" delta="+6% vs cohorte préc." />
-          <AdminStat icon={CheckCircle2} label="Protocoles terminés" value="92" delta="ce trimestre" />
-          <AdminStat icon={AlertCircle} label="Élèves à risque" value="11" delta="à contacter" tone="warn" />
+          <AdminStat icon={Users} label="Élèves inscrits" value={loadingStudents ? "…" : String(totalStudents)} delta="total" />
+          <AdminStat icon={TrendingUp} label="Taux de complétion" value={loadingStudents ? "…" : `${avgCompletion}%`} delta="moyenne protocole" />
+          <AdminStat icon={CheckCircle2} label="Protocoles terminés" value={loadingStudents ? "…" : String(completedProtocols)} delta={`sur ${totalStudents} élèves`} />
+          <AdminStat icon={AlertCircle} label="Élèves à risque" value={loadingStudents ? "…" : String(atRisk)} delta="> 14j, < 25% progression" tone="warn" />
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">

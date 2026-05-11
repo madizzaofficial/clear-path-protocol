@@ -276,7 +276,7 @@ export const Route = createFileRoute("/admin_/routines")({
     uid: typeof search.uid === "string" ? search.uid : "",
   }),
   head: () => ({
-    meta: [{ title: "Routines des élèves — Lumen Admin" }],
+    meta: [{ title: "Routines des élèves — Protocole Clear" }],
   }),
   component: RoutinesPage,
 });

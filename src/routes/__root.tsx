@@ -73,17 +73,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lumen — Your Clear Skin Protocol" },
-      { name: "description", content: "A premium guided acne recovery protocol with personalized routines, education, and tracking." },
-      { name: "author", content: "Lumen" },
-      { property: "og:title", content: "Lumen — Your Clear Skin Protocol" },
-      { property: "og:description", content: "A premium guided acne recovery protocol with personalized routines, education, and tracking." },
+      { title: "Protocole Clear" },
+      { name: "description", content: "Ton protocole guidé anti-acné de 12 semaines — routines personnalisées, éducation, et suivi de progression." },
+      { name: "author", content: "Protocole Clear" },
+      { property: "og:title", content: "Protocole Clear" },
+      { property: "og:description", content: "Ton protocole guidé anti-acné de 12 semaines — routines personnalisées, éducation, et suivi de progression." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "theme-color", content: "#000000" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black" },
+      { name: "apple-mobile-web-app-title", content: "Protocole Clear" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.json" },
+      { rel: "apple-touch-icon", href: "/icon-512.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -100,7 +105,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <head>
         <HeadContent />
       </head>

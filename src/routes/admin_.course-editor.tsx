@@ -81,7 +81,7 @@ const COURSE_ID = "clear-skin-protocol";
 
 export const Route = createFileRoute("/admin_/course-editor")({
   head: () => ({
-    meta: [{ title: "Course Editor — Lumen Admin" }],
+    meta: [{ title: "Éditeur de cours — Protocole Clear" }],
   }),
   component: CourseEditorPage,
 });
