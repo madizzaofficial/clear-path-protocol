@@ -74,7 +74,7 @@ function LoginPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,oklch(0.95_0.08_55_/_0.6),transparent_60%)]" />
         <div className="relative z-10 flex h-full flex-col justify-between p-12">
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-background/80 shadow-soft backdrop-blur">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-background/80 shadow-soft backdrop-blur">
               <img src="/logo_clear.png" alt="Protocole Clear" className="h-full w-full rounded-full object-cover" />
             </div>
             <span className="font-display text-2xl font-semibold tracking-tight">Protocole Clear</span>

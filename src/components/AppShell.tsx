@@ -134,7 +134,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
             <Link to="/" className="flex items-center gap-2">
-              <img src="/logo_clear.png" alt="Protocole Clear" className="h-8 w-8 rounded-full object-cover" />
+              <img src="/logo_clear.png" alt="Protocole Clear" className="h-16 w-16 rounded-full object-cover" />
               <span className="font-display text-xl font-semibold tracking-tight">Protocole Clear</span>
             </Link>
             <nav className="hidden items-center gap-1 md:flex">
