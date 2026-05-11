@@ -76,6 +76,9 @@ export default async function handler(req, res) {
 console.log("→ Copying static assets…");
 await cp(resolve(root, "dist/client"), resolve(outDir, "static"), { recursive: true });
 
+console.log("→ Copying public folder…");
+await cp(resolve(root, "public"), resolve(outDir, "static"), { recursive: true });
+
 console.log("→ Writing Vercel function config…");
 await writeFile(
   resolve(funcDir, ".vc-config.json"),
