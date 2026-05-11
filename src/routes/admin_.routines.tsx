@@ -212,17 +212,15 @@ function buildEmailHtml(
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Ta routine Lumen</title>
+<title>Ta routine Protocole Clear</title>
 </head>
 <body style="margin:0;padding:0;background:#fdf8f3;font-family:'Helvetica Neue',Arial,sans-serif;">
 <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
 
   <!-- Logo -->
   <div style="text-align:center;margin-bottom:32px;">
-    <div style="display:inline-block;width:48px;height:48px;background:linear-gradient(135deg,#c4724b,#e89b7a);border-radius:50%;line-height:48px;text-align:center;margin-bottom:10px;">
-      <span style="color:white;font-size:22px;font-weight:700;">L</span>
-    </div>
-    <h1 style="font-family:Georgia,serif;color:#1a1a1a;margin:0;font-size:22px;font-weight:600;letter-spacing:-0.02em;">Lumen</h1>
+    <img src="https://app.protocole-clear.com/logo_clear.png" alt="Protocole Clear" width="56" height="56" style="border-radius:50%;display:block;margin:0 auto 12px;border:0;" />
+    <h1 style="font-family:Georgia,serif;color:#1a1a1a;margin:0;font-size:20px;font-weight:600;letter-spacing:-0.02em;">Protocole Clear</h1>
     <p style="color:#aaa;font-size:12px;margin:4px 0 0;letter-spacing:0.12em;text-transform:uppercase;">Clear Skin Protocol</p>
   </div>
 
@@ -236,31 +234,39 @@ function buildEmailHtml(
 
   <!-- AM -->
   <div style="background:white;border-radius:24px;padding:24px 28px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
-      <div style="background:#fff3ec;border-radius:14px;padding:8px 14px;font-size:18px;display:inline-block;">☀️</div>
-      <div>
-        <h3 style="font-family:Georgia,serif;color:#1a1a1a;margin:0;font-size:17px;">Routine du matin</h3>
-        <p style="color:#bbb;font-size:12px;margin:2px 0 0;text-transform:uppercase;letter-spacing:0.07em;">${am.length} étape${am.length !== 1 ? "s" : ""}</p>
-      </div>
-    </div>
+    <table cellpadding="0" cellspacing="0" style="margin-bottom:18px;">
+      <tr>
+        <td style="padding-right:14px;">
+          <div style="background:#fff3ec;border-radius:14px;padding:8px 14px;font-size:20px;line-height:1;">☀️</div>
+        </td>
+        <td>
+          <h3 style="font-family:Georgia,serif;color:#1a1a1a;margin:0;font-size:17px;">Routine du matin</h3>
+          <p style="color:#bbb;font-size:12px;margin:2px 0 0;text-transform:uppercase;letter-spacing:0.07em;">${am.length} étape${am.length !== 1 ? "s" : ""}</p>
+        </td>
+      </tr>
+    </table>
     ${stepBlock(am)}
   </div>
 
   <!-- PM -->
   <div style="background:white;border-radius:24px;padding:24px 28px;margin-bottom:28px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
-      <div style="background:#f0edf8;border-radius:14px;padding:8px 14px;font-size:18px;display:inline-block;">🌙</div>
-      <div>
-        <h3 style="font-family:Georgia,serif;color:#1a1a1a;margin:0;font-size:17px;">Routine du soir</h3>
-        <p style="color:#bbb;font-size:12px;margin:2px 0 0;text-transform:uppercase;letter-spacing:0.07em;">${pm.length} étape${pm.length !== 1 ? "s" : ""}</p>
-      </div>
-    </div>
+    <table cellpadding="0" cellspacing="0" style="margin-bottom:18px;">
+      <tr>
+        <td style="padding-right:14px;">
+          <div style="background:#f0edf8;border-radius:14px;padding:8px 14px;font-size:20px;line-height:1;">🌙</div>
+        </td>
+        <td>
+          <h3 style="font-family:Georgia,serif;color:#1a1a1a;margin:0;font-size:17px;">Routine du soir</h3>
+          <p style="color:#bbb;font-size:12px;margin:2px 0 0;text-transform:uppercase;letter-spacing:0.07em;">${pm.length} étape${pm.length !== 1 ? "s" : ""}</p>
+        </td>
+      </tr>
+    </table>
     ${stepBlock(pm)}
   </div>
 
   <!-- Footer -->
   <p style="text-align:center;color:#ccc;font-size:12px;line-height:1.6;margin:0;">
-    Cet email a été envoyé via <strong style="color:#c4724b;">Lumen</strong> · Clear Skin Protocol.<br>
+    Cet email a été envoyé via <strong style="color:#c4724b;">Protocole Clear</strong> · Clear Skin Protocol.<br>
     Des questions ? Réponds directement à cet email.
   </p>
 
