@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { course, allLessons } from "@/lib/course-data";
-import { Play, Check, Sparkles, Sun, Moon, ArrowRight, TrendingUp, BookOpen, Flame, Lock } from "lucide-react";
+import { Play, Check, Sparkles, Sun, Moon, ArrowRight, TrendingUp, BookOpen, Flame } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import {
@@ -446,91 +446,88 @@ function Dashboard() {
 // ── Welcome state (new user, no routine, no lessons) ─────────────────────────
 
 function WelcomeState({ firstName, next }: { firstName: string; next: ReturnType<typeof allLessons>[number] | undefined }) {
-  const steps = [
-    {
-      n: "01",
-      title: "Suis le protocole",
-      body: "Des leçons courtes et progressives pour comprendre ta peau et adopter les bons gestes.",
-      cta: next ? "Commencer la première leçon" : null,
-      to: next ? `/lesson/${next.id}` : null,
-      available: !!next,
-    },
-    {
-      n: "02",
-      title: "Applique ta routine",
-      body: "Ton coach va te préparer une routine personnalisée selon ton type de peau et tes objectifs.",
-      cta: null,
-      to: null,
-      available: false,
-    },
-    {
-      n: "03",
-      title: "Suis tes progrès",
-      body: "Photos hebdomadaires et journal de peau pour voir l'évolution semaine après semaine.",
-      cta: null,
-      to: null,
-      available: false,
-    },
-  ];
-
   return (
-    <main className="mx-auto max-w-3xl px-6 pb-24 pt-12 md:pt-16">
-      <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Bienvenue</p>
-      <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight text-balance md:text-5xl">
-        Bonjour, {firstName}. 👋
-      </h1>
-      <p className="mt-4 max-w-lg text-lg text-muted-foreground leading-relaxed">
-        Ton protocole démarre ici. Voici comment les prochaines semaines vont se dérouler.
-      </p>
+    <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
 
-      <div className="mt-12 space-y-4">
-        {steps.map((s) => (
-          <div
-            key={s.n}
-            className={`relative overflow-hidden rounded-3xl border p-6 transition-all md:p-8 ${
-              s.available
-                ? "border-border/60 bg-card shadow-soft"
-                : "border-border/40 bg-muted/30"
-            }`}
-          >
-            <div className="flex items-start gap-5">
-              <span className={`font-display text-3xl font-semibold tabular-nums ${s.available ? "text-primary" : "text-muted-foreground/40"}`}>
-                {s.n}
-              </span>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h2 className={`font-display text-xl font-semibold ${!s.available ? "text-muted-foreground" : ""}`}>
-                    {s.title}
-                  </h2>
-                  {!s.available && <Lock className="h-3.5 w-3.5 text-muted-foreground/50" />}
+      {/* Header */}
+      <section className="mb-10">
+        <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Bienvenue</p>
+        <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight text-balance md:text-5xl">
+          Bonjour, {firstName}.
+        </h1>
+        <p className="mt-2 max-w-xl text-muted-foreground">
+          Ton protocole commence ici. Voici comment transformer ta peau en 12 semaines.
+        </p>
+      </section>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+
+        {/* ── Main column ─────────────────────────────────────────────── */}
+        <div className="space-y-6 lg:col-span-2">
+
+          {/* Hero CTA */}
+          {next ? (
+            <Link to="/lesson/$lessonId" params={{ lessonId: next.id }} className="group block">
+              <div className="relative overflow-hidden rounded-3xl bg-gradient-warm p-8 shadow-elegant md:p-10">
+                <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gradient-primary opacity-30 blur-3xl" />
+                <div className="relative">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-background/70 px-3 py-1 text-xs font-medium text-foreground backdrop-blur">
+                    <Play className="h-3 w-3 fill-primary text-primary" />
+                    Commencer le protocole
+                  </span>
+                  <h2 className="mt-5 font-display text-2xl font-semibold md:text-3xl">{next.title}</h2>
+                  <p className="mt-2 max-w-md text-sm text-foreground/70">{next.summary}</p>
+                  <div className="mt-6 flex items-center gap-4">
+                    <div className="flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background transition-transform group-hover:scale-[1.02]">
+                      Commencer la première leçon <ArrowRight className="h-4 w-4" />
+                    </div>
+                    <span className="text-sm text-foreground/60">{next.duration}</span>
+                  </div>
                 </div>
-                <p className={`mt-2 text-sm leading-relaxed ${s.available ? "text-muted-foreground" : "text-muted-foreground/60"}`}>
-                  {s.body}
-                </p>
-                {s.cta && s.to && (
-                  <Link
-                    to={s.to as any}
-                    className="mt-5 inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
-                  >
-                    {s.cta} <ArrowRight className="h-4 w-4" />
-                  </Link>
-                )}
               </div>
+            </Link>
+          ) : (
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-warm p-8 shadow-elegant md:p-10">
+              <p className="font-display text-xl font-semibold">Les leçons arrivent bientôt.</p>
+              <p className="mt-2 text-sm text-muted-foreground">Ton coach prépare le contenu de ton protocole.</p>
             </div>
-          </div>
-        ))}
-      </div>
+          )}
 
-      <div className="mt-8 rounded-3xl bg-gradient-warm p-6 md:p-8">
-        <div className="flex items-start gap-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-soft">
-            <Sparkles className="h-5 w-5 text-primary" />
+          {/* 3 feature cards */}
+          <div className="grid gap-4 sm:grid-cols-3">
+            {[
+              { n: "01", title: "Le protocole", body: "Des leçons courtes et progressives pour comprendre ta peau et adopter les bons gestes durablement." },
+              { n: "02", title: "Ta routine", body: "Une routine AM/PM personnalisée par ton coach selon ton type de peau et tes objectifs." },
+              { n: "03", title: "Tes progrès", body: "Photos hebdomadaires et journal de peau pour visualiser l'évolution semaine après semaine." },
+            ].map((c) => (
+              <div key={c.n} className="rounded-2xl border border-border/60 bg-card p-5 shadow-soft">
+                <span className="font-display text-2xl font-semibold text-primary">{c.n}</span>
+                <h3 className="mt-3 font-display text-base font-semibold">{c.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{c.body}</p>
+              </div>
+            ))}
           </div>
-          <div>
-            <p className="font-display text-base font-semibold">Ton coach prépare ta routine</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Tu recevras un email dès que ta routine personnalisée est prête. En attendant, commence par les leçons du protocole.
+        </div>
+
+        {/* ── Sidebar ─────────────────────────────────────────────────── */}
+        <div>
+          <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-soft">
+              <Sparkles className="h-5 w-5 text-primary" />
+            </div>
+            <h3 className="mt-4 font-display text-lg font-semibold">Ton coach prépare ta routine</h3>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              Tu recevras un email dès que ta routine personnalisée est prête. En attendant, commence par les leçons du protocole — c'est la meilleure façon de démarrer.
             </p>
+            {next && (
+              <Link
+                to="/lesson/$lessonId"
+                params={{ lessonId: next.id }}
+                className="mt-5 flex items-center justify-center gap-2 rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-primary/20"
+              >
+                Commencer maintenant <ArrowRight className="h-4 w-4" />
+              </Link>
+            )}
           </div>
         </div>
       </div>
