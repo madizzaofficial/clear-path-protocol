@@ -549,7 +549,7 @@ function RoutineCalendar({
           return (
             <div
               key={day}
-              className={`flex h-8 w-full items-center justify-center rounded-lg text-[11px] font-medium transition-all ${
+              className={`mx-auto flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-medium transition-all ${
                 isFuture
                   ? "text-muted-foreground/25"
                   : isDone
