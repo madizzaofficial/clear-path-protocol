@@ -149,7 +149,7 @@ const sendRoutineEmailFn = createServerFn({ method: "POST" }).handler(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: process.env.RESEND_FROM ?? "Lumen <onboarding@resend.dev>",
+        from: process.env.RESEND_FROM ?? "Protocole Clear <onboarding@resend.dev>",
         to: data.email,
         subject: `${firstName}, ta routine personnalisée est prête ✨`,
         html,
@@ -389,8 +389,12 @@ function RoutinesContent() {
         sentAt: Date.now(),
         updatedAt: Date.now(),
       };
-      await setDoc(doc(db, "routines", selectedUser.uid), toSave);
 
+      // Save to Firestore first — always succeeds regardless of email
+      await setDoc(doc(db, "routines", selectedUser.uid), toSave);
+      setRoutine(toSave);
+
+      // Email + Inngest event — failure here doesn't roll back the save
       await sendRoutineEmailFn({
         data: {
           email: selectedUser.email,
@@ -408,9 +412,8 @@ function RoutinesContent() {
         },
       }).catch(() => {});
 
-      setRoutine(toSave);
       setSendResult("success");
-    } catch (e) {
+    } catch (e: any) {
       console.error("[routines] send email error:", e);
       setSendResult("error");
     } finally {
