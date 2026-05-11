@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Sparkles, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { auth } from "@/lib/firebase";
+import { GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo, signOut } from "firebase/auth";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -46,10 +48,19 @@ function LoginPage() {
     setError("");
     setGoogleLoading(true);
     try {
-      await signInWithGoogle();
+      const result = await signInWithPopup(auth, new GoogleAuthProvider());
+      const info = getAdditionalUserInfo(result);
+      if (info?.isNewUser) {
+        // Account didn't exist — not a registered client, block immediately
+        await signOut(auth);
+        setError("Aucun compte trouvé. Contacte ton coach pour recevoir un lien d'accès.");
+        return;
+      }
       navigate({ to: "/" });
     } catch (err: any) {
-      setError(err.message);
+      if (err.code !== "auth/popup-closed-by-user") {
+        setError("Une erreur est survenue. Réessaie.");
+      }
     } finally {
       setGoogleLoading(false);
     }
@@ -180,10 +191,7 @@ function LoginPage() {
           </form>
 
           <p className="mt-8 text-center text-sm text-muted-foreground">
-            New here?{" "}
-            <Link to="/register" className="font-medium text-foreground hover:text-primary">
-              Create an account
-            </Link>
+            Pas encore de compte ? Contacte ton coach pour recevoir un lien d'accès.
           </p>
         </div>
       </div>
