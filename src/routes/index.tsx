@@ -115,9 +115,11 @@ function Dashboard() {
       getDoc(doc(db, "intake_answers", user.uid)),
       getDoc(doc(db, "routine_checkins", user.uid, "days", todayKey)),
     ]).then(async ([progressSnap, routineSnap, userSnap, intakeSnap, todaySnap]) => {
-      const routine = routineSnap.exists()
-        ? { am: routineSnap.data().am ?? [], pm: routineSnap.data().pm ?? [] }
-        : null;
+      const routineData = routineSnap.exists() ? routineSnap.data() : null;
+      const routine =
+        routineData && routineData.status === "sent"
+          ? { am: routineData.am ?? [], pm: routineData.pm ?? [] }
+          : null;
 
       const totalSteps = (routine?.am.length ?? 0) + (routine?.pm.length ?? 0);
       const streak = await computeStreak(user.uid, totalSteps).catch(() => 0);
