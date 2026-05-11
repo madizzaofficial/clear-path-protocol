@@ -27,17 +27,15 @@ type StudentProfile = {
 
 type IntakeAnswers = {
   skinType?: string;
-  concerns?: string[];
-  sensitivities?: string[];
-  usesSPF?: string;
-  routineComplexity?: string;
-  skinHistoryDuration?: string;
-  seenDermatologist?: string;
+  acneTypes?: string[];
+  intensity?: string;
+  currentRoutine?: string;
   mainGoal?: string;
+  photoUrls?: string[];
   completedAt?: number;
 };
 
-type RoutineStep = { id: string; category: string; productName: string; note?: string };
+type RoutineStep = { id: string; order: number; category: string; product: string; instructions: string };
 type Routine = { am: RoutineStep[]; pm: RoutineStep[] };
 
 type PhotoEntry = {
@@ -55,6 +53,14 @@ const TOTAL_LESSONS = course.chapters.reduce((sum, ch) => sum + ch.lessons.lengt
 
 const SKIN_TYPE_LABELS: Record<string, string> = {
   normale: "Normale", grasse: "Grasse", seche: "Sèche", mixte: "Mixte", sensible: "Sensible",
+};
+
+const ACNE_TYPE_LABELS: Record<string, string> = {
+  comedons: "Comédons", papules: "Papules / Pustules", microkystes: "Microkystes", kystes: "Kystes / Nodules",
+};
+
+const INTENSITY_LABELS: Record<string, string> = {
+  legere: "Légère", moderee: "Modérée", severe: "Sévère",
 };
 
 function formatDays(enrolledAt: number): string {
@@ -220,64 +226,57 @@ function StudentPage() {
               />
             ) : (
               <>
-                <IntakeSection title="Type de peau">
-                  <span className="rounded-full bg-primary-soft px-4 py-1.5 text-sm font-semibold text-primary">
-                    {SKIN_TYPE_LABELS[intake.skinType ?? ""] ?? intake.skinType}
-                  </span>
-                </IntakeSection>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <IntakeSection title="Type de peau">
+                    <span className="rounded-full bg-primary-soft px-4 py-1.5 text-sm font-semibold text-primary">
+                      {SKIN_TYPE_LABELS[intake.skinType ?? ""] ?? intake.skinType ?? "—"}
+                    </span>
+                  </IntakeSection>
+                  <IntakeSection title="Intensité">
+                    <span className={`rounded-full px-4 py-1.5 text-sm font-semibold ${
+                      intake.intensity === "severe"
+                        ? "bg-destructive/10 text-destructive"
+                        : intake.intensity === "moderee"
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-primary-soft text-primary"
+                    }`}>
+                      {INTENSITY_LABELS[intake.intensity ?? ""] ?? intake.intensity ?? "—"}
+                    </span>
+                  </IntakeSection>
+                  <IntakeSection title="Routine actuelle">
+                    <p className="text-sm font-medium">{intake.currentRoutine ?? "—"}</p>
+                  </IntakeSection>
+                </div>
 
-                {intake.concerns && intake.concerns.length > 0 && (
-                  <IntakeSection title="Préoccupations principales">
+                {(intake.acneTypes?.length ?? 0) > 0 && (
+                  <IntakeSection title="Type de boutons">
                     <div className="flex flex-wrap gap-2">
-                      {intake.concerns.map((c) => (
-                        <Tag key={c}>{c}</Tag>
+                      {intake.acneTypes!.map((t) => (
+                        <Tag key={t}>{ACNE_TYPE_LABELS[t] ?? t}</Tag>
                       ))}
                     </div>
                   </IntakeSection>
                 )}
-
-                {intake.sensitivities && intake.sensitivities.length > 0 && (
-                  <IntakeSection title="Sensibilités connues">
-                    <div className="flex flex-wrap gap-2">
-                      {intake.sensitivities.map((s) => (
-                        <Tag key={s} variant="warn">{s}</Tag>
-                      ))}
-                    </div>
-                  </IntakeSection>
-                )}
-
-                <IntakeSection title="Routine actuelle">
-                  <div className="flex flex-wrap gap-3">
-                    {intake.usesSPF && (
-                      <div className="rounded-2xl border border-border/60 bg-card px-4 py-3">
-                        <p className="text-xs uppercase tracking-wider text-muted-foreground">Solaire</p>
-                        <p className="mt-1 text-sm font-semibold">{intake.usesSPF}</p>
-                      </div>
-                    )}
-                    {intake.routineComplexity && (
-                      <div className="rounded-2xl border border-border/60 bg-card px-4 py-3">
-                        <p className="text-xs uppercase tracking-wider text-muted-foreground">Complexité</p>
-                        <p className="mt-1 text-sm font-semibold">{intake.routineComplexity}</p>
-                      </div>
-                    )}
-                    {intake.skinHistoryDuration && (
-                      <div className="rounded-2xl border border-border/60 bg-card px-4 py-3">
-                        <p className="text-xs uppercase tracking-wider text-muted-foreground">Ancienneté</p>
-                        <p className="mt-1 text-sm font-semibold">{intake.skinHistoryDuration}</p>
-                      </div>
-                    )}
-                    {intake.seenDermatologist && (
-                      <div className="rounded-2xl border border-border/60 bg-card px-4 py-3">
-                        <p className="text-xs uppercase tracking-wider text-muted-foreground">Dermatologue</p>
-                        <p className="mt-1 text-sm font-semibold">{intake.seenDermatologist}</p>
-                      </div>
-                    )}
-                  </div>
-                </IntakeSection>
 
                 {intake.mainGoal && (
                   <IntakeSection title="Objectif principal">
                     <p className="text-sm leading-relaxed text-foreground/80">{intake.mainGoal}</p>
+                  </IntakeSection>
+                )}
+
+                {(intake.photoUrls?.length ?? 0) > 0 && (
+                  <IntakeSection title={`Photos de la peau (${intake.photoUrls!.length})`}>
+                    <div className="flex flex-wrap gap-3">
+                      {intake.photoUrls!.map((url, i) => (
+                        <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+                          <img
+                            src={url}
+                            alt={`Photo ${i + 1}`}
+                            className="h-32 w-32 rounded-2xl object-cover border border-border transition-opacity hover:opacity-80"
+                          />
+                        </a>
+                      ))}
+                    </div>
                   </IntakeSection>
                 )}
               </>
@@ -519,9 +518,9 @@ function RoutineBlock({
                 {i + 1}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">{s.productName}</p>
+                <p className="text-sm font-medium">{s.product}</p>
                 <p className="text-xs text-muted-foreground">{s.category}</p>
-                {s.note && <p className="mt-0.5 text-xs italic text-muted-foreground/80">{s.note}</p>}
+                {s.instructions && <p className="mt-0.5 text-xs italic text-muted-foreground/80">{s.instructions}</p>}
               </div>
             </li>
           ))}

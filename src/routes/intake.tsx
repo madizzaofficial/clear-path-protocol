@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/use-auth";
-import { db } from "@/lib/firebase";
+import { db, storage } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useState, useEffect } from "react";
-import { ChevronRight, ChevronLeft, Check, Loader2, Sparkles, ArrowRight } from "lucide-react";
+import { ChevronRight, ChevronLeft, Check, Loader2, Sparkles, ArrowRight, Camera, X } from "lucide-react";
 import { inngest } from "@/lib/inngest";
 
 const triggerIntakeEventFn = createServerFn({ method: "POST" }).handler(
@@ -64,6 +65,8 @@ function IntakePage() {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
   const [answers, setAnswers] = useState<IntakeAnswers>({
     skinType: "",
     acneTypes: [],
@@ -82,6 +85,25 @@ function IntakePage() {
       if (snap.exists()) navigate({ to: "/" });
     });
   }, [user, navigate]);
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const incoming = Array.from(e.target.files ?? []).filter(
+      (f) => f.type.startsWith("image/") && f.size <= 10 * 1024 * 1024
+    );
+    const combined = [...photoFiles, ...incoming].slice(0, 3);
+    photoPreviews.forEach((p) => URL.revokeObjectURL(p));
+    setPhotoFiles(combined);
+    setPhotoPreviews(combined.map((f) => URL.createObjectURL(f)));
+    e.target.value = "";
+  }
+
+  function removePhoto(idx: number) {
+    URL.revokeObjectURL(photoPreviews[idx]);
+    const newFiles = photoFiles.filter((_, i) => i !== idx);
+    const newPreviews = newFiles.map((f) => URL.createObjectURL(f));
+    setPhotoFiles(newFiles);
+    setPhotoPreviews(newPreviews);
+  }
 
   function toggleAcneType(value: string) {
     setAnswers((prev) => ({
@@ -104,9 +126,18 @@ function IntakePage() {
   async function handleSubmit() {
     if (!user) return;
     setSubmitting(true);
+
+    const photoUrls: string[] = [];
+    for (const file of photoFiles) {
+      const storageRef = ref(storage, `intake_photos/${user.uid}/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      photoUrls.push(await getDownloadURL(storageRef));
+    }
+
     await setDoc(doc(db, "intake_answers", user.uid), {
       ...answers,
       mainGoal: answers.mainGoal.trim(),
+      photoUrls,
       uid: user.uid,
       completedAt: Date.now(),
     });
@@ -299,17 +330,72 @@ function IntakePage() {
         {step === 4 && (
           <>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Pour finir…</h1>
-            <p className="mt-2 text-muted-foreground">Décris ton objectif principal en quelques mots.</p>
-            <div className="mt-8">
-              <textarea
-                placeholder="Ex. : Réduire mon acné kystique, retrouver un teint uniforme, arrêter les rougeurs persistantes…"
-                value={answers.mainGoal}
-                onChange={(e) => setAnswers((a) => ({ ...a, mainGoal: e.target.value.slice(0, 1000) }))}
-                maxLength={1000}
-                className="min-h-36 w-full resize-none rounded-2xl border border-border bg-card p-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-              <p className="mt-1 text-right text-xs text-muted-foreground">{answers.mainGoal.length}/1000</p>
-              <p className="mt-3 text-xs text-muted-foreground">Optionnel — mais très utile pour personnaliser ta routine.</p>
+            <p className="mt-2 text-muted-foreground">Deux dernières choses — toutes les deux optionnelles.</p>
+            <div className="mt-8 space-y-8">
+              {/* Objective */}
+              <div>
+                <p className="mb-2 text-sm font-semibold">
+                  Ton objectif principal{" "}
+                  <span className="font-normal text-muted-foreground">(optionnel)</span>
+                </p>
+                <textarea
+                  placeholder="Ex. : Réduire mon acné kystique, retrouver un teint uniforme, arrêter les rougeurs persistantes…"
+                  value={answers.mainGoal}
+                  onChange={(e) => setAnswers((a) => ({ ...a, mainGoal: e.target.value.slice(0, 1000) }))}
+                  maxLength={1000}
+                  className="min-h-28 w-full resize-none rounded-2xl border border-border bg-card p-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+                <p className="mt-1 text-right text-xs text-muted-foreground">{answers.mainGoal.length}/1000</p>
+              </div>
+
+              {/* Photo upload */}
+              <div>
+                <p className="mb-1 text-sm font-semibold">
+                  Photos de ta peau{" "}
+                  <span className="font-normal text-muted-foreground">(optionnel · 3 max)</span>
+                </p>
+                <p className="mb-4 text-xs text-muted-foreground">
+                  Aide ton coach à visualiser l'état de ta peau pour personnaliser au mieux ta routine.
+                </p>
+
+                {photoPreviews.length > 0 && (
+                  <div className="mb-4 flex flex-wrap gap-3">
+                    {photoPreviews.map((url, i) => (
+                      <div key={i} className="relative">
+                        <img
+                          src={url}
+                          alt={`Photo ${i + 1}`}
+                          className="h-24 w-24 rounded-2xl object-cover border border-border"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removePhoto(i)}
+                          className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-background shadow"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {photoFiles.length < 3 && (
+                  <label className="flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed border-border px-5 py-4 transition-colors hover:border-primary/40 hover:bg-primary-soft/20">
+                    <Camera className="h-5 w-5 shrink-0 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Ajouter une photo</p>
+                      <p className="text-xs text-muted-foreground">JPG, PNG · max 10 Mo par photo</p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handlePhotoChange}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+              </div>
             </div>
           </>
         )}
