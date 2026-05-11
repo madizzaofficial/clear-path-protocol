@@ -134,6 +134,8 @@ function Dashboard() {
         checkedPm: todaySnap.exists() ? (todaySnap.data().pm ?? []) : [],
         streak,
       });
+    }).catch(() => {
+      setData((prev) => ({ ...prev, loading: false }));
     });
   }, [user]);
 
@@ -146,6 +148,7 @@ function Dashboard() {
   const allDone = done === lessons.length;
 
   if (authLoading || !user) return null;
+  if (loading) return <AppShell><div className="flex min-h-[60vh] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" /></div></AppShell>;
 
   const firstName = user.displayName?.split(" ")[0] ?? user.email?.split("@")[0] ?? "toi";
   const position = enrolledAt ? getPosition(enrolledAt) : { week: 1, day: 1 };
