@@ -315,6 +315,7 @@ function RoutinesContent() {
   const [saving, setSaving] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<"success" | "error" | null>(null);
+  const [sendError, setSendError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"am" | "pm">("am");
 
   const [editingStep, setEditingStep] = useState<RoutineStep | null>(null);
@@ -382,6 +383,7 @@ function RoutinesContent() {
     if (!routine || !selectedUser) return;
     setSending(true);
     setSendResult(null);
+    setSendError(null);
     try {
       const toSave: StudentRoutine = {
         ...routine,
@@ -415,6 +417,7 @@ function RoutinesContent() {
       setSendResult("success");
     } catch (e: any) {
       console.error("[routines] send email error:", e);
+      setSendError(e?.message ?? "Erreur inconnue");
       setSendResult("error");
     } finally {
       setSending(false);
@@ -708,7 +711,7 @@ function RoutinesContent() {
                         exit={{ opacity: 0 }}
                         className="rounded-2xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive"
                       >
-                        Échec de l'envoi. Vérifiez la configuration Resend et le domaine expéditeur.
+                        Échec de l'envoi — {sendError ?? "vérifiez la configuration Resend et le domaine expéditeur."}
                       </motion.div>
                     )}
                   </AnimatePresence>
