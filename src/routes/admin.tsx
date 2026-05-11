@@ -2,9 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { TrendingUp, Users, CheckCircle2, AlertCircle, BookOpen, Loader2, ClipboardList } from "lucide-react";
+import { TrendingUp, Users, CheckCircle2, AlertCircle, BookOpen, Loader2, ClipboardList, Link2, Copy, Check } from "lucide-react";
 import { course } from "@/lib/course-data";
 
 export const Route = createFileRoute("/admin")({
@@ -41,6 +41,9 @@ function AdminPage() {
   const [students, setStudents] = useState<StudentDoc[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(true);
   const [progressMap, setProgressMap] = useState<Map<string, number>>(new Map());
+  const [generatingLink, setGeneratingLink] = useState(false);
+  const [generatedLink, setGeneratedLink] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -76,6 +79,27 @@ function AdminPage() {
     );
   }
 
+  async function generateOnboardingLink() {
+    setGeneratingLink(true);
+    const token = crypto.randomUUID();
+    await setDoc(doc(db, "onboarding_tokens", token), {
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
+      used: false,
+    });
+    const link = `${window.location.origin}/start/${token}`;
+    setGeneratedLink(link);
+    await navigator.clipboard.writeText(link).catch(() => {});
+    setGeneratingLink(false);
+  }
+
+  async function copyLink() {
+    if (!generatedLink) return;
+    await navigator.clipboard.writeText(generatedLink).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
   if (!isAdmin) return null;
 
   return (
@@ -88,6 +112,18 @@ function AdminPage() {
             <p className="mt-2 text-muted-foreground">Monitor protocols, intervene early, celebrate wins.</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={generateOnboardingLink}
+              disabled={generatingLink}
+              className="flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background shadow-elegant transition-all hover:opacity-90 disabled:opacity-60"
+            >
+              {generatingLink ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Link2 className="h-4 w-4" />
+              )}
+              Nouveau lien d'onboarding
+            </button>
             <Link
               to="/admin/course-editor"
               className="flex items-center gap-2 rounded-full bg-primary-soft px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary-muted"
@@ -97,6 +133,31 @@ function AdminPage() {
             </Link>
           </div>
         </header>
+
+        {/* Generated link banner */}
+        {generatedLink && (
+          <div className="mb-8 flex items-center gap-4 rounded-2xl border border-border/60 bg-card p-4 shadow-soft">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-soft">
+              <Link2 className="h-4 w-4 text-primary" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-0.5">
+                Lien valable 7 jours · usage unique
+              </p>
+              <p className="truncate text-sm font-mono text-foreground">{generatedLink}</p>
+            </div>
+            <button
+              onClick={copyLink}
+              className="flex shrink-0 items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
+            >
+              {copied ? (
+                <><Check className="h-4 w-4 text-primary" /> Copié</>
+              ) : (
+                <><Copy className="h-4 w-4" /> Copier</>
+              )}
+            </button>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
