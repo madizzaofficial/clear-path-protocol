@@ -108,8 +108,8 @@ function AdminPage() {
         <header className="mb-10 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>
-            <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight md:text-5xl">Coach dashboard</h1>
-            <p className="mt-2 text-muted-foreground">Monitor protocols, intervene early, celebrate wins.</p>
+            <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight md:text-5xl">Dashboard coach</h1>
+            <p className="mt-2 text-muted-foreground">Suivez les protocoles, intervenez tôt, célébrez les résultats.</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <button
@@ -129,7 +129,7 @@ function AdminPage() {
               className="flex items-center gap-2 rounded-full bg-primary-soft px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary-muted"
             >
               <BookOpen className="h-4 w-4" />
-              Edit course
+              Modifier le cours
             </Link>
           </div>
         </header>
@@ -161,10 +161,10 @@ function AdminPage() {
 
         {/* Stats */}
         <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <AdminStat icon={Users} label="Active students" value="248" delta="+18 this month" />
-          <AdminStat icon={TrendingUp} label="Avg. completion" value="64%" delta="+6% vs last cohort" />
-          <AdminStat icon={CheckCircle2} label="Protocols completed" value="92" delta="this quarter" />
-          <AdminStat icon={AlertCircle} label="At-risk students" value="11" delta="needs outreach" tone="warn" />
+          <AdminStat icon={Users} label="Élèves actifs" value="248" delta="+18 ce mois" />
+          <AdminStat icon={TrendingUp} label="Taux de complétion" value="64%" delta="+6% vs cohorte préc." />
+          <AdminStat icon={CheckCircle2} label="Protocoles terminés" value="92" delta="ce trimestre" />
+          <AdminStat icon={AlertCircle} label="Élèves à risque" value="11" delta="à contacter" tone="warn" />
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
@@ -264,26 +264,26 @@ function AdminPage() {
           {/* Right column */}
           <div className="space-y-6">
             <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-              <h3 className="font-display text-lg font-semibold">Assign recommendations</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Push curated products to a student.</p>
+              <h3 className="font-display text-lg font-semibold">Recommander des produits</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Envoyer une sélection à un élève.</p>
               <div className="mt-4 space-y-3">
                 <select className="h-10 w-full rounded-full border border-border bg-background px-4 text-sm focus:border-primary focus:outline-none">
-                  <option>Select student…</option>
-                  {students.map((s) => <option key={s.email}>{s.name}</option>)}
+                  <option>Choisir un élève…</option>
+                  {students.map((s) => <option key={s.email}>{s.displayName ?? s.email}</option>)}
                 </select>
                 <select className="h-10 w-full rounded-full border border-border bg-background px-4 text-sm focus:border-primary focus:outline-none">
-                  <option>Recommend product…</option>
-                  <option>Adapalene 0.1% Gel</option>
+                  <option>Recommander un produit…</option>
+                  <option>Adapalène 0.1% Gel</option>
                   <option>Niacinamide 10%</option>
-                  <option>Mineral SPF 50</option>
+                  <option>SPF Minéral 50</option>
                 </select>
-                <textarea placeholder="Personal note for the student…" className="min-h-20 w-full resize-none rounded-2xl border border-border bg-background p-3 text-sm focus:border-primary focus:outline-none" />
-                <button className="w-full rounded-full bg-foreground py-2.5 text-sm font-medium text-background hover:opacity-90">Send recommendation</button>
+                <textarea placeholder="Note personnelle pour l'élève…" className="min-h-20 w-full resize-none rounded-2xl border border-border bg-background p-3 text-sm focus:border-primary focus:outline-none" />
+                <button className="w-full rounded-full bg-foreground py-2.5 text-sm font-medium text-background hover:opacity-90">Envoyer la recommandation</button>
               </div>
             </div>
 
             <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-              <h3 className="font-display text-lg font-semibold">Course analytics</h3>
+              <h3 className="font-display text-lg font-semibold">Analyse du cours</h3>
               <ul className="mt-4 space-y-3">
                 {[
                   { label: "Foundations", val: 91 },

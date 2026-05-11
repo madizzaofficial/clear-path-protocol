@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Home, BookOpen, Sparkles, ShieldCheck, Bell, User, Settings, LogOut, UserCircle, CreditCard, HelpCircle, Check, Camera } from "lucide-react";
+import { Home, BookOpen, Sparkles, ShieldCheck, Bell, User, LogOut, UserCircle, Camera, Check } from "lucide-react";
 import { ReactNode } from "react";
 import {
   DropdownMenu,
@@ -12,9 +12,9 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 
 const notifications = [
-  { id: 1, title: "New lesson unlocked", body: "Layering Without Irritation is now available.", time: "2h ago", unread: true },
-  { id: 2, title: "Routine reminder", body: "Don't forget your evening retinoid tonight.", time: "5h ago", unread: true },
-  { id: 3, title: "Coach left a note", body: "Your week 3 photos look great — keep going!", time: "Yesterday", unread: false },
+  { id: 1, title: "Nouvelle leçon disponible", body: "\"Superposition sans irritation\" est maintenant accessible.", time: "il y a 2h", unread: true },
+  { id: 2, title: "Rappel routine", body: "N'oublie pas ton rétinoïde du soir ce soir.", time: "il y a 5h", unread: true },
+  { id: 3, title: "Note de ton coach", body: "Tes photos de la semaine 3 sont top — continue !", time: "Hier", unread: false },
 ];
 
 function NotificationsMenu() {
@@ -35,7 +35,7 @@ function NotificationsMenu() {
         <div className="flex items-center justify-between px-4 pb-3 pt-4">
           <p className="font-display text-base font-semibold">Notifications</p>
           <button className="flex items-center gap-1 text-xs font-medium text-primary hover:underline">
-            <Check className="h-3 w-3" /> Mark all read
+            <Check className="h-3 w-3" /> Tout marquer lu
           </button>
         </div>
         <div className="max-h-[360px] overflow-y-auto border-t border-border/60">
@@ -55,7 +55,7 @@ function NotificationsMenu() {
         </div>
         <div className="border-t border-border/60 p-2">
           <button className="w-full rounded-xl py-2 text-center text-xs font-medium text-foreground hover:bg-muted">
-            View all notifications
+            Voir toutes les notifications
           </button>
         </div>
       </DropdownMenuContent>
@@ -73,7 +73,7 @@ function UserMenu() {
   }
 
   const initials = user?.displayName
-    ? user.displayName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+    ? user.displayName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()
     : user?.email?.slice(0, 2).toUpperCase() ?? "?";
 
   return (
@@ -89,27 +89,16 @@ function UserMenu() {
             {initials}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold">{user?.displayName ?? "My account"}</p>
+            <p className="truncate text-sm font-semibold">{user?.displayName ?? "Mon compte"}</p>
             <p className="truncate text-xs text-muted-foreground">{user?.email ?? ""}</p>
           </div>
         </div>
-        <div className="mx-3 mb-2 rounded-xl bg-primary-soft/60 px-3 py-2">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-primary">Week 3 of 12</p>
-          <p className="mt-0.5 text-xs text-foreground/80">Clear Skin Protocol</p>
-        </div>
         <DropdownMenuSeparator />
         <div className="p-1">
-          <DropdownMenuItem className="cursor-pointer rounded-lg py-2">
-            <UserCircle className="mr-2 h-4 w-4" /> My profile
-          </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer rounded-lg py-2">
-            <CreditCard className="mr-2 h-4 w-4" /> Subscription
-          </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer rounded-lg py-2">
-            <Settings className="mr-2 h-4 w-4" /> Settings
-          </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer rounded-lg py-2">
-            <HelpCircle className="mr-2 h-4 w-4" /> Help center
+          <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2">
+            <Link to="/profile">
+              <UserCircle className="mr-2 h-4 w-4" /> Mon profil
+            </Link>
           </DropdownMenuItem>
         </div>
         <DropdownMenuSeparator />
@@ -118,7 +107,7 @@ function UserMenu() {
             onClick={handleSignOut}
             className="cursor-pointer rounded-lg py-2 text-destructive focus:text-destructive"
           >
-            <LogOut className="mr-2 h-4 w-4" /> Sign out
+            <LogOut className="mr-2 h-4 w-4" /> Se déconnecter
           </DropdownMenuItem>
         </div>
       </DropdownMenuContent>
@@ -132,8 +121,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { isAdmin } = useAuth();
 
   const nav = [
-    { to: "/", label: "Home", icon: Home },
-    { to: "/course", label: "Protocol", icon: BookOpen },
+    { to: "/", label: "Accueil", icon: Home },
+    { to: "/course", label: "Protocole", icon: BookOpen },
     { to: "/products", label: "Routine", icon: Sparkles },
     { to: "/journal", label: "Journal", icon: Camera },
     ...(isAdmin ? [{ to: "/admin", label: "Admin", icon: ShieldCheck }] : []),

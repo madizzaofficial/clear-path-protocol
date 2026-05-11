@@ -8,8 +8,8 @@ import { Play, Check, Lock, Clock, ChevronRight } from "lucide-react";
 export const Route = createFileRoute("/course")({
   head: () => ({
     meta: [
-      { title: "The Clear Skin Protocol — Lumen" },
-      { name: "description", content: "Your 12-week guided acne transformation protocol." },
+      { title: "Le Protocole — Lumen" },
+      { name: "description", content: "Ton protocole guidé de 12 semaines contre l'acné." },
     ],
   }),
   component: CoursePage,
@@ -36,16 +36,16 @@ function CoursePage() {
         <section className="relative overflow-hidden border-b border-border/60 bg-gradient-warm">
           <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary/20 blur-3xl" />
           <div className="relative mx-auto max-w-7xl px-6 py-16 md:py-24">
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Your Protocol</p>
+            <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Ton protocole</p>
             <h1 className="mt-4 max-w-2xl font-display text-4xl font-semibold tracking-tight text-balance md:text-6xl">
               {course.title}
             </h1>
             <p className="mt-4 max-w-xl text-foreground/70 md:text-lg">{course.subtitle}</p>
             <div className="mt-8 flex flex-wrap items-center gap-6 text-sm">
-              <Stat label="Chapters" value={String(course.chapters.length)} />
-              <Stat label="Lessons" value={String(total)} />
-              <Stat label="Total time" value={`${course.estimatedHours}h`} />
-              <Stat label="Progress" value={`${progress}%`} />
+              <Stat label="Chapitres" value={String(course.chapters.length)} />
+              <Stat label="Leçons" value={String(total)} />
+              <Stat label="Durée totale" value={`${course.estimatedHours}h`} />
+              <Stat label="Progression" value={`${progress}%`} />
             </div>
             <div className="mt-8 max-w-md">
               <div className="h-1.5 overflow-hidden rounded-full bg-background/60">
@@ -66,9 +66,9 @@ function CoursePage() {
                   <header className="flex flex-wrap items-start justify-between gap-4 border-b border-border/60 p-6 md:p-8">
                     <div>
                       <div className="flex items-center gap-3">
-                        <span className="font-display text-sm font-medium text-primary">Chapter {i + 1}</span>
+                        <span className="font-display text-sm font-medium text-primary">Chapitre {i + 1}</span>
                         <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
-                        <span className="text-xs text-muted-foreground">{cdone}/{ch.lessons.length} complete</span>
+                        <span className="text-xs text-muted-foreground">{cdone}/{ch.lessons.length} terminée{cdone > 1 ? "s" : ""}</span>
                       </div>
                       <h2 className="mt-2 font-display text-2xl font-semibold">{ch.title}</h2>
                       <p className="mt-1 text-sm text-muted-foreground">{ch.description}</p>

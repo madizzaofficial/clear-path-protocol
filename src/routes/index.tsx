@@ -10,8 +10,8 @@ import { useEffect, useState } from "react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Dashboard — Lumen" },
-      { name: "description", content: "Your personalized acne recovery dashboard." },
+      { title: "Accueil — Lumen" },
+      { name: "description", content: "Ton espace personnalisé pour suivre ton protocole peau." },
     ],
   }),
   component: Dashboard,

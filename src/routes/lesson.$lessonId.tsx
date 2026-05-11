@@ -95,11 +95,11 @@ function LessonPage() {
             </button>
             <Link to="/course" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
               <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Back to protocol</span>
+              <span className="hidden sm:inline">Retour au protocole</span>
             </Link>
           </div>
           <div className="text-xs text-muted-foreground">
-            Lesson {idx + 1} of {all.length}
+            Leçon {idx + 1} sur {all.length}
           </div>
         </div>
 
@@ -109,7 +109,7 @@ function LessonPage() {
           <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight md:text-4xl">{lesson.title}</h1>
           <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {lesson.duration}</span>
-            {isCompleted && <span className="flex items-center gap-1.5 text-primary"><Check className="h-4 w-4" /> Completed</span>}
+            {isCompleted && <span className="flex items-center gap-1.5 text-primary"><Check className="h-4 w-4" /> Terminée</span>}
           </div>
 
           {/* Video */}
@@ -130,22 +130,21 @@ function LessonPage() {
           <div className="mt-10 grid gap-8 lg:grid-cols-3">
             <div className="space-y-8 lg:col-span-2">
               <section>
-                <h2 className="font-display text-xl font-semibold">Lesson summary</h2>
+                <h2 className="font-display text-xl font-semibold">Résumé</h2>
                 <p className="mt-3 leading-relaxed text-muted-foreground">{lesson.summary}</p>
                 <p className="mt-3 leading-relaxed text-muted-foreground">
-                  In this lesson, we'll explore the core principles step by step. Take notes as you watch — you'll apply these
-                  insights directly to your routine in the checklist below.
+                  Dans cette leçon, on explore les principes clés étape par étape. Prends des notes pendant le visionnage — tu les appliqueras directement dans ta routine via la liste ci-dessous.
                 </p>
               </section>
 
               <section>
-                <h2 className="font-display text-xl font-semibold">Skincare checklist</h2>
+                <h2 className="font-display text-xl font-semibold">Liste de contrôle</h2>
                 <div className="mt-4 space-y-2 rounded-2xl border border-border/60 bg-card p-5">
                   {[
-                    "Watch the full video without distractions",
-                    "Take baseline photos in natural light",
-                    "Update your evening routine card",
-                    "Reflect on triggers in your notes",
+                    "Regarder la vidéo en entier sans distraction",
+                    "Prendre des photos de référence en lumière naturelle",
+                    "Mettre à jour ta fiche routine du soir",
+                    "Réfléchir aux déclencheurs dans tes notes",
                   ].map((item, i) => (
                     <label key={item} className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 hover:bg-primary-soft/40">
                       <input type="checkbox" defaultChecked={i < 2} className="h-4 w-4 rounded border-border accent-[var(--primary)]" />
@@ -156,9 +155,9 @@ function LessonPage() {
               </section>
 
               <section>
-                <h2 className="font-display text-xl font-semibold">Your notes</h2>
+                <h2 className="font-display text-xl font-semibold">Tes notes</h2>
                 <textarea
-                  placeholder="Capture insights as you watch..."
+                  placeholder="Note tes observations pendant le visionnage…"
                   className="mt-3 min-h-32 w-full resize-none rounded-2xl border border-border bg-card p-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
                 />
               </section>
@@ -167,7 +166,7 @@ function LessonPage() {
             <aside className="space-y-6">
               {lesson.resources.length > 0 && (
                 <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-soft">
-                  <h3 className="font-display text-base font-semibold">Resources</h3>
+                  <h3 className="font-display text-base font-semibold">Ressources</h3>
                   <ul className="mt-3 space-y-2">
                     {lesson.resources.map((r: { name: string; size: string }) => (
                       <li key={r.name}>
@@ -186,14 +185,14 @@ function LessonPage() {
               )}
 
               <div className="rounded-2xl bg-gradient-warm p-5 shadow-soft">
-                <p className="text-xs font-medium uppercase tracking-wider text-primary">Next up</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-primary">Ensuite</p>
                 {next ? (
                   <Link to="/lesson/$lessonId" params={{ lessonId: next.id }} className="mt-2 block">
                     <p className="font-display text-base font-semibold">{next.title}</p>
                     <p className="mt-1 text-xs text-muted-foreground">{next.duration}</p>
                   </Link>
                 ) : (
-                  <p className="mt-2 font-display text-base font-semibold">Protocol complete 🎉</p>
+                  <p className="mt-2 font-display text-base font-semibold">Protocole terminé 🎉</p>
                 )}
               </div>
             </aside>
@@ -205,7 +204,7 @@ function LessonPage() {
               <Link to="/lesson/$lessonId" params={{ lessonId: prev.id }} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
                 <ArrowLeft className="h-4 w-4" />
                 <div className="text-left">
-                  <p className="text-xs uppercase tracking-wider">Previous</p>
+                  <p className="text-xs uppercase tracking-wider">Précédent</p>
                   <p className="font-medium">{prev.title}</p>
                 </div>
               </Link>
@@ -221,11 +220,11 @@ function LessonPage() {
                 }`}
               >
                 {isCompleted && <Check className="h-4 w-4" />}
-                {isCompleted ? "Completed" : "Mark as complete"}
+                {isCompleted ? "Terminée" : "Marquer comme terminée"}
               </button>
               {next && (
                 <Link to="/lesson/$lessonId" params={{ lessonId: next.id }} className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background hover:opacity-90">
-                  Next lesson <ArrowRight className="h-4 w-4" />
+                  Leçon suivante <ArrowRight className="h-4 w-4" />
                 </Link>
               )}
             </div>
@@ -251,7 +250,7 @@ function SidebarContent({ currentId, completedLessons, onNavigate }: { currentId
           </div>
           <span className="font-display text-lg font-semibold">Lumen</span>
         </Link>
-        <p className="mt-4 text-xs font-medium uppercase tracking-[0.2em] text-primary">Course</p>
+        <p className="mt-4 text-xs font-medium uppercase tracking-[0.2em] text-primary">Protocole</p>
         <p className="mt-1 font-display text-base font-semibold leading-tight">{course.title}</p>
       </div>
       <nav className="flex-1 overflow-y-auto p-4">
