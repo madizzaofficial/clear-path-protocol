@@ -102,6 +102,8 @@ await writeFile(
           headers: { "cache-control": "public, max-age=31536000, immutable" },
           dest: "/assets/$1",
         },
+        // Check filesystem for static files (public folder: images, manifest, favicon…)
+        { handle: "filesystem" },
         // Everything else → Node.js serverless function (SSR + server fns + Inngest)
         { src: "^/(.*)$", dest: "/index" },
       ],
