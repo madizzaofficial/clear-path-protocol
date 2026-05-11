@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useState, useEffect } from "react";
-import { ChevronRight, ChevronLeft, Check, Loader2, Sparkles } from "lucide-react";
+import { ChevronRight, ChevronLeft, Check, Loader2, Sparkles, ArrowRight } from "lucide-react";
 import { inngest } from "@/lib/inngest";
 
 const triggerIntakeEventFn = createServerFn({ method: "POST" }).handler(
@@ -21,12 +21,9 @@ export const Route = createFileRoute("/intake")({
 
 type IntakeAnswers = {
   skinType: string;
-  concerns: string[];
-  sensitivities: string[];
-  usesSPF: string;
-  routineComplexity: string;
-  skinHistoryDuration: string;
-  seenDermatologist: string;
+  acneTypes: string[];
+  intensity: string;
+  currentRoutine: string;
   mainGoal: string;
 };
 
@@ -38,40 +35,40 @@ const SKIN_TYPES = [
   { value: "sensible", label: "Sensible", desc: "Réactivité marquée, rougeurs, inconfort fréquent" },
 ];
 
-const CONCERNS = [
-  "Acné / Boutons",
-  "Points noirs / Pores dilatés",
-  "Rougeurs / Irritation",
-  "Hyperpigmentation / Taches",
-  "Rides / Perte de fermeté",
-  "Texture irrégulière",
-  "Teint terne / Manque d'éclat",
+const ACNE_TYPES = [
+  { value: "comedons", label: "Comédons", desc: "Points noirs et points blancs peu visibles" },
+  { value: "papules", label: "Papules / Pustules", desc: "Boutons rouges ou avec du pus" },
+  { value: "microkystes", label: "Microkystes", desc: "Petites bosses sous la peau, sans tête visible" },
+  { value: "kystes", label: "Kystes / Nodules", desc: "Boutons profonds, douloureux, inflammatoires" },
 ];
 
-const SENSITIVITIES = [
-  "Parfums",
-  "Alcool",
-  "AHA / BHA (acides exfoliants)",
-  "Rétinol / Dérivés vitamine A",
-  "Huiles essentielles",
-  "Aucune sensibilité connue",
+const INTENSITY_OPTIONS = [
+  { value: "legere", label: "Légère", desc: "Quelques boutons de temps en temps, peu visibles" },
+  { value: "moderee", label: "Modérée", desc: "Zones visiblement touchées, apparition régulière" },
+  { value: "severe", label: "Sévère", desc: "Inflammations fréquentes, étendues ou douloureuses" },
 ];
 
-const STEPS = ["Type de peau", "Préoccupations", "Sensibilités", "Routine", "Objectif"];
+const CURRENT_ROUTINE_OPTIONS = [
+  "Rien",
+  "Nettoyant",
+  "Nettoyant + SPF",
+  "Nettoyant + Crème hydratante + SPF",
+  "Nettoyant + Crème hydratante + SPF + Sérum",
+];
+
+const STEPS = ["Type de peau", "Type de boutons", "Intensité", "Routine actuelle", "Objectif"];
 
 function IntakePage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [answers, setAnswers] = useState<IntakeAnswers>({
     skinType: "",
-    concerns: [],
-    sensitivities: [],
-    usesSPF: "",
-    routineComplexity: "",
-    skinHistoryDuration: "",
-    seenDermatologist: "",
+    acneTypes: [],
+    intensity: "",
+    currentRoutine: "",
     mainGoal: "",
   });
 
@@ -86,22 +83,21 @@ function IntakePage() {
     });
   }, [user, navigate]);
 
-  function toggleMulti(field: "concerns" | "sensitivities", value: string) {
-    setAnswers((prev) => {
-      const arr = prev[field];
-      return {
-        ...prev,
-        [field]: arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value],
-      };
-    });
+  function toggleAcneType(value: string) {
+    setAnswers((prev) => ({
+      ...prev,
+      acneTypes: prev.acneTypes.includes(value)
+        ? prev.acneTypes.filter((v) => v !== value)
+        : [...prev.acneTypes, value],
+    }));
   }
 
   function canAdvance(): boolean {
     if (step === 0) return !!answers.skinType;
-    if (step === 1) return answers.concerns.length > 0;
-    if (step === 2) return answers.sensitivities.length > 0;
-    if (step === 3) return !!answers.usesSPF && !!answers.routineComplexity && !!answers.skinHistoryDuration;
-    if (step === 4) return !!answers.seenDermatologist;
+    if (step === 1) return answers.acneTypes.length > 0;
+    if (step === 2) return !!answers.intensity;
+    if (step === 3) return !!answers.currentRoutine;
+    if (step === 4) return true;
     return false;
   }
 
@@ -118,13 +114,39 @@ function IntakePage() {
     triggerIntakeEventFn({
       data: { uid: user.uid, email: user.email ?? "", firstName },
     }).catch(() => {});
-    navigate({ to: "/welcome" });
+    setSubmitting(false);
+    setSubmitted(true);
   }
 
   if (loading || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (submitted) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-6">
+        <div className="w-full max-w-md text-center">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-primary shadow-elegant">
+            <Check className="h-7 w-7 text-primary-foreground" />
+          </div>
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Bilan envoyé</p>
+          <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">
+            On s'occupe de tout.
+          </h1>
+          <p className="mt-4 leading-relaxed text-muted-foreground">
+            Votre routine personnalisée est en cours de préparation. Vous recevrez un e-mail dès qu'elle sera disponible dans votre espace.
+          </p>
+          <button
+            onClick={() => navigate({ to: "/welcome" })}
+            className="mt-8 inline-flex items-center gap-2 rounded-full bg-foreground px-8 py-3.5 text-base font-semibold text-background shadow-elegant transition-all hover:opacity-90"
+          >
+            Accéder à mon espace <ArrowRight className="h-5 w-5" />
+          </button>
+        </div>
       </div>
     );
   }
@@ -171,11 +193,9 @@ function IntakePage() {
                       : "border-border hover:border-primary/40"
                   }`}
                 >
-                  <span
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                      answers.skinType === t.value ? "border-primary bg-primary" : "border-border"
-                    }`}
-                  >
+                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                    answers.skinType === t.value ? "border-primary bg-primary" : "border-border"
+                  }`}>
                     {answers.skinType === t.value && <Check className="h-3 w-3 text-primary-foreground" />}
                   </span>
                   <div>
@@ -190,27 +210,28 @@ function IntakePage() {
 
         {step === 1 && (
           <>
-            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Tes préoccupations principales ?</h1>
-            <p className="mt-2 text-muted-foreground">Sélectionne tout ce qui te concerne actuellement.</p>
-            <div className="mt-8 grid grid-cols-2 gap-3">
-              {CONCERNS.map((c) => {
-                const sel = answers.concerns.includes(c);
+            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Quel type de boutons as-tu ?</h1>
+            <p className="mt-2 text-muted-foreground">Tu peux en sélectionner plusieurs.</p>
+            <div className="mt-8 space-y-3">
+              {ACNE_TYPES.map((t) => {
+                const sel = answers.acneTypes.includes(t.value);
                 return (
                   <button
-                    key={c}
-                    onClick={() => toggleMulti("concerns", c)}
-                    className={`flex items-center gap-2 rounded-2xl border-2 p-3 text-left text-sm transition-all ${
+                    key={t.value}
+                    onClick={() => toggleAcneType(t.value)}
+                    className={`flex w-full items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all ${
                       sel ? "border-primary bg-primary-soft" : "border-border hover:border-primary/40"
                     }`}
                   >
-                    <span
-                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded transition-colors ${
-                        sel ? "bg-primary" : "border border-border bg-muted"
-                      }`}
-                    >
-                      {sel && <Check className="h-2.5 w-2.5 text-primary-foreground" />}
+                    <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${
+                      sel ? "border-primary bg-primary" : "border-border"
+                    }`}>
+                      {sel && <Check className="h-3 w-3 text-primary-foreground" />}
                     </span>
-                    {c}
+                    <div>
+                      <p className="font-semibold">{t.label}</p>
+                      <p className="text-sm text-muted-foreground">{t.desc}</p>
+                    </div>
                   </button>
                 );
               })}
@@ -220,30 +241,30 @@ function IntakePage() {
 
         {step === 2 && (
           <>
-            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">As-tu des sensibilités connues ?</h1>
-            <p className="mt-2 text-muted-foreground">Ingrédients ou familles qui ont causé des réactions.</p>
+            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Quelle est l'intensité ?</h1>
+            <p className="mt-2 text-muted-foreground">Décris ce que tu vis au quotidien avec ta peau.</p>
             <div className="mt-8 space-y-3">
-              {SENSITIVITIES.map((s) => {
-                const sel = answers.sensitivities.includes(s);
-                return (
-                  <button
-                    key={s}
-                    onClick={() => toggleMulti("sensitivities", s)}
-                    className={`flex w-full items-center gap-3 rounded-2xl border-2 p-4 text-left transition-all ${
-                      sel ? "border-primary bg-primary-soft" : "border-border hover:border-primary/40"
-                    }`}
-                  >
-                    <span
-                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${
-                        sel ? "border-primary bg-primary" : "border-border"
-                      }`}
-                    >
-                      {sel && <Check className="h-3 w-3 text-primary-foreground" />}
-                    </span>
-                    <span className="text-sm font-medium">{s}</span>
-                  </button>
-                );
-              })}
+              {INTENSITY_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setAnswers((a) => ({ ...a, intensity: opt.value }))}
+                  className={`flex w-full items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all ${
+                    answers.intensity === opt.value
+                      ? "border-primary bg-primary-soft"
+                      : "border-border hover:border-primary/40"
+                  }`}
+                >
+                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                    answers.intensity === opt.value ? "border-primary bg-primary" : "border-border"
+                  }`}>
+                    {answers.intensity === opt.value && <Check className="h-3 w-3 text-primary-foreground" />}
+                  </span>
+                  <div>
+                    <p className="font-semibold">{opt.label}</p>
+                    <p className="text-sm text-muted-foreground">{opt.desc}</p>
+                  </div>
+                </button>
+              ))}
             </div>
           </>
         )}
@@ -251,92 +272,44 @@ function IntakePage() {
         {step === 3 && (
           <>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Ta routine actuelle</h1>
-            <p className="mt-2 text-muted-foreground">Pour adapter le protocole à ton point de départ.</p>
-            <div className="mt-8 space-y-7">
-              <div>
-                <p className="mb-3 text-sm font-semibold">Utilises-tu une protection solaire ?</p>
-                <div className="flex gap-3">
-                  {["Oui, tous les jours", "Parfois", "Pas encore"].map((opt) => (
-                    <button
-                      key={opt}
-                      onClick={() => setAnswers((a) => ({ ...a, usesSPF: opt }))}
-                      className={`flex-1 rounded-2xl border-2 px-3 py-2.5 text-sm font-medium transition-all ${
-                        answers.usesSPF === opt ? "border-primary bg-primary-soft" : "border-border hover:border-primary/40"
-                      }`}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <p className="mb-3 text-sm font-semibold">Combien d'étapes dans ta routine actuelle ?</p>
-                <div className="flex gap-3">
-                  {["1–2 étapes", "3–5 étapes", "6+ étapes"].map((opt) => (
-                    <button
-                      key={opt}
-                      onClick={() => setAnswers((a) => ({ ...a, routineComplexity: opt }))}
-                      className={`flex-1 rounded-2xl border-2 px-3 py-2.5 text-sm font-medium transition-all ${
-                        answers.routineComplexity === opt ? "border-primary bg-primary-soft" : "border-border hover:border-primary/40"
-                      }`}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <p className="mb-3 text-sm font-semibold">Depuis combien de temps as-tu des problèmes de peau ?</p>
-                <div className="flex gap-3">
-                  {["Moins d'un an", "1 à 3 ans", "Plus de 3 ans"].map((opt) => (
-                    <button
-                      key={opt}
-                      onClick={() => setAnswers((a) => ({ ...a, skinHistoryDuration: opt }))}
-                      className={`flex-1 rounded-2xl border-2 px-3 py-2.5 text-sm font-medium transition-all ${
-                        answers.skinHistoryDuration === opt ? "border-primary bg-primary-soft" : "border-border hover:border-primary/40"
-                      }`}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <p className="mt-2 text-muted-foreground">Sélectionne ce qui décrit le mieux ce que tu fais aujourd'hui.</p>
+            <div className="mt-8 space-y-3">
+              {CURRENT_ROUTINE_OPTIONS.map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => setAnswers((a) => ({ ...a, currentRoutine: opt }))}
+                  className={`flex w-full items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all ${
+                    answers.currentRoutine === opt
+                      ? "border-primary bg-primary-soft"
+                      : "border-border hover:border-primary/40"
+                  }`}
+                >
+                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                    answers.currentRoutine === opt ? "border-primary bg-primary" : "border-border"
+                  }`}>
+                    {answers.currentRoutine === opt && <Check className="h-3 w-3 text-primary-foreground" />}
+                  </span>
+                  <p className="font-semibold">{opt}</p>
+                </button>
+              ))}
             </div>
           </>
         )}
 
         {step === 4 && (
           <>
-            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Pour finir...</h1>
-            <p className="mt-2 text-muted-foreground">Quelques infos pour mieux personnaliser ton suivi.</p>
-            <div className="mt-8 space-y-7">
-              <div>
-                <p className="mb-3 text-sm font-semibold">As-tu déjà consulté un dermatologue ?</p>
-                <div className="flex gap-3">
-                  {["Oui", "Non", "En cours"].map((opt) => (
-                    <button
-                      key={opt}
-                      onClick={() => setAnswers((a) => ({ ...a, seenDermatologist: opt }))}
-                      className={`flex-1 rounded-2xl border-2 px-3 py-2.5 text-sm font-medium transition-all ${
-                        answers.seenDermatologist === opt ? "border-primary bg-primary-soft" : "border-border hover:border-primary/40"
-                      }`}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <p className="mb-3 text-sm font-semibold">Quel est ton objectif principal avec ta peau ? <span className="text-muted-foreground font-normal">(optionnel)</span></p>
-                <textarea
-                  placeholder="Ex : Réduire mon acné kystique, retrouver un teint uniforme, arrêter les rougeurs persistantes..."
-                  value={answers.mainGoal}
-                  onChange={(e) => setAnswers((a) => ({ ...a, mainGoal: e.target.value.slice(0, 1000) }))}
-                  maxLength={1000}
-                  className="min-h-28 w-full resize-none rounded-2xl border border-border bg-card p-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-                <p className="mt-1 text-right text-xs text-muted-foreground">{answers.mainGoal.length}/1000</p>
-              </div>
+            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Pour finir…</h1>
+            <p className="mt-2 text-muted-foreground">Décris ton objectif principal en quelques mots.</p>
+            <div className="mt-8">
+              <textarea
+                placeholder="Ex. : Réduire mon acné kystique, retrouver un teint uniforme, arrêter les rougeurs persistantes…"
+                value={answers.mainGoal}
+                onChange={(e) => setAnswers((a) => ({ ...a, mainGoal: e.target.value.slice(0, 1000) }))}
+                maxLength={1000}
+                className="min-h-36 w-full resize-none rounded-2xl border border-border bg-card p-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+              <p className="mt-1 text-right text-xs text-muted-foreground">{answers.mainGoal.length}/1000</p>
+              <p className="mt-3 text-xs text-muted-foreground">Optionnel — mais très utile pour personnaliser ta routine.</p>
             </div>
           </>
         )}
@@ -370,7 +343,7 @@ function IntakePage() {
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <>
-                  <Sparkles className="h-4 w-4" /> Commencer mon protocole
+                  <Sparkles className="h-4 w-4" /> Envoyer mon bilan
                 </>
               )}
             </button>

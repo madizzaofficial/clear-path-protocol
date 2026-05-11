@@ -14,10 +14,19 @@ const SKIN_TYPE_LABELS: Record<string, string> = {
   normale: "Normale", grasse: "Grasse", seche: "Sèche", mixte: "Mixte", sensible: "Sensible",
 };
 
+const ACNE_TYPE_LABELS: Record<string, string> = {
+  comedons: "Comédons", papules: "Papules / Pustules", microkystes: "Microkystes", kystes: "Kystes / Nodules",
+};
+
+const INTENSITY_LABELS: Record<string, string> = {
+  legere: "Légère", moderee: "Modérée", severe: "Sévère",
+};
+
 type IntakeAnswers = {
   skinType?: string;
-  concerns?: string[];
-  sensitivities?: string[];
+  acneTypes?: string[];
+  intensity?: string;
+  currentRoutine?: string;
 };
 
 function WelcomePage() {
@@ -92,30 +101,31 @@ function WelcomePage() {
               </p>
             </div>
             <div className="p-6">
-              {intake.skinType && (
-                <div className="mb-4">
+              <div className="flex flex-wrap gap-2">
+                {intake.skinType && (
                   <span className="rounded-full bg-gradient-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground">
                     Peau {SKIN_TYPE_LABELS[intake.skinType] ?? intake.skinType}
                   </span>
-                </div>
-              )}
-              {(intake.concerns?.length ?? 0) > 0 && (
-                <div className="mb-3 flex flex-wrap gap-2">
-                  {intake.concerns!.map((c) => (
-                    <span key={c} className="rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-foreground">
-                      {c}
+                )}
+                {intake.intensity && (
+                  <span className="rounded-full bg-primary-soft px-3 py-1.5 text-xs font-semibold text-primary">
+                    Acné {INTENSITY_LABELS[intake.intensity] ?? intake.intensity}
+                  </span>
+                )}
+              </div>
+              {(intake.acneTypes?.length ?? 0) > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {intake.acneTypes!.map((t) => (
+                    <span key={t} className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-foreground">
+                      {ACNE_TYPE_LABELS[t] ?? t}
                     </span>
                   ))}
                 </div>
               )}
-              {(intake.sensitivities?.length ?? 0) > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {intake.sensitivities!.map((s) => (
-                    <span key={s} className="rounded-full bg-destructive/10 px-3 py-1 text-xs font-medium text-destructive">
-                      ⚠ {s}
-                    </span>
-                  ))}
-                </div>
+              {intake.currentRoutine && (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Routine actuelle : <span className="font-medium text-foreground">{intake.currentRoutine}</span>
+                </p>
               )}
             </div>
           </div>
