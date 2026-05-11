@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import {
   doc, getDoc, setDoc,
-  collection, getDocs, query, orderBy, limit, documentId,
+  collection, getDocs, query, orderBy, limit, documentId, where,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
@@ -33,6 +33,7 @@ type HomeData = {
   checkedAm: string[];
   checkedPm: string[];
   streak: number;
+  monthCheckins: Record<string, { am: string[]; pm: string[] }>;
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -98,6 +99,7 @@ function Dashboard() {
     checkedAm: [],
     checkedPm: [],
     streak: 0,
+    monthCheckins: {},
   });
 
   useEffect(() => {
@@ -106,16 +108,26 @@ function Dashboard() {
 
   useEffect(() => {
     if (!user) return;
-    const todayKey = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const todayKey = now.toISOString().slice(0, 10);
+    const monthPrefix = now.toISOString().slice(0, 7);
+    const monthStart = `${monthPrefix}-01`;
+    const monthEnd = `${monthPrefix}-31`;
 
-    Promise.all([
+    Promise.allSettled([
       getDoc(doc(db, "progress", user.uid)),
       getDoc(doc(db, "routines", user.uid)),
       getDoc(doc(db, "users", user.uid)),
       getDoc(doc(db, "intake_answers", user.uid)),
       getDoc(doc(db, "routine_checkins", user.uid, "days", todayKey)),
-    ]).then(async ([progressSnap, routineSnap, userSnap, intakeSnap, todaySnap]) => {
-      const routineData = routineSnap.exists() ? routineSnap.data() : null;
+      getDocs(query(
+        collection(db, "routine_checkins", user.uid, "days"),
+        where(documentId(), ">=", monthStart),
+        where(documentId(), "<=", monthEnd),
+      )),
+    ]).then(async ([progressRes, routineRes, userRes, intakeRes, todayRes, monthRes]) => {
+      const routineSnap = routineRes.status === "fulfilled" ? routineRes.value : null;
+      const routineData = routineSnap?.exists() ? routineSnap.data() : null;
       const routine =
         routineData && routineData.status === "sent"
           ? { am: routineData.am ?? [], pm: routineData.pm ?? [] }
@@ -124,23 +136,34 @@ function Dashboard() {
       const totalSteps = (routine?.am.length ?? 0) + (routine?.pm.length ?? 0);
       const streak = await computeStreak(user.uid, totalSteps).catch(() => 0);
 
+      const monthCheckins: Record<string, { am: string[]; pm: string[] }> = {};
+      if (monthRes.status === "fulfilled") {
+        monthRes.value.forEach((snap) => {
+          monthCheckins[snap.id] = snap.data() as { am: string[]; pm: string[] };
+        });
+      }
+
+      const progressSnap = progressRes.status === "fulfilled" ? progressRes.value : null;
+      const userSnap = userRes.status === "fulfilled" ? userRes.value : null;
+      const intakeSnap = intakeRes.status === "fulfilled" ? intakeRes.value : null;
+      const todaySnap = todayRes.status === "fulfilled" ? todayRes.value : null;
+
       setData({
         loading: false,
-        completedLessons: progressSnap.exists() ? (progressSnap.data().completedLessons ?? []) : [],
+        completedLessons: progressSnap?.exists() ? (progressSnap.data().completedLessons ?? []) : [],
         routine,
-        enrolledAt: userSnap.exists() ? (userSnap.data().enrolledAt ?? null) : null,
-        needsIntake: !intakeSnap.exists(),
-        checkedAm: todaySnap.exists() ? (todaySnap.data().am ?? []) : [],
-        checkedPm: todaySnap.exists() ? (todaySnap.data().pm ?? []) : [],
+        enrolledAt: userSnap?.exists() ? (userSnap.data().enrolledAt ?? null) : null,
+        needsIntake: !intakeSnap?.exists(),
+        checkedAm: todaySnap?.exists() ? (todaySnap.data().am ?? []) : [],
+        checkedPm: todaySnap?.exists() ? (todaySnap.data().pm ?? []) : [],
         streak,
+        monthCheckins,
       });
-    }).catch(() => {
-      setData((prev) => ({ ...prev, loading: false }));
     });
   }, [user]);
 
   const lessons = allLessons();
-  const { loading, completedLessons, routine, enrolledAt, needsIntake, checkedAm, checkedPm, streak } = data;
+  const { loading, completedLessons, routine, enrolledAt, needsIntake, checkedAm, checkedPm, streak, monthCheckins } = data;
 
   const done = completedLessons.length;
   const progress = Math.round((done / lessons.length) * 100);
@@ -160,14 +183,6 @@ function Dashboard() {
   const chapterDone = currentChapter
     ? currentChapter.lessons.filter((l) => completedLessons.includes(l.id)).length
     : 0;
-
-  const MILESTONES = [
-    { label: "Photos de base & bilan peau", targetWeek: 1 },
-    { label: "Routine entièrement intégrée", targetWeek: 2 },
-    { label: "Premiers signes d'amélioration", targetWeek: 4 },
-    { label: "Réduction visible des éruptions", targetWeek: 6 },
-    { label: "Teint uniforme restauré", targetWeek: 10 },
-  ];
 
   const totalRoutineSteps = (routine?.am.length ?? 0) + (routine?.pm.length ?? 0);
   const routineAllDone = totalRoutineSteps > 0 && checkedAm.length + checkedPm.length >= totalRoutineSteps;
@@ -258,7 +273,7 @@ function Dashboard() {
                   <div className="relative">
                     <span className="inline-flex items-center gap-2 rounded-full bg-background/70 px-3 py-1 text-xs font-medium text-foreground backdrop-blur">
                       <Play className="h-3 w-3 fill-primary text-primary" />
-                      {done === 0 ? "Commencer le protocole" : "Continuer"}
+                      {done === 0 ? "Commencer le protocole" : "Continuer le protocole"}
                     </span>
                     <h2 className="mt-5 font-display text-2xl font-semibold md:text-3xl">{next.title}</h2>
                     <p className="mt-2 max-w-md text-sm text-foreground/70">{next.summary}</p>
@@ -304,48 +319,13 @@ function Dashboard() {
               />
             </div>
 
-            {/* Milestones */}
-            <div className="mt-8 rounded-3xl border border-border/60 bg-card p-6 shadow-soft md:p-8">
-              <div className="flex items-center justify-between">
-                <h3 className="font-display text-xl font-semibold">Jalons de transformation</h3>
-                <span className="text-xs uppercase tracking-wider text-muted-foreground">
-                  Semaine {position.week} / 12
-                </span>
-              </div>
-              <div className="mt-6 space-y-4">
-                {MILESTONES.map((m) => {
-                  const isDone = position.week > m.targetWeek;
-                  const isCurrent = position.week === m.targetWeek;
-                  return (
-                    <div key={m.label} className="flex items-center gap-4">
-                      <div
-                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 ${
-                          isDone
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : isCurrent
-                            ? "border-primary bg-primary-soft"
-                            : "border-border bg-muted"
-                        }`}
-                      >
-                        {isDone ? (
-                          <Check className="h-4 w-4" />
-                        ) : (
-                          <span className="text-[10px] font-semibold text-muted-foreground">S{m.targetWeek}</span>
-                        )}
-                      </div>
-                      <p className={`flex-1 text-sm ${isDone ? "text-muted-foreground line-through" : "font-medium"}`}>
-                        {m.label}
-                      </p>
-                      {isCurrent && (
-                        <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-foreground">
-                          En cours
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            {/* Routine calendar */}
+            <RoutineCalendar
+              totalSteps={totalRoutineSteps}
+              monthCheckins={monthCheckins}
+              checkedAm={checkedAm}
+              checkedPm={checkedPm}
+            />
           </div>
 
           {/* ── Sidebar ───────────────────────────────────────────────────── */}
@@ -406,36 +386,6 @@ function Dashboard() {
               )}
             </div>
 
-            {/* Current chapter goal */}
-            {currentChapter ? (
-              <div className="rounded-3xl bg-gradient-primary p-6 text-primary-foreground shadow-elegant">
-                <p className="text-xs uppercase tracking-[0.2em] opacity-80">Objectif</p>
-                <h3 className="mt-2 font-display text-xl font-semibold leading-tight">
-                  {currentChapter.title}
-                </h3>
-                <p className="mt-2 text-sm opacity-90">
-                  {currentChapter.lessons.length - chapterDone} leçon
-                  {currentChapter.lessons.length - chapterDone > 1 ? "s" : ""} restante
-                  {currentChapter.lessons.length - chapterDone > 1 ? "s" : ""}
-                </p>
-                <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-primary-foreground/20">
-                  <div
-                    className="h-full rounded-full bg-primary-foreground/90 transition-all"
-                    style={{
-                      width: `${Math.round((chapterDone / currentChapter.lessons.length) * 100)}%`,
-                    }}
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft text-center">
-                <p className="text-2xl">🏆</p>
-                <p className="mt-3 font-display text-base font-semibold">Protocole complété</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Continue à prendre soin de ta peau.
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </main>
@@ -536,6 +486,102 @@ function WelcomeState({ firstName, next }: { firstName: string; next: ReturnType
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
+
+function RoutineCalendar({
+  totalSteps,
+  monthCheckins,
+  checkedAm,
+  checkedPm,
+}: {
+  totalSteps: number;
+  monthCheckins: Record<string, { am: string[]; pm: string[] }>;
+  checkedAm: string[];
+  checkedPm: string[];
+}) {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const today = now.getDate();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDayOfWeek = (new Date(year, month, 1).getDay() + 6) % 7; // Monday = 0
+  const monthLabel = now.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+
+  // Merge today's live checkin into the month map
+  const todayKey = now.toISOString().slice(0, 10);
+  const allCheckins = { ...monthCheckins, [todayKey]: { am: checkedAm, pm: checkedPm } };
+
+  const DAY_LABELS = ["L", "M", "M", "J", "V", "S", "D"];
+
+  return (
+    <div className="mt-8 rounded-3xl border border-border/60 bg-card p-6 shadow-soft md:p-8">
+      <div className="mb-5 flex items-center justify-between">
+        <h3 className="font-display text-xl font-semibold">Suivi de routine</h3>
+        <span className="text-xs capitalize text-muted-foreground">{monthLabel}</span>
+      </div>
+
+      {/* Day-of-week headers */}
+      <div className="mb-1 grid grid-cols-7 gap-1">
+        {DAY_LABELS.map((d, i) => (
+          <div key={i} className="py-1 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            {d}
+          </div>
+        ))}
+      </div>
+
+      {/* Day cells */}
+      <div className="grid grid-cols-7 gap-1">
+        {Array.from({ length: firstDayOfWeek }).map((_, i) => <div key={`e${i}`} />)}
+        {Array.from({ length: daysInMonth }).map((_, i) => {
+          const day = i + 1;
+          const key = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+          const checkin = allCheckins[key];
+          const isToday = day === today;
+          const isFuture = day > today;
+
+          let isDone = false;
+          let isPartial = false;
+          if (checkin && totalSteps > 0) {
+            const checked = (checkin.am?.length ?? 0) + (checkin.pm?.length ?? 0);
+            isDone = checked >= totalSteps;
+            isPartial = checked > 0 && !isDone;
+          }
+
+          return (
+            <div
+              key={day}
+              className={`flex aspect-square items-center justify-center rounded-xl text-xs font-medium transition-all ${
+                isFuture
+                  ? "text-muted-foreground/25"
+                  : isDone
+                  ? "bg-primary text-primary-foreground"
+                  : isPartial
+                  ? "bg-primary-soft text-primary"
+                  : isToday
+                  ? "ring-2 ring-primary text-foreground font-semibold"
+                  : "text-muted-foreground"
+              }`}
+            >
+              {isDone ? <Check className="h-3 w-3" /> : day}
+            </div>
+          );
+        })}
+      </div>
+
+      {totalSteps > 0 && (
+        <div className="mt-4 flex items-center gap-5 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <div className="h-3 w-3 rounded-sm bg-primary" />
+            Complète
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="h-3 w-3 rounded-sm bg-primary-soft" />
+            Partielle
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function StatCard({ icon: Icon, label, value, sub }: { icon: any; label: string; value: string; sub: string }) {
   return (
