@@ -72,6 +72,8 @@ type RoutineStep = {
   category: string;
   product: string;
   instructions: string;
+  imageUrl?: string;
+  purchaseUrl?: string;
 };
 
 type StudentRoutine = {
@@ -228,7 +230,8 @@ function buildEmailHtml(
   <div style="background:white;border-radius:24px;padding:28px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
     <h2 style="font-family:Georgia,serif;color:#1a1a1a;margin:0 0 10px;font-size:22px;">Bonjour ${firstName} !</h2>
     <p style="color:#555;margin:0;line-height:1.65;font-size:15px;">
-      Ta routine personnalisée est prête. Elle a été élaborée spécialement pour ta peau — applique-la chaque jour pour des résultats visibles.
+      Ta routine personnalisée est prête. Elle a été élaborée spécialement pour ta peau. Applique-la chaque jour pour des résultats visibles.
+      </br> </br>Tu peux la consulter sur ton espace personnel via le menu "Routine".
     </p>
   </div>
 
@@ -443,7 +446,7 @@ function RoutinesContent() {
     saveRoutine(updated);
   }
 
-  function handleSaveStep(data: { category: string; product: string; instructions: string }) {
+  function handleSaveStep(data: { category: string; product: string; instructions: string; imageUrl?: string; purchaseUrl?: string }) {
     if (!routine) return;
     const steps = activeTab === "am" ? routine.am : routine.pm;
     let updated: StudentRoutine;
@@ -895,18 +898,22 @@ function StepDialog({
   step: RoutineStep | null;
   isNew: boolean;
   onClose: () => void;
-  onSave: (d: { category: string; product: string; instructions: string }) => void;
+  onSave: (d: { category: string; product: string; instructions: string; imageUrl?: string; purchaseUrl?: string }) => void;
   saving: boolean;
 }) {
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [product, setProduct] = useState("");
   const [instructions, setInstructions] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [purchaseUrl, setPurchaseUrl] = useState("");
 
   useEffect(() => {
     if (step) {
       setCategory(step.category || CATEGORIES[0]);
       setProduct(step.product);
       setInstructions(step.instructions);
+      setImageUrl(step.imageUrl ?? "");
+      setPurchaseUrl(step.purchaseUrl ?? "");
     }
   }, [step]);
 
@@ -920,9 +927,7 @@ function StepDialog({
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div>
-            <label className="mb-2 block text-sm font-medium text-foreground/80">
-              Catégorie
-            </label>
+            <label className="mb-2 block text-sm font-medium text-foreground/80">Catégorie</label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -934,9 +939,7 @@ function StepDialog({
             </select>
           </div>
           <div>
-            <label className="mb-2 block text-sm font-medium text-foreground/80">
-              Produit
-            </label>
+            <label className="mb-2 block text-sm font-medium text-foreground/80">Produit</label>
             <input
               value={product}
               onChange={(e) => setProduct(e.target.value)}
@@ -945,15 +948,35 @@ function StepDialog({
             />
           </div>
           <div>
-            <label className="mb-2 block text-sm font-medium text-foreground/80">
-              Instructions
-            </label>
+            <label className="mb-2 block text-sm font-medium text-foreground/80">Instructions</label>
             <textarea
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
               placeholder="ex. Appliquer sur peau humide, masser doucement 30 s puis rincer."
               rows={3}
               className="w-full resize-none rounded-2xl border border-border bg-background p-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-foreground/80">
+              Image du produit <span className="font-normal text-muted-foreground">(URL optionnelle)</span>
+            </label>
+            <input
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="https://..."
+              className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-foreground/80">
+              Lien d'achat <span className="font-normal text-muted-foreground">(URL optionnelle)</span>
+            </label>
+            <input
+              value={purchaseUrl}
+              onChange={(e) => setPurchaseUrl(e.target.value)}
+              placeholder="https://..."
+              className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
         </div>
@@ -965,7 +988,7 @@ function StepDialog({
             Annuler
           </button>
           <button
-            onClick={() => onSave({ category, product, instructions })}
+            onClick={() => onSave({ category, product, instructions, imageUrl: imageUrl.trim() || undefined, purchaseUrl: purchaseUrl.trim() || undefined })}
             disabled={saving || !product.trim()}
             className="flex items-center gap-2 rounded-2xl bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
           >
