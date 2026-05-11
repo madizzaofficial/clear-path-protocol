@@ -31,15 +31,17 @@ import {
 
 // ── Server functions ──────────────────────────────────────────────────────────
 
-const triggerSignUpFn = createServerFn({ method: "POST" }).handler(async (ctx) => {
-  const d = ctx.data as unknown as { uid: string; email: string; firstName: string };
-  await inngest.send({ name: "user/signed.up", data: d });
-});
+const triggerSignUpFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { uid: string; email: string; firstName: string }) => d)
+  .handler(async (ctx) => {
+    await inngest.send({ name: "user/signed.up", data: ctx.data });
+  });
 
-const triggerIntakeFn = createServerFn({ method: "POST" }).handler(async (ctx) => {
-  const d = ctx.data as unknown as { uid: string; email: string; firstName: string };
-  await inngest.send({ name: "user/intake.completed", data: d });
-});
+const triggerIntakeFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { uid: string; email: string; firstName: string }) => d)
+  .handler(async (ctx) => {
+    await inngest.send({ name: "user/intake.completed", data: ctx.data });
+  });
 
 // ── Route ─────────────────────────────────────────────────────────────────────
 

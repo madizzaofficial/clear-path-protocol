@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as JournalRouteImport } from './routes/journal'
@@ -18,12 +19,11 @@ import { Route as IntakeRouteImport } from './routes/intake'
 import { Route as CourseRouteImport } from './routes/course'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StartTokenRouteImport } from './routes/start.$token'
 import { Route as LessonLessonIdRouteImport } from './routes/lesson.$lessonId'
 import { Route as AdminRoutinesRouteImport } from './routes/admin_.routines'
 import { Route as AdminCourseEditorRouteImport } from './routes/admin_.course-editor'
 import { Route as AdminStudentUidRouteImport } from './routes/admin_.student.$uid'
-import { Route as StartTokenRouteImport } from './routes/start.$token'
-import { Route as ProfileRouteImport } from './routes/profile'
 
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
@@ -33,6 +33,11 @@ const WelcomeRoute = WelcomeRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductsRoute = ProductsRouteImport.update({
@@ -70,6 +75,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StartTokenRoute = StartTokenRouteImport.update({
+  id: '/start/$token',
+  path: '/start/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LessonLessonIdRoute = LessonLessonIdRouteImport.update({
   id: '/lesson/$lessonId',
   path: '/lesson/$lessonId',
@@ -90,16 +100,6 @@ const AdminStudentUidRoute = AdminStudentUidRouteImport.update({
   path: '/admin/student/$uid',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StartTokenRoute = StartTokenRouteImport.update({
-  id: '/start/$token',
-  path: '/start/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -109,14 +109,14 @@ export interface FileRoutesByFullPath {
   '/journal': typeof JournalRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
   '/admin/course-editor': typeof AdminCourseEditorRoute
   '/admin/routines': typeof AdminRoutinesRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
-  '/admin/student/$uid': typeof AdminStudentUidRoute
   '/start/$token': typeof StartTokenRoute
-  '/profile': typeof ProfileRoute
+  '/admin/student/$uid': typeof AdminStudentUidRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -126,14 +126,14 @@ export interface FileRoutesByTo {
   '/journal': typeof JournalRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
   '/admin/course-editor': typeof AdminCourseEditorRoute
   '/admin/routines': typeof AdminRoutinesRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
-  '/admin/student/$uid': typeof AdminStudentUidRoute
   '/start/$token': typeof StartTokenRoute
-  '/profile': typeof ProfileRoute
+  '/admin/student/$uid': typeof AdminStudentUidRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -144,14 +144,14 @@ export interface FileRoutesById {
   '/journal': typeof JournalRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
   '/admin_/course-editor': typeof AdminCourseEditorRoute
   '/admin_/routines': typeof AdminRoutinesRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
-  '/admin_/student/$uid': typeof AdminStudentUidRoute
   '/start/$token': typeof StartTokenRoute
-  '/profile': typeof ProfileRoute
+  '/admin_/student/$uid': typeof AdminStudentUidRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -163,14 +163,14 @@ export interface FileRouteTypes {
     | '/journal'
     | '/login'
     | '/products'
+    | '/profile'
     | '/register'
     | '/welcome'
     | '/admin/course-editor'
     | '/admin/routines'
     | '/lesson/$lessonId'
-    | '/admin/student/$uid'
     | '/start/$token'
-    | '/profile'
+    | '/admin/student/$uid'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -180,14 +180,14 @@ export interface FileRouteTypes {
     | '/journal'
     | '/login'
     | '/products'
+    | '/profile'
     | '/register'
     | '/welcome'
     | '/admin/course-editor'
     | '/admin/routines'
     | '/lesson/$lessonId'
-    | '/admin/student/$uid'
     | '/start/$token'
-    | '/profile'
+    | '/admin/student/$uid'
   id:
     | '__root__'
     | '/'
@@ -197,14 +197,14 @@ export interface FileRouteTypes {
     | '/journal'
     | '/login'
     | '/products'
+    | '/profile'
     | '/register'
     | '/welcome'
     | '/admin_/course-editor'
     | '/admin_/routines'
     | '/lesson/$lessonId'
-    | '/admin_/student/$uid'
     | '/start/$token'
-    | '/profile'
+    | '/admin_/student/$uid'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -215,14 +215,14 @@ export interface RootRouteChildren {
   JournalRoute: typeof JournalRoute
   LoginRoute: typeof LoginRoute
   ProductsRoute: typeof ProductsRoute
+  ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
   WelcomeRoute: typeof WelcomeRoute
   AdminCourseEditorRoute: typeof AdminCourseEditorRoute
   AdminRoutinesRoute: typeof AdminRoutinesRoute
   LessonLessonIdRoute: typeof LessonLessonIdRoute
-  AdminStudentUidRoute: typeof AdminStudentUidRoute
   StartTokenRoute: typeof StartTokenRoute
-  ProfileRoute: typeof ProfileRoute
+  AdminStudentUidRoute: typeof AdminStudentUidRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -239,6 +239,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/products': {
@@ -290,6 +297,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/start/$token': {
+      id: '/start/$token'
+      path: '/start/$token'
+      fullPath: '/start/$token'
+      preLoaderRoute: typeof StartTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lesson/$lessonId': {
       id: '/lesson/$lessonId'
       path: '/lesson/$lessonId'
@@ -318,20 +332,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminStudentUidRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/start/$token': {
-      id: '/start/$token'
-      path: '/start/$token'
-      fullPath: '/start/$token'
-      preLoaderRoute: typeof StartTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -343,14 +343,14 @@ const rootRouteChildren: RootRouteChildren = {
   JournalRoute: JournalRoute,
   LoginRoute: LoginRoute,
   ProductsRoute: ProductsRoute,
+  ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
   WelcomeRoute: WelcomeRoute,
   AdminCourseEditorRoute: AdminCourseEditorRoute,
   AdminRoutinesRoute: AdminRoutinesRoute,
   LessonLessonIdRoute: LessonLessonIdRoute,
-  AdminStudentUidRoute: AdminStudentUidRoute,
   StartTokenRoute: StartTokenRoute,
-  ProfileRoute: ProfileRoute,
+  AdminStudentUidRoute: AdminStudentUidRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

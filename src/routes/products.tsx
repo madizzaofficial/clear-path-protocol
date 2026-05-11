@@ -59,19 +59,21 @@ function RoutinePage() {
   useEffect(() => {
     if (!user) return;
     const todayKey = new Date().toISOString().slice(0, 10);
-    Promise.all([
+    Promise.allSettled([
       getDoc(doc(db, "routines", user.uid)),
       getDoc(doc(db, "routine_checkins", user.uid, "days", todayKey)),
       getDoc(doc(db, "routine_reports", user.uid)),
-    ]).then(([routineSnap, checkinSnap, reportsSnap]) => {
-      if (routineSnap.exists()) setRoutine(routineSnap.data() as UserRoutine);
-      if (checkinSnap.exists()) {
-        setCheckedAm(checkinSnap.data().am ?? []);
-        setCheckedPm(checkinSnap.data().pm ?? []);
+    ]).then(([routineRes, checkinRes, reportsRes]) => {
+      if (routineRes.status === "fulfilled" && routineRes.value.exists())
+        setRoutine(routineRes.value.data() as UserRoutine);
+      if (checkinRes.status === "fulfilled" && checkinRes.value.exists()) {
+        setCheckedAm(checkinRes.value.data().am ?? []);
+        setCheckedPm(checkinRes.value.data().pm ?? []);
       }
-      if (reportsSnap.exists()) setReports(reportsSnap.data() as Record<string, "irritant" | "allergie">);
+      if (reportsRes.status === "fulfilled" && reportsRes.value.exists())
+        setReports(reportsRes.value.data() as Record<string, "irritant" | "allergie">);
       setLoadingRoutine(false);
-    }).catch(() => setLoadingRoutine(false));
+    });
   }, [user]);
 
   function toggleStep(session: "am" | "pm", stepId: string) {

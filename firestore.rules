@@ -73,6 +73,16 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ── Routine check-ins (daily tracking) ────────────────────────────────────
+    match /routine_checkins/{userId}/days/{day} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // ── Routine product reports ───────────────────────────────────────────────
+    match /routine_reports/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
     // ── Lesson progress ───────────────────────────────────────────────────────
     // completedLessons capped at 50 (18 lessons in protocol) to prevent abuse
     match /progress/{userId} {

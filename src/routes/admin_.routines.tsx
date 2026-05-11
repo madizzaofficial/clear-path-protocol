@@ -135,8 +135,9 @@ function validatePayload(data: unknown): SendEmailPayload {
   return d as unknown as SendEmailPayload;
 }
 
-const sendRoutineEmailFn = createServerFn({ method: "POST" }).handler(
-  async (ctx) => {
+const sendRoutineEmailFn = createServerFn({ method: "POST" })
+  .inputValidator((d: SendEmailPayload) => d)
+  .handler(async (ctx) => {
     const data = validatePayload(ctx.data);
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) throw new Error("RESEND_API_KEY non configurée.");
@@ -167,12 +168,11 @@ const sendRoutineEmailFn = createServerFn({ method: "POST" }).handler(
   }
 );
 
-const triggerRoutineEventFn = createServerFn({ method: "POST" }).handler(
-  async (ctx) => {
-    const d = ctx.data as unknown as { uid: string; email: string; firstName: string };
-    await inngest.send({ name: "routine/assigned", data: d });
-  }
-);
+const triggerRoutineEventFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { uid: string; email: string; firstName: string }) => d)
+  .handler(async (ctx) => {
+    await inngest.send({ name: "routine/assigned", data: ctx.data });
+  });
 
 // ─── Email HTML builder ───────────────────────────────────────────────────────
 

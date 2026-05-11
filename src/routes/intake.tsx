@@ -8,12 +8,11 @@ import { useState, useEffect } from "react";
 import { ChevronRight, ChevronLeft, Check, Loader2, Sparkles, ArrowRight, Camera, X } from "lucide-react";
 import { inngest } from "@/lib/inngest";
 
-const triggerIntakeEventFn = createServerFn({ method: "POST" }).handler(
-  async (ctx) => {
-    const d = ctx.data as unknown as { uid: string; email: string; firstName: string };
-    await inngest.send({ name: "user/intake.completed", data: d });
-  }
-);
+const triggerIntakeEventFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { uid: string; email: string; firstName: string }) => d)
+  .handler(async (ctx) => {
+    await inngest.send({ name: "user/intake.completed", data: ctx.data });
+  });
 
 export const Route = createFileRoute("/intake")({
   head: () => ({ meta: [{ title: "Bilan peau — Protocole Clear" }] }),
