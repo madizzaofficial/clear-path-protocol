@@ -102,8 +102,22 @@ await writeFile(
           headers: { "cache-control": "public, max-age=31536000, immutable" },
           dest: "/assets/$1",
         },
-        // Check filesystem for static files (public folder: images, manifest, favicon…)
-        { handle: "filesystem" },
+        // Public folder files served explicitly
+        {
+          src: "^/favicon\\.ico$",
+          headers: { "content-type": "image/x-icon", "cache-control": "public, max-age=86400" },
+          dest: "/favicon.ico",
+        },
+        {
+          src: "^/manifest\\.json$",
+          headers: { "content-type": "application/manifest+json", "cache-control": "public, max-age=86400" },
+          dest: "/manifest.json",
+        },
+        {
+          src: "^/(icon-192\\.png|icon-512\\.png|logo_clear\\.png)$",
+          headers: { "cache-control": "public, max-age=86400" },
+          dest: "/$1",
+        },
         // Everything else → Node.js serverless function (SSR + server fns + Inngest)
         { src: "^/(.*)$", dest: "/index" },
       ],
