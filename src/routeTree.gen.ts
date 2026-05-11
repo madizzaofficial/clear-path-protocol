@@ -22,6 +22,7 @@ import { Route as LessonLessonIdRouteImport } from './routes/lesson.$lessonId'
 import { Route as AdminRoutinesRouteImport } from './routes/admin_.routines'
 import { Route as AdminCourseEditorRouteImport } from './routes/admin_.course-editor'
 import { Route as AdminStudentUidRouteImport } from './routes/admin_.student.$uid'
+import { Route as StartTokenRouteImport } from './routes/start.$token'
 
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
@@ -88,6 +89,11 @@ const AdminStudentUidRoute = AdminStudentUidRouteImport.update({
   path: '/admin/student/$uid',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StartTokenRoute = StartTokenRouteImport.update({
+  id: '/start/$token',
+  path: '/start/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/admin/routines': typeof AdminRoutinesRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/admin/student/$uid': typeof AdminStudentUidRoute
+  '/start/$token': typeof StartTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/admin/routines': typeof AdminRoutinesRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/admin/student/$uid': typeof AdminStudentUidRoute
+  '/start/$token': typeof StartTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/admin_/routines': typeof AdminRoutinesRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/admin_/student/$uid': typeof AdminStudentUidRoute
+  '/start/$token': typeof StartTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/admin/routines'
     | '/lesson/$lessonId'
     | '/admin/student/$uid'
+    | '/start/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/admin/routines'
     | '/lesson/$lessonId'
     | '/admin/student/$uid'
+    | '/start/$token'
   id:
     | '__root__'
     | '/'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/admin_/routines'
     | '/lesson/$lessonId'
     | '/admin_/student/$uid'
+    | '/start/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -197,6 +209,7 @@ export interface RootRouteChildren {
   AdminRoutinesRoute: typeof AdminRoutinesRoute
   LessonLessonIdRoute: typeof LessonLessonIdRoute
   AdminStudentUidRoute: typeof AdminStudentUidRoute
+  StartTokenRoute: typeof StartTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -292,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminStudentUidRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/start/$token': {
+      id: '/start/$token'
+      path: '/start/$token'
+      fullPath: '/start/$token'
+      preLoaderRoute: typeof StartTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -309,6 +329,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoutinesRoute: AdminRoutinesRoute,
   LessonLessonIdRoute: LessonLessonIdRoute,
   AdminStudentUidRoute: AdminStudentUidRoute,
+  StartTokenRoute: StartTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
