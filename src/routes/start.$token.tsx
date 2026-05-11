@@ -123,9 +123,9 @@ function OnboardingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  // If already logged in, redirect to regular intake
+  // If already logged in, go to dashboard (token links are for new users)
   useEffect(() => {
-    if (!authLoading && user) navigate({ to: "/intake" });
+    if (!authLoading && user) navigate({ to: "/" });
   }, [user, authLoading, navigate]);
 
   // Validate token
