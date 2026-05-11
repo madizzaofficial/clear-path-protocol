@@ -246,7 +246,7 @@ function SidebarContent({ currentId, completedLessons, onNavigate }: { currentId
       <div className="border-b border-border/60 p-6">
         <Link to="/" className="flex items-center gap-2" onClick={onNavigate}>
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary">
-            <span className="text-sm font-semibold text-primary-foreground">C</span>
+            <img src="/logo_clear.png" alt="Protocole Clear" className="h-full w-full rounded-full object-cover" />
           </div>
           <span className="font-display text-lg font-semibold">Protocole Clear</span>
         </Link>

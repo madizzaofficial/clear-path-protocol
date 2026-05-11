@@ -191,7 +191,7 @@ function IntakePage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-primary">
-                <span className="text-xs font-semibold text-primary-foreground">C</span>
+                <img src="/logo_clear.png" alt="Protocole Clear" className="h-full w-full rounded-full object-cover" />
               </div>
               <span className="font-display text-base font-semibold">Protocole Clear</span>
             </div>

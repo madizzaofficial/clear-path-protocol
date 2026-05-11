@@ -61,10 +61,6 @@ function Dashboard() {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (!data.loading && data.needsIntake) navigate({ to: "/intake" });
-  }, [data.loading, data.needsIntake, navigate]);
-
-  useEffect(() => {
     if (!user) return;
     Promise.all([
       getDoc(doc(db, "progress", user.uid)),

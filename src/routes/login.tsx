@@ -75,7 +75,7 @@ function LoginPage() {
         <div className="relative z-10 flex h-full flex-col justify-between p-12">
           <Link to="/" className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-background/80 shadow-soft backdrop-blur">
-              <span className="font-display text-base font-semibold text-foreground">C</span>
+              <img src="/logo_clear.png" alt="Protocole Clear" className="h-full w-full rounded-full object-cover" />
             </div>
             <span className="font-display text-2xl font-semibold tracking-tight">Protocole Clear</span>
           </Link>
@@ -107,7 +107,7 @@ function LoginPage() {
           <div className="mb-10 lg:hidden">
             <Link to="/" className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary shadow-soft">
-                <span className="text-sm font-semibold text-primary-foreground">C</span>
+                <img src="/logo_clear.png" alt="Protocole Clear" className="h-full w-full rounded-full object-cover" />
               </div>
               <span className="font-display text-xl font-semibold">Protocole Clear</span>
             </Link>
