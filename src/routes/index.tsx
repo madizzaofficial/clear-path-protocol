@@ -297,28 +297,6 @@ function Dashboard() {
               </div>
             )}
 
-            {/* Stats strip */}
-            <div className="mt-6 grid gap-4 sm:grid-cols-3">
-              <StatCard
-                icon={TrendingUp}
-                label="Protocole"
-                value={`${progress}%`}
-                sub={`${done}/${lessons.length} leçons`}
-              />
-              <StatCard
-                icon={Sparkles}
-                label="Dans le protocole"
-                value={daysIn !== null ? `J+${daysIn}` : "—"}
-                sub={`Semaine ${position.week} sur 12`}
-              />
-              <StatCard
-                icon={BookOpen}
-                label="Chapitre en cours"
-                value={currentChapter ? `${chapterDone}/${currentChapter.lessons.length}` : "✓"}
-                sub={currentChapter ? currentChapter.title : "Protocole terminé"}
-              />
-            </div>
-
             {/* Routine calendar */}
             <RoutineCalendar
               totalSteps={totalRoutineSteps}
@@ -384,6 +362,28 @@ function Dashboard() {
                   )}
                 </>
               )}
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-1 gap-3">
+              <StatCard
+                icon={TrendingUp}
+                label="Protocole"
+                value={`${progress}%`}
+                sub={`${done}/${lessons.length} leçons`}
+              />
+              <StatCard
+                icon={Sparkles}
+                label="Dans le protocole"
+                value={daysIn !== null ? `J+${daysIn}` : "—"}
+                sub={`Semaine ${position.week} sur 12`}
+              />
+              <StatCard
+                icon={BookOpen}
+                label="Chapitre en cours"
+                value={currentChapter ? `${chapterDone}/${currentChapter.lessons.length}` : "✓"}
+                sub={currentChapter ? currentChapter.title : "Protocole terminé"}
+              />
             </div>
 
           </div>
@@ -520,7 +520,7 @@ function RoutineCalendar({
       </div>
 
       {/* Day-of-week headers */}
-      <div className="mb-1 grid grid-cols-7 gap-1">
+      <div className="mb-0.5 grid grid-cols-7 gap-0.5">
         {DAY_LABELS.map((d, i) => (
           <div key={i} className="py-1 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
             {d}
@@ -529,7 +529,7 @@ function RoutineCalendar({
       </div>
 
       {/* Day cells */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-0.5">
         {Array.from({ length: firstDayOfWeek }).map((_, i) => <div key={`e${i}`} />)}
         {Array.from({ length: daysInMonth }).map((_, i) => {
           const day = i + 1;
@@ -549,7 +549,7 @@ function RoutineCalendar({
           return (
             <div
               key={day}
-              className={`flex aspect-square items-center justify-center rounded-xl text-xs font-medium transition-all ${
+              className={`flex h-8 w-full items-center justify-center rounded-lg text-[11px] font-medium transition-all ${
                 isFuture
                   ? "text-muted-foreground/25"
                   : isDone
