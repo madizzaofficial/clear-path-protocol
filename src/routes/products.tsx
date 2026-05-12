@@ -41,6 +41,9 @@ export const Route = createFileRoute("/products")({
   component: RoutinePage,
 });
 
+type NutritionItem = { id: string; label: string; emoji: string };
+type Reminder = { id: string; text: string; emoji: string };
+
 function RoutinePage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -51,6 +54,9 @@ function RoutinePage() {
   const [reports, setReports] = useState<Record<string, "irritant" | "allergie">>({});
   const [reportStep, setReportStep] = useState<RoutineStep | null>(null);
   const [reporting, setReporting] = useState(false);
+  const [nutritionItems, setNutritionItems] = useState<NutritionItem[]>([]);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [checkedNutrition, setCheckedNutrition] = useState<string[]>([]);
 
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/login" });
@@ -63,7 +69,10 @@ function RoutinePage() {
       getDoc(doc(db, "routines", user.uid)),
       getDoc(doc(db, "routine_checkins", user.uid, "days", todayKey)),
       getDoc(doc(db, "routine_reports", user.uid)),
-    ]).then(([routineRes, checkinRes, reportsRes]) => {
+      getDoc(doc(db, "config", "nutrition")),
+      getDoc(doc(db, "config", "reminders")),
+      getDoc(doc(db, "nutrition_checkins", user.uid, "days", todayKey)),
+    ]).then(([routineRes, checkinRes, reportsRes, nutritionCfgRes, remindersCfgRes, nutritionTodayRes]) => {
       if (routineRes.status === "fulfilled" && routineRes.value.exists())
         setRoutine(routineRes.value.data() as UserRoutine);
       if (checkinRes.status === "fulfilled" && checkinRes.value.exists()) {
@@ -72,9 +81,25 @@ function RoutinePage() {
       }
       if (reportsRes.status === "fulfilled" && reportsRes.value.exists())
         setReports(reportsRes.value.data() as Record<string, "irritant" | "allergie">);
+      if (nutritionCfgRes.status === "fulfilled" && nutritionCfgRes.value.exists())
+        setNutritionItems(nutritionCfgRes.value.data().items ?? []);
+      if (remindersCfgRes.status === "fulfilled" && remindersCfgRes.value.exists())
+        setReminders(remindersCfgRes.value.data().items ?? []);
+      if (nutritionTodayRes.status === "fulfilled" && nutritionTodayRes.value.exists())
+        setCheckedNutrition(nutritionTodayRes.value.data().checked ?? []);
       setLoadingRoutine(false);
     });
   }, [user]);
+
+  function toggleNutrition(itemId: string) {
+    if (!user) return;
+    const updated = checkedNutrition.includes(itemId)
+      ? checkedNutrition.filter((id) => id !== itemId)
+      : [...checkedNutrition, itemId];
+    setCheckedNutrition(updated);
+    const key = new Date().toISOString().slice(0, 10);
+    setDoc(doc(db, "nutrition_checkins", user.uid, "days", key), { checked: updated }, { merge: true });
+  }
 
   function toggleStep(session: "am" | "pm", stepId: string) {
     if (!user) return;
@@ -136,7 +161,7 @@ function RoutinePage() {
 
   return (
     <AppShell>
-      <main className="mx-auto max-w-5xl px-6 pb-24 pt-8 md:pt-12">
+      <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
         <header className="mb-10">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Ma Routine</p>
           <h1 className="mt-3 max-w-2xl font-display text-4xl font-semibold tracking-tight md:text-5xl">
@@ -147,42 +172,92 @@ function RoutinePage() {
           </p>
         </header>
 
-        <div className="space-y-10">
-          {routine.am.length > 0 && (
-            <RoutineBlock
-              title="Routine du matin"
-              icon={Sun}
-              accent="from-peach/60 to-primary-soft"
-              session="am"
-              steps={routine.am}
-              checked={checkedAm}
-              reports={reports}
-              onToggle={(id) => toggleStep("am", id)}
-              onReport={setReportStep}
-            />
-          )}
-          {routine.pm.length > 0 && (
-            <RoutineBlock
-              title="Routine du soir"
-              icon={Moon}
-              accent="from-primary-muted/50 to-primary-soft/70"
-              session="pm"
-              steps={routine.pm}
-              checked={checkedPm}
-              reports={reports}
-              onToggle={(id) => toggleStep("pm", id)}
-              onReport={setReportStep}
-            />
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+
+          {/* ── AM/PM routine blocks ─────────────────────────────────────── */}
+          <div className="min-w-0 flex-1 space-y-10">
+            {routine.am.length > 0 && (
+              <RoutineBlock
+                title="Routine du matin"
+                icon={Sun}
+                accent="from-peach/60 to-primary-soft"
+                session="am"
+                steps={routine.am}
+                checked={checkedAm}
+                reports={reports}
+                onToggle={(id) => toggleStep("am", id)}
+                onReport={setReportStep}
+              />
+            )}
+            {routine.pm.length > 0 && (
+              <RoutineBlock
+                title="Routine du soir"
+                icon={Moon}
+                accent="from-primary-muted/50 to-primary-soft/70"
+                session="pm"
+                steps={routine.pm}
+                checked={checkedPm}
+                reports={reports}
+                onToggle={(id) => toggleStep("pm", id)}
+                onReport={setReportStep}
+              />
+            )}
+
+            <footer className="rounded-3xl border border-border/60 bg-card p-6 text-center shadow-soft md:p-8">
+              <Sparkles className="mx-auto h-6 w-6 text-primary" />
+              <h3 className="mt-4 font-display text-2xl font-semibold">La régularité avant tout</h3>
+              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+                Votre peau se renouvelle en 28 jours. Suivez cette routine pendant au moins 6 semaines avant de juger les résultats.
+              </p>
+            </footer>
+          </div>
+
+          {/* ── Nutrition sidebar ─────────────────────────────────────────── */}
+          {(nutritionItems.length > 0 || reminders.length > 0) && (
+            <aside className="w-full space-y-6 lg:sticky lg:top-24 lg:w-80 lg:shrink-0">
+              {nutritionItems.length > 0 && (
+                <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                  <h3 className="mb-4 font-display text-lg font-semibold">Nutrition du jour</h3>
+                  <ul className="space-y-1">
+                    {nutritionItems.map((item) => {
+                      const checked = checkedNutrition.includes(item.id);
+                      return (
+                        <li key={item.id}>
+                          <button
+                            onClick={() => toggleNutrition(item.id)}
+                            className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-left transition-colors hover:bg-muted/60"
+                          >
+                            <span className="text-base">{item.emoji}</span>
+                            <span className={`flex-1 text-sm ${checked ? "text-muted-foreground line-through" : ""}`}>
+                              {item.label}
+                            </span>
+                            <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${checked ? "border-primary bg-primary" : "border-border"}`}>
+                              {checked && <Check className="h-3 w-3 text-primary-foreground" />}
+                            </div>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
+
+              {reminders.length > 0 && (
+                <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                  <h3 className="mb-4 font-display text-lg font-semibold">Rappels</h3>
+                  <ul className="space-y-2">
+                    {reminders.map((r) => (
+                      <li key={r.id} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                        <span>{r.emoji}</span>
+                        <span>{r.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </aside>
           )}
         </div>
-
-        <footer className="mt-12 rounded-3xl border border-border/60 bg-card p-6 text-center shadow-soft md:p-8">
-          <Sparkles className="mx-auto h-6 w-6 text-primary" />
-          <h3 className="mt-4 font-display text-2xl font-semibold">La régularité avant tout</h3>
-          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-            Votre peau se renouvelle en 28 jours. Suivez cette routine pendant au moins 6 semaines avant de juger les résultats.
-          </p>
-        </footer>
       </main>
 
       {/* Report dialog */}
