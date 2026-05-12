@@ -34,6 +34,9 @@ type Reminder = { id: string; text: string; emoji: string };
 // ─── Route ────────────────────────────────────────────────────────────────────
 
 export const Route = createFileRoute("/admin_/nutrition")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    uid: typeof search.uid === "string" ? search.uid : "",
+  }),
   head: () => ({ meta: [{ title: "Nutrition — Admin Protocole Clear" }] }),
   component: NutritionPage,
 });
@@ -61,6 +64,7 @@ function NutritionPage() {
 // ─── Main content ─────────────────────────────────────────────────────────────
 
 function NutritionContent() {
+  const { uid: preselectedUid } = Route.useSearch();
   const [users, setUsers] = useState<UserDoc[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserDoc | null>(null);
   const [loadingUsers, setLoadingUsers] = useState(true);
@@ -91,13 +95,20 @@ function NutritionContent() {
         getDocs(collection(db, "users")),
         getDoc(doc(db, "config", "reminders")),
       ]);
-      setUsers(usersSnap.docs.map((d) => d.data() as UserDoc));
+      const fetched = usersSnap.docs.map((d) => d.data() as UserDoc);
+      setUsers(fetched);
       setLoadingUsers(false);
+
+      if (preselectedUid) {
+        const match = fetched.find((u) => u.uid === preselectedUid);
+        if (match) selectUser(match);
+      }
       if (remindersSnap.exists()) setReminders(remindersSnap.data().items ?? []);
       setLoadingReminders(false);
     }
     load();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preselectedUid]);
 
   async function selectUser(u: UserDoc) {
     setSelectedUser(u);

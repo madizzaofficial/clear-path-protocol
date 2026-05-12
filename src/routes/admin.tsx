@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
-import { TrendingUp, Users, CheckCircle2, AlertCircle, BookOpen, Loader2, ClipboardList, Link2, Copy, Check, Search, Apple } from "lucide-react";
+import { TrendingUp, Users, CheckCircle2, AlertCircle, BookOpen, Loader2, ClipboardList, Link2, Copy, Check, Search, Apple, Salad } from "lucide-react";
 import { course } from "@/lib/course-data";
 
 export const Route = createFileRoute("/admin")({
@@ -42,6 +42,7 @@ function AdminPage() {
   const [loadingStudents, setLoadingStudents] = useState(true);
   const [progressMap, setProgressMap] = useState<Map<string, number>>(new Map());
   const [routineStatusMap, setRoutineStatusMap] = useState<Map<string, "sent" | "draft">>(new Map());
+  const [nutritionSet, setNutritionSet] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "sent" | "draft" | "none">("all");
   const [sortBy, setSortBy] = useState<"name" | "email" | "status">("name");
@@ -59,9 +60,10 @@ function AdminPage() {
     async function fetchStudents() {
       setLoadingStudents(true);
       try {
-        const [usersSnap, routinesSnap] = await Promise.all([
+        const [usersSnap, routinesSnap, nutritionSnap] = await Promise.all([
           getDocs(collection(db, "users")),
           getDocs(collection(db, "routines")),
+          getDocs(collection(db, "nutrition")),
         ]);
         const docs = usersSnap.docs.map((d) => d.data() as StudentDoc);
         setStudents(docs);
@@ -69,6 +71,12 @@ function AdminPage() {
         const rMap = new Map<string, "sent" | "draft">();
         routinesSnap.docs.forEach((d) => rMap.set(d.id, (d.data() as { status: "sent" | "draft" }).status));
         setRoutineStatusMap(rMap);
+
+        const nSet = new Set<string>();
+        nutritionSnap.docs.forEach((d) => {
+          if ((d.data().items ?? []).length > 0) nSet.add(d.id);
+        });
+        setNutritionSet(nSet);
 
         const progressSnaps = await Promise.all(docs.map((s) => getDoc(doc(db, "progress", s.uid))));
         const pMap = new Map<string, number>();
@@ -267,19 +275,21 @@ function AdminPage() {
                     <th className="px-6 py-3.5 font-medium">Progression</th>
                     <th className="px-6 py-3.5 font-medium">Durée</th>
                     <th className="px-6 py-3.5 text-center font-medium">Routine</th>
+                    <th className="px-6 py-3.5 text-center font-medium">Nutrition</th>
                     <th className="px-6 py-3.5"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60">
                   {filteredStudents.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-14 text-center text-sm text-muted-foreground">
+                      <td colSpan={7} className="py-14 text-center text-sm text-muted-foreground">
                         Aucun élève trouvé.
                       </td>
                     </tr>
                   ) : filteredStudents.map((s) => {
                     const initials = (s.displayName ?? s.email).split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
                     const routineStatus = routineStatusMap.get(s.uid) ?? "none";
+                    const hasNutrition = nutritionSet.has(s.uid);
                     const done = progressMap.get(s.uid) ?? 0;
                     const pct = Math.round((done / TOTAL_LESSONS) * 100);
                     return (
@@ -317,15 +327,36 @@ function AdminPage() {
                             )}
                           </div>
                         </td>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-center">
+                            {hasNutrition ? (
+                              <span className="flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
+                                <Check className="h-3 w-3" /> Configurée
+                              </span>
+                            ) : (
+                              <span className="text-xs text-muted-foreground/40">—</span>
+                            )}
+                          </div>
+                        </td>
                         <td className="px-6 py-4 text-right">
-                          <Link
-                            to="/admin/routines"
-                            search={{ uid: s.uid }}
-                            className="inline-flex items-center gap-1.5 rounded-2xl bg-foreground px-4 py-2 text-xs font-medium text-background transition-opacity hover:opacity-80"
-                          >
-                            <ClipboardList className="h-3.5 w-3.5" />
-                            {routineStatus === "none" ? "Créer routine" : "Éditer routine"}
-                          </Link>
+                          <div className="flex items-center justify-end gap-2">
+                            <Link
+                              to="/admin/routines"
+                              search={{ uid: s.uid }}
+                              className="inline-flex items-center gap-1.5 rounded-2xl bg-foreground px-3 py-2 text-xs font-medium text-background transition-opacity hover:opacity-80"
+                            >
+                              <ClipboardList className="h-3.5 w-3.5" />
+                              {routineStatus === "none" ? "Créer routine" : "Éditer routine"}
+                            </Link>
+                            <Link
+                              to="/admin/nutrition"
+                              search={{ uid: s.uid }}
+                              className="inline-flex items-center gap-1.5 rounded-2xl border border-border bg-card px-3 py-2 text-xs font-medium transition-colors hover:bg-muted"
+                            >
+                              <Salad className="h-3.5 w-3.5" />
+                              {hasNutrition ? "Éditer nutrition" : "Créer nutrition"}
+                            </Link>
+                          </div>
                         </td>
                       </tr>
                     );
