@@ -24,6 +24,9 @@ export const Route = createFileRoute("/")({
 
 type RoutineStep = { id: string; category: string; product: string };
 
+type NutritionItem = { id: string; label: string; emoji: string };
+type Reminder = { id: string; text: string; emoji: string };
+
 type HomeData = {
   loading: boolean;
   completedLessons: string[];
@@ -34,6 +37,9 @@ type HomeData = {
   checkedPm: string[];
   streak: number;
   monthCheckins: Record<string, { am: string[]; pm: string[] }>;
+  nutritionItems: NutritionItem[];
+  reminders: Reminder[];
+  checkedNutrition: string[];
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -100,6 +106,9 @@ function Dashboard() {
     checkedPm: [],
     streak: 0,
     monthCheckins: {},
+    nutritionItems: [],
+    reminders: [],
+    checkedNutrition: [],
   });
 
   useEffect(() => {
@@ -125,7 +134,10 @@ function Dashboard() {
         where(documentId(), ">=", monthStart),
         where(documentId(), "<=", monthEnd),
       )),
-    ]).then(async ([progressRes, routineRes, userRes, intakeRes, todayRes, monthRes]) => {
+      getDoc(doc(db, "config", "nutrition")),
+      getDoc(doc(db, "config", "reminders")),
+      getDoc(doc(db, "nutrition_checkins", user.uid, "days", todayKey)),
+    ]).then(async ([progressRes, routineRes, userRes, intakeRes, todayRes, monthRes, nutritionCfgRes, remindersCfgRes, nutritionTodayRes]) => {
       const routineSnap = routineRes.status === "fulfilled" ? routineRes.value : null;
       const routineData = routineSnap?.exists() ? routineSnap.data() : null;
       const routine =
@@ -148,6 +160,10 @@ function Dashboard() {
       const intakeSnap = intakeRes.status === "fulfilled" ? intakeRes.value : null;
       const todaySnap = todayRes.status === "fulfilled" ? todayRes.value : null;
 
+      const nutritionCfgSnap = nutritionCfgRes.status === "fulfilled" ? nutritionCfgRes.value : null;
+      const remindersCfgSnap = remindersCfgRes.status === "fulfilled" ? remindersCfgRes.value : null;
+      const nutritionTodaySnap = nutritionTodayRes.status === "fulfilled" ? nutritionTodayRes.value : null;
+
       setData({
         loading: false,
         completedLessons: progressSnap?.exists() ? (progressSnap.data().completedLessons ?? []) : [],
@@ -158,12 +174,25 @@ function Dashboard() {
         checkedPm: todaySnap?.exists() ? (todaySnap.data().pm ?? []) : [],
         streak,
         monthCheckins,
+        nutritionItems: nutritionCfgSnap?.exists() ? (nutritionCfgSnap.data().items ?? []) : [],
+        reminders: remindersCfgSnap?.exists() ? (remindersCfgSnap.data().items ?? []) : [],
+        checkedNutrition: nutritionTodaySnap?.exists() ? (nutritionTodaySnap.data().checked ?? []) : [],
       });
     });
   }, [user]);
 
   const lessons = allLessons();
-  const { loading, completedLessons, routine, enrolledAt, needsIntake, checkedAm, checkedPm, streak, monthCheckins } = data;
+  const { loading, completedLessons, routine, enrolledAt, needsIntake, checkedAm, checkedPm, streak, monthCheckins, nutritionItems, reminders, checkedNutrition } = data;
+
+  function toggleNutrition(itemId: string) {
+    if (!user) return;
+    const updated = checkedNutrition.includes(itemId)
+      ? checkedNutrition.filter((id) => id !== itemId)
+      : [...checkedNutrition, itemId];
+    setData((prev) => ({ ...prev, checkedNutrition: updated }));
+    const key = new Date().toISOString().slice(0, 10);
+    setDoc(doc(db, "nutrition_checkins", user.uid, "days", key), { checked: updated }, { merge: true });
+  }
 
   const done = completedLessons.length;
   const progress = Math.round((done / lessons.length) * 100);
@@ -363,6 +392,49 @@ function Dashboard() {
                 </>
               )}
             </div>
+
+            {/* Nutrition du jour */}
+            {nutritionItems.length > 0 && (
+              <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                <h3 className="mb-4 font-display text-lg font-semibold">Nutrition du jour</h3>
+                <ul className="space-y-1">
+                  {nutritionItems.map((item) => {
+                    const checked = checkedNutrition.includes(item.id);
+                    return (
+                      <li key={item.id}>
+                        <button
+                          onClick={() => toggleNutrition(item.id)}
+                          className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-left transition-colors hover:bg-muted/60"
+                        >
+                          <span className="text-base">{item.emoji}</span>
+                          <span className={`flex-1 text-sm ${checked ? "text-muted-foreground line-through" : ""}`}>
+                            {item.label}
+                          </span>
+                          <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${checked ? "border-primary bg-primary" : "border-border"}`}>
+                            {checked && <Check className="h-3 w-3 text-primary-foreground" />}
+                          </div>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+
+            {/* Rappels */}
+            {reminders.length > 0 && (
+              <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                <h3 className="mb-4 font-display text-lg font-semibold">Rappels</h3>
+                <ul className="space-y-2">
+                  {reminders.map((r) => (
+                    <li key={r.id} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                      <span>{r.emoji}</span>
+                      <span>{r.text}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Stats */}
             <div className="grid grid-cols-1 gap-3">

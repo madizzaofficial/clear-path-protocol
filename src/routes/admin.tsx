@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
-import { TrendingUp, Users, CheckCircle2, AlertCircle, BookOpen, Loader2, ClipboardList, Link2, Copy, Check, Search } from "lucide-react";
+import { TrendingUp, Users, CheckCircle2, AlertCircle, BookOpen, Loader2, ClipboardList, Link2, Copy, Check, Search, Apple } from "lucide-react";
 import { course } from "@/lib/course-data";
 
 export const Route = createFileRoute("/admin")({
@@ -172,6 +172,13 @@ function AdminPage() {
             >
               <BookOpen className="h-4 w-4" />
               Modifier le cours
+            </Link>
+            <Link
+              to="/admin/nutrition"
+              className="flex items-center gap-2 rounded-full bg-primary-soft px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary-muted"
+            >
+              <Apple className="h-4 w-4" />
+              Nutrition
             </Link>
           </div>
         </header>

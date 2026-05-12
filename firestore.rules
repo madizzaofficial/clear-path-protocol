@@ -19,11 +19,10 @@ service cloud.firestore {
       return isAuth() && request.auth.uid == uid;
     }
 
-    // ── Config (admin list) ───────────────────────────────────────────────────
-    // Only seeded via Firebase Admin SDK / Console — never via client writes
+    // ── Config ───────────────────────────────────────────────────────────────
     match /config/{doc} {
       allow read: if isAuth();
-      allow write: if false;
+      allow write: if isAdmin();
     }
 
     // ── Course content ────────────────────────────────────────────────────────
@@ -80,6 +79,11 @@ service cloud.firestore {
 
     // ── Routine product reports ───────────────────────────────────────────────
     match /routine_reports/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // ── Nutrition check-ins (daily tracking) ─────────────────────────────────
+    match /nutrition_checkins/{userId}/days/{day} {
       allow read, write: if isOwner(userId) || isAdmin();
     }
 
