@@ -83,6 +83,25 @@ function AdminPage() {
     fetchStudents();
   }, [isAdmin]);
 
+  const filteredStudents = useMemo(() => {
+    let result = students;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter((s) => s.displayName?.toLowerCase().includes(q) || s.email.toLowerCase().includes(q));
+    }
+    if (filterStatus !== "all") {
+      result = result.filter((s) => (routineStatusMap.get(s.uid) ?? "none") === filterStatus);
+    }
+    return [...result].sort((a, b) => {
+      if (sortBy === "email") return a.email.localeCompare(b.email);
+      if (sortBy === "status") {
+        const o = { sent: 0, draft: 1, none: 2 } as const;
+        return (o[routineStatusMap.get(a.uid) ?? "none"]) - (o[routineStatusMap.get(b.uid) ?? "none"]);
+      }
+      return (a.displayName ?? a.email).localeCompare(b.displayName ?? b.email);
+    });
+  }, [students, search, filterStatus, sortBy, routineStatusMap]);
+
   if (loading || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -113,25 +132,6 @@ function AdminPage() {
   }
 
   if (!isAdmin) return null;
-
-  const filteredStudents = useMemo(() => {
-    let result = students;
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter((s) => s.displayName?.toLowerCase().includes(q) || s.email.toLowerCase().includes(q));
-    }
-    if (filterStatus !== "all") {
-      result = result.filter((s) => (routineStatusMap.get(s.uid) ?? "none") === filterStatus);
-    }
-    return [...result].sort((a, b) => {
-      if (sortBy === "email") return a.email.localeCompare(b.email);
-      if (sortBy === "status") {
-        const o = { sent: 0, draft: 1, none: 2 } as const;
-        return (o[routineStatusMap.get(a.uid) ?? "none"]) - (o[routineStatusMap.get(b.uid) ?? "none"]);
-      }
-      return (a.displayName ?? a.email).localeCompare(b.displayName ?? b.email);
-    });
-  }, [students, search, filterStatus, sortBy, routineStatusMap]);
 
   const totalStudents = students.length;
   const avgCompletion = totalStudents > 0

@@ -117,6 +117,7 @@ function UserMenu() {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const isNavigating = useRouterState({ select: (s) => s.isLoading });
   const onLesson = path.startsWith("/lesson");
   const { isAdmin } = useAuth();
 
@@ -130,6 +131,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background">
+      {isNavigating && (
+        <div className="fixed inset-x-0 top-0 z-50 h-0.5 bg-muted">
+          <div className="h-full animate-[progress_1s_ease-in-out_infinite] bg-primary" />
+        </div>
+      )}
       {!onLesson && (
         <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
