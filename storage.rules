@@ -23,6 +23,15 @@ service firebase.storage {
       allow delete: if request.auth != null && request.auth.uid == uid;
     }
 
+    // Product images uploaded by admins, readable by any authenticated user
+    match /product-images/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin()
+        && request.resource.contentType.matches('image/.*')
+        && request.resource.size <= 10 * 1024 * 1024;
+      allow delete: if isAdmin();
+    }
+
     // Deny everything else
     match /{allPaths=**} {
       allow read, write: if false;
