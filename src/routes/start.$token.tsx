@@ -127,8 +127,8 @@ function OnboardingPage() {
 
   // If already logged in, go to dashboard (token links are for new users)
   useEffect(() => {
-    if (!authLoading && user) navigate({ to: "/" });
-  }, [user, authLoading, navigate]);
+    if (!authLoading && user && tokenStatus === "valid") navigate({ to: "/" });
+  }, [user, authLoading, tokenStatus, navigate]);
 
   // Validate token
   useEffect(() => {
