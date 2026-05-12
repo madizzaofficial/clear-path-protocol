@@ -890,6 +890,13 @@ function SortableStep({
           </p>
         )}
       </div>
+      {step.imageUrl && (
+        <img
+          src={step.imageUrl}
+          alt={step.product}
+          className="h-12 w-12 shrink-0 rounded-xl border border-border object-cover"
+        />
+      )}
       <div className="flex shrink-0 items-center gap-1.5">
         <button
           onClick={onEdit}
