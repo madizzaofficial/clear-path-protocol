@@ -20,6 +20,8 @@ export const Route = createFileRoute("/")({
   component: Dashboard,
 });
 
+const WELCOME_VIDEO_URL = ""; // TODO: https://iframe.mediadelivery.net/embed/{lib}/{id}
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type RoutineStep = { id: string; category: string; product: string };
@@ -296,6 +298,28 @@ function Dashboard() {
                 </div>
               </div>
             )}
+
+            {/* Welcome video */}
+            <div className="mt-8 overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
+              <div className="border-b border-border/60 px-6 py-4 md:px-8">
+                <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">Bienvenue</p>
+                <h2 className="mt-1 font-display text-lg font-semibold">Présentation du protocole</h2>
+              </div>
+              {WELCOME_VIDEO_URL ? (
+                <div className="relative aspect-video">
+                  <iframe
+                    src={WELCOME_VIDEO_URL}
+                    className="absolute inset-0 h-full w-full"
+                    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <div className="flex aspect-video items-center justify-center bg-muted/40">
+                  <p className="text-sm text-muted-foreground">Vidéo à venir</p>
+                </div>
+              )}
+            </div>
 
             {/* Routine calendar */}
             <RoutineCalendar
