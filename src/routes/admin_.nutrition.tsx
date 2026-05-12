@@ -2,9 +2,11 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Plus, Trash2, Loader2, Save, GripVertical } from "lucide-react";
+import {
+  ArrowLeft, Plus, Trash2, Loader2, GripVertical, Users, ChevronRight,
+} from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -25,6 +27,7 @@ import { CSS } from "@dnd-kit/utilities";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+type UserDoc = { uid: string; email: string; displayName: string | null };
 type NutritionItem = { id: string; label: string; emoji: string };
 type Reminder = { id: string; text: string; emoji: string };
 
@@ -58,14 +61,21 @@ function NutritionPage() {
 // ─── Main content ─────────────────────────────────────────────────────────────
 
 function NutritionContent() {
-  const [nutritionItems, setNutritionItems] = useState<NutritionItem[]>([]);
-  const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [loadingData, setLoadingData] = useState(true);
-  const [savingNutrition, setSavingNutrition] = useState(false);
-  const [savingReminders, setSavingReminders] = useState(false);
+  const [users, setUsers] = useState<UserDoc[]>([]);
+  const [selectedUser, setSelectedUser] = useState<UserDoc | null>(null);
+  const [loadingUsers, setLoadingUsers] = useState(true);
 
-  const [newNutritionEmoji, setNewNutritionEmoji] = useState("🥗");
-  const [newNutritionLabel, setNewNutritionLabel] = useState("");
+  // Per-student nutrition items
+  const [nutritionItems, setNutritionItems] = useState<NutritionItem[]>([]);
+  const [loadingNutrition, setLoadingNutrition] = useState(false);
+  const [savingNutrition, setSavingNutrition] = useState(false);
+  const [newEmoji, setNewEmoji] = useState("🥗");
+  const [newLabel, setNewLabel] = useState("");
+
+  // Global reminders
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [loadingReminders, setLoadingReminders] = useState(true);
+  const [savingReminders, setSavingReminders] = useState(false);
   const [newReminderEmoji, setNewReminderEmoji] = useState("💡");
   const [newReminderText, setNewReminderText] = useState("");
 
@@ -74,54 +84,72 @@ function NutritionContent() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
+  // Load students + global reminders on mount
   useEffect(() => {
     async function load() {
-      setLoadingData(true);
-      const [nutritionSnap, remindersSnap] = await Promise.all([
-        getDoc(doc(db, "config", "nutrition")),
+      const [usersSnap, remindersSnap] = await Promise.all([
+        getDocs(collection(db, "users")),
         getDoc(doc(db, "config", "reminders")),
       ]);
-      if (nutritionSnap.exists()) setNutritionItems(nutritionSnap.data().items ?? []);
+      setUsers(usersSnap.docs.map((d) => d.data() as UserDoc));
+      setLoadingUsers(false);
       if (remindersSnap.exists()) setReminders(remindersSnap.data().items ?? []);
-      setLoadingData(false);
+      setLoadingReminders(false);
     }
     load();
   }, []);
 
+  async function selectUser(u: UserDoc) {
+    setSelectedUser(u);
+    setNutritionItems([]);
+    setNewLabel("");
+    setLoadingNutrition(true);
+    const snap = await getDoc(doc(db, "nutrition", u.uid));
+    if (snap.exists()) setNutritionItems(snap.data().items ?? []);
+    setLoadingNutrition(false);
+  }
+
+  // ── Per-student nutrition ──────────────────────────────────────────────────
+
   async function saveNutrition(items: NutritionItem[]) {
+    if (!selectedUser) return;
     setSavingNutrition(true);
-    await setDoc(doc(db, "config", "nutrition"), { items });
+    await setDoc(doc(db, "nutrition", selectedUser.uid), { items });
     setSavingNutrition(false);
   }
 
-  async function saveReminders(items: Reminder[]) {
-    setSavingReminders(true);
-    await setDoc(doc(db, "config", "reminders"), { items });
-    setSavingReminders(false);
-  }
-
-  function addNutritionItem() {
-    if (!newNutritionLabel.trim()) return;
-    const updated = [...nutritionItems, { id: `n-${Date.now()}`, label: newNutritionLabel.trim(), emoji: newNutritionEmoji }];
+  function addItem() {
+    if (!newLabel.trim()) return;
+    const updated = [...nutritionItems, { id: `n-${Date.now()}`, label: newLabel.trim(), emoji: newEmoji }];
     setNutritionItems(updated);
     saveNutrition(updated);
-    setNewNutritionLabel("");
+    setNewLabel("");
   }
 
-  function removeNutritionItem(id: string) {
+  function removeItem(id: string) {
     const updated = nutritionItems.filter((i) => i.id !== id);
     setNutritionItems(updated);
     saveNutrition(updated);
   }
 
-  function handleNutritionDragEnd(event: DragEndEvent) {
+  function handleItemsDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const from = nutritionItems.findIndex((i) => i.id === active.id);
-    const to = nutritionItems.findIndex((i) => i.id === over.id);
-    const updated = arrayMove(nutritionItems, from, to);
+    const updated = arrayMove(
+      nutritionItems,
+      nutritionItems.findIndex((i) => i.id === active.id),
+      nutritionItems.findIndex((i) => i.id === over.id),
+    );
     setNutritionItems(updated);
     saveNutrition(updated);
+  }
+
+  // ── Global reminders ──────────────────────────────────────────────────────
+
+  async function saveReminders(items: Reminder[]) {
+    setSavingReminders(true);
+    await setDoc(doc(db, "config", "reminders"), { items });
+    setSavingReminders(false);
   }
 
   function addReminder() {
@@ -141,16 +169,19 @@ function NutritionContent() {
   function handleRemindersDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const from = reminders.findIndex((r) => r.id === active.id);
-    const to = reminders.findIndex((r) => r.id === over.id);
-    const updated = arrayMove(reminders, from, to);
+    const updated = arrayMove(
+      reminders,
+      reminders.findIndex((r) => r.id === active.id),
+      reminders.findIndex((r) => r.id === over.id),
+    );
     setReminders(updated);
     saveReminders(updated);
   }
 
   return (
     <AppShell>
-      <main className="mx-auto max-w-3xl px-6 pb-24 pt-8 md:pt-12">
+      <div className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
+
         <div className="mb-8">
           <Link to="/admin" className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> Retour au dashboard
@@ -160,117 +191,172 @@ function NutritionContent() {
         <header className="mb-10">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>
           <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight md:text-5xl">Nutrition & Rappels</h1>
-          <p className="mt-2 text-muted-foreground">Configurez la checklist nutrition et les rappels affichés à tous les élèves.</p>
+          <p className="mt-2 text-muted-foreground">Checklist nutrition personnalisée par élève — rappels généraux communs à tous.</p>
         </header>
 
-        {loadingData ? (
-          <div className="flex items-center justify-center py-24">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          </div>
-        ) : (
-          <div className="space-y-8">
+        <div className="grid gap-6 lg:grid-cols-[300px,1fr]">
 
-            {/* ── Checklist nutrition ─────────────────────────────────────── */}
+          {/* ── Student list ──────────────────────────────────────────────── */}
+          <aside className="rounded-3xl border border-border/60 bg-card shadow-soft">
+            <div className="flex items-center gap-3 border-b border-border/60 px-5 py-4">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <span className="font-display text-base font-semibold">Élèves</span>
+              {!loadingUsers && (
+                <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{users.length}</span>
+              )}
+            </div>
+            {loadingUsers ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <ul className="divide-y divide-border/40 p-2">
+                {users.map((u) => (
+                  <li key={u.uid}>
+                    <button
+                      onClick={() => selectUser(u)}
+                      className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-muted/60 ${selectedUser?.uid === u.uid ? "bg-primary-soft" : ""}`}
+                    >
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-semibold text-primary">
+                        {(u.displayName ?? u.email)[0].toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">{u.displayName ?? u.email}</p>
+                        {u.displayName && <p className="truncate text-xs text-muted-foreground">{u.email}</p>}
+                      </div>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/40" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </aside>
+
+          {/* ── Right panel ───────────────────────────────────────────────── */}
+          <div className="space-y-6">
+
+            {/* Per-student checklist */}
             <section className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
               <div className="flex items-center justify-between border-b border-border/60 px-6 py-5">
                 <div>
                   <h2 className="font-display text-xl font-semibold">Checklist nutrition</h2>
-                  <p className="mt-0.5 text-sm text-muted-foreground">Les élèves cochent ces items chaque jour depuis leur dashboard.</p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">
+                    {selectedUser
+                      ? `Items personnalisés pour ${selectedUser.displayName ?? selectedUser.email}`
+                      : "Sélectionnez un élève pour configurer sa checklist."}
+                  </p>
                 </div>
                 {savingNutrition && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-                {!savingNutrition && nutritionItems.length > 0 && <Save className="h-4 w-4 text-primary" />}
               </div>
 
-              {nutritionItems.length > 0 && (
-                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleNutritionDragEnd}>
-                  <SortableContext items={nutritionItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
-                    <ul className="divide-y divide-border/40">
-                      {nutritionItems.map((item) => (
-                        <SortableNutritionItem key={item.id} item={item} onRemove={() => removeNutritionItem(item.id)} />
-                      ))}
-                    </ul>
-                  </SortableContext>
-                </DndContext>
-              )}
-
-              <div className="p-5">
-                <div className="flex gap-2">
-                  <input
-                    value={newNutritionEmoji}
-                    onChange={(e) => setNewNutritionEmoji(e.target.value)}
-                    placeholder="🥗"
-                    className="h-11 w-14 rounded-2xl border border-border bg-background px-3 text-center text-lg outline-none focus:border-primary"
-                  />
-                  <input
-                    value={newNutritionLabel}
-                    onChange={(e) => setNewNutritionLabel(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && addNutritionItem()}
-                    placeholder="ex. Boire 1.5L d'eau"
-                    className="h-11 flex-1 rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-                  />
-                  <button
-                    onClick={addNutritionItem}
-                    disabled={!newNutritionLabel.trim()}
-                    className="flex h-11 w-11 items-center justify-center rounded-2xl bg-foreground text-background transition-opacity hover:opacity-90 disabled:opacity-40"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
+              {!selectedUser ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <Users className="mb-3 h-8 w-8 text-muted-foreground/30" />
+                  <p className="text-sm text-muted-foreground">Sélectionnez un élève dans la liste</p>
                 </div>
-              </div>
+              ) : loadingNutrition ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <>
+                  {nutritionItems.length > 0 && (
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleItemsDragEnd}>
+                      <SortableContext items={nutritionItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+                        <ul className="divide-y divide-border/40">
+                          {nutritionItems.map((item) => (
+                            <SortableNutritionItem key={item.id} item={item} onRemove={() => removeItem(item.id)} />
+                          ))}
+                        </ul>
+                      </SortableContext>
+                    </DndContext>
+                  )}
+                  <div className="p-5">
+                    <div className="flex gap-2">
+                      <input
+                        value={newEmoji}
+                        onChange={(e) => setNewEmoji(e.target.value)}
+                        placeholder="🥗"
+                        className="h-11 w-14 rounded-2xl border border-border bg-background px-3 text-center text-lg outline-none focus:border-primary"
+                      />
+                      <input
+                        value={newLabel}
+                        onChange={(e) => setNewLabel(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && addItem()}
+                        placeholder="ex. Boire 1.5L d'eau"
+                        className="h-11 flex-1 rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                      />
+                      <button
+                        onClick={addItem}
+                        disabled={!newLabel.trim()}
+                        className="flex h-11 w-11 items-center justify-center rounded-2xl bg-foreground text-background transition-opacity hover:opacity-90 disabled:opacity-40"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </section>
 
-            {/* ── Rappels généraux ────────────────────────────────────────── */}
+            {/* Global reminders */}
             <section className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
               <div className="flex items-center justify-between border-b border-border/60 px-6 py-5">
                 <div>
                   <h2 className="font-display text-xl font-semibold">Rappels généraux</h2>
-                  <p className="mt-0.5 text-sm text-muted-foreground">Conseils persistants affichés dans le dashboard (non cochables).</p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">Conseils affichés à tous les élèves (non cochables).</p>
                 </div>
                 {savingReminders && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-                {!savingReminders && reminders.length > 0 && <Save className="h-4 w-4 text-primary" />}
               </div>
 
-              {reminders.length > 0 && (
-                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleRemindersDragEnd}>
-                  <SortableContext items={reminders.map((r) => r.id)} strategy={verticalListSortingStrategy}>
-                    <ul className="divide-y divide-border/40">
-                      {reminders.map((r) => (
-                        <SortableReminderItem key={r.id} reminder={r} onRemove={() => removeReminder(r.id)} />
-                      ))}
-                    </ul>
-                  </SortableContext>
-                </DndContext>
-              )}
-
-              <div className="p-5">
-                <div className="flex gap-2">
-                  <input
-                    value={newReminderEmoji}
-                    onChange={(e) => setNewReminderEmoji(e.target.value)}
-                    placeholder="💡"
-                    className="h-11 w-14 rounded-2xl border border-border bg-background px-3 text-center text-lg outline-none focus:border-primary"
-                  />
-                  <input
-                    value={newReminderText}
-                    onChange={(e) => setNewReminderText(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && addReminder()}
-                    placeholder="ex. Éviter les produits laitiers"
-                    className="h-11 flex-1 rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-                  />
-                  <button
-                    onClick={addReminder}
-                    disabled={!newReminderText.trim()}
-                    className="flex h-11 w-11 items-center justify-center rounded-2xl bg-foreground text-background transition-opacity hover:opacity-90 disabled:opacity-40"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
+              {loadingReminders ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                 </div>
-              </div>
+              ) : (
+                <>
+                  {reminders.length > 0 && (
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleRemindersDragEnd}>
+                      <SortableContext items={reminders.map((r) => r.id)} strategy={verticalListSortingStrategy}>
+                        <ul className="divide-y divide-border/40">
+                          {reminders.map((r) => (
+                            <SortableReminderItem key={r.id} reminder={r} onRemove={() => removeReminder(r.id)} />
+                          ))}
+                        </ul>
+                      </SortableContext>
+                    </DndContext>
+                  )}
+                  <div className="p-5">
+                    <div className="flex gap-2">
+                      <input
+                        value={newReminderEmoji}
+                        onChange={(e) => setNewReminderEmoji(e.target.value)}
+                        placeholder="💡"
+                        className="h-11 w-14 rounded-2xl border border-border bg-background px-3 text-center text-lg outline-none focus:border-primary"
+                      />
+                      <input
+                        value={newReminderText}
+                        onChange={(e) => setNewReminderText(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && addReminder()}
+                        placeholder="ex. Éviter les produits laitiers"
+                        className="h-11 flex-1 rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                      />
+                      <button
+                        onClick={addReminder}
+                        disabled={!newReminderText.trim()}
+                        className="flex h-11 w-11 items-center justify-center rounded-2xl bg-foreground text-background transition-opacity hover:opacity-90 disabled:opacity-40"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </section>
 
           </div>
-        )}
-      </main>
+        </div>
+      </div>
     </AppShell>
   );
 }
