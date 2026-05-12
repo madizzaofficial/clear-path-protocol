@@ -438,6 +438,10 @@ function Dashboard() {
 // ── Welcome state (new user, no routine, no lessons) ─────────────────────────
 
 function WelcomeState({ firstName, next }: { firstName: string; next: ReturnType<typeof allLessons>[number] | undefined }) {
+  const [videoOpen, setVideoOpen] = useState(() => {
+    try { return localStorage.getItem("welcomeVideoOpen") !== "false"; } catch { return true; }
+  });
+
   return (
     <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
 
@@ -484,6 +488,42 @@ function WelcomeState({ firstName, next }: { firstName: string; next: ReturnType
               <p className="mt-2 text-sm text-muted-foreground">Ton coach prépare le contenu de ton protocole.</p>
             </div>
           )}
+
+          {/* Welcome video */}
+          <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
+            <button
+              onClick={() => {
+                const next = !videoOpen;
+                setVideoOpen(next);
+                try { localStorage.setItem("welcomeVideoOpen", String(next)); } catch {}
+              }}
+              className="flex w-full items-center justify-between px-6 py-4 md:px-8"
+            >
+              <div className="text-left">
+                <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">Bienvenue</p>
+                <h2 className="mt-1 font-display text-lg font-semibold">Présentation du protocole</h2>
+              </div>
+              <ChevronDown className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-300 ${videoOpen ? "rotate-180" : ""}`} />
+            </button>
+            {videoOpen && (
+              <div className="border-t border-border/60">
+                {WELCOME_VIDEO_URL ? (
+                  <div className="relative aspect-video">
+                    <iframe
+                      src={WELCOME_VIDEO_URL}
+                      className="absolute inset-0 h-full w-full"
+                      allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                ) : (
+                  <div className="flex aspect-video items-center justify-center bg-muted/40">
+                    <p className="text-sm text-muted-foreground">Vidéo à venir</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* 3 feature cards */}
           <div className="grid gap-4 sm:grid-cols-3">
