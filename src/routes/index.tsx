@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { course, allLessons } from "@/lib/course-data";
-import { Play, Check, Sparkles, Sun, Moon, ArrowRight, TrendingUp, BookOpen, Flame } from "lucide-react";
+import { Play, Check, Sparkles, Sun, Moon, ArrowRight, TrendingUp, BookOpen, Flame, ChevronDown } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import {
@@ -92,6 +92,10 @@ async function computeStreak(uid: string, totalSteps: number): Promise<number> {
 function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [videoOpen, setVideoOpen] = useState(() => {
+    try { return localStorage.getItem("welcomeVideoOpen") !== "false"; } catch { return true; }
+  });
+
   const [data, setData] = useState<HomeData>({
     loading: true,
     completedLessons: [],
@@ -301,22 +305,36 @@ function Dashboard() {
 
             {/* Welcome video */}
             <div className="mt-8 overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
-              <div className="border-b border-border/60 px-6 py-4 md:px-8">
-                <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">Bienvenue</p>
-                <h2 className="mt-1 font-display text-lg font-semibold">Présentation du protocole</h2>
-              </div>
-              {WELCOME_VIDEO_URL ? (
-                <div className="relative aspect-video">
-                  <iframe
-                    src={WELCOME_VIDEO_URL}
-                    className="absolute inset-0 h-full w-full"
-                    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
-                    allowFullScreen
-                  />
+              <button
+                onClick={() => {
+                  const next = !videoOpen;
+                  setVideoOpen(next);
+                  try { localStorage.setItem("welcomeVideoOpen", String(next)); } catch {}
+                }}
+                className="flex w-full items-center justify-between px-6 py-4 md:px-8"
+              >
+                <div className="text-left">
+                  <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">Bienvenue</p>
+                  <h2 className="mt-1 font-display text-lg font-semibold">Présentation du protocole</h2>
                 </div>
-              ) : (
-                <div className="flex aspect-video items-center justify-center bg-muted/40">
-                  <p className="text-sm text-muted-foreground">Vidéo à venir</p>
+                <ChevronDown className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-300 ${videoOpen ? "rotate-180" : ""}`} />
+              </button>
+              {videoOpen && (
+                <div className="border-t border-border/60">
+                  {WELCOME_VIDEO_URL ? (
+                    <div className="relative aspect-video">
+                      <iframe
+                        src={WELCOME_VIDEO_URL}
+                        className="absolute inset-0 h-full w-full"
+                        allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex aspect-video items-center justify-center bg-muted/40">
+                      <p className="text-sm text-muted-foreground">Vidéo à venir</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
