@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useState, useEffect } from "react";
-import { Sun, Moon, Clock, Sparkles, Loader2, Check, ShoppingCart, AlertTriangle, ImageOff } from "lucide-react";
+import { Sun, Moon, Clock, Sparkles, Loader2, Check, X, ShoppingCart, AlertTriangle, ImageOff } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -54,9 +54,9 @@ function RoutinePage() {
   const [reports, setReports] = useState<Record<string, "irritant" | "allergie">>({});
   const [reportStep, setReportStep] = useState<RoutineStep | null>(null);
   const [reporting, setReporting] = useState(false);
-  const [nutritionItems, setNutritionItems] = useState<NutritionItem[]>([]);
+  const [toEat, setToEat] = useState<NutritionItem[]>([]);
+  const [toAvoid, setToAvoid] = useState<NutritionItem[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [checkedNutrition, setCheckedNutrition] = useState<string[]>([]);
 
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/login" });
@@ -71,8 +71,7 @@ function RoutinePage() {
       getDoc(doc(db, "routine_reports", user.uid)),
       getDoc(doc(db, "nutrition", user.uid)),
       getDoc(doc(db, "config", "reminders")),
-      getDoc(doc(db, "nutrition_checkins", user.uid, "days", todayKey)),
-    ]).then(([routineRes, checkinRes, reportsRes, nutritionCfgRes, remindersCfgRes, nutritionTodayRes]) => {
+    ]).then(([routineRes, checkinRes, reportsRes, nutritionRes, remindersRes]) => {
       if (routineRes.status === "fulfilled" && routineRes.value.exists())
         setRoutine(routineRes.value.data() as UserRoutine);
       if (checkinRes.status === "fulfilled" && checkinRes.value.exists()) {
@@ -81,25 +80,15 @@ function RoutinePage() {
       }
       if (reportsRes.status === "fulfilled" && reportsRes.value.exists())
         setReports(reportsRes.value.data() as Record<string, "irritant" | "allergie">);
-      if (nutritionCfgRes.status === "fulfilled" && nutritionCfgRes.value.exists())
-        setNutritionItems(nutritionCfgRes.value.data().items ?? []);
-      if (remindersCfgRes.status === "fulfilled" && remindersCfgRes.value.exists())
-        setReminders(remindersCfgRes.value.data().items ?? []);
-      if (nutritionTodayRes.status === "fulfilled" && nutritionTodayRes.value.exists())
-        setCheckedNutrition(nutritionTodayRes.value.data().checked ?? []);
+      if (nutritionRes.status === "fulfilled" && nutritionRes.value.exists()) {
+        setToEat(nutritionRes.value.data().toEat ?? []);
+        setToAvoid(nutritionRes.value.data().toAvoid ?? []);
+      }
+      if (remindersRes.status === "fulfilled" && remindersRes.value.exists())
+        setReminders(remindersRes.value.data().items ?? []);
       setLoadingRoutine(false);
     });
   }, [user]);
-
-  function toggleNutrition(itemId: string) {
-    if (!user) return;
-    const updated = checkedNutrition.includes(itemId)
-      ? checkedNutrition.filter((id) => id !== itemId)
-      : [...checkedNutrition, itemId];
-    setCheckedNutrition(updated);
-    const key = new Date().toISOString().slice(0, 10);
-    setDoc(doc(db, "nutrition_checkins", user.uid, "days", key), { checked: updated }, { merge: true });
-  }
 
   function toggleStep(session: "am" | "pm", stepId: string) {
     if (!user) return;
@@ -213,32 +202,48 @@ function RoutinePage() {
           </div>
 
           {/* ── Nutrition sidebar ─────────────────────────────────────────── */}
-          {(nutritionItems.length > 0 || reminders.length > 0) && (
+          {(toEat.length > 0 || toAvoid.length > 0 || reminders.length > 0) && (
             <aside className="w-full space-y-6 lg:sticky lg:top-24 lg:w-80 lg:shrink-0">
-              {nutritionItems.length > 0 && (
+
+              {(toEat.length > 0 || toAvoid.length > 0) && (
                 <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-                  <h3 className="mb-4 font-display text-lg font-semibold">Nutrition du jour</h3>
-                  <ul className="space-y-1">
-                    {nutritionItems.map((item) => {
-                      const checked = checkedNutrition.includes(item.id);
-                      return (
-                        <li key={item.id}>
-                          <button
-                            onClick={() => toggleNutrition(item.id)}
-                            className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-left transition-colors hover:bg-muted/60"
-                          >
-                            <span className="text-base">{item.emoji}</span>
-                            <span className={`flex-1 text-sm ${checked ? "text-muted-foreground line-through" : ""}`}>
-                              {item.label}
-                            </span>
-                            <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${checked ? "border-primary bg-primary" : "border-border"}`}>
-                              {checked && <Check className="h-3 w-3 text-primary-foreground" />}
-                            </div>
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                  <h3 className="mb-5 font-display text-lg font-semibold">Nutrition</h3>
+
+                  {toEat.length > 0 && (
+                    <div>
+                      <p className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-primary">
+                        <Check className="h-4 w-4" /> À privilégier
+                      </p>
+                      <ul className="space-y-2">
+                        {toEat.map((item) => (
+                          <li key={item.id} className="flex items-start gap-2.5 text-sm text-foreground">
+                            <span className="shrink-0">{item.emoji}</span>
+                            <span>{item.label}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {toEat.length > 0 && toAvoid.length > 0 && (
+                    <div className="my-5 border-t border-border/60" />
+                  )}
+
+                  {toAvoid.length > 0 && (
+                    <div>
+                      <p className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-destructive">
+                        <X className="h-4 w-4" /> À éviter
+                      </p>
+                      <ul className="space-y-2">
+                        {toAvoid.map((item) => (
+                          <li key={item.id} className="flex items-start gap-2.5 text-sm text-foreground">
+                            <span className="shrink-0">{item.emoji}</span>
+                            <span>{item.label}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
 
