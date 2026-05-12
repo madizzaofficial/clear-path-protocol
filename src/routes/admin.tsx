@@ -3,8 +3,8 @@ import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
-import { TrendingUp, Users, CheckCircle2, AlertCircle, BookOpen, Loader2, ClipboardList, Link2, Copy, Check } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import { TrendingUp, Users, CheckCircle2, AlertCircle, BookOpen, Loader2, ClipboardList, Link2, Copy, Check, Search } from "lucide-react";
 import { course } from "@/lib/course-data";
 
 export const Route = createFileRoute("/admin")({
@@ -41,6 +41,10 @@ function AdminPage() {
   const [students, setStudents] = useState<StudentDoc[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(true);
   const [progressMap, setProgressMap] = useState<Map<string, number>>(new Map());
+  const [routineStatusMap, setRoutineStatusMap] = useState<Map<string, "sent" | "draft">>(new Map());
+  const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState<"all" | "sent" | "draft" | "none">("all");
+  const [sortBy, setSortBy] = useState<"name" | "email" | "status">("name");
   const [generatingLink, setGeneratingLink] = useState(false);
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -55,15 +59,23 @@ function AdminPage() {
     async function fetchStudents() {
       setLoadingStudents(true);
       try {
-        const snap = await getDocs(collection(db, "users"));
-        const docs = snap.docs.map((d) => d.data() as StudentDoc);
+        const [usersSnap, routinesSnap] = await Promise.all([
+          getDocs(collection(db, "users")),
+          getDocs(collection(db, "routines")),
+        ]);
+        const docs = usersSnap.docs.map((d) => d.data() as StudentDoc);
         setStudents(docs);
+
+        const rMap = new Map<string, "sent" | "draft">();
+        routinesSnap.docs.forEach((d) => rMap.set(d.id, (d.data() as { status: "sent" | "draft" }).status));
+        setRoutineStatusMap(rMap);
+
         const progressSnaps = await Promise.all(docs.map((s) => getDoc(doc(db, "progress", s.uid))));
-        const map = new Map<string, number>();
+        const pMap = new Map<string, number>();
         progressSnaps.forEach((ps, i) => {
-          if (ps.exists()) map.set(docs[i].uid, (ps.data().completedLessons ?? []).length);
+          if (ps.exists()) pMap.set(docs[i].uid, (ps.data().completedLessons ?? []).length);
         });
-        setProgressMap(map);
+        setProgressMap(pMap);
       } finally {
         setLoadingStudents(false);
       }
@@ -101,6 +113,25 @@ function AdminPage() {
   }
 
   if (!isAdmin) return null;
+
+  const filteredStudents = useMemo(() => {
+    let result = students;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter((s) => s.displayName?.toLowerCase().includes(q) || s.email.toLowerCase().includes(q));
+    }
+    if (filterStatus !== "all") {
+      result = result.filter((s) => (routineStatusMap.get(s.uid) ?? "none") === filterStatus);
+    }
+    return [...result].sort((a, b) => {
+      if (sortBy === "email") return a.email.localeCompare(b.email);
+      if (sortBy === "status") {
+        const o = { sent: 0, draft: 1, none: 2 } as const;
+        return (o[routineStatusMap.get(a.uid) ?? "none"]) - (o[routineStatusMap.get(b.uid) ?? "none"]);
+      }
+      return (a.displayName ?? a.email).localeCompare(b.displayName ?? b.email);
+    });
+  }, [students, search, filterStatus, sortBy, routineStatusMap]);
 
   const totalStudents = students.length;
   const avgCompletion = totalStudents > 0
@@ -178,143 +209,130 @@ function AdminPage() {
           <AdminStat icon={AlertCircle} label="Élèves à risque" value={loadingStudents ? "…" : String(atRisk)} delta="> 14j, < 25% progression" tone="warn" />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Students table */}
-          <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft lg:col-span-2">
-            <header className="flex items-center justify-between border-b border-border/60 p-6">
-              <h2 className="font-display text-lg font-semibold">Élèves</h2>
-              <span className="text-sm text-muted-foreground">
-                {loadingStudents ? "…" : `${students.length} inscrits`}
-              </span>
-            </header>
-            {loadingStudents ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              </div>
-            ) : students.length === 0 ? (
-              <p className="px-6 py-10 text-center text-sm text-muted-foreground">
-                Aucun élève inscrit pour l'instant.
-              </p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-border/60 bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
-                      <th className="px-6 py-3 font-medium">Élève</th>
-                      <th className="px-6 py-3 font-medium">Email</th>
-                      <th className="px-6 py-3 font-medium">Progression</th>
-                      <th className="px-6 py-3 font-medium">Durée</th>
-                      <th className="px-6 py-3"></th>
+        {/* Controls */}
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <div className="relative min-w-[220px] flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Rechercher par nom ou email…"
+              className="h-10 w-full rounded-2xl border border-border bg-card pl-10 pr-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          <div className="flex rounded-xl bg-muted p-1">
+            {(["all", "sent", "draft", "none"] as const).map((v) => (
+              <button
+                key={v}
+                onClick={() => setFilterStatus(v)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                  filterStatus === v ? "bg-card shadow-soft text-foreground" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {{ all: "Tous", sent: "Envoyée", draft: "Brouillon", none: "Sans routine" }[v]}
+              </button>
+            ))}
+          </div>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+            className="h-10 rounded-2xl border border-border bg-card px-4 text-sm outline-none focus:border-primary"
+          >
+            <option value="name">Trier par nom</option>
+            <option value="email">Trier par email</option>
+            <option value="status">Trier par statut routine</option>
+          </select>
+        </div>
+
+        {/* Students table — full width */}
+        <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
+          {loadingStudents ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border/60 bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                    <th className="px-6 py-3.5 font-medium">Élève</th>
+                    <th className="px-6 py-3.5 font-medium">Email</th>
+                    <th className="px-6 py-3.5 font-medium">Progression</th>
+                    <th className="px-6 py-3.5 font-medium">Durée</th>
+                    <th className="px-6 py-3.5 text-center font-medium">Routine</th>
+                    <th className="px-6 py-3.5"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60">
+                  {filteredStudents.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-14 text-center text-sm text-muted-foreground">
+                        Aucun élève trouvé.
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/60">
-                    {students.map((s) => {
-                      const initials = (s.displayName ?? s.email)
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .slice(0, 2)
-                        .toUpperCase();
-                      return (
-                        <tr key={s.uid} className="hover:bg-primary-soft/30">
-                          <td className="px-6 py-4">
-                            <Link
-                              to="/admin/student/$uid"
-                              params={{ uid: s.uid }}
-                              className="flex items-center gap-3 group"
-                            >
-                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-warm text-sm font-semibold">
-                                {initials}
-                              </div>
-                              <p className="text-sm font-semibold group-hover:text-primary transition-colors">
-                                {s.displayName ?? "—"}
-                              </p>
-                            </Link>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-muted-foreground">
-                            {s.email}
-                          </td>
-                          <td className="px-6 py-4">
-                            {(() => {
-                              const done = progressMap.get(s.uid) ?? 0;
-                              const pct = Math.round((done / TOTAL_LESSONS) * 100);
-                              return (
-                                <div className="flex items-center gap-2 min-w-[100px]">
-                                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                                    <div className="h-full rounded-full bg-gradient-primary transition-all" style={{ width: `${pct}%` }} />
-                                  </div>
-                                  <span className="text-xs tabular-nums text-muted-foreground">{done}/{TOTAL_LESSONS}</span>
-                                </div>
-                              );
-                            })()}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className="text-sm tabular-nums text-muted-foreground">
-                              {s.enrolledAt ? formatDays(s.enrolledAt) : "—"}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <Link
-                              to="/admin/routines"
-                              search={{ uid: s.uid }}
-                              className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-primary-muted"
-                            >
-                              <ClipboardList className="h-3.5 w-3.5" />
-                              Routine
-                            </Link>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-
-          {/* Right column */}
-          <div className="space-y-6">
-            <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-              <h3 className="font-display text-lg font-semibold">Recommander des produits</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Envoyer une sélection à un élève.</p>
-              <div className="mt-4 space-y-3">
-                <select className="h-10 w-full rounded-full border border-border bg-background px-4 text-sm focus:border-primary focus:outline-none">
-                  <option>Choisir un élève…</option>
-                  {students.map((s) => <option key={s.email}>{s.displayName ?? s.email}</option>)}
-                </select>
-                <select className="h-10 w-full rounded-full border border-border bg-background px-4 text-sm focus:border-primary focus:outline-none">
-                  <option>Recommander un produit…</option>
-                  <option>Adapalène 0.1% Gel</option>
-                  <option>Niacinamide 10%</option>
-                  <option>SPF Minéral 50</option>
-                </select>
-                <textarea placeholder="Note personnelle pour l'élève…" className="min-h-20 w-full resize-none rounded-2xl border border-border bg-background p-3 text-sm focus:border-primary focus:outline-none" />
-                <button className="w-full rounded-full bg-foreground py-2.5 text-sm font-medium text-background hover:opacity-90">Envoyer la recommandation</button>
-              </div>
+                  ) : filteredStudents.map((s) => {
+                    const initials = (s.displayName ?? s.email).split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+                    const routineStatus = routineStatusMap.get(s.uid) ?? "none";
+                    const done = progressMap.get(s.uid) ?? 0;
+                    const pct = Math.round((done / TOTAL_LESSONS) * 100);
+                    return (
+                      <tr key={s.uid} className="hover:bg-muted/20 transition-colors">
+                        <td className="px-6 py-4">
+                          <Link to="/admin/student/$uid" params={{ uid: s.uid }} className="group flex items-center gap-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-warm text-sm font-semibold">
+                              {initials}
+                            </div>
+                            <p className="text-sm font-semibold transition-colors group-hover:text-primary">{s.displayName ?? "—"}</p>
+                          </Link>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-muted-foreground">{s.email}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex min-w-[120px] items-center gap-2">
+                            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                              <div className="h-full rounded-full bg-gradient-primary transition-all" style={{ width: `${pct}%` }} />
+                            </div>
+                            <span className="text-xs tabular-nums text-muted-foreground">{done}/{TOTAL_LESSONS}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-sm tabular-nums text-muted-foreground">{s.enrolledAt ? formatDays(s.enrolledAt) : "—"}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-center">
+                            {routineStatus === "sent" ? (
+                              <span className="flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
+                                <Check className="h-3 w-3" /> Envoyée
+                              </span>
+                            ) : routineStatus === "draft" ? (
+                              <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-600">Brouillon</span>
+                            ) : (
+                              <span className="text-xs text-muted-foreground/40">—</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <Link
+                            to="/admin/routines"
+                            search={{ uid: s.uid }}
+                            className="inline-flex items-center gap-1.5 rounded-2xl bg-foreground px-4 py-2 text-xs font-medium text-background transition-opacity hover:opacity-80"
+                          >
+                            <ClipboardList className="h-3.5 w-3.5" />
+                            {routineStatus === "none" ? "Créer routine" : "Éditer routine"}
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-
-            <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-              <h3 className="font-display text-lg font-semibold">Analyse du cours</h3>
-              <ul className="mt-4 space-y-3">
-                {[
-                  { label: "Foundations", val: 91 },
-                  { label: "Daily Routine", val: 76 },
-                  { label: "Lifestyle", val: 54 },
-                  { label: "Maintenance", val: 32 },
-                ].map((c) => (
-                  <li key={c.label}>
-                    <div className="flex items-center justify-between text-sm">
-                      <span>{c.label}</span>
-                      <span className="tabular-nums text-muted-foreground">{c.val}%</span>
-                    </div>
-                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
-                      <div className="h-full rounded-full bg-gradient-primary" style={{ width: `${c.val}%` }} />
-                    </div>
-                  </li>
-                ))}
-              </ul>
+          )}
+          {!loadingStudents && (
+            <div className="border-t border-border/40 px-6 py-3 text-xs text-muted-foreground">
+              {filteredStudents.length} élève{filteredStudents.length !== 1 ? "s" : ""}
+              {filterStatus !== "all" || search.trim() ? ` sur ${students.length}` : ""}
             </div>
-          </div>
+          )}
         </div>
       </main>
     </AppShell>
