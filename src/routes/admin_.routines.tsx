@@ -5,8 +5,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { inngest } from "@/lib/inngest";
 import { collection, doc, getDocs, getDoc, setDoc } from "firebase/firestore";
-import { ref as storageRef, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -176,6 +174,28 @@ const triggerRoutineEventFn = createServerFn({ method: "POST" })
   .inputValidator((d: { uid: string; email: string; firstName: string }) => d)
   .handler(async (ctx) => {
     await inngest.send({ name: "routine/assigned", data: ctx.data });
+  });
+
+const getR2PresignedUrlFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { fileName: string; contentType: string }) => d)
+  .handler(async (ctx) => {
+    const { fileName, contentType } = ctx.data;
+    const { getSignedUrl } = await import("@aws-sdk/s3-request-presigner");
+    const { PutObjectCommand } = await import("@aws-sdk/client-s3");
+    const { r2 } = await import("@/lib/r2");
+
+    const key = `product-images/${Date.now()}-${fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+    const uploadUrl = await getSignedUrl(
+      r2,
+      new PutObjectCommand({
+        Bucket: process.env.CLOUDFLARE_R2_BUCKET!,
+        Key: key,
+        ContentType: contentType,
+      }),
+      { expiresIn: 120 }
+    );
+
+    return { uploadUrl, publicUrl: `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${key}` };
   });
 
 // ─── Email HTML builder ───────────────────────────────────────────────────────
@@ -925,21 +945,28 @@ function StepDialog({
     }
   }, [step]);
 
-  function handleImageFile(file: File) {
+  async function handleImageFile(file: File) {
     setUploading(true);
     setUploadProgress(0);
-    const ext = file.name.split(".").pop() ?? "jpg";
-    const fileRef = storageRef(storage, `product-images/${Date.now()}.${ext}`);
-    const task = uploadBytesResumable(fileRef, file);
-    task.on(
-      "state_changed",
-      (snap) => setUploadProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100)),
-      () => setUploading(false),
-      async () => {
-        setImageUrl(await getDownloadURL(task.snapshot.ref));
-        setUploading(false);
-      }
-    );
+    try {
+      const { uploadUrl, publicUrl } = await getR2PresignedUrlFn({
+        data: { fileName: file.name, contentType: file.type || "image/jpeg" },
+      });
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
+        };
+        xhr.onload = () => (xhr.status < 300 ? resolve() : reject(new Error(`Upload failed: ${xhr.status}`)));
+        xhr.onerror = () => reject(new Error("Upload error"));
+        xhr.open("PUT", uploadUrl);
+        xhr.setRequestHeader("Content-Type", file.type || "image/jpeg");
+        xhr.send(file);
+      });
+      setImageUrl(publicUrl);
+    } finally {
+      setUploading(false);
+    }
   }
 
   return (
