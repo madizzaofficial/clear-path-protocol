@@ -76,6 +76,7 @@ type RoutineStep = {
   order: number;
   category: string;
   product: string;
+  description?: string;
   instructions: string;
   imageUrl?: string;
   purchaseUrl?: string;
@@ -472,7 +473,7 @@ function RoutinesContent() {
     saveRoutine(updated);
   }
 
-  async function handleSaveToCatalog(data: { category: string; product: string; instructions: string; imageUrl?: string; purchaseUrl?: string }) {
+  async function handleSaveToCatalog(data: { category: string; product: string; description?: string; instructions: string; imageUrl?: string; purchaseUrl?: string }) {
     setSavingToCatalog(true);
     try {
       const existing = catalogProducts.find(
@@ -483,6 +484,7 @@ function RoutinesContent() {
         id,
         name: data.product.trim(),
         category: data.category,
+        description: data.description,
         instructions: data.instructions,
         imageUrl: data.imageUrl,
         purchaseUrl: data.purchaseUrl,
@@ -941,14 +943,15 @@ function StepDialog({
   step: RoutineStep | null;
   isNew: boolean;
   onClose: () => void;
-  onSave: (d: { category: string; product: string; instructions: string; imageUrl?: string; purchaseUrl?: string }) => void;
+  onSave: (d: { category: string; product: string; description?: string; instructions: string; imageUrl?: string; purchaseUrl?: string }) => void;
   saving: boolean;
   catalogProducts: CatalogProduct[];
-  onSaveToCatalog: (data: { category: string; product: string; instructions: string; imageUrl?: string; purchaseUrl?: string }) => Promise<void>;
+  onSaveToCatalog: (data: { category: string; product: string; description?: string; instructions: string; imageUrl?: string; purchaseUrl?: string }) => Promise<void>;
   savingToCatalog: boolean;
 }) {
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
   const [product, setProduct] = useState("");
+  const [description, setDescription] = useState("");
   const [instructions, setInstructions] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [purchaseUrl, setPurchaseUrl] = useState("");
@@ -969,6 +972,7 @@ function StepDialog({
     if (step) {
       setCategory(step.category || CATEGORIES[0]);
       setProduct(step.product);
+      setDescription(step.description ?? "");
       setInstructions(step.instructions);
       setImageUrl(step.imageUrl ?? "");
       setPurchaseUrl(step.purchaseUrl ?? "");
@@ -982,6 +986,7 @@ function StepDialog({
   function fillFromCatalog(p: CatalogProduct) {
     setCategory(p.category);
     setProduct(p.name);
+    setDescription(p.description ?? "");
     setInstructions(p.instructions);
     setImageUrl(p.imageUrl ?? "");
     setPurchaseUrl(p.purchaseUrl ?? "");
@@ -1098,6 +1103,18 @@ function StepDialog({
             />
           </div>
           <div>
+            <label className="mb-2 block text-sm font-medium text-foreground/80">
+              Description <span className="font-normal text-muted-foreground">(ce que fait le produit, optionnelle)</span>
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={2}
+              placeholder="ex. Nettoyant doux hydratant, idéal pour les peaux sensibles…"
+              className="w-full resize-none rounded-2xl border border-border bg-background p-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          <div>
             <label className="mb-2 block text-sm font-medium text-foreground/80">Instructions</label>
             <textarea
               value={instructions}
@@ -1168,7 +1185,7 @@ function StepDialog({
         <DialogFooter className="shrink-0 gap-2 sm:gap-2">
           <button
             type="button"
-            onClick={() => onSaveToCatalog({ category, product, instructions, imageUrl: imageUrl.trim() || undefined, purchaseUrl: purchaseUrl.trim() || undefined })}
+            onClick={() => onSaveToCatalog({ category, product, description: description.trim() || undefined, instructions, imageUrl: imageUrl.trim() || undefined, purchaseUrl: purchaseUrl.trim() || undefined })}
             disabled={savingToCatalog || !product.trim()}
             className="mr-auto flex items-center gap-2 rounded-2xl border border-border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-50"
           >
@@ -1182,7 +1199,7 @@ function StepDialog({
             Annuler
           </button>
           <button
-            onClick={() => onSave({ category, product, instructions, imageUrl: imageUrl.trim() || undefined, purchaseUrl: purchaseUrl.trim() || undefined })}
+            onClick={() => onSave({ category, product, description: description.trim() || undefined, instructions, imageUrl: imageUrl.trim() || undefined, purchaseUrl: purchaseUrl.trim() || undefined })}
             disabled={saving || !product.trim()}
             className="flex items-center gap-2 rounded-2xl bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
           >
