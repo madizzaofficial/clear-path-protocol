@@ -183,17 +183,28 @@ const uploadProductImageFn = createServerFn({ method: "POST" })
     const { PutObjectCommand } = await import("@aws-sdk/client-s3");
     const { r2 } = await import("@/lib/r2");
 
-    const key = `product-images/${Date.now()}-${fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-    await r2.send(
-      new PutObjectCommand({
-        Bucket: process.env.CLOUDFLARE_R2_BUCKET!,
-        Key: key,
-        Body: Buffer.from(base64, "base64"),
-        ContentType: contentType,
-      })
-    );
+    const bucket = process.env.CLOUDFLARE_R2_BUCKET;
+    const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL;
+    if (!bucket || !publicUrl) {
+      throw new Error(`R2 env vars missing: BUCKET=${bucket ?? "unset"} PUBLIC_URL=${publicUrl ?? "unset"}`);
+    }
 
-    return { publicUrl: `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${key}` };
+    const key = `product-images/${Date.now()}-${fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+    try {
+      await r2.send(
+        new PutObjectCommand({
+          Bucket: bucket,
+          Key: key,
+          Body: Buffer.from(base64, "base64"),
+          ContentType: contentType,
+        })
+      );
+    } catch (err) {
+      console.error("[uploadProductImage] R2 PutObject failed:", err);
+      throw err;
+    }
+
+    return { publicUrl: `${publicUrl}/${key}` };
   });
 
 // ─── Email HTML builder ───────────────────────────────────────────────────────
@@ -966,8 +977,9 @@ function StepDialog({
         data: { fileName: file.name, contentType: file.type || "image/jpeg", base64 },
       });
       setImageUrl(publicUrl);
-    } catch {
-      setUploadError("Erreur lors de l'upload — réessaye.");
+    } catch (err: any) {
+      console.error("[uploadProductImage] client error:", err);
+      setUploadError(err?.message ?? "Erreur lors de l'upload — réessaye.");
     } finally {
       setUploading(false);
     }
