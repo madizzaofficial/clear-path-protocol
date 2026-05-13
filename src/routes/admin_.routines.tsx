@@ -406,7 +406,7 @@ function RoutinesContent() {
       };
 
       // Save to Firestore first — always succeeds regardless of email
-      await setDoc(doc(db, "routines", selectedUser.uid), toSave);
+      await setDoc(doc(db, "routines", selectedUser.uid), JSON.parse(JSON.stringify(toSave)));
       setRoutine(toSave);
 
       // Email + Inngest event — failure here doesn't roll back the save
