@@ -2,8 +2,10 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { course } from "@/lib/course-data";
 import { useAuth } from "@/hooks/use-auth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Play, Check, Lock, Clock, ChevronRight } from "lucide-react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export const Route = createFileRoute("/course")({
   head: () => ({
@@ -18,13 +20,21 @@ export const Route = createFileRoute("/course")({
 function CoursePage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
   }, [user, loading, navigate]);
 
+  useEffect(() => {
+    if (!user) return;
+    getDoc(doc(db, "progress", user.uid)).then((snap) => {
+      if (snap.exists()) setCompletedLessons(snap.data().completedLessons ?? []);
+    });
+  }, [user]);
+
   const total = course.chapters.reduce((s, c) => s + c.lessons.length, 0);
-  const done = course.chapters.reduce((s, c) => s + c.lessons.filter((l) => l.completed).length, 0);
+  const done = completedLessons.length;
   const progress = Math.round((done / total) * 100);
 
   if (loading || !user) return null;
@@ -59,7 +69,7 @@ function CoursePage() {
         <section className="mx-auto max-w-7xl px-6 py-12">
           <div className="space-y-6">
             {course.chapters.map((ch, i) => {
-              const cdone = ch.lessons.filter((l) => l.completed).length;
+              const cdone = ch.lessons.filter((l) => completedLessons.includes(l.id)).length;
               const cprog = Math.round((cdone / ch.lessons.length) * 100);
               return (
                 <article key={ch.id} className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
@@ -93,10 +103,10 @@ function CoursePage() {
                         >
                           <span
                             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
-                              l.completed ? "bg-primary text-primary-foreground" : l.locked ? "bg-muted text-muted-foreground" : "bg-primary-soft text-primary"
+                              completedLessons.includes(l.id) ? "bg-primary text-primary-foreground" : l.locked ? "bg-muted text-muted-foreground" : "bg-primary-soft text-primary"
                             }`}
                           >
-                            {l.completed ? <Check className="h-4 w-4" /> : l.locked ? <Lock className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
+                            {completedLessons.includes(l.id) ? <Check className="h-4 w-4" /> : l.locked ? <Lock className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
                           </span>
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-semibold">{idx + 1}. {l.title}</p>

@@ -2,7 +2,6 @@ export type Lesson = {
   id: string;
   title: string;
   duration: string;
-  completed: boolean;
   locked: boolean;
   summary: string;
   resources: { name: string; size: string }[];
@@ -27,10 +26,10 @@ export const course = {
       title: "Foundations of Skin Health",
       description: "Understand the biology of acne and your unique skin.",
       lessons: [
-        { id: "l-1", title: "Welcome to the Protocol", duration: "4 min", completed: true, locked: false, summary: "Set your intentions and learn how to use this program.", resources: [{ name: "Welcome guide.pdf", size: "1.2 MB" }] },
-        { id: "l-2", title: "How Acne Actually Works", duration: "12 min", completed: true, locked: false, summary: "The four pillars: sebum, keratin, bacteria, inflammation.", resources: [{ name: "Skin biology cheatsheet.pdf", size: "800 KB" }] },
-        { id: "l-3", title: "Identify Your Skin Type", duration: "9 min", completed: true, locked: false, summary: "A quick framework to know your skin in 3 minutes.", resources: [] },
-        { id: "l-4", title: "Tracking Your Baseline", duration: "7 min", completed: false, locked: false, summary: "Take your first photos and notes the right way.", resources: [{ name: "Tracking template.pdf", size: "420 KB" }] },
+        { id: "l-1", title: "Welcome to the Protocol", duration: "4 min", locked: false, summary: "Set your intentions and learn how to use this program.", resources: [{ name: "Welcome guide.pdf", size: "1.2 MB" }] },
+        { id: "l-2", title: "How Acne Actually Works", duration: "12 min", locked: false, summary: "The four pillars: sebum, keratin, bacteria, inflammation.", resources: [{ name: "Skin biology cheatsheet.pdf", size: "800 KB" }] },
+        { id: "l-3", title: "Identify Your Skin Type", duration: "9 min", locked: false, summary: "A quick framework to know your skin in 3 minutes.", resources: [] },
+        { id: "l-4", title: "Tracking Your Baseline", duration: "7 min", locked: false, summary: "Take your first photos and notes the right way.", resources: [{ name: "Tracking template.pdf", size: "420 KB" }] },
       ],
     },
     {
@@ -38,10 +37,10 @@ export const course = {
       title: "Building Your Daily Routine",
       description: "Morning and evening rituals that actually work.",
       lessons: [
-        { id: "l-5", title: "The Minimal Morning Routine", duration: "11 min", completed: false, locked: false, summary: "Cleanse, treat, hydrate, protect — without overload.", resources: [{ name: "AM routine card.pdf", size: "300 KB" }] },
-        { id: "l-6", title: "Evening Reset Ritual", duration: "10 min", completed: false, locked: false, summary: "Why double cleansing changes everything.", resources: [] },
-        { id: "l-7", title: "Active Ingredients 101", duration: "15 min", completed: false, locked: false, summary: "Retinoids, BHA, AHA, niacinamide — when and how.", resources: [{ name: "Ingredients guide.pdf", size: "1.6 MB" }] },
-        { id: "l-8", title: "Layering Without Irritation", duration: "8 min", completed: false, locked: true, summary: "The order that protects your barrier.", resources: [] },
+        { id: "l-5", title: "The Minimal Morning Routine", duration: "11 min", locked: false, summary: "Cleanse, treat, hydrate, protect — without overload.", resources: [{ name: "AM routine card.pdf", size: "300 KB" }] },
+        { id: "l-6", title: "Evening Reset Ritual", duration: "10 min", locked: false, summary: "Why double cleansing changes everything.", resources: [] },
+        { id: "l-7", title: "Active Ingredients 101", duration: "15 min", locked: false, summary: "Retinoids, BHA, AHA, niacinamide — when and how.", resources: [{ name: "Ingredients guide.pdf", size: "1.6 MB" }] },
+        { id: "l-8", title: "Layering Without Irritation", duration: "8 min", locked: true, summary: "The order that protects your barrier.", resources: [] },
       ],
     },
     {
@@ -49,9 +48,9 @@ export const course = {
       title: "Lifestyle & Inner Health",
       description: "Sleep, stress, nutrition — the invisible levers.",
       lessons: [
-        { id: "l-9", title: "Diet Triggers Decoded", duration: "14 min", completed: false, locked: true, summary: "Dairy, sugar, omega ratios — what the data really says.", resources: [] },
-        { id: "l-10", title: "Sleep & Skin Repair", duration: "9 min", completed: false, locked: true, summary: "How REM cycles drive cell turnover.", resources: [] },
-        { id: "l-11", title: "Stress, Cortisol & Breakouts", duration: "11 min", completed: false, locked: true, summary: "Calm nervous system, calmer skin.", resources: [] },
+        { id: "l-9", title: "Diet Triggers Decoded", duration: "14 min", locked: true, summary: "Dairy, sugar, omega ratios — what the data really says.", resources: [] },
+        { id: "l-10", title: "Sleep & Skin Repair", duration: "9 min", locked: true, summary: "How REM cycles drive cell turnover.", resources: [] },
+        { id: "l-11", title: "Stress, Cortisol & Breakouts", duration: "11 min", locked: true, summary: "Calm nervous system, calmer skin.", resources: [] },
       ],
     },
     {
@@ -59,9 +58,9 @@ export const course = {
       title: "Long-Term Maintenance",
       description: "Protect your transformation forever.",
       lessons: [
-        { id: "l-12", title: "Reading Your Skin Signals", duration: "8 min", completed: false, locked: true, summary: "Adjust your routine before flare-ups happen.", resources: [] },
-        { id: "l-13", title: "Seasonal Adjustments", duration: "10 min", completed: false, locked: true, summary: "Winter barrier care vs. summer oil control.", resources: [] },
-        { id: "l-14", title: "Graduation & Beyond", duration: "6 min", completed: false, locked: true, summary: "Your maintenance protocol for life.", resources: [] },
+        { id: "l-12", title: "Reading Your Skin Signals", duration: "8 min", locked: true, summary: "Adjust your routine before flare-ups happen.", resources: [] },
+        { id: "l-13", title: "Seasonal Adjustments", duration: "10 min", locked: true, summary: "Winter barrier care vs. summer oil control.", resources: [] },
+        { id: "l-14", title: "Graduation & Beyond", duration: "6 min", locked: true, summary: "Your maintenance protocol for life.", resources: [] },
       ],
     },
   ] satisfies Chapter[],

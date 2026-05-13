@@ -154,7 +154,7 @@ function CourseEditorContent() {
               summary: l.summary,
               videoUrl: "",
               locked: l.locked,
-              completed: l.completed,
+              completed: false,
               order: j,
               resources: l.resources,
             })),
