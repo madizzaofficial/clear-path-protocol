@@ -17,6 +17,7 @@ type RoutineStep = {
   order: number;
   category: string;
   product: string;
+  description?: string;
   instructions: string;
   imageUrl?: string;
   purchaseUrl?: string;
@@ -386,6 +387,9 @@ function RoutineBlock({
                       <h3 className={`mt-1.5 font-display text-base font-semibold ${isChecked ? "text-muted-foreground line-through" : ""}`}>
                         {step.product}
                       </h3>
+                      {step.description && (
+                        <p className="mt-0.5 text-xs italic text-muted-foreground/70">{step.description}</p>
+                      )}
                       {step.instructions && (
                         <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{step.instructions}</p>
                       )}
