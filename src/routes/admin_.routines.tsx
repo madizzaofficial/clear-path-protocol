@@ -197,6 +197,8 @@ const uploadProductImageFn = createServerFn({ method: "POST" })
       endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
       credentials: { accessKeyId, secretAccessKey },
     });
+    client.middlewareStack.remove("flexibleChecksumsInputMiddleware");
+    client.middlewareStack.remove("flexibleChecksumsMiddleware");
 
     const key = `product-images/${Date.now()}-${fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
     console.log("[uploadProductImage] sending to bucket:", bucket, "key:", key);
