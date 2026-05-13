@@ -195,7 +195,7 @@ const uploadProductImageFn = createServerFn({ method: "POST" })
     const { Sha256 } = await import("@aws-crypto/sha256-js");
 
     const body = Buffer.from(base64, "base64");
-    const host = `${bucket}.${accountId}.r2.cloudflarestorage.com`;
+    const host = `${accountId}.r2.cloudflarestorage.com`;
     const key = `product-images/${Date.now()}-${fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
 
     const signer = new SignatureV4({
@@ -208,7 +208,7 @@ const uploadProductImageFn = createServerFn({ method: "POST" })
     const signed = await signer.sign({
       method: "PUT",
       hostname: host,
-      path: `/${key}`,
+      path: `/${bucket}/${key}`,
       protocol: "https:",
       headers: {
         host,
@@ -218,7 +218,7 @@ const uploadProductImageFn = createServerFn({ method: "POST" })
       body,
     });
 
-    const response = await fetch(`https://${host}/${key}`, {
+    const response = await fetch(`https://${host}/${bucket}/${key}`, {
       method: "PUT",
       headers: signed.headers as Record<string, string>,
       body,
