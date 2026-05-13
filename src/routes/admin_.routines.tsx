@@ -180,22 +180,29 @@ const uploadProductImageFn = createServerFn({ method: "POST" })
   .inputValidator((d: { fileName: string; contentType: string; base64: string }) => d)
   .handler(async (ctx) => {
     const { fileName, contentType, base64 } = ctx.data;
-    const { PutObjectCommand } = await import("@aws-sdk/client-s3");
-    const { r2 } = await import("@/lib/r2");
+    const { S3Client, PutObjectCommand } = await import("@aws-sdk/client-s3");
 
-    const bucket = process.env.CLOUDFLARE_R2_BUCKET;
-    const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL;
-    const accountId = process.env.CLOUDFLARE_R2_ACCOUNT_ID;
-    const accessKey = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID;
-    const secretKey = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY;
-    console.log("[uploadProductImage] env check — bucket:", bucket, "| accountId:", accountId, "| accessKeyLen:", accessKey?.length ?? "MISSING", "| secretKeyLen:", secretKey?.length ?? "MISSING");
-    if (!bucket || !publicUrl) {
-      throw new Error(`R2 env vars missing: BUCKET=${bucket ?? "unset"} PUBLIC_URL=${publicUrl ?? "unset"}`);
+    const bucket = process.env.CLOUDFLARE_R2_BUCKET!;
+    const publicUrlBase = process.env.CLOUDFLARE_R2_PUBLIC_URL!;
+    const accountId = process.env.CLOUDFLARE_R2_ACCOUNT_ID!;
+    const accessKeyId = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID!;
+    const secretAccessKey = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY!;
+
+    if (!bucket || !accountId || !accessKeyId || !secretAccessKey) {
+      throw new Error("R2 env vars missing");
     }
 
+    const client = new S3Client({
+      region: "auto",
+      endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+      credentials: { accessKeyId, secretAccessKey },
+      forcePathStyle: true,
+    });
+
     const key = `product-images/${Date.now()}-${fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+    console.log("[uploadProductImage] sending to bucket:", bucket, "key:", key);
     try {
-      await r2.send(
+      await client.send(
         new PutObjectCommand({
           Bucket: bucket,
           Key: key,
@@ -204,11 +211,11 @@ const uploadProductImageFn = createServerFn({ method: "POST" })
         })
       );
     } catch (err) {
-      console.error("[uploadProductImage] R2 PutObject failed:", err);
-      throw new Error(`R2 upload failed — bucket="${bucket}" accountId="${accountId}": ${(err as Error).message}`);
+      console.error("[uploadProductImage] failed:", err);
+      throw new Error(`R2 PutObject failed: ${(err as Error).message}`);
     }
 
-    return { publicUrl: `${publicUrl}/${key}` };
+    return { publicUrl: `${publicUrlBase}/${key}` };
   });
 
 // ─── Email HTML builder ───────────────────────────────────────────────────────
