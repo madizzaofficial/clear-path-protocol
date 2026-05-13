@@ -359,9 +359,9 @@ function RoutineBlock({
               <div className="flex gap-4">
 
                 {/* Product image */}
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-muted">
+                <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-muted md:h-28 md:w-28">
                   {step.imageUrl ? (
-                    <img src={step.imageUrl} alt={step.product} className="h-full w-full object-cover" />
+                    <img src={step.imageUrl} alt={step.product} className="h-full w-full object-contain p-1" />
                   ) : (
                     <ImageOff className="h-5 w-5 text-muted-foreground/40" />
                   )}
