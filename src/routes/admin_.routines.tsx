@@ -196,7 +196,6 @@ const uploadProductImageFn = createServerFn({ method: "POST" })
       region: "auto",
       endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
       credentials: { accessKeyId, secretAccessKey },
-      forcePathStyle: true,
     });
 
     const key = `product-images/${Date.now()}-${fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
