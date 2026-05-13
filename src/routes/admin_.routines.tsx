@@ -5,7 +5,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { inngest } from "@/lib/inngest";
 import { collection, doc, getDocs, getDoc, setDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import type { CatalogProduct } from "./admin_.products";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   DndContext,
@@ -40,6 +41,8 @@ import {
   ChevronRight,
   Upload,
   X,
+  Package,
+  Search,
 } from "lucide-react";
 import {
   Dialog,
@@ -94,19 +97,7 @@ type SendEmailPayload = {
   pm: RoutineStep[];
 };
 
-const CATEGORIES = [
-  "Démaquillant",
-  "Nettoyant",
-  "Exfoliant",
-  "Tonique",
-  "Sérum",
-  "Actif",
-  "Hydratant",
-  "Crème de nuit",
-  "Protection solaire",
-  "Huile",
-  "Autre",
-];
+import { CATEGORIES } from "@/lib/skincare-categories";
 
 // ─── Server function ──────────────────────────────────────────────────────────
 
@@ -176,42 +167,7 @@ const triggerRoutineEventFn = createServerFn({ method: "POST" })
     await inngest.send({ name: "routine/assigned", data: ctx.data });
   });
 
-const uploadProductImageFn = createServerFn({ method: "POST" })
-  .inputValidator((d: { fileName: string; contentType: string; base64: string }) => d)
-  .handler(async (ctx) => {
-    const { fileName, contentType, base64 } = ctx.data;
-
-    const bucket = process.env.CLOUDFLARE_R2_BUCKET!;
-    const publicUrlBase = process.env.CLOUDFLARE_R2_PUBLIC_URL!;
-
-    if (!bucket || !publicUrlBase) throw new Error("R2 env vars missing");
-
-    const { getSignedUrl } = await import("@aws-sdk/s3-request-presigner");
-    const { PutObjectCommand } = await import("@aws-sdk/client-s3");
-    const { r2 } = await import("@/lib/r2");
-
-    const key = `product-images/${Date.now()}-${fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-
-    const presignedUrl = await getSignedUrl(
-      r2,
-      new PutObjectCommand({ Bucket: bucket, Key: key, ContentType: contentType }),
-      { expiresIn: 60 }
-    );
-
-    // Server-to-server PUT — no CORS, no extra headers needed
-    const body = Buffer.from(base64, "base64");
-    const response = await fetch(presignedUrl, {
-      method: "PUT",
-      headers: { "Content-Type": contentType },
-      body,
-    });
-
-    if (!response.ok) {
-      throw new Error(`Upload échoué (${response.status})`);
-    }
-
-    return { publicUrl: `${publicUrlBase}/${key}` };
-  });
+import { uploadProductImageFn } from "@/lib/upload-image";
 
 // ─── Email HTML builder ───────────────────────────────────────────────────────
 
@@ -370,6 +326,9 @@ function RoutinesContent() {
   const [isNewStep, setIsNewStep] = useState(false);
   const [deletingStepId, setDeletingStepId] = useState<string | null>(null);
 
+  const [catalogProducts, setCatalogProducts] = useState<CatalogProduct[]>([]);
+  const [savingToCatalog, setSavingToCatalog] = useState(false);
+
   const { uid: preselectedUid } = Route.useSearch();
 
   const sensors = useSensors(
@@ -381,9 +340,13 @@ function RoutinesContent() {
     async function loadUsers() {
       setLoadingUsers(true);
       try {
-        const snap = await getDocs(collection(db, "users"));
-        const fetched = snap.docs.map((d) => d.data() as UserDoc);
+        const [usersSnap, catalogSnap] = await Promise.all([
+          getDocs(collection(db, "users")),
+          getDocs(collection(db, "admin_products")),
+        ]);
+        const fetched = usersSnap.docs.map((d) => d.data() as UserDoc);
         setUsers(fetched);
+        setCatalogProducts(catalogSnap.docs.map((d) => d.data() as CatalogProduct));
 
         // Auto-select if uid was passed via search param
         if (preselectedUid) {
@@ -507,6 +470,32 @@ function RoutinesContent() {
     setRoutine(updated);
     setEditingStep(null);
     saveRoutine(updated);
+  }
+
+  async function handleSaveToCatalog(data: { category: string; product: string; instructions: string; imageUrl?: string; purchaseUrl?: string }) {
+    setSavingToCatalog(true);
+    try {
+      const existing = catalogProducts.find(
+        (p) => p.name.toLowerCase() === data.product.trim().toLowerCase() && p.category === data.category
+      );
+      const id = existing?.id ?? crypto.randomUUID();
+      const entry: CatalogProduct = {
+        id,
+        name: data.product.trim(),
+        category: data.category,
+        instructions: data.instructions,
+        imageUrl: data.imageUrl,
+        purchaseUrl: data.purchaseUrl,
+        createdAt: existing?.createdAt ?? Date.now(),
+        updatedAt: Date.now(),
+      };
+      await setDoc(doc(db, "admin_products", id), entry);
+      setCatalogProducts((prev) =>
+        existing ? prev.map((p) => (p.id === id ? entry : p)) : [...prev, entry]
+      );
+    } finally {
+      setSavingToCatalog(false);
+    }
   }
 
   function handleDeleteStep() {
@@ -818,6 +807,9 @@ function RoutinesContent() {
         onClose={() => setEditingStep(null)}
         onSave={handleSaveStep}
         saving={saving}
+        catalogProducts={catalogProducts}
+        onSaveToCatalog={handleSaveToCatalog}
+        savingToCatalog={savingToCatalog}
       />
 
       <AlertDialog
@@ -942,20 +934,36 @@ function StepDialog({
   onClose,
   onSave,
   saving,
+  catalogProducts,
+  onSaveToCatalog,
+  savingToCatalog,
 }: {
   step: RoutineStep | null;
   isNew: boolean;
   onClose: () => void;
   onSave: (d: { category: string; product: string; instructions: string; imageUrl?: string; purchaseUrl?: string }) => void;
   saving: boolean;
+  catalogProducts: CatalogProduct[];
+  onSaveToCatalog: (data: { category: string; product: string; instructions: string; imageUrl?: string; purchaseUrl?: string }) => Promise<void>;
+  savingToCatalog: boolean;
 }) {
-  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [category, setCategory] = useState<string>(CATEGORIES[0]);
   const [product, setProduct] = useState("");
   const [instructions, setInstructions] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [purchaseUrl, setPurchaseUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [catalogSearch, setCatalogSearch] = useState("");
+  const [showCatalogPicker, setShowCatalogPicker] = useState(false);
+
+  const catalogResults = useMemo(() => {
+    if (!catalogSearch.trim()) return catalogProducts.slice(0, 8);
+    const q = catalogSearch.toLowerCase();
+    return catalogProducts
+      .filter((p) => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q))
+      .slice(0, 20);
+  }, [catalogProducts, catalogSearch]);
 
   useEffect(() => {
     if (step) {
@@ -966,8 +974,20 @@ function StepDialog({
       setPurchaseUrl(step.purchaseUrl ?? "");
       setUploadError(null);
       setUploading(false);
+      setShowCatalogPicker(false);
+      setCatalogSearch("");
     }
   }, [step]);
+
+  function fillFromCatalog(p: CatalogProduct) {
+    setCategory(p.category);
+    setProduct(p.name);
+    setInstructions(p.instructions);
+    setImageUrl(p.imageUrl ?? "");
+    setPurchaseUrl(p.purchaseUrl ?? "");
+    setCatalogSearch("");
+    setShowCatalogPicker(false);
+  }
 
   async function handleImageFile(file: File) {
     setUploading(true);
@@ -1000,6 +1020,61 @@ function StepDialog({
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
+          {/* Catalog picker */}
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <label className="text-sm font-medium text-foreground/80">Depuis le catalogue</label>
+              <button
+                type="button"
+                onClick={() => setShowCatalogPicker((v) => !v)}
+                className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+              >
+                <Package className="h-3 w-3" />
+                {showCatalogPicker ? "Fermer" : "Choisir un produit"}
+              </button>
+            </div>
+            {showCatalogPicker && (
+              <div className="rounded-2xl border border-border bg-muted/40 p-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    value={catalogSearch}
+                    onChange={(e) => setCatalogSearch(e.target.value)}
+                    placeholder="Rechercher dans le catalogue…"
+                    className="h-9 w-full rounded-xl border border-border bg-background pl-9 pr-3 text-sm outline-none focus:border-primary"
+                  />
+                </div>
+                <ul className="mt-2 max-h-44 overflow-y-auto space-y-0.5">
+                  {catalogResults.length === 0 ? (
+                    <li className="py-3 text-center text-xs text-muted-foreground">Aucun résultat</li>
+                  ) : (
+                    catalogResults.map((p) => (
+                      <li key={p.id}>
+                        <button
+                          type="button"
+                          onClick={() => fillFromCatalog(p)}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors hover:bg-background"
+                        >
+                          {p.imageUrl ? (
+                            <img src={p.imageUrl} className="h-8 w-8 shrink-0 rounded-lg object-contain border border-border" />
+                          ) : (
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-muted">
+                              <Package className="h-3.5 w-3.5 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium">{p.name}</p>
+                            <p className="text-xs text-muted-foreground">{p.category}</p>
+                          </div>
+                        </button>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </div>
+            )}
+          </div>
+
           <div>
             <label className="mb-2 block text-sm font-medium text-foreground/80">Catégorie</label>
             <select
@@ -1089,6 +1164,15 @@ function StepDialog({
           </div>
         </div>
         <DialogFooter className="gap-2 sm:gap-2">
+          <button
+            type="button"
+            onClick={() => onSaveToCatalog({ category, product, instructions, imageUrl: imageUrl.trim() || undefined, purchaseUrl: purchaseUrl.trim() || undefined })}
+            disabled={savingToCatalog || !product.trim()}
+            className="mr-auto flex items-center gap-2 rounded-2xl border border-border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-50"
+          >
+            {savingToCatalog ? <Loader2 className="h-4 w-4 animate-spin" /> : <Package className="h-4 w-4" />}
+            Catalogue
+          </button>
           <button
             onClick={onClose}
             className="rounded-2xl border border-border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted"
