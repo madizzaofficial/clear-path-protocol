@@ -185,6 +185,8 @@ const uploadProductImageFn = createServerFn({ method: "POST" })
 
     const bucket = process.env.CLOUDFLARE_R2_BUCKET;
     const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL;
+    const accountId = process.env.CLOUDFLARE_R2_ACCOUNT_ID;
+    console.log("[uploadProductImage] env check — bucket:", bucket, "| accountId:", accountId, "| publicUrl:", publicUrl);
     if (!bucket || !publicUrl) {
       throw new Error(`R2 env vars missing: BUCKET=${bucket ?? "unset"} PUBLIC_URL=${publicUrl ?? "unset"}`);
     }
