@@ -405,7 +405,8 @@ function RoutinesContent() {
     if (!selectedUser) return;
     setSaving(true);
     try {
-      await setDoc(doc(db, "routines", selectedUser.uid), updated);
+      const clean = JSON.parse(JSON.stringify(updated)) as StudentRoutine;
+      await setDoc(doc(db, "routines", selectedUser.uid), clean);
       setRoutine(updated);
     } finally {
       setSaving(false);
@@ -488,8 +489,9 @@ function RoutinesContent() {
         updatedAt: Date.now(),
       };
     } else return;
-    saveRoutine(updated);
+    setRoutine(updated);
     setEditingStep(null);
+    saveRoutine(updated);
   }
 
   function handleDeleteStep() {
@@ -939,6 +941,7 @@ function StepDialog({
   const [purchaseUrl, setPurchaseUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (step) {
@@ -947,6 +950,7 @@ function StepDialog({
       setInstructions(step.instructions);
       setImageUrl(step.imageUrl ?? "");
       setPurchaseUrl(step.purchaseUrl ?? "");
+      setUploadError(null);
       setUploading(false);
       setUploadProgress(0);
     }
@@ -955,6 +959,7 @@ function StepDialog({
   async function handleImageFile(file: File) {
     setUploading(true);
     setUploadProgress(0);
+    setUploadError(null);
     try {
       const { uploadUrl, publicUrl } = await getR2PresignedUrlFn({
         data: { fileName: file.name, contentType: file.type || "image/jpeg" },
@@ -971,6 +976,8 @@ function StepDialog({
         xhr.send(file);
       });
       setImageUrl(publicUrl);
+    } catch {
+      setUploadError("Erreur lors de l'upload — réessaye.");
     } finally {
       setUploading(false);
     }
@@ -1049,19 +1056,24 @@ function StepDialog({
                 </span>
               </div>
             ) : (
-              <label className="flex cursor-pointer items-center gap-2 rounded-2xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary-soft/30 hover:text-foreground">
-                <Upload className="h-4 w-4 shrink-0" />
-                Choisir une image
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="sr-only"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleImageFile(file);
-                  }}
-                />
-              </label>
+              <>
+                <label className="flex cursor-pointer items-center gap-2 rounded-2xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary-soft/30 hover:text-foreground">
+                  <Upload className="h-4 w-4 shrink-0" />
+                  Choisir une image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleImageFile(file);
+                    }}
+                  />
+                </label>
+                {uploadError && (
+                  <p className="mt-1.5 text-xs text-destructive">{uploadError}</p>
+                )}
+              </>
             )}
           </div>
           <div>

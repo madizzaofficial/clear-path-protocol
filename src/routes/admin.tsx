@@ -74,7 +74,8 @@ function AdminPage() {
 
         const nSet = new Set<string>();
         nutritionSnap.docs.forEach((d) => {
-          if ((d.data().items ?? []).length > 0) nSet.add(d.id);
+          const { toEat = [], toAvoid = [] } = d.data();
+          if (toEat.length > 0 || toAvoid.length > 0) nSet.add(d.id);
         });
         setNutritionSet(nSet);
 
