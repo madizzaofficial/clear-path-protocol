@@ -207,9 +207,7 @@ const uploadProductImageFn = createServerFn({ method: "POST" })
     });
 
     if (!response.ok) {
-      const text = await response.text();
-      console.error("[uploadProductImage] presigned PUT failed:", response.status, text);
-      throw new Error(`Upload failed (${response.status}): ${text}`);
+      throw new Error(`Upload échoué (${response.status})`);
     }
 
     return { publicUrl: `${publicUrlBase}/${key}` };
