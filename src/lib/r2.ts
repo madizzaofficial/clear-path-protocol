@@ -7,6 +7,7 @@ const client = new S3Client({
     accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID!,
     secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY!,
   },
+  forcePathStyle: true,
 });
 
 // R2 rejects presigned PUT URLs that contain CRC32 checksum query params (x-amz-checksum-crc32).
