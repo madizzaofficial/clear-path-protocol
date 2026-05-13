@@ -42,6 +42,7 @@ export type CatalogProduct = {
   id: string;
   name: string;
   category: string;
+  description?: string;
   instructions: string;
   imageUrl?: string;
   purchaseUrl?: string;
@@ -297,6 +298,9 @@ function ProductCard({
         <p className="text-sm font-semibold leading-snug text-foreground line-clamp-2">
           {product.name}
         </p>
+        {product.description && (
+          <p className="text-xs text-muted-foreground/70 italic line-clamp-2">{product.description}</p>
+        )}
         {product.instructions && (
           <p className="text-xs text-muted-foreground line-clamp-2">{product.instructions}</p>
         )}
@@ -353,6 +357,7 @@ function ProductDialog({
 }) {
   const [name, setName] = useState("");
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
+  const [description, setDescription] = useState("");
   const [instructions, setInstructions] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [purchaseUrl, setPurchaseUrl] = useState("");
@@ -363,6 +368,7 @@ function ProductDialog({
     if (product) {
       setName(product.name);
       setCategory(product.category || CATEGORIES[0]);
+      setDescription(product.description ?? "");
       setInstructions(product.instructions);
       setImageUrl(product.imageUrl ?? "");
       setPurchaseUrl(product.purchaseUrl ?? "");
@@ -396,6 +402,7 @@ function ProductDialog({
     onSave({
       name: name.trim(),
       category,
+      description: description.trim() || undefined,
       instructions,
       imageUrl: imageUrl.trim() || undefined,
       purchaseUrl: purchaseUrl.trim() || undefined,
@@ -434,6 +441,20 @@ function ProductDialog({
                 <option key={c}>{c}</option>
               ))}
             </select>
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-foreground/80">
+              Description <span className="font-normal text-muted-foreground">(ce que fait le produit)</span>
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={2}
+              placeholder="ex. Nettoyant doux hydratant, idéal pour les peaux sensibles…"
+              className="w-full resize-none rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
           </div>
 
           {/* Instructions */}
