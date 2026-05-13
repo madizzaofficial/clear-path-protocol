@@ -184,43 +184,22 @@ const uploadProductImageFn = createServerFn({ method: "POST" })
     const bucket = process.env.CLOUDFLARE_R2_BUCKET!;
     const publicUrlBase = process.env.CLOUDFLARE_R2_PUBLIC_URL!;
     const accountId = process.env.CLOUDFLARE_R2_ACCOUNT_ID!;
-    const accessKeyId = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID!;
-    const secretAccessKey = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY!;
+    const apiToken = process.env.CLOUDFLARE_R2_API_TOKEN!;
 
-    if (!bucket || !accountId || !accessKeyId || !secretAccessKey) {
-      throw new Error("R2 env vars missing");
+    if (!bucket || !accountId || !apiToken) {
+      throw new Error("R2 env vars missing (BUCKET, ACCOUNT_ID or API_TOKEN)");
     }
 
-    const { SignatureV4 } = await import("@smithy/signature-v4");
-    const { Sha256 } = await import("@aws-crypto/sha256-js");
-
     const body = Buffer.from(base64, "base64");
-    const host = `${accountId}.r2.cloudflarestorage.com`;
     const key = `product-images/${Date.now()}-${fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+    const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucket}/objects/${key}`;
 
-    const signer = new SignatureV4({
-      credentials: { accessKeyId, secretAccessKey },
-      region: "auto",
-      service: "s3",
-      sha256: Sha256,
-    });
-
-    const signed = await signer.sign({
+    const response = await fetch(url, {
       method: "PUT",
-      hostname: host,
-      path: `/${bucket}/${key}`,
-      protocol: "https:",
       headers: {
-        host,
-        "content-type": contentType,
-        "content-length": String(body.length),
+        "Authorization": `Bearer ${apiToken}`,
+        "Content-Type": contentType,
       },
-      body,
-    });
-
-    const response = await fetch(`https://${host}/${bucket}/${key}`, {
-      method: "PUT",
-      headers: signed.headers as Record<string, string>,
       body,
     });
 
