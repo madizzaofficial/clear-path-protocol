@@ -180,7 +180,6 @@ const uploadProductImageFn = createServerFn({ method: "POST" })
   .inputValidator((d: { fileName: string; contentType: string; base64: string }) => d)
   .handler(async (ctx) => {
     const { fileName, contentType, base64 } = ctx.data;
-    const { S3Client, PutObjectCommand } = await import("@aws-sdk/client-s3");
 
     const bucket = process.env.CLOUDFLARE_R2_BUCKET!;
     const publicUrlBase = process.env.CLOUDFLARE_R2_PUBLIC_URL!;
@@ -192,28 +191,43 @@ const uploadProductImageFn = createServerFn({ method: "POST" })
       throw new Error("R2 env vars missing");
     }
 
-    const client = new S3Client({
-      region: "auto",
-      endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
-      credentials: { accessKeyId, secretAccessKey },
-    });
-    client.middlewareStack.remove("flexibleChecksumsInputMiddleware");
-    client.middlewareStack.remove("flexibleChecksumsMiddleware");
+    const { SignatureV4 } = await import("@smithy/signature-v4");
+    const { Sha256 } = await import("@aws-crypto/sha256-js");
 
+    const body = Buffer.from(base64, "base64");
+    const host = `${bucket}.${accountId}.r2.cloudflarestorage.com`;
     const key = `product-images/${Date.now()}-${fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-    console.log("[uploadProductImage] sending to bucket:", bucket, "key:", key);
-    try {
-      await client.send(
-        new PutObjectCommand({
-          Bucket: bucket,
-          Key: key,
-          Body: Buffer.from(base64, "base64"),
-          ContentType: contentType,
-        })
-      );
-    } catch (err) {
-      console.error("[uploadProductImage] failed:", err);
-      throw new Error(`R2 PutObject failed: ${(err as Error).message}`);
+
+    const signer = new SignatureV4({
+      credentials: { accessKeyId, secretAccessKey },
+      region: "auto",
+      service: "s3",
+      sha256: Sha256,
+    });
+
+    const signed = await signer.sign({
+      method: "PUT",
+      hostname: host,
+      path: `/${key}`,
+      protocol: "https:",
+      headers: {
+        host,
+        "content-type": contentType,
+        "content-length": String(body.length),
+      },
+      body,
+    });
+
+    const response = await fetch(`https://${host}/${key}`, {
+      method: "PUT",
+      headers: signed.headers as Record<string, string>,
+      body,
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      console.error("[uploadProductImage] failed:", response.status, text);
+      throw new Error(`R2 upload failed (${response.status}): ${text}`);
     }
 
     return { publicUrl: `${publicUrlBase}/${key}` };
