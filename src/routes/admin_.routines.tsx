@@ -203,7 +203,7 @@ const uploadProductImageFn = createServerFn({ method: "POST" })
       );
     } catch (err) {
       console.error("[uploadProductImage] R2 PutObject failed:", err);
-      throw err;
+      throw new Error(`R2 upload failed — bucket="${bucket}" accountId="${accountId}": ${(err as Error).message}`);
     }
 
     return { publicUrl: `${publicUrl}/${key}` };
