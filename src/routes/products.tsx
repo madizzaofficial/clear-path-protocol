@@ -388,7 +388,13 @@ function RoutineBlock({
                         {step.product}
                       </h3>
                       {step.description && (
-                        <p className="mt-0.5 text-xs italic text-muted-foreground/70">{step.description}</p>
+                        <p className="mt-0.5 text-xs italic text-muted-foreground/70">
+                          {step.description.length > 120 ? (
+                            <ExpandableText text={step.description} />
+                          ) : (
+                            step.description
+                          )}
+                        </p>
                       )}
                       {step.instructions && (
                         <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{step.instructions}</p>
@@ -432,5 +438,21 @@ function RoutineBlock({
         })}
       </ol>
     </section>
+  );
+}
+
+function ExpandableText({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <>
+      <span className={!expanded ? "line-clamp-3" : undefined}>{text}</span>
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="ml-1 text-xs font-medium text-primary/70 hover:text-primary"
+      >
+        {expanded ? "Voir moins" : "Voir plus"}
+      </button>
+    </>
   );
 }
