@@ -176,26 +176,24 @@ const triggerRoutineEventFn = createServerFn({ method: "POST" })
     await inngest.send({ name: "routine/assigned", data: ctx.data });
   });
 
-const getR2PresignedUrlFn = createServerFn({ method: "POST" })
-  .inputValidator((d: { fileName: string; contentType: string }) => d)
+const uploadProductImageFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { fileName: string; contentType: string; base64: string }) => d)
   .handler(async (ctx) => {
-    const { fileName, contentType } = ctx.data;
-    const { getSignedUrl } = await import("@aws-sdk/s3-request-presigner");
+    const { fileName, contentType, base64 } = ctx.data;
     const { PutObjectCommand } = await import("@aws-sdk/client-s3");
     const { r2 } = await import("@/lib/r2");
 
     const key = `product-images/${Date.now()}-${fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-    const uploadUrl = await getSignedUrl(
-      r2,
+    await r2.send(
       new PutObjectCommand({
         Bucket: process.env.CLOUDFLARE_R2_BUCKET!,
         Key: key,
+        Body: Buffer.from(base64, "base64"),
         ContentType: contentType,
-      }),
-      { expiresIn: 120 }
+      })
     );
 
-    return { uploadUrl, publicUrl: `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${key}` };
+    return { publicUrl: `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${key}` };
   });
 
 // ─── Email HTML builder ───────────────────────────────────────────────────────
@@ -940,7 +938,6 @@ function StepDialog({
   const [imageUrl, setImageUrl] = useState("");
   const [purchaseUrl, setPurchaseUrl] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -952,28 +949,21 @@ function StepDialog({
       setPurchaseUrl(step.purchaseUrl ?? "");
       setUploadError(null);
       setUploading(false);
-      setUploadProgress(0);
     }
   }, [step]);
 
   async function handleImageFile(file: File) {
     setUploading(true);
-    setUploadProgress(0);
     setUploadError(null);
     try {
-      const { uploadUrl, publicUrl } = await getR2PresignedUrlFn({
-        data: { fileName: file.name, contentType: file.type || "image/jpeg" },
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve((reader.result as string).split(",")[1]);
+        reader.onerror = () => reject(new Error("File read error"));
+        reader.readAsDataURL(file);
       });
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
-        };
-        xhr.onload = () => (xhr.status < 300 ? resolve() : reject(new Error(`Upload failed: ${xhr.status}`)));
-        xhr.onerror = () => reject(new Error("Upload error"));
-        xhr.open("PUT", uploadUrl);
-        xhr.setRequestHeader("Content-Type", file.type || "image/jpeg");
-        xhr.send(file);
+      const { publicUrl } = await uploadProductImageFn({
+        data: { fileName: file.name, contentType: file.type || "image/jpeg", base64 },
       });
       setImageUrl(publicUrl);
     } catch {
@@ -1045,15 +1035,7 @@ function StepDialog({
             ) : uploading ? (
               <div className="flex items-center gap-3 rounded-2xl border border-border bg-background px-4 py-3">
                 <Loader2 className="h-4 w-4 shrink-0 animate-spin text-primary" />
-                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-primary transition-all"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-                <span className="w-8 text-right text-xs tabular-nums text-muted-foreground">
-                  {uploadProgress}%
-                </span>
+                <span className="text-sm text-muted-foreground">Upload en cours…</span>
               </div>
             ) : (
               <>
