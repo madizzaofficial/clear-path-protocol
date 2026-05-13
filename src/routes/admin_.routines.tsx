@@ -1013,12 +1013,13 @@ function StepDialog({
 
   return (
     <Dialog open={!!step} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="rounded-3xl sm:max-w-lg">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[90vh] flex-col rounded-3xl sm:max-w-lg">
+        <DialogHeader className="shrink-0">
           <DialogTitle className="font-display text-xl">
             {isNew ? "Ajouter une étape" : "Modifier l'étape"}
           </DialogTitle>
         </DialogHeader>
+        <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="space-y-4 py-2">
           {/* Catalog picker */}
           <div>
@@ -1163,7 +1164,8 @@ function StepDialog({
             />
           </div>
         </div>
-        <DialogFooter className="gap-2 sm:gap-2">
+        </div>
+        <DialogFooter className="shrink-0 gap-2 sm:gap-2">
           <button
             type="button"
             onClick={() => onSaveToCatalog({ category, product, instructions, imageUrl: imageUrl.trim() || undefined, purchaseUrl: purchaseUrl.trim() || undefined })}
