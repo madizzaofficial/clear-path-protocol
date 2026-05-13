@@ -183,30 +183,33 @@ const uploadProductImageFn = createServerFn({ method: "POST" })
 
     const bucket = process.env.CLOUDFLARE_R2_BUCKET!;
     const publicUrlBase = process.env.CLOUDFLARE_R2_PUBLIC_URL!;
-    const accountId = process.env.CLOUDFLARE_R2_ACCOUNT_ID!;
-    const apiToken = process.env.CLOUDFLARE_R2_API_TOKEN!;
 
-    if (!bucket || !accountId || !apiToken) {
-      throw new Error("R2 env vars missing (BUCKET, ACCOUNT_ID or API_TOKEN)");
-    }
+    if (!bucket || !publicUrlBase) throw new Error("R2 env vars missing");
 
-    const body = Buffer.from(base64, "base64");
+    const { getSignedUrl } = await import("@aws-sdk/s3-request-presigner");
+    const { PutObjectCommand } = await import("@aws-sdk/client-s3");
+    const { r2 } = await import("@/lib/r2");
+
     const key = `product-images/${Date.now()}-${fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-    const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucket}/objects/${key}`;
 
-    const response = await fetch(url, {
+    const presignedUrl = await getSignedUrl(
+      r2,
+      new PutObjectCommand({ Bucket: bucket, Key: key, ContentType: contentType }),
+      { expiresIn: 60 }
+    );
+
+    // Server-to-server PUT — no CORS, no extra headers needed
+    const body = Buffer.from(base64, "base64");
+    const response = await fetch(presignedUrl, {
       method: "PUT",
-      headers: {
-        "Authorization": `Bearer ${apiToken}`,
-        "Content-Type": contentType,
-      },
+      headers: { "Content-Type": contentType },
       body,
     });
 
     if (!response.ok) {
       const text = await response.text();
-      console.error("[uploadProductImage] failed:", response.status, text);
-      throw new Error(`R2 upload failed (${response.status}): ${text}`);
+      console.error("[uploadProductImage] presigned PUT failed:", response.status, text);
+      throw new Error(`Upload failed (${response.status}): ${text}`);
     }
 
     return { publicUrl: `${publicUrlBase}/${key}` };
