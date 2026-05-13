@@ -397,7 +397,10 @@ function RoutineBlock({
                         </p>
                       )}
                       {step.instructions && (
-                        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{step.instructions}</p>
+                        <div className="mt-2">
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">Instructions</p>
+                          <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{step.instructions}</p>
+                        </div>
                       )}
                       <div className="mt-3 flex items-center gap-2 flex-wrap">
                         {step.purchaseUrl && (
