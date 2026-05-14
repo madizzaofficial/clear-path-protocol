@@ -112,6 +112,7 @@ function JournalContent({ uid }: { uid: string }) {
   const [savingNote, setSavingNote] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
   const [activeView, setActiveView] = useState<"journal" | "compare">("journal");
+  const [zoomedPhoto, setZoomedPhoto] = useState<string | null>(null);
 
   // Compare state
   const [compareA, setCompareA] = useState("");
@@ -323,6 +324,7 @@ function JournalContent({ uid }: { uid: string }) {
                     isUploading={uploading[key] ?? false}
                     isUploaded={uploadedAngles.has(key)}
                     onUpload={handleUpload}
+                    onZoom={setZoomedPhoto}
                   />
                 ))}
               </div>
@@ -390,6 +392,7 @@ function JournalContent({ uid }: { uid: string }) {
               hasNext={selectedIdx < pastHistory.length - 1}
               onPrev={() => selectedIdx > 0 && setSelectedDate(pastHistory[selectedIdx - 1].date)}
               onNext={() => selectedIdx < pastHistory.length - 1 && setSelectedDate(pastHistory[selectedIdx + 1].date)}
+              onZoom={setZoomedPhoto}
             />
 
             {history.length === 0 && (
@@ -418,6 +421,20 @@ function JournalContent({ uid }: { uid: string }) {
           />
         )}
       </main>
+
+      {/* Full-screen zoom overlay — rendered at page level so it's above everything */}
+      {zoomedPhoto && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm"
+          onClick={() => setZoomedPhoto(null)}
+        >
+          <img
+            src={zoomedPhoto}
+            alt="Photo agrandie"
+            className="max-h-screen max-w-full object-contain p-4"
+          />
+        </div>
+      )}
     </AppShell>
   );
 }
@@ -432,6 +449,7 @@ function PhotoCard({
   isUploading,
   isUploaded,
   onUpload,
+  onZoom,
 }: {
   label: string;
   icon: string;
@@ -440,6 +458,7 @@ function PhotoCard({
   isUploading: boolean;
   isUploaded: boolean;
   onUpload: (angle: Angle, file: File) => void;
+  onZoom?: (url: string) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(url);
@@ -515,8 +534,20 @@ function PhotoCard({
         {/* Change photo overlay on hover */}
         {preview && !isUploading && (
           <div className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100">
-            <div className="mb-3 flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-foreground">
-              <Upload className="h-3 w-3" /> Changer
+            <div className="mb-3 flex items-center gap-2">
+              {onZoom && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onZoom(preview); }}
+                  className="flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-foreground"
+                >
+                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                  Voir
+                </button>
+              )}
+              <div className="flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-foreground">
+                <Upload className="h-3 w-3" /> Changer
+              </div>
             </div>
           </div>
         )}
@@ -580,6 +611,7 @@ function PhotoDetailDialog({
   hasNext,
   onPrev,
   onNext,
+  onZoom,
 }: {
   entry: PhotoEntry | null;
   open: boolean;
@@ -588,25 +620,9 @@ function PhotoDetailDialog({
   hasNext: boolean;
   onPrev: () => void;
   onNext: () => void;
+  onZoom: (url: string) => void;
 }) {
-  const [zoomedPhoto, setZoomedPhoto] = useState<string | null>(null);
-
   return (
-    <>
-      {/* Full-screen photo zoom overlay */}
-      {zoomedPhoto && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-sm"
-          onClick={() => setZoomedPhoto(null)}
-        >
-          <img
-            src={zoomedPhoto}
-            alt="Photo agrandie"
-            className="max-h-screen max-w-full object-contain p-4"
-          />
-        </div>
-      )}
-
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-2xl p-0 overflow-hidden rounded-3xl">
         <DialogHeader className="px-5 pt-5 pb-3 border-b border-border/50">
@@ -643,7 +659,7 @@ function PhotoDetailDialog({
                   <img
                     src={entry[key as Angle]!}
                     alt={label}
-                    onClick={() => setZoomedPhoto(entry[key as Angle]!)}
+                    onClick={() => onZoom(entry[key as Angle]!)}
                     className="h-full w-full cursor-zoom-in object-cover object-top"
                   />
                 ) : (
@@ -662,7 +678,6 @@ function PhotoDetailDialog({
         )}
       </DialogContent>
     </Dialog>
-    </>
   );
 }
 
