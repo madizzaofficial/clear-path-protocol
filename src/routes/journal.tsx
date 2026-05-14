@@ -18,7 +18,6 @@ import {
   ArrowLeftRight,
   Loader2,
   Check,
-  Save,
   Upload,
 } from "lucide-react";
 
@@ -100,9 +99,9 @@ function JournalContent({ uid }: { uid: string }) {
   const [todayEntry, setTodayEntry] = useState<PhotoEntry | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [uploading, setUploading] = useState<Partial<Record<Angle, boolean>>>({});
+  const [uploadedAngles, setUploadedAngles] = useState<Set<Angle>>(new Set());
   const [note, setNote] = useState("");
-  const [savingNote, setSavingNote] = useState(false);
-  const [savedNote, setSavedNote] = useState(false);
+  const [noteSaved, setNoteSaved] = useState(false);
   const [activeView, setActiveView] = useState<"journal" | "compare">("journal");
 
   // Compare state
@@ -175,6 +174,9 @@ function JournalContent({ uid }: { uid: string }) {
           ? [...prev.slice(0, idx), updated, ...prev.slice(idx + 1)]
           : [updated, ...prev];
       });
+
+      setUploadedAngles((prev) => new Set([...prev, angle]));
+      setTimeout(() => setUploadedAngles((prev) => { const n = new Set(prev); n.delete(angle); return n; }), 2000);
     } catch (err) {
       console.error("Échec de l'upload photo :", err);
       alert("L'upload a échoué. Vérifie ta connexion et réessaie.");
@@ -184,8 +186,6 @@ function JournalContent({ uid }: { uid: string }) {
   }
 
   async function saveNote() {
-    setSavingNote(true);
-    setSavedNote(false);
     try {
       const base: PhotoEntry = todayEntry ?? {
         uid,
@@ -200,10 +200,10 @@ function JournalContent({ uid }: { uid: string }) {
       const updated: PhotoEntry = { ...base, note, updatedAt: Date.now() };
       await setDoc(doc(db, "progress_photos", entryId), updated);
       setTodayEntry(updated);
-      setSavedNote(true);
-      setTimeout(() => setSavedNote(false), 2000);
-    } finally {
-      setSavingNote(false);
+      setNoteSaved(true);
+      setTimeout(() => setNoteSaved(false), 2000);
+    } catch (err) {
+      console.error("Échec de la sauvegarde de la note :", err);
     }
   }
 
@@ -267,7 +267,7 @@ function JournalContent({ uid }: { uid: string }) {
                     {formatDate(today)}
                   </p>
                 </div>
-                {todayEntry && (todayEntry.front || todayEntry.left || todayEntry.right) && (
+                {todayEntry && (todayEntry.front || todayEntry.left || todayEntry.right || todayEntry.note) && (
                   <span className="flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-foreground">
                     <Check className="h-3 w-3 text-primary" /> Check-in effectué
                   </span>
@@ -283,6 +283,7 @@ function JournalContent({ uid }: { uid: string }) {
                     angle={key}
                     url={todayEntry?.[key] ?? null}
                     isUploading={uploading[key] ?? false}
+                    isUploaded={uploadedAngles.has(key)}
                     onUpload={handleUpload}
                   />
                 ))}
@@ -296,25 +297,24 @@ function JournalContent({ uid }: { uid: string }) {
                 <textarea
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
+                  onBlur={saveNote}
                   placeholder="Comment se sent votre peau aujourd'hui ? Rougeurs, sécheresse, éclat…"
                   rows={3}
                   className="w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
                 />
-                <div className="mt-3 flex justify-end">
-                  <button
-                    onClick={saveNote}
-                    disabled={savingNote}
-                    className="flex items-center gap-2 rounded-2xl bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
-                  >
-                    {savingNote ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : savedNote ? (
-                      <Check className="h-3.5 w-3.5" />
-                    ) : (
-                      <Save className="h-3.5 w-3.5" />
+                <div className="mt-2 flex justify-end">
+                  <AnimatePresence>
+                    {noteSaved && (
+                      <motion.span
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="flex items-center gap-1 text-xs font-medium text-primary"
+                      >
+                        <Check className="h-3 w-3" /> Sauvegardée
+                      </motion.span>
                     )}
-                    {savedNote ? "Sauvegardé !" : "Sauvegarder la note"}
-                  </button>
+                  </AnimatePresence>
                 </div>
               </div>
             </section>
@@ -371,6 +371,7 @@ function PhotoCard({
   angle,
   url,
   isUploading,
+  isUploaded,
   onUpload,
 }: {
   label: string;
@@ -378,6 +379,7 @@ function PhotoCard({
   angle: Angle;
   url: string | null;
   isUploading: boolean;
+  isUploaded: boolean;
   onUpload: (angle: Angle, file: File) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -435,6 +437,18 @@ function PhotoCard({
               className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-sm"
             >
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </motion.div>
+          )}
+          {isUploaded && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="absolute inset-0 flex items-center justify-center bg-green-500/20 backdrop-blur-sm"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500 shadow-lg">
+                <Check className="h-5 w-5 text-white" />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
