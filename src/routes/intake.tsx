@@ -251,11 +251,11 @@ function IntakePage() {
 
         {step === 0 && (
           <>
-            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">
-              Quel est ton type de peau ?
+            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Quel est ton type de peau ?</h1>
+            <div className="mt-2 flex items-center gap-3">
+              <p className="text-muted-foreground">Choisis celui qui te correspond le mieux en ce moment.</p>
               <HelpButton onClick={() => setHelpOpen("skinType")} />
-            </h1>
-            <p className="mt-2 text-muted-foreground">Choisis celui qui te correspond le mieux en ce moment.</p>
+            </div>
             <div className="mt-8 space-y-3">
               {SKIN_TYPES.map((t) => (
                 <button
@@ -284,11 +284,11 @@ function IntakePage() {
 
         {step === 1 && (
           <>
-            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">
-              Quel type de boutons as-tu ?
+            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Quel type de boutons as-tu ?</h1>
+            <div className="mt-2 flex items-center gap-3">
+              <p className="text-muted-foreground">Tu peux en sélectionner plusieurs.</p>
               <HelpButton onClick={() => setHelpOpen("acneTypes")} />
-            </h1>
-            <p className="mt-2 text-muted-foreground">Tu peux en sélectionner plusieurs.</p>
+            </div>
             <div className="mt-8 space-y-3">
               {ACNE_TYPES.map((t) => {
                 const sel = answers.acneTypes.includes(t.value);
@@ -318,11 +318,11 @@ function IntakePage() {
 
         {step === 2 && (
           <>
-            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">
-              Quelle est l'intensité ?
+            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Quelle est l'intensité ?</h1>
+            <div className="mt-2 flex items-center gap-3">
+              <p className="text-muted-foreground">Décris ce que tu vis au quotidien avec ta peau.</p>
               <HelpButton onClick={() => setHelpOpen("intensity")} />
-            </h1>
-            <p className="mt-2 text-muted-foreground">Décris ce que tu vis au quotidien avec ta peau.</p>
+            </div>
             <div className="mt-8 space-y-3">
               {INTENSITY_OPTIONS.map((opt) => (
                 <button
@@ -498,9 +498,10 @@ function HelpButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="ml-2 inline-flex h-6 w-6 align-middle items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground transition-colors hover:bg-primary-soft hover:text-primary"
+      className="shrink-0 inline-flex items-center gap-1 rounded-full bg-primary-soft px-2.5 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
     >
-      ?
+      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">?</span>
+      Aide
     </button>
   );
 }
