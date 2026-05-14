@@ -11,7 +11,7 @@ import {
   where,
 } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Camera,
@@ -129,12 +129,13 @@ function JournalContent({ uid }: { uid: string }) {
         setTodayEntry(entry);
         setNote(entry?.note ?? "");
 
-        // Default compare dates
+        // Default compare dates: oldest → newest
         if (entries.length >= 2) {
-          setCompareA(entries[0].date);
-          setCompareB(entries[1].date);
+          setCompareA(entries[entries.length - 1].date);
+          setCompareB(entries[0].date);
         } else if (entries.length === 1) {
           setCompareA(entries[0].date);
+          setCompareB(entries[0].date);
         }
       } finally {
         setLoadingData(false);
@@ -490,6 +491,37 @@ function HistoryCard({ entry }: { entry: PhotoEntry }) {
   );
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function formatGap(dateA: string, dateB: string): string {
+  if (!dateA || !dateB || dateA === dateB) return "Même jour";
+  const a = new Date(dateA + "T00:00:00");
+  const b = new Date(dateB + "T00:00:00");
+  const [early, late] = a < b ? [a, b] : [b, a];
+  const totalDays = Math.round((late.getTime() - early.getTime()) / 86_400_000);
+  if (totalDays < 30) return `${totalDays} jour${totalDays > 1 ? "s" : ""}`;
+  let months =
+    (late.getFullYear() - early.getFullYear()) * 12 + late.getMonth() - early.getMonth();
+  let rem = Math.round(
+    (late.getTime() - new Date(early.getFullYear(), early.getMonth() + months, early.getDate()).getTime()) /
+      86_400_000
+  );
+  if (rem < 0) {
+    months--;
+    rem = Math.round(
+      (late.getTime() - new Date(early.getFullYear(), early.getMonth() + months, early.getDate()).getTime()) /
+        86_400_000
+    );
+  }
+  if (months < 12) return `${months} mois${rem > 0 ? ` et ${rem} jour${rem > 1 ? "s" : ""}` : ""}`;
+  const years = Math.floor(months / 12);
+  const remM = months % 12;
+  let s = `${years} an${years > 1 ? "s" : ""}`;
+  if (remM > 0) s += ` ${remM} mois`;
+  if (rem > 0) s += ` et ${rem} jour${rem > 1 ? "s" : ""}`;
+  return s;
+}
+
 // ─── Compare Section ──────────────────────────────────────────────────────────
 
 function CompareSection({
@@ -513,46 +545,82 @@ function CompareSection({
   onSetB: (d: string) => void;
   onSetAngle: (a: Angle) => void;
 }) {
+  // Oldest-first for left-to-right slider direction
+  const dates = useMemo(() => [...history].reverse().map((e) => e.date), [history]);
+  const max = Math.max(0, dates.length - 1);
+  const idxA = Math.max(0, dates.indexOf(compareA));
+  const idxB = (() => { const i = dates.indexOf(compareB); return i >= 0 ? i : max; })();
+
   const photoA = compareEntryA?.[compareAngle] ?? null;
   const photoB = compareEntryB?.[compareAngle] ?? null;
+  const gap = compareA && compareB ? formatGap(compareA, compareB) : null;
+
+  function nearestDate(target: string): string {
+    if (!dates.length) return "";
+    const t = new Date(target + "T00:00:00").getTime();
+    return dates.reduce((best, d) =>
+      Math.abs(new Date(d + "T00:00:00").getTime() - t) <
+      Math.abs(new Date(best + "T00:00:00").getTime() - t)
+        ? d
+        : best
+    );
+  }
+
+  if (history.length < 2) {
+    return (
+      <p className="rounded-3xl border border-dashed border-border bg-card px-6 py-12 text-center text-sm text-muted-foreground">
+        Ajoutez au moins 2 entrées dans votre journal pour utiliser la comparaison.
+      </p>
+    );
+  }
 
   return (
     <div className="space-y-5">
-      {/* Date selectors */}
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Date A
-          </label>
-          <select
-            value={compareA}
-            onChange={(e) => onSetA(e.target.value)}
-            className="h-11 w-full rounded-2xl border border-border bg-card px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-          >
-            <option value="">Choisir une date…</option>
-            {history.map((e) => (
-              <option key={e.date} value={e.date}>
-                {formatDate(e.date)}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Date B
-          </label>
-          <select
-            value={compareB}
-            onChange={(e) => onSetB(e.target.value)}
-            className="h-11 w-full rounded-2xl border border-border bg-card px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-          >
-            <option value="">Choisir une date…</option>
-            {history.map((e) => (
-              <option key={e.date} value={e.date}>
-                {formatDate(e.date)}
-              </option>
-            ))}
-          </select>
+      {/* Slider card */}
+      <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
+        <DateRangeSlider
+          dates={dates}
+          idxA={idxA}
+          idxB={idxB}
+          onChangeA={(i) => onSetA(dates[i])}
+          onChangeB={(i) => onSetB(dates[i])}
+        />
+
+        {/* Gap indicator */}
+        {gap && (
+          <p className="mt-4 text-center text-sm font-semibold text-primary">
+            {gap === "Même jour" ? "Même jour" : `Écart : ${gap}`}
+          </p>
+        )}
+
+        {/* Manual date inputs */}
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <div>
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+              Date A
+            </p>
+            <input
+              type="date"
+              value={compareA}
+              min={dates[0]}
+              max={dates[max]}
+              onChange={(e) => { if (e.target.value) onSetA(nearestDate(e.target.value)); }}
+              className="h-9 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          <div>
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+              Date B
+            </p>
+            <input
+              type="date"
+              value={compareB}
+              min={dates[0]}
+              max={dates[max]}
+              onChange={(e) => { if (e.target.value) onSetB(nearestDate(e.target.value)); }}
+              className="h-9 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
         </div>
       </div>
 
@@ -575,23 +643,95 @@ function CompareSection({
 
       {/* Side-by-side photos */}
       <div className="grid grid-cols-2 gap-3">
-        <CompareSlot
-          label={compareA ? formatDate(compareA) : "Date A"}
-          photo={photoA}
-          side="A"
+        <CompareSlot label={compareA ? formatDate(compareA) : "Date A"} photo={photoA} side="A" />
+        <CompareSlot label={compareB ? formatDate(compareB) : "Date B"} photo={photoB} side="B" />
+      </div>
+    </div>
+  );
+}
+
+// ─── Date Range Slider ────────────────────────────────────────────────────────
+
+function DateRangeSlider({
+  dates,
+  idxA,
+  idxB,
+  onChangeA,
+  onChangeB,
+}: {
+  dates: string[];
+  idxA: number;
+  idxB: number;
+  onChangeA: (i: number) => void;
+  onChangeB: (i: number) => void;
+}) {
+  const max = Math.max(1, dates.length - 1);
+  const pctA = (idxA / max) * 100;
+  const pctB = (idxB / max) * 100;
+  const lo = Math.min(pctA, pctB);
+  const hi = Math.max(pctA, pctB);
+
+  const thumbCls =
+    "pointer-events-none absolute inset-0 w-full h-full appearance-none bg-transparent outline-none " +
+    "[&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-runnable-track]:h-0 " +
+    "[&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none " +
+    "[&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full " +
+    "[&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md " +
+    "[&::-webkit-slider-thumb]:ring-2 [&::-webkit-slider-thumb]:ring-white " +
+    "[&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 " +
+    "[&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer " +
+    "[&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:ring-2 [&::-moz-range-thumb]:ring-white " +
+    "[&::-moz-range-thumb]:border-none [&::-moz-range-track]:bg-transparent";
+
+  return (
+    <div>
+      <div className="relative h-6">
+        {/* Track */}
+        <div className="pointer-events-none absolute top-1/2 left-0 right-0 -translate-y-1/2 h-1.5 rounded-full bg-muted">
+          <div
+            className="absolute h-full rounded-full bg-primary"
+            style={{ left: `${lo}%`, right: `${100 - hi}%` }}
+          />
+        </div>
+
+        {/* Handle A — primary */}
+        <input
+          type="range"
+          min={0}
+          max={max}
+          value={idxA}
+          onChange={(e) => onChangeA(Number(e.target.value))}
+          className={`${thumbCls} [&::-webkit-slider-thumb]:bg-primary [&::-moz-range-thumb]:bg-primary`}
+          style={{ zIndex: idxA > idxB ? 4 : 3 }}
         />
-        <CompareSlot
-          label={compareB ? formatDate(compareB) : "Date B"}
-          photo={photoB}
-          side="B"
+
+        {/* Handle B — foreground */}
+        <input
+          type="range"
+          min={0}
+          max={max}
+          value={idxB}
+          onChange={(e) => onChangeB(Number(e.target.value))}
+          className={`${thumbCls} [&::-webkit-slider-thumb]:bg-foreground [&::-moz-range-thumb]:bg-foreground`}
+          style={{ zIndex: idxA > idxB ? 3 : 4 }}
         />
       </div>
 
-      {history.length < 2 && (
-        <p className="text-center text-sm text-muted-foreground">
-          Ajoutez au moins 2 entrées dans votre journal pour utiliser la comparaison.
-        </p>
-      )}
+      {/* Date labels */}
+      <div className="relative mt-2 h-4">
+        <span
+          className="absolute -translate-x-1/2 text-[11px] font-semibold text-primary whitespace-nowrap"
+          style={{ left: `${pctA}%` }}
+        >
+          {dates[idxA] ? formatDateShort(dates[idxA]) : ""}
+        </span>
+        <span
+          className="absolute -translate-x-1/2 text-[11px] font-medium text-foreground/60 whitespace-nowrap"
+          style={{ left: `${pctB}%` }}
+        >
+          {dates[idxB] && dates[idxB] !== dates[idxA] ? formatDateShort(dates[idxB]) : ""}
+        </span>
+      </div>
     </div>
   );
 }
