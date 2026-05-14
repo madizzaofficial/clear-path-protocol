@@ -595,7 +595,7 @@ function PhotoDetailDialog({
         <DialogHeader className="px-5 pt-5 pb-3 border-b border-border/50">
           <div className="flex items-center justify-between pr-6">
             <DialogTitle className="font-display text-lg">
-              {entry ? formatDateLong(entry.date) : ""}
+              {entry ? formatDate(entry.date) : ""}
             </DialogTitle>
             <div className="flex items-center gap-1">
               <button
