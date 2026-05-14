@@ -28,6 +28,7 @@ import {
   User,
   LinkIcon,
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 // ── Server functions ──────────────────────────────────────────────────────────
 
@@ -98,6 +99,45 @@ const STEPS = [
   "Créer ton compte",
 ];
 
+type HelpContent = {
+  title: string;
+  intro: string;
+  items: { label: string; text: string }[];
+};
+
+const SKIN_TYPE_HELP: HelpContent = {
+  title: "Les types de peau",
+  intro: "Pour identifier ton type, observe ta peau 2–3 heures après le nettoyage, sans rien appliquer.",
+  items: [
+    { label: "Normale", text: "Teint uniforme, pores peu visibles, ni brillances ni tiraillements, confortable toute la journée." },
+    { label: "Grasse", text: "Brillances fréquentes (front, nez, menton), pores dilatés visibles, tendance aux boutons." },
+    { label: "Sèche", text: "Sensation de tiraillement après le lavage, peau parfois squameuse ou terne, inconfort fréquent." },
+    { label: "Mixte", text: "Zone T (front, nez, menton) grasse avec brillances, joues normales ou sèches." },
+    { label: "Sensible", text: "Rougeurs fréquentes, réactivité aux produits, picotements ou inconfort sans raison apparente." },
+  ],
+};
+
+const ACNE_TYPE_HELP: HelpContent = {
+  title: "Les types de boutons",
+  intro: "Tu peux avoir plusieurs types en même temps — coche tout ce que tu reconnais sur ta peau.",
+  items: [
+    { label: "Comédons", text: "Points noirs (pores bouchés ouverts, noircis par oxydation) ou points blancs (petite bosse lisse, pore fermé, sans inflammation)." },
+    { label: "Papules / Pustules", text: "Boutons rouges et surélevés (papules) ou avec un point blanc de pus au sommet (pustules). Souvent douloureux au toucher." },
+    { label: "Microkystes", text: "Petites bosses dures sous la peau, sans tête visible, difficiles à éliminer seul." },
+    { label: "Kystes / Nodules", text: "Boutons profonds, très enflammés, douloureux, parfois de la taille d'une bille. Risque de cicatrices si mal traités." },
+  ],
+};
+
+const INTENSITY_HELP: HelpContent = {
+  title: "Comment évaluer l'intensité",
+  intro: "Compte les lésions actives (boutons, comédons) visibles sur l'ensemble du visage.",
+  items: [
+    { label: "Légère", text: "Moins de 10 lésions, peu ou pas d'inflammation, boutons isolés et peu fréquents." },
+    { label: "Modérée", text: "Entre 10 et 30 lésions, zones visiblement touchées (front, menton, joues), apparitions régulières." },
+    { label: "Sévère", text: "Plus de 30 lésions, ou présence de kystes/nodules, inflammations fréquentes, parfois douloureuses." },
+  ],
+};
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 function OnboardingPage() {
@@ -124,6 +164,7 @@ function OnboardingPage() {
   const [regError, setRegError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [helpOpen, setHelpOpen] = useState<"skinType" | "acneTypes" | "intensity" | null>(null);
 
   // If already logged in, go to dashboard (token links are for new users)
   useEffect(() => {
@@ -333,7 +374,10 @@ function OnboardingPage() {
         {step === 0 && (
           <>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Quel est ton type de peau ?</h1>
-            <p className="mt-2 text-muted-foreground">Choisis celui qui te correspond le mieux en ce moment.</p>
+            <div className="mt-2 flex items-center gap-3">
+              <p className="text-muted-foreground">Choisis celui qui te correspond le mieux en ce moment.</p>
+              <HelpButton onClick={() => setHelpOpen("skinType")} />
+            </div>
             <div className="mt-8 space-y-3">
               {SKIN_TYPES.map((t) => (
                 <button
@@ -364,7 +408,10 @@ function OnboardingPage() {
         {step === 1 && (
           <>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Quel type de boutons as-tu ?</h1>
-            <p className="mt-2 text-muted-foreground">Tu peux en sélectionner plusieurs.</p>
+            <div className="mt-2 flex items-center gap-3">
+              <p className="text-muted-foreground">Tu peux en sélectionner plusieurs.</p>
+              <HelpButton onClick={() => setHelpOpen("acneTypes")} />
+            </div>
             <div className="mt-8 space-y-3">
               {ACNE_TYPES.map((t) => {
                 const sel = answers.acneTypes.includes(t.value);
@@ -396,7 +443,10 @@ function OnboardingPage() {
         {step === 2 && (
           <>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Quelle est l'intensité ?</h1>
-            <p className="mt-2 text-muted-foreground">Décris ce que tu vis au quotidien avec ta peau.</p>
+            <div className="mt-2 flex items-center gap-3">
+              <p className="text-muted-foreground">Décris ce que tu vis au quotidien avec ta peau.</p>
+              <HelpButton onClick={() => setHelpOpen("intensity")} />
+            </div>
             <div className="mt-8 space-y-3">
               {INTENSITY_OPTIONS.map((opt) => (
                 <button
@@ -658,6 +708,44 @@ function OnboardingPage() {
           </button>
         )}
       </div>
+
+      <HelpDialog help={SKIN_TYPE_HELP}  open={helpOpen === "skinType"}   onClose={() => setHelpOpen(null)} />
+      <HelpDialog help={ACNE_TYPE_HELP}  open={helpOpen === "acneTypes"}  onClose={() => setHelpOpen(null)} />
+      <HelpDialog help={INTENSITY_HELP}  open={helpOpen === "intensity"}  onClose={() => setHelpOpen(null)} />
     </div>
+  );
+}
+
+function HelpButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="shrink-0 inline-flex items-center gap-1 rounded-full bg-primary-soft px-2.5 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+    >
+      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">?</span>
+      Aide
+    </button>
+  );
+}
+
+function HelpDialog({ help, open, onClose }: { help: HelpContent; open: boolean; onClose: () => void }) {
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-sm sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{help.title}</DialogTitle>
+        </DialogHeader>
+        <p className="text-sm text-muted-foreground">{help.intro}</p>
+        <div className="mt-2 space-y-3">
+          {help.items.map((item) => (
+            <div key={item.label} className="rounded-xl border border-border/60 bg-muted/30 p-3">
+              <p className="text-sm font-semibold">{item.label}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{item.text}</p>
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
