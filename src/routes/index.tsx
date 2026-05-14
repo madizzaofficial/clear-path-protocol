@@ -29,7 +29,6 @@ type HomeData = {
   completedLessons: string[];
   routine: { am: RoutineStep[]; pm: RoutineStep[] } | null;
   enrolledAt: number | null;
-  needsIntake: boolean;
   checkedAm: string[];
   checkedPm: string[];
   streak: number;
@@ -95,7 +94,6 @@ function Dashboard() {
     completedLessons: [],
     routine: null,
     enrolledAt: null,
-    needsIntake: false,
     checkedAm: [],
     checkedPm: [],
     streak: 0,
@@ -118,14 +116,13 @@ function Dashboard() {
       getDoc(doc(db, "progress", user.uid)),
       getDoc(doc(db, "routines", user.uid)),
       getDoc(doc(db, "users", user.uid)),
-      getDoc(doc(db, "intake_answers", user.uid)),
       getDoc(doc(db, "routine_checkins", user.uid, "days", todayKey)),
       getDocs(query(
         collection(db, "routine_checkins", user.uid, "days"),
         where(documentId(), ">=", monthStart),
         where(documentId(), "<=", monthEnd),
       )),
-    ]).then(async ([progressRes, routineRes, userRes, intakeRes, todayRes, monthRes]) => {
+    ]).then(async ([progressRes, routineRes, userRes, todayRes, monthRes]) => {
       const routineSnap = routineRes.status === "fulfilled" ? routineRes.value : null;
       const routineData = routineSnap?.exists() ? routineSnap.data() : null;
       const routine =
@@ -145,7 +142,6 @@ function Dashboard() {
 
       const progressSnap = progressRes.status === "fulfilled" ? progressRes.value : null;
       const userSnap = userRes.status === "fulfilled" ? userRes.value : null;
-      const intakeSnap = intakeRes.status === "fulfilled" ? intakeRes.value : null;
       const todaySnap = todayRes.status === "fulfilled" ? todayRes.value : null;
 
       setData({
@@ -153,7 +149,6 @@ function Dashboard() {
         completedLessons: progressSnap?.exists() ? (progressSnap.data().completedLessons ?? []) : [],
         routine,
         enrolledAt: userSnap?.exists() ? (userSnap.data().enrolledAt ?? null) : null,
-        needsIntake: !intakeSnap?.exists(),
         checkedAm: todaySnap?.exists() ? (todaySnap.data().am ?? []) : [],
         checkedPm: todaySnap?.exists() ? (todaySnap.data().pm ?? []) : [],
         streak,
@@ -163,7 +158,7 @@ function Dashboard() {
   }, [user]);
 
   const lessons = allLessons();
-  const { loading, completedLessons, routine, enrolledAt, needsIntake, checkedAm, checkedPm, streak, monthCheckins } = data;
+  const { loading, completedLessons, routine, enrolledAt, checkedAm, checkedPm, streak, monthCheckins } = data;
 
   const done = completedLessons.length;
   const progress = Math.round((done / lessons.length) * 100);
@@ -223,25 +218,6 @@ function Dashboard() {
   return (
     <AppShell>
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
-
-        {/* Intake banner */}
-        {needsIntake && !loading && (
-          <Link
-            to="/intake"
-            className="mb-8 flex items-center gap-4 rounded-2xl border border-border/60 bg-gradient-warm p-4 shadow-soft transition-shadow hover:shadow-elegant"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-soft">
-              <Sparkles className="h-5 w-5 text-primary" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold">Complète ton bilan peau</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Aide ton coach à personnaliser ton protocole — 2 minutes
-              </p>
-            </div>
-            <ArrowRight className="h-4 w-4 text-muted-foreground" />
-          </Link>
-        )}
 
         {/* Welcome header */}
         <section className="mb-10">

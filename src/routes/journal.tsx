@@ -44,7 +44,11 @@ const ANGLES: { key: Angle; label: string; icon: string }[] = [
 ];
 
 function todayStr(): string {
-  return new Date().toISOString().split("T")[0];
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 function formatDate(dateStr: string): string {
@@ -138,6 +142,8 @@ function JournalContent({ uid }: { uid: string }) {
           setCompareA(entries[0].date);
           setCompareB(entries[0].date);
         }
+      } catch (err) {
+        console.error("Erreur chargement journal :", err);
       } finally {
         setLoadingData(false);
       }
@@ -155,26 +161,45 @@ function JournalContent({ uid }: { uid: string }) {
       await uploadBytesResumable(storageRef, file);
       const url = await getDownloadURL(storageRef);
 
-      const base: PhotoEntry = todayEntry ?? {
+      // merge: true preserves other angles already saved (avoids overwrite race)
+      await setDoc(
+        doc(db, "progress_photos", entryId),
+        { uid, date: today, [angle]: url, updatedAt: Date.now() },
+        { merge: true }
+      );
+
+      // Functional updates avoid stale closure over todayEntry / history
+      setTodayEntry((prev) => ({
         uid,
         date: today,
         front: null,
         left: null,
         right: null,
-        note,
+        note: "",
         createdAt: Date.now(),
+        ...(prev ?? {}),
+        [angle]: url,
         updatedAt: Date.now(),
-      };
-      const updated: PhotoEntry = { ...base, [angle]: url, updatedAt: Date.now() };
-
-      await setDoc(doc(db, "progress_photos", entryId), updated);
-      setTodayEntry(updated);
+      } as PhotoEntry));
 
       setHistory((prev) => {
+        const existing = prev.find((e) => e.date === today);
+        const newEntry: PhotoEntry = {
+          uid,
+          date: today,
+          front: null,
+          left: null,
+          right: null,
+          note: "",
+          createdAt: Date.now(),
+          ...(existing ?? {}),
+          [angle]: url,
+          updatedAt: Date.now(),
+        } as PhotoEntry;
         const idx = prev.findIndex((e) => e.date === today);
         return idx >= 0
-          ? [...prev.slice(0, idx), updated, ...prev.slice(idx + 1)]
-          : [updated, ...prev];
+          ? [...prev.slice(0, idx), newEntry, ...prev.slice(idx + 1)]
+          : [newEntry, ...prev];
       });
 
       setUploadedAngles((prev) => new Set([...prev, angle]));
@@ -190,19 +215,21 @@ function JournalContent({ uid }: { uid: string }) {
   async function saveNote() {
     setSavingNote(true);
     try {
-      const base: PhotoEntry = todayEntry ?? {
+      await setDoc(
+        doc(db, "progress_photos", entryId),
+        { uid, date: today, note, updatedAt: Date.now() },
+        { merge: true }
+      );
+      setTodayEntry((prev) => prev ? { ...prev, note, updatedAt: Date.now() } : {
         uid,
         date: today,
         front: null,
         left: null,
         right: null,
-        note: "",
+        note,
         createdAt: Date.now(),
         updatedAt: Date.now(),
-      };
-      const updated: PhotoEntry = { ...base, note, updatedAt: Date.now() };
-      await setDoc(doc(db, "progress_photos", entryId), updated);
-      setTodayEntry(updated);
+      });
       setNoteSaved(true);
       setTimeout(() => setNoteSaved(false), 2000);
     } catch (err) {
