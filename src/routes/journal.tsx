@@ -20,7 +20,10 @@ import {
   Check,
   Save,
   Upload,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -242,6 +245,9 @@ function JournalContent({ uid }: { uid: string }) {
   const compareEntryA = history.find((e) => e.date === compareA) ?? null;
   const compareEntryB = history.find((e) => e.date === compareB) ?? null;
   const pastHistory = history.filter((e) => e.date !== today);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const selectedIdx = selectedDate ? pastHistory.findIndex((e) => e.date === selectedDate) : -1;
+  const selectedEntry = selectedIdx >= 0 ? pastHistory[selectedIdx] : null;
 
   return (
     <AppShell>
@@ -370,11 +376,21 @@ function JournalContent({ uid }: { uid: string }) {
                 </h2>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
                   {pastHistory.map((entry) => (
-                    <HistoryCard key={entry.date} entry={entry} />
+                    <HistoryCard key={entry.date} entry={entry} onClick={() => setSelectedDate(entry.date)} />
                   ))}
                 </div>
               </section>
             )}
+
+            <PhotoDetailDialog
+              entry={selectedEntry}
+              open={selectedEntry !== null}
+              onClose={() => setSelectedDate(null)}
+              hasPrev={selectedIdx > 0}
+              hasNext={selectedIdx < pastHistory.length - 1}
+              onPrev={() => selectedIdx > 0 && setSelectedDate(pastHistory[selectedIdx - 1].date)}
+              onNext={() => selectedIdx < pastHistory.length - 1 && setSelectedDate(pastHistory[selectedIdx + 1].date)}
+            />
 
             {history.length === 0 && (
               <div className="mt-4 rounded-3xl border border-dashed border-border bg-card px-6 py-12 text-center">
@@ -516,12 +532,15 @@ function PhotoCard({
 
 // ─── History Card ─────────────────────────────────────────────────────────────
 
-function HistoryCard({ entry }: { entry: PhotoEntry }) {
+function HistoryCard({ entry, onClick }: { entry: PhotoEntry; onClick?: () => void }) {
   const mainPhoto = entry.front ?? entry.left ?? entry.right;
   const count = [entry.front, entry.left, entry.right].filter(Boolean).length;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft">
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full text-left overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft cursor-pointer hover:ring-2 hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-shadow">
       <div className="relative aspect-[3/4] bg-muted/30">
         {mainPhoto ? (
           <img
@@ -547,7 +566,84 @@ function HistoryCard({ entry }: { entry: PhotoEntry }) {
           </p>
         )}
       </div>
-    </div>
+    </button>
+  );
+}
+
+// ─── Photo Detail Dialog ──────────────────────────────────────────────────────
+
+function PhotoDetailDialog({
+  entry,
+  open,
+  onClose,
+  hasPrev,
+  hasNext,
+  onPrev,
+  onNext,
+}: {
+  entry: PhotoEntry | null;
+  open: boolean;
+  onClose: () => void;
+  hasPrev: boolean;
+  hasNext: boolean;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-2xl p-0 overflow-hidden rounded-3xl">
+        <DialogHeader className="px-5 pt-5 pb-3 border-b border-border/50">
+          <div className="flex items-center justify-between pr-6">
+            <DialogTitle className="font-display text-lg">
+              {entry ? formatDateLong(entry.date) : ""}
+            </DialogTitle>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={onPrev}
+                disabled={!hasPrev}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-border/60 text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={onNext}
+                disabled={!hasNext}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-border/60 text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </DialogHeader>
+        <div className="grid grid-cols-1 gap-3 p-5 sm:grid-cols-3">
+          {ANGLES.map(({ key, label }) => (
+            <div key={key} className="flex flex-col gap-1.5">
+              <p className="text-center text-xs font-medium text-muted-foreground">{label}</p>
+              <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-muted/30">
+                {entry?.[key as Angle] ? (
+                  <img
+                    src={entry[key as Angle]!}
+                    alt={label}
+                    className="h-full w-full object-cover object-top"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center">
+                    <Camera className="h-6 w-6 text-muted-foreground/30" />
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+        {entry?.note && (
+          <div className="px-5 pb-5">
+            <p className="text-sm leading-relaxed text-muted-foreground">{entry.note}</p>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
