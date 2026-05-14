@@ -18,6 +18,7 @@ import {
   ArrowLeftRight,
   Loader2,
   Check,
+  Save,
   Upload,
 } from "lucide-react";
 
@@ -101,6 +102,7 @@ function JournalContent({ uid }: { uid: string }) {
   const [uploading, setUploading] = useState<Partial<Record<Angle, boolean>>>({});
   const [uploadedAngles, setUploadedAngles] = useState<Set<Angle>>(new Set());
   const [note, setNote] = useState("");
+  const [savingNote, setSavingNote] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
   const [activeView, setActiveView] = useState<"journal" | "compare">("journal");
 
@@ -186,6 +188,7 @@ function JournalContent({ uid }: { uid: string }) {
   }
 
   async function saveNote() {
+    setSavingNote(true);
     try {
       const base: PhotoEntry = todayEntry ?? {
         uid,
@@ -204,6 +207,8 @@ function JournalContent({ uid }: { uid: string }) {
       setTimeout(() => setNoteSaved(false), 2000);
     } catch (err) {
       console.error("Échec de la sauvegarde de la note :", err);
+    } finally {
+      setSavingNote(false);
     }
   }
 
@@ -297,12 +302,11 @@ function JournalContent({ uid }: { uid: string }) {
                 <textarea
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  onBlur={saveNote}
                   placeholder="Comment se sent votre peau aujourd'hui ? Rougeurs, sécheresse, éclat…"
                   rows={3}
                   className="w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
                 />
-                <div className="mt-2 flex justify-end">
+                <div className="mt-3 flex items-center justify-end gap-3">
                   <AnimatePresence>
                     {noteSaved && (
                       <motion.span
@@ -315,6 +319,18 @@ function JournalContent({ uid }: { uid: string }) {
                       </motion.span>
                     )}
                   </AnimatePresence>
+                  <button
+                    onClick={saveNote}
+                    disabled={savingNote}
+                    className="flex items-center gap-2 rounded-2xl bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
+                  >
+                    {savingNote ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Save className="h-3.5 w-3.5" />
+                    )}
+                    Sauvegarder
+                  </button>
                 </div>
               </div>
             </section>
