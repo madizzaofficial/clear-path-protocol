@@ -954,7 +954,7 @@ function CompareSlot({
           <img
             src={photo}
             alt={label}
-            className="h-full w-full object-cover object-top"
+            className="h-full w-full object-contain"
           />
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-2">
