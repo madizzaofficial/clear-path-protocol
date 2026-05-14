@@ -589,7 +589,24 @@ function PhotoDetailDialog({
   onPrev: () => void;
   onNext: () => void;
 }) {
+  const [zoomedPhoto, setZoomedPhoto] = useState<string | null>(null);
+
   return (
+    <>
+      {/* Full-screen photo zoom overlay */}
+      {zoomedPhoto && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-sm"
+          onClick={() => setZoomedPhoto(null)}
+        >
+          <img
+            src={zoomedPhoto}
+            alt="Photo agrandie"
+            className="max-h-screen max-w-full object-contain p-4"
+          />
+        </div>
+      )}
+
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-2xl p-0 overflow-hidden rounded-3xl">
         <DialogHeader className="px-5 pt-5 pb-3 border-b border-border/50">
@@ -626,7 +643,8 @@ function PhotoDetailDialog({
                   <img
                     src={entry[key as Angle]!}
                     alt={label}
-                    className="h-full w-full object-cover object-top"
+                    onClick={() => setZoomedPhoto(entry[key as Angle]!)}
+                    className="h-full w-full cursor-zoom-in object-cover object-top"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center">
@@ -644,6 +662,7 @@ function PhotoDetailDialog({
         )}
       </DialogContent>
     </Dialog>
+    </>
   );
 }
 
