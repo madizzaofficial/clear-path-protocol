@@ -498,7 +498,7 @@ function HelpButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="ml-2 inline-flex h-5 w-5 align-middle items-center justify-center rounded-full border border-border/60 text-[11px] font-semibold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+      className="ml-2 inline-flex h-6 w-6 align-middle items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground transition-colors hover:bg-primary-soft hover:text-primary"
     >
       ?
     </button>
