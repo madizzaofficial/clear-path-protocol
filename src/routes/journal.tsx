@@ -149,7 +149,7 @@ function JournalContent({ uid }: { uid: string }) {
     try {
       const storageRef = ref(
         storage,
-        `progress-photos/${uid}/${today}-${angle}`
+        `progress_photos/${uid}/${today}-${angle}`
       );
       await uploadBytesResumable(storageRef, file);
       const url = await getDownloadURL(storageRef);
@@ -175,6 +175,9 @@ function JournalContent({ uid }: { uid: string }) {
           ? [...prev.slice(0, idx), updated, ...prev.slice(idx + 1)]
           : [updated, ...prev];
       });
+    } catch (err) {
+      console.error("Échec de l'upload photo :", err);
+      alert("L'upload a échoué. Vérifie ta connexion et réessaie.");
     } finally {
       setUploading((prev) => ({ ...prev, [angle]: false }));
     }
