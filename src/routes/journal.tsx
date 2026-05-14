@@ -393,6 +393,7 @@ function JournalContent({ uid }: { uid: string }) {
               onPrev={() => selectedIdx > 0 && setSelectedDate(pastHistory[selectedIdx - 1].date)}
               onNext={() => selectedIdx < pastHistory.length - 1 && setSelectedDate(pastHistory[selectedIdx + 1].date)}
               onZoom={setZoomedPhoto}
+              isZoomed={zoomedPhoto !== null}
             />
 
             {history.length === 0 && (
@@ -612,6 +613,7 @@ function PhotoDetailDialog({
   onPrev,
   onNext,
   onZoom,
+  isZoomed,
 }: {
   entry: PhotoEntry | null;
   open: boolean;
@@ -621,10 +623,14 @@ function PhotoDetailDialog({
   onPrev: () => void;
   onNext: () => void;
   onZoom: (url: string) => void;
+  isZoomed: boolean;
 }) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-2xl p-0 overflow-hidden rounded-3xl">
+      <DialogContent
+        className="max-w-2xl p-0 overflow-hidden rounded-3xl"
+        onInteractOutside={(e) => { if (isZoomed) e.preventDefault(); }}
+      >
         <DialogHeader className="px-5 pt-5 pb-3 border-b border-border/50">
           <div className="flex items-center justify-between pr-6">
             <DialogTitle className="font-display text-lg">
