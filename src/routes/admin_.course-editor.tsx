@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { AppShell } from "@/components/AppShell";
+import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
@@ -24,7 +24,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
-  ArrowLeft, Plus, Pencil, Trash2, GripVertical,
+  Plus, Pencil, Trash2, GripVertical,
   ChevronDown, ChevronRight, Video, Lock,
   Loader2, Check, BookOpen,
 } from "lucide-react";
@@ -302,29 +302,21 @@ function CourseEditorContent() {
 
   if (!course) {
     return (
-      <AppShell>
+      <AdminShell>
         <div className="flex min-h-[60vh] items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </AppShell>
+      </AdminShell>
     );
   }
 
   const totalLessons = course.chapters.reduce((s, c) => s + c.lessons.length, 0);
 
   return (
-    <AppShell>
+    <AdminShell>
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
         {/* Header */}
         <header className="mb-10">
-          <div className="mb-6">
-            <Link
-              to="/admin"
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <ArrowLeft className="h-4 w-4" /> Back to dashboard
-            </Link>
-          </div>
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>
@@ -473,7 +465,7 @@ function CourseEditorContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </AppShell>
+    </AdminShell>
   );
 }
 

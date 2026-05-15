@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { AppShell } from "@/components/AppShell";
+import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
-import { TrendingUp, Users, CheckCircle2, AlertCircle, AlertTriangle, BookOpen, Loader2, ClipboardList, Link2, Check, Search, Apple, Salad, Package } from "lucide-react";
+import { TrendingUp, Users, CheckCircle2, AlertCircle, AlertTriangle, Loader2, ClipboardList, Check, Search, Salad } from "lucide-react";
 import { course } from "@/lib/course-data";
 
 export const Route = createFileRoute("/admin")({
@@ -139,44 +139,12 @@ function AdminPage() {
   }).length;
 
   return (
-    <AppShell>
+    <AdminShell>
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
-        <header className="mb-10 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>
-            <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight md:text-5xl">Dashboard coach</h1>
-            <p className="mt-2 text-muted-foreground">Suivez les protocoles, intervenez tôt, célébrez les résultats.</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              to="/admin/tokens"
-              className="flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background shadow-elegant transition-all hover:opacity-90"
-            >
-              <Link2 className="h-4 w-4" />
-              Liens d'invitation
-            </Link>
-            <Link
-              to="/admin/course-editor"
-              className="flex items-center gap-2 rounded-full bg-primary-soft px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary-muted"
-            >
-              <BookOpen className="h-4 w-4" />
-              Modifier le cours
-            </Link>
-            <Link
-              to="/admin/nutrition"
-              className="flex items-center gap-2 rounded-full bg-primary-soft px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary-muted"
-            >
-              <Apple className="h-4 w-4" />
-              Nutrition
-            </Link>
-            <Link
-              to="/admin/products"
-              className="flex items-center gap-2 rounded-full bg-primary-soft px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary-muted"
-            >
-              <Package className="h-4 w-4" />
-              Catalogue produits
-            </Link>
-          </div>
+        <header className="mb-10">
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>
+          <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight md:text-5xl">Dashboard coach</h1>
+          <p className="mt-2 text-muted-foreground">Suivez les protocoles, intervenez tôt, célébrez les résultats.</p>
         </header>
 
         {/* Stats */}
@@ -351,7 +319,7 @@ function AdminPage() {
           )}
         </div>
       </main>
-    </AppShell>
+    </AdminShell>
   );
 }
 

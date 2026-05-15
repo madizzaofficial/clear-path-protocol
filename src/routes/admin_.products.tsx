@@ -1,11 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { AppShell } from "@/components/AppShell";
+import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
 import {
-  ArrowLeft,
   ImageOff,
   Loader2,
   Package,
@@ -148,17 +147,10 @@ function ProductsContent() {
   }
 
   return (
-    <AppShell>
-      <div className="mx-auto max-w-5xl px-4 py-8 md:px-6">
+    <AdminShell>
+      <div className="mx-auto max-w-7xl px-6 py-8">
         {/* Header */}
         <div className="mb-8">
-          <Link
-            to="/admin"
-            className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Dashboard
-          </Link>
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
@@ -258,7 +250,7 @@ function ProductsContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </AppShell>
+    </AdminShell>
   );
 }
 

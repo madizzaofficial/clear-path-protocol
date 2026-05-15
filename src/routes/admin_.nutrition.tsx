@@ -1,11 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { AppShell } from "@/components/AppShell";
+import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
-  ArrowLeft, Plus, Trash2, Loader2, GripVertical, Users, ChevronRight, Save, Check, X,
+  Plus, Trash2, Loader2, GripVertical, Users, ChevronRight, Save, Check, X,
 } from "lucide-react";
 import {
   DndContext,
@@ -214,14 +214,8 @@ function NutritionContent() {
   }
 
   return (
-    <AppShell>
+    <AdminShell>
       <div className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
-
-        <div className="mb-8">
-          <Link to="/admin" className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
-            <ArrowLeft className="h-4 w-4" /> Retour au dashboard
-          </Link>
-        </div>
 
         <header className="mb-10">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>
@@ -445,7 +439,7 @@ function NutritionContent() {
           </div>
         </div>
       </div>
-    </AppShell>
+    </AdminShell>
   );
 }
 

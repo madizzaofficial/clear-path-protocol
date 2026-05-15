@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { AppShell } from "@/components/AppShell";
+import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, setDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { Link2, Copy, Check, Loader2, Clock, User, Ban, X, ArrowLeft } from "lucide-react";
+import { Link2, Copy, Check, Loader2, Clock, User, Ban, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin_/tokens")({
   head: () => ({
@@ -107,14 +107,11 @@ function TokensPage() {
   const expiredCount = tokens.filter((t) => tokenStatus(t) === "expired").length;
 
   return (
-    <AppShell>
+    <AdminShell>
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
 
         <header className="mb-10 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <Link to="/admin" className="mb-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
-              <ArrowLeft className="h-4 w-4" /> Dashboard
-            </Link>
             <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>
             <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight md:text-5xl">
               Liens d'invitation
@@ -296,6 +293,6 @@ function TokensPage() {
         </div>
 
       </main>
-    </AppShell>
+    </AdminShell>
   );
 }
