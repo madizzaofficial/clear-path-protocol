@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, query, where, getDocs, addDoc, orderBy } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs, addDoc, updateDoc, deleteField, orderBy } from "firebase/firestore";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
@@ -79,7 +79,7 @@ function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 }
 
-type CoachNote = { id: string; note: string; authorName: string; authorUid: string; createdAt: string };
+type CoachNote = { id: string; note: string; authorName: string; authorUid: string; createdAt: string; isFromStudent?: boolean };
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
@@ -98,6 +98,7 @@ function StudentPage() {
   const [notes, setNotes] = useState<CoachNote[]>([]);
   const [noteInput, setNoteInput] = useState("");
   const [sendingNote, setSendingNote] = useState(false);
+  const [resolvingReport, setResolvingReport] = useState<string | null>(null);
   const { tab: initialTab } = Route.useSearch();
   const [tab, setTab] = useState<Tab>(initialTab ?? "profil");
   const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
@@ -188,6 +189,23 @@ function StudentPage() {
       toast.error("Impossible d'envoyer la note.");
     } finally {
       setSendingNote(false);
+    }
+  }
+
+  async function resolveReport(stepId: string) {
+    setResolvingReport(stepId);
+    try {
+      await updateDoc(doc(db, "routine_reports", uid), { [stepId]: deleteField() });
+      setReports((prev) => {
+        const next = { ...prev };
+        delete next[stepId];
+        return next;
+      });
+      toast.success("Signalement résolu.");
+    } catch {
+      toast.error("Impossible de résoudre le signalement.");
+    } finally {
+      setResolvingReport(null);
     }
   }
 
@@ -340,18 +358,32 @@ function StudentPage() {
                   </div>
                   <div className="space-y-2">
                     {flagged.map(({ step, type }) => (
-                      <div key={step!.id} className="flex items-center justify-between rounded-xl bg-white/60 px-4 py-2.5 dark:bg-black/20">
-                        <div>
+                      <div key={step!.id} className="flex items-center justify-between gap-3 rounded-xl bg-white/60 px-4 py-2.5 dark:bg-black/20">
+                        <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium">{step!.product}</p>
                           <p className="text-xs text-muted-foreground">{step!.category}</p>
                         </div>
-                        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                          type === "allergie"
-                            ? "bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400"
-                            : "bg-orange-100 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400"
-                        }`}>
-                          {type === "allergie" ? "Allergie" : "Irritant"}
-                        </span>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                            type === "allergie"
+                              ? "bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400"
+                              : "bg-orange-100 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400"
+                          }`}>
+                            {type === "allergie" ? "Allergie" : "Irritant"}
+                          </span>
+                          <button
+                            onClick={() => resolveReport(step!.id)}
+                            disabled={resolvingReport === step!.id}
+                            className="flex items-center gap-1 rounded-xl border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-50"
+                          >
+                            {resolvingReport === step!.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Check className="h-3 w-3" />
+                            )}
+                            Traité
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -553,7 +585,19 @@ function StudentPage() {
             ) : (
               <div className="space-y-3">
                 {notes.map((n) => (
-                  <div key={n.id} className="rounded-2xl border border-border/60 bg-card p-5 shadow-soft">
+                  <div
+                    key={n.id}
+                    className={`rounded-2xl border p-5 shadow-soft ${
+                      n.isFromStudent
+                        ? "border-primary/20 bg-primary-soft/30 ml-6"
+                        : "border-border/60 bg-card"
+                    }`}
+                  >
+                    {n.isFromStudent && (
+                      <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                        Réponse de l'élève
+                      </p>
+                    )}
                     <p className="text-sm leading-relaxed text-foreground">{n.note}</p>
                     <p className="mt-2 text-xs text-muted-foreground">
                       {n.authorName} · {new Date(n.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}

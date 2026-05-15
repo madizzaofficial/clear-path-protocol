@@ -1,13 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { course, allLessons } from "@/lib/course-data";
-import { Play, Check, Sparkles, Sun, Moon, ArrowRight, TrendingUp, BookOpen, Flame } from "lucide-react";
+import { Play, Check, Sparkles, Sun, Moon, ArrowRight, TrendingUp, BookOpen, Flame, Send, Loader2, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import {
-  doc, getDoc, setDoc,
+  doc, getDoc, setDoc, addDoc,
   collection, getDocs, query, orderBy, limit, documentId, where,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
@@ -35,7 +35,7 @@ const MILESTONES = [
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type RoutineStep = { id: string; category: string; product: string };
-type CoachNote = { id: string; note: string; authorName: string; createdAt: string };
+type CoachNote = { id: string; note: string; authorName: string; createdAt: string; isFromStudent?: boolean };
 
 type HomeData = {
   loading: boolean;
@@ -103,6 +103,9 @@ function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [coachNotes, setCoachNotes] = useState<CoachNote[]>([]);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [sendingReply, setSendingReply] = useState(false);
   const [milestone, setMilestone] = useState<typeof MILESTONES[number] | null>(null);
   const [data, setData] = useState<HomeData>({
     loading: true,
@@ -137,7 +140,7 @@ function Dashboard() {
         where(documentId(), ">=", monthStart),
         where(documentId(), "<=", monthEnd),
       )),
-      getDocs(query(collection(db, "users", user.uid, "notes"), orderBy("createdAt", "desc"), limit(3))),
+      getDocs(query(collection(db, "users", user.uid, "notes"), orderBy("createdAt", "desc"), limit(10))),
     ]).then(async ([progressRes, routineRes, userRes, todayRes, monthRes, notesRes]) => {
       const routineSnap = routineRes.status === "fulfilled" ? routineRes.value : null;
       const routineData = routineSnap?.exists() ? routineSnap.data() : null;
@@ -161,7 +164,8 @@ function Dashboard() {
       const todaySnap = todayRes.status === "fulfilled" ? todayRes.value : null;
 
       if (notesRes.status === "fulfilled") {
-        setCoachNotes(notesRes.value.docs.map((d) => ({ id: d.id, ...d.data() } as CoachNote)));
+        const allNotes = notesRes.value.docs.map((d) => ({ id: d.id, ...d.data() } as CoachNote));
+        setCoachNotes(allNotes.filter((n) => !n.isFromStudent).slice(0, 3));
       }
 
       setData({
@@ -251,6 +255,27 @@ function Dashboard() {
         <WelcomeState firstName={firstName} next={next} />
       </AppShell>
     );
+  }
+
+  async function sendReply(noteId: string) {
+    if (!user || !replyText.trim() || sendingReply) return;
+    setSendingReply(true);
+    try {
+      await addDoc(collection(db, "users", user.uid, "notes"), {
+        note: replyText.trim(),
+        authorUid: user.uid,
+        authorName: user.displayName ?? user.email ?? "Moi",
+        isFromStudent: true,
+        createdAt: new Date().toISOString(),
+      });
+      setReplyText("");
+      setReplyingTo(null);
+      toast.success("Réponse envoyée.");
+    } catch {
+      toast.error("Impossible d'envoyer la réponse.");
+    } finally {
+      setSendingReply(false);
+    }
   }
 
   return (
@@ -402,13 +427,49 @@ function Dashboard() {
               <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Messages de ton coach
               </p>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="space-y-3">
                 {coachNotes.map((n) => (
                   <div key={n.id} className="rounded-2xl bg-primary-soft/40 p-4">
                     <p className="text-sm text-foreground leading-relaxed">{n.note}</p>
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      {n.authorName} · {new Date(n.createdAt).toLocaleDateString("fr-FR")}
-                    </p>
+                    <div className="mt-2 flex items-center justify-between gap-3">
+                      <p className="text-xs text-muted-foreground">
+                        {n.authorName} · {new Date(n.createdAt).toLocaleDateString("fr-FR")}
+                      </p>
+                      {replyingTo !== n.id && (
+                        <button
+                          onClick={() => { setReplyingTo(n.id); setReplyText(""); }}
+                          className="flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+                        >
+                          <MessageSquare className="h-3 w-3" /> Répondre
+                        </button>
+                      )}
+                    </div>
+                    {replyingTo === n.id && (
+                      <div className="mt-3 flex items-end gap-2">
+                        <textarea
+                          value={replyText}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          placeholder="Ta réponse…"
+                          rows={2}
+                          className="flex-1 resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground/50 focus:border-primary focus:ring-1 focus:ring-primary/20"
+                        />
+                        <div className="flex flex-col gap-1">
+                          <button
+                            onClick={() => sendReply(n.id)}
+                            disabled={sendingReply || !replyText.trim()}
+                            className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+                          >
+                            {sendingReply ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                          </button>
+                          <button
+                            onClick={() => setReplyingTo(null)}
+                            className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-xs text-muted-foreground transition-colors hover:bg-muted"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

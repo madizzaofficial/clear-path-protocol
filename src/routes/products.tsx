@@ -465,12 +465,18 @@ function RoutineBlock({
                             <ShoppingCart className="h-3 w-3" /> Acheter
                           </a>
                         )}
-                        <button
-                          onClick={() => onReport(step)}
-                          className="inline-flex items-center gap-1.5 rounded-xl border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-orange-300 hover:text-orange-500"
-                        >
-                          <AlertTriangle className="h-3 w-3" /> Signaler
-                        </button>
+                        {report ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-xl bg-orange-50 px-3 py-1.5 text-xs font-medium text-orange-600 dark:bg-orange-950/30 dark:text-orange-400">
+                            <Check className="h-3 w-3" /> Signalement reçu · ton coach en est informé
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => onReport(step)}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-orange-300 hover:text-orange-500"
+                          >
+                            <AlertTriangle className="h-3 w-3" /> Signaler
+                          </button>
+                        )}
                       </div>
                     </div>
 
