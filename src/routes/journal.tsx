@@ -24,6 +24,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import * as SliderPrimitive from "@radix-ui/react-slider";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -532,7 +533,20 @@ function PhotoCard({
           )}
         </AnimatePresence>
 
-        {/* Change photo overlay on hover */}
+        {/* Bouton zoom mobile — toujours visible sur touch, caché sur desktop */}
+        {preview && onZoom && !isUploading && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onZoom(preview); }}
+            className="sm:hidden absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+          </button>
+        )}
+
+        {/* Change photo overlay on hover — desktop uniquement */}
         {preview && !isUploading && (
           <div className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100">
             <div className="mb-3 flex items-center gap-2">
@@ -900,71 +914,39 @@ function DateRangeSlider({
   onChangeB: (i: number) => void;
 }) {
   const max = Math.max(1, dates.length - 1);
-  const pctA = (idxA / max) * 100;
-  const pctB = (idxB / max) * 100;
-  const lo = Math.min(pctA, pctB);
-  const hi = Math.max(pctA, pctB);
-
-  const thumbCls =
-    "pointer-events-none absolute inset-0 w-full h-full appearance-none bg-transparent outline-none " +
-    "[&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:rounded-full " +
-    "[&::-moz-range-track]:bg-transparent [&::-moz-range-track]:h-1.5 [&::-moz-range-track]:rounded-full " +
-    "[&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none " +
-    "[&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full " +
-    "[&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md " +
-    "[&::-webkit-slider-thumb]:ring-2 [&::-webkit-slider-thumb]:ring-white " +
-    "[&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 " +
-    "[&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer " +
-    "[&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:ring-2 [&::-moz-range-thumb]:ring-white " +
-    "[&::-moz-range-thumb]:border-none [&::-moz-range-track]:bg-transparent";
+  const lo = Math.min(idxA, idxB);
+  const hi = Math.max(idxA, idxB);
 
   return (
     <div>
-      <div className="relative h-6">
-        {/* Track */}
-        <div className="pointer-events-none absolute top-1/2 left-0 right-0 -translate-y-1/2 h-1.5 rounded-full bg-muted">
-          <div
-            className="absolute h-full rounded-full bg-primary"
-            style={{ left: `${lo}%`, right: `${100 - hi}%` }}
-          />
-        </div>
-
-        {/* Handle A — primary */}
-        <input
-          type="range"
-          min={0}
-          max={max}
-          value={idxA}
-          onChange={(e) => onChangeA(Number(e.target.value))}
-          className={`${thumbCls} [&::-webkit-slider-thumb]:bg-primary [&::-moz-range-thumb]:bg-primary`}
-          style={{ zIndex: idxA > idxB ? 4 : 3 }}
-        />
-
-        {/* Handle B — foreground */}
-        <input
-          type="range"
-          min={0}
-          max={max}
-          value={idxB}
-          onChange={(e) => onChangeB(Number(e.target.value))}
-          className={`${thumbCls} [&::-webkit-slider-thumb]:bg-foreground [&::-moz-range-thumb]:bg-foreground`}
-          style={{ zIndex: idxA > idxB ? 3 : 4 }}
-        />
-      </div>
+      <SliderPrimitive.Root
+        className="relative flex w-full touch-none select-none items-center h-5"
+        min={0}
+        max={max}
+        step={1}
+        value={[lo, hi]}
+        onValueChange={([a, b]) => { onChangeA(a); onChangeB(b); }}
+      >
+        <SliderPrimitive.Track className="relative h-1.5 w-full grow overflow-hidden rounded-full bg-muted">
+          <SliderPrimitive.Range className="absolute h-full bg-primary" />
+        </SliderPrimitive.Track>
+        <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full bg-primary ring-2 ring-white shadow-md focus-visible:outline-none cursor-grab active:cursor-grabbing" />
+        <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full bg-foreground ring-2 ring-white shadow-md focus-visible:outline-none cursor-grab active:cursor-grabbing" />
+      </SliderPrimitive.Root>
 
       {/* Date labels */}
       <div className="relative mt-2 h-4">
         <span
           className="absolute -translate-x-1/2 text-[11px] font-semibold text-primary whitespace-nowrap"
-          style={{ left: `${pctA}%` }}
+          style={{ left: `${(lo / max) * 100}%` }}
         >
-          {dates[idxA] ? formatDateShort(dates[idxA]) : ""}
+          {dates[lo] ? formatDateShort(dates[lo]) : ""}
         </span>
         <span
           className="absolute -translate-x-1/2 text-[11px] font-medium text-foreground/60 whitespace-nowrap"
-          style={{ left: `${pctB}%` }}
+          style={{ left: `${(hi / max) * 100}%` }}
         >
-          {dates[idxB] && dates[idxB] !== dates[idxA] ? formatDateShort(dates[idxB]) : ""}
+          {dates[hi] && lo !== hi ? formatDateShort(dates[hi]) : ""}
         </span>
       </div>
     </div>
