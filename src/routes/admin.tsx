@@ -35,6 +35,21 @@ type StudentDoc = {
   enrolledAt?: number;
 };
 
+type TokenDoc = {
+  id: string;
+  createdAt: number;
+  expiresAt: number;
+  used: boolean;
+  usedBy?: string;
+  usedAt?: number;
+};
+
+function tokenStatus(t: TokenDoc): "active" | "used" | "expired" {
+  if (t.used) return "used";
+  if (t.expiresAt < Date.now()) return "expired";
+  return "active";
+}
+
 function AdminPage() {
   const { user, loading, isAdmin } = useAuth();
   const navigate = useNavigate();
@@ -50,6 +65,8 @@ function AdminPage() {
   const [generatingLink, setGeneratingLink] = useState(false);
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [tokens, setTokens] = useState<TokenDoc[]>([]);
+  const [loadingTokens, setLoadingTokens] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -101,6 +118,17 @@ function AdminPage() {
     fetchStudents();
   }, [isAdmin]);
 
+  useEffect(() => {
+    if (!isAdmin) return;
+    getDocs(collection(db, "onboarding_tokens")).then((snap) => {
+      const sorted = snap.docs
+        .map((d) => ({ id: d.id, ...d.data() } as TokenDoc))
+        .sort((a, b) => b.createdAt - a.createdAt);
+      setTokens(sorted);
+      setLoadingTokens(false);
+    });
+  }, [isAdmin]);
+
   const filteredStudents = useMemo(() => {
     let result = students;
     if (search.trim()) {
@@ -138,6 +166,7 @@ function AdminPage() {
     });
     const link = `${window.location.origin}/start/${token}`;
     setGeneratedLink(link);
+    setTokens((prev) => [{ id: token, createdAt: Date.now(), expiresAt: Date.now() + 7 * 86400000, used: false }, ...prev]);
     await navigator.clipboard.writeText(link).catch(() => {});
     setGeneratingLink(false);
   }
@@ -230,6 +259,54 @@ function AdminPage() {
                 <><Copy className="h-4 w-4" /> Copier</>
               )}
             </button>
+          </div>
+        )}
+
+        {/* Token list */}
+        {!loadingTokens && tokens.length > 0 && (
+          <div className="mb-8 overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
+            <div className="flex items-center gap-3 border-b border-border/60 px-6 py-4">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-soft">
+                <Link2 className="h-3.5 w-3.5 text-primary" />
+              </div>
+              <p className="text-sm font-semibold">Liens d'invitation</p>
+              <span className="ml-auto rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                {tokens.length}
+              </span>
+            </div>
+            <div className="divide-y divide-border/60">
+              {tokens.map((t) => {
+                const status = tokenStatus(t);
+                const usedByStudent = students.find((s) => s.uid === t.usedBy);
+                return (
+                  <div key={t.id} className="flex items-center justify-between px-6 py-3 text-sm">
+                    <div>
+                      <p className="text-xs text-muted-foreground">
+                        Créé le {new Date(t.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                      </p>
+                      {status === "used" && usedByStudent && (
+                        <p className="mt-0.5 text-xs font-medium">
+                          Utilisé par {usedByStudent.displayName ?? usedByStudent.email}
+                        </p>
+                      )}
+                    </div>
+                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                      status === "active"
+                        ? "bg-primary-soft text-primary"
+                        : status === "used"
+                        ? "bg-muted text-muted-foreground"
+                        : "bg-muted/50 text-muted-foreground/60"
+                    }`}>
+                      {status === "active"
+                        ? `Actif · expire ${new Date(t.expiresAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`
+                        : status === "used"
+                        ? "Utilisé"
+                        : "Expiré"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 

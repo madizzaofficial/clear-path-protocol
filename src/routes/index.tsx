@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { course, allLessons } from "@/lib/course-data";
 import { Play, Check, Sparkles, Sun, Moon, ArrowRight, TrendingUp, BookOpen, Flame } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import confetti from "canvas-confetti";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import {
@@ -20,6 +22,15 @@ export const Route = createFileRoute("/")({
   }),
   component: Dashboard,
 });
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+const MILESTONES = [
+  { pct: 25, label: "Un quart du chemin ! 🌱", emoji: "🌱" },
+  { pct: 50, label: "À mi-parcours ! 💪",      emoji: "💪" },
+  { pct: 75, label: "Presque là ! 🚀",          emoji: "🚀" },
+  { pct: 100, label: "Protocole terminé ! 🎉",  emoji: "🎉" },
+] as const;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -92,6 +103,7 @@ function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [coachNotes, setCoachNotes] = useState<CoachNote[]>([]);
+  const [milestone, setMilestone] = useState<typeof MILESTONES[number] | null>(null);
   const [data, setData] = useState<HomeData>({
     loading: true,
     completedLessons: [],
@@ -170,6 +182,19 @@ function Dashboard() {
 
   const done = completedLessons.length;
   const progress = Math.round((done / lessons.length) * 100);
+
+  useEffect(() => {
+    if (data.loading || progress === 0) return;
+    const last = parseInt(localStorage.getItem("lastMilestone") ?? "0");
+    const reached = [...MILESTONES].reverse().find((m) => progress >= m.pct);
+    if (reached && reached.pct > last) {
+      localStorage.setItem("lastMilestone", String(reached.pct));
+      setMilestone(reached);
+      confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+      setTimeout(() => setMilestone(null), 4000);
+    }
+  }, [data.loading, progress]);
+
   const next = lessons.find((l) => !completedLessons.includes(l.id) && !l.locked);
   const allDone = done === lessons.length;
 
@@ -230,6 +255,19 @@ function Dashboard() {
 
   return (
     <AppShell>
+      <AnimatePresence>
+        {milestone && (
+          <motion.div
+            initial={{ opacity: 0, y: -24, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -16 }}
+            className="fixed top-20 left-1/2 z-50 -translate-x-1/2 flex items-center gap-3 rounded-2xl bg-foreground px-6 py-3.5 text-background shadow-elegant"
+          >
+            <span className="text-2xl">{milestone.emoji}</span>
+            <p className="text-sm font-semibold">{milestone.label}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
 
         {/* Welcome header */}
