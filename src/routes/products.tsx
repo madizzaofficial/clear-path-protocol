@@ -5,6 +5,7 @@ import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useState, useEffect } from "react";
 import { Sun, Moon, Clock, Sparkles, Loader2, Check, X, ShoppingCart, AlertTriangle, ImageOff } from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -91,7 +92,7 @@ function RoutinePage() {
     });
   }, [user]);
 
-  function toggleStep(session: "am" | "pm", stepId: string) {
+  async function toggleStep(session: "am" | "pm", stepId: string) {
     if (!user) return;
     const current = session === "am" ? checkedAm : checkedPm;
     const updated = current.includes(stepId)
@@ -102,7 +103,11 @@ function RoutinePage() {
     if (session === "am") setCheckedAm(updated);
     else setCheckedPm(updated);
     const key = new Date().toISOString().slice(0, 10);
-    setDoc(doc(db, "routine_checkins", user.uid, "days", key), { am: newAm, pm: newPm }, { merge: true });
+    try {
+      await setDoc(doc(db, "routine_checkins", user.uid, "days", key), { am: newAm, pm: newPm }, { merge: true });
+    } catch {
+      toast.error("Impossible de sauvegarder. Réessaie.");
+    }
   }
 
   async function submitReport(type: "irritant" | "allergie") {
@@ -110,9 +115,14 @@ function RoutinePage() {
     setReporting(true);
     const updated = { ...reports, [reportStep.id]: type };
     setReports(updated);
-    await setDoc(doc(db, "routine_reports", user.uid), updated, { merge: true });
-    setReporting(false);
-    setReportStep(null);
+    try {
+      await setDoc(doc(db, "routine_reports", user.uid), updated, { merge: true });
+      setReportStep(null);
+    } catch {
+      toast.error("Impossible d'enregistrer le signalement. Réessaie.");
+    } finally {
+      setReporting(false);
+    }
   }
 
   if (authLoading || !user) return null;

@@ -140,6 +140,17 @@ const INTENSITY_HELP: HelpContent = {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
+function normalizeRegError(code: string): string {
+  const map: Record<string, string> = {
+    "auth/email-already-in-use": "Cette adresse email est déjà utilisée.",
+    "auth/invalid-email": "Adresse email invalide.",
+    "auth/weak-password": "Le mot de passe doit contenir au moins 6 caractères.",
+    "auth/network-request-failed": "Erreur réseau. Vérifie ta connexion.",
+    "auth/too-many-requests": "Trop de tentatives. Réessaie plus tard.",
+  };
+  return map[code] ?? "Une erreur est survenue. Réessaie.";
+}
+
 function OnboardingPage() {
   const { token } = Route.useParams();
   const navigate = useNavigate();
@@ -275,7 +286,7 @@ function OnboardingPage() {
       await saveIntakeAndFinish(credential.user, name);
       setSubmitted(true);
     } catch (err: any) {
-      setRegError(err.message);
+      setRegError(normalizeRegError(err.code));
     } finally {
       setSubmitting(false);
     }
@@ -289,7 +300,7 @@ function OnboardingPage() {
       await saveIntakeAndFinish(credential.user);
       setSubmitted(true);
     } catch (err: any) {
-      setRegError(err.message);
+      setRegError(normalizeRegError(err.code));
     } finally {
       setSubmitting(false);
     }

@@ -9,6 +9,7 @@ import {
   collection, getDocs, query, orderBy, limit, documentId, where,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -184,7 +185,7 @@ function Dashboard() {
   const hasRoutine = totalRoutineSteps > 0;
   const isNewUser = !loading && done === 0 && !hasRoutine;
 
-  function toggleStep(session: "am" | "pm", stepId: string) {
+  async function toggleStep(session: "am" | "pm", stepId: string) {
     if (!user) return;
 
     const field = session === "am" ? "checkedAm" : "checkedPm";
@@ -204,7 +205,11 @@ function Dashboard() {
     setData((prev) => ({ ...prev, [field]: updated, streak: newStreak }));
 
     const key = new Date().toISOString().slice(0, 10);
-    setDoc(doc(db, "routine_checkins", user.uid, "days", key), { am: newAm, pm: newPm }, { merge: true });
+    try {
+      await setDoc(doc(db, "routine_checkins", user.uid, "days", key), { am: newAm, pm: newPm }, { merge: true });
+    } catch {
+      toast.error("Impossible de sauvegarder. Réessaie.");
+    }
   }
 
   if (isNewUser) {

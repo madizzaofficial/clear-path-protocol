@@ -11,6 +11,7 @@ import {
   where,
 } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { toast } from "sonner";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -211,7 +212,7 @@ function JournalContent({ uid }: { uid: string }) {
       setTimeout(() => setUploadedAngles((prev) => { const n = new Set(prev); n.delete(angle); return n; }), 2000);
     } catch (err) {
       console.error("Échec de l'upload photo :", err);
-      alert("L'upload a échoué. Vérifie ta connexion et réessaie.");
+      toast.error("L'upload a échoué. Vérifie ta connexion et réessaie.");
     } finally {
       setUploading((prev) => ({ ...prev, [angle]: false }));
     }
@@ -239,6 +240,7 @@ function JournalContent({ uid }: { uid: string }) {
       setTimeout(() => setNoteSaved(false), 2000);
     } catch (err) {
       console.error("Échec de la sauvegarde de la note :", err);
+      toast.error("Échec de la sauvegarde. Réessaie.");
     } finally {
       setSavingNote(false);
     }
@@ -277,17 +279,23 @@ function JournalContent({ uid }: { uid: string }) {
           >
             <Camera className="h-4 w-4" /> Journal
           </button>
-          <button
-            onClick={() => setActiveView("compare")}
-            disabled={history.filter((e) => e.date !== today).length < 1 && !todayEntry}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-all disabled:opacity-40 ${
-              activeView === "compare"
-                ? "bg-card shadow-soft text-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <ArrowLeftRight className="h-4 w-4" /> Comparer
-          </button>
+          <div className="flex flex-1 flex-col items-center">
+            <button
+              onClick={() => setActiveView("compare")}
+              disabled={history.filter((e) => e.date !== today).length < 1 && !todayEntry}
+              title={history.filter((e) => e.date !== today).length < 1 && !todayEntry ? "Ajoutez au moins 2 entrées pour comparer" : undefined}
+              className={`flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-all disabled:opacity-40 ${
+                activeView === "compare"
+                  ? "bg-card shadow-soft text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <ArrowLeftRight className="h-4 w-4" /> Comparer
+            </button>
+            {history.filter((e) => e.date !== today).length < 1 && !todayEntry && (
+              <span className="mt-0.5 text-[10px] text-muted-foreground/50">2 entrées minimum</span>
+            )}
+          </div>
         </div>
 
         {loadingData ? (

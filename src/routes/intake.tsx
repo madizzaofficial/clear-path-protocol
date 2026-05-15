@@ -428,6 +428,11 @@ function IntakePage() {
                   </div>
                 )}
 
+                <p className="text-xs text-muted-foreground">
+                  {photoFiles.length}/3 photos
+                  {photoFiles.length >= 3 && <span className="ml-1 font-medium text-primary">— limite atteinte</span>}
+                </p>
+
                 {photoFiles.length < 3 && (
                   <label className="flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed border-border px-5 py-4 transition-colors hover:border-primary/40 hover:bg-primary-soft/20">
                     <Camera className="h-5 w-5 shrink-0 text-muted-foreground" />
