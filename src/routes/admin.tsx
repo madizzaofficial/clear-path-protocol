@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
-import { TrendingUp, Users, CheckCircle2, AlertCircle, BookOpen, Loader2, ClipboardList, Link2, Copy, Check, Search, Apple, Salad, Package } from "lucide-react";
+import { TrendingUp, Users, CheckCircle2, AlertCircle, AlertTriangle, BookOpen, Loader2, ClipboardList, Link2, Copy, Check, Search, Apple, Salad, Package } from "lucide-react";
 import { course } from "@/lib/course-data";
 
 export const Route = createFileRoute("/admin")({
@@ -43,6 +43,7 @@ function AdminPage() {
   const [progressMap, setProgressMap] = useState<Map<string, number>>(new Map());
   const [routineStatusMap, setRoutineStatusMap] = useState<Map<string, "sent" | "draft">>(new Map());
   const [nutritionSet, setNutritionSet] = useState<Set<string>>(new Set());
+  const [reportsMap, setReportsMap] = useState<Map<string, number>>(new Map());
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "sent" | "draft" | "none">("all");
   const [sortBy, setSortBy] = useState<"name" | "email" | "status">("name");
@@ -60,10 +61,11 @@ function AdminPage() {
     async function fetchStudents() {
       setLoadingStudents(true);
       try {
-        const [usersSnap, routinesSnap, nutritionSnap] = await Promise.all([
+        const [usersSnap, routinesSnap, nutritionSnap, reportsSnap] = await Promise.all([
           getDocs(collection(db, "users")),
           getDocs(collection(db, "routines")),
           getDocs(collection(db, "nutrition")),
+          getDocs(collection(db, "routine_reports")),
         ]);
         const docs = usersSnap.docs.map((d) => d.data() as StudentDoc);
         setStudents(docs);
@@ -78,6 +80,13 @@ function AdminPage() {
           if (toEat.length > 0 || toAvoid.length > 0) nSet.add(d.id);
         });
         setNutritionSet(nSet);
+
+        const rptMap = new Map<string, number>();
+        reportsSnap.docs.forEach((d) => {
+          const count = Object.keys(d.data()).length;
+          if (count > 0) rptMap.set(d.id, count);
+        });
+        setReportsMap(rptMap);
 
         const progressSnaps = await Promise.all(docs.map((s) => getDoc(doc(db, "progress", s.uid))));
         const pMap = new Map<string, number>();
@@ -284,13 +293,14 @@ function AdminPage() {
                     <th className="px-6 py-3.5 font-medium">Durée</th>
                     <th className="px-6 py-3.5 text-center font-medium">Routine</th>
                     <th className="px-6 py-3.5 text-center font-medium">Nutrition</th>
+                    <th className="px-6 py-3.5 text-center font-medium">Alertes</th>
                     <th className="px-6 py-3.5"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60">
                   {filteredStudents.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-14 text-center text-sm text-muted-foreground">
+                      <td colSpan={8} className="py-14 text-center text-sm text-muted-foreground">
                         Aucun élève trouvé.
                       </td>
                     </tr>
@@ -341,6 +351,20 @@ function AdminPage() {
                               <span className="flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
                                 <Check className="h-3 w-3" /> Configurée
                               </span>
+                            ) : (
+                              <span className="text-xs text-muted-foreground/40">—</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-center">
+                            {(reportsMap.get(s.uid) ?? 0) > 0 ? (
+                              <Link to="/admin/student/$uid" params={{ uid: s.uid }}>
+                                <span className="flex items-center gap-1.5 rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">
+                                  <AlertTriangle className="h-3 w-3" />
+                                  {reportsMap.get(s.uid)} produit{(reportsMap.get(s.uid) ?? 0) > 1 ? "s" : ""}
+                                </span>
+                              </Link>
                             ) : (
                               <span className="text-xs text-muted-foreground/40">—</span>
                             )}

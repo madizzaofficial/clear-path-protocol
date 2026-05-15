@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
   ArrowLeft, Loader2, Check, Sun, Moon, ClipboardList,
-  BookOpen, ChevronDown, Lock, Play, ImageOff, MessageSquare, Send,
+  BookOpen, ChevronDown, Lock, Play, ImageOff, MessageSquare, Send, AlertTriangle,
 } from "lucide-react";
 import { course } from "@/lib/course-data";
 
@@ -93,6 +93,7 @@ function StudentPage() {
   const [routine, setRoutine] = useState<Routine | null>(null);
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [photos, setPhotos] = useState<PhotoEntry[]>([]);
+  const [reports, setReports] = useState<Record<string, "irritant" | "allergie">>({});
   const [notes, setNotes] = useState<CoachNote[]>([]);
   const [noteInput, setNoteInput] = useState("");
   const [sendingNote, setSendingNote] = useState(false);
@@ -108,13 +109,14 @@ function StudentPage() {
     if (!isAdmin || !uid) return;
     async function load() {
       setLoading(true);
-      const [profileSnap, intakeSnap, routineSnap, progressSnap, photosSnap, notesSnap] = await Promise.all([
+      const [profileSnap, intakeSnap, routineSnap, progressSnap, photosSnap, notesSnap, reportsSnap] = await Promise.all([
         getDoc(doc(db, "users", uid)),
         getDoc(doc(db, "intake_answers", uid)),
         getDoc(doc(db, "routines", uid)),
         getDoc(doc(db, "progress", uid)),
         getDocs(query(collection(db, "progress_photos"), where("uid", "==", uid))),
         getDocs(query(collection(db, "users", uid, "notes"), orderBy("createdAt", "desc"))),
+        getDoc(doc(db, "routine_reports", uid)),
       ]);
       setProfile(profileSnap.exists() ? (profileSnap.data() as StudentProfile) : null);
       setIntake(intakeSnap.exists() ? (intakeSnap.data() as IntakeAnswers) : null);
@@ -129,6 +131,7 @@ function StudentPage() {
         .sort((a, b) => b.date.localeCompare(a.date));
       setPhotos(sorted);
       setNotes(notesSnap.docs.map((d) => ({ id: d.id, ...d.data() } as CoachNote)));
+      if (reportsSnap.exists()) setReports(reportsSnap.data() as Record<string, "irritant" | "allergie">);
       const initial = Object.fromEntries(course.chapters.map((c) => [c.id, true]));
       setOpenChapters(initial);
       setLoading(false);
@@ -318,6 +321,42 @@ function StudentPage() {
         {/* ── Routine ─────────────────────────────────────────────────────────── */}
         {tab === "routine" && (
           <div>
+            {/* Produits signalés */}
+            {Object.keys(reports).length > 0 && routine && (() => {
+              const allSteps = [...(routine.am ?? []), ...(routine.pm ?? [])];
+              const flagged = Object.entries(reports)
+                .map(([stepId, type]) => ({ step: allSteps.find((s) => s.id === stepId), type }))
+                .filter((f) => f.step);
+              if (flagged.length === 0) return null;
+              return (
+                <div className="mb-6 rounded-3xl border border-orange-200 bg-orange-50 p-5 dark:border-orange-900/40 dark:bg-orange-950/20">
+                  <div className="mb-3 flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-orange-500" />
+                    <p className="text-sm font-semibold text-orange-700 dark:text-orange-400">
+                      {flagged.length} produit{flagged.length > 1 ? "s" : ""} signalé{flagged.length > 1 ? "s" : ""}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    {flagged.map(({ step, type }) => (
+                      <div key={step!.id} className="flex items-center justify-between rounded-xl bg-white/60 px-4 py-2.5 dark:bg-black/20">
+                        <div>
+                          <p className="text-sm font-medium">{step!.product}</p>
+                          <p className="text-xs text-muted-foreground">{step!.category}</p>
+                        </div>
+                        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                          type === "allergie"
+                            ? "bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400"
+                            : "bg-orange-100 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400"
+                        }`}>
+                          {type === "allergie" ? "Allergie" : "Irritant"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+
             {!routine || (routine.am.length === 0 && routine.pm.length === 0) ? (
               <EmptyState
                 icon="🧴"
