@@ -244,7 +244,7 @@ function Dashboard() {
         <div className="grid gap-6 lg:grid-cols-3">
 
           {/* ── Main column ───────────────────────────────────────────────── */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 flex flex-col">
 
             {/* Hero card */}
             {!allDone && next ? (
@@ -288,7 +288,7 @@ function Dashboard() {
           </div>
 
           {/* ── Sidebar ───────────────────────────────────────────────────── */}
-          <div className="space-y-6">
+          <div className="flex flex-col gap-6">
 
             {/* Today's routine */}
             <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
@@ -346,14 +346,16 @@ function Dashboard() {
             </div>
 
             {/* Stats */}
-            <ProtocolProgressCard
-              progress={progress}
-              done={done}
-              total={lessons.length}
-              week={position.week}
-              currentChapter={currentChapter}
-              chapterDone={chapterDone}
-            />
+            <div className="flex-1">
+              <ProtocolProgressCard
+                progress={progress}
+                done={done}
+                total={lessons.length}
+                week={position.week}
+                currentChapter={currentChapter}
+                chapterDone={chapterDone}
+              />
+            </div>
 
           </div>
         </div>
@@ -592,7 +594,7 @@ function ProtocolProgressCard({
   }, [progress]);
 
   return (
-    <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+    <div className="h-full rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
       <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Progression</p>
 
       {/* SVG Ring */}
