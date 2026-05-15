@@ -37,6 +37,12 @@ service cloud.firestore {
       allow read, write: if isOwner(userId) || isAdmin();
     }
 
+    // ── Coach notes subcollection ─────────────────────────────────────────────
+    match /users/{userId}/notes/{noteId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isAdmin();
+    }
+
     // ── Intake answers ────────────────────────────────────────────────────────
     // Students can only write their own intake once; immutable after submission
     match /intake_answers/{userId} {
@@ -112,12 +118,13 @@ service cloud.firestore {
       allow create: if isAdmin()
         && request.resource.data.keys().hasAll(['createdAt', 'expiresAt', 'used'])
         && request.resource.data.used == false;
-      allow update: if isAuth()
-        && resource.data.used == false
-        && request.resource.data.used == true
-        && request.resource.data.usedBy == request.auth.uid
-        && request.resource.data.createdAt == resource.data.createdAt
-        && request.resource.data.expiresAt == resource.data.expiresAt;
+      allow update: if isAdmin()
+        || (isAuth()
+          && resource.data.used == false
+          && request.resource.data.used == true
+          && request.resource.data.usedBy == request.auth.uid
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.expiresAt == resource.data.expiresAt);
       allow delete: if false;
     }
 
