@@ -420,6 +420,7 @@ function JournalContent({ uid }: { uid: string }) {
             onSetA={setCompareA}
             onSetB={setCompareB}
             onSetAngle={setCompareAngle}
+            onZoom={setZoomedPhoto}
           />
         )}
       </main>
@@ -782,6 +783,7 @@ function CompareSection({
   onSetA,
   onSetB,
   onSetAngle,
+  onZoom,
 }: {
   history: PhotoEntry[];
   compareA: string;
@@ -792,6 +794,7 @@ function CompareSection({
   onSetA: (d: string) => void;
   onSetB: (d: string) => void;
   onSetAngle: (a: Angle) => void;
+  onZoom?: (url: string) => void;
 }) {
   // Oldest-first for left-to-right slider direction
   const dates = useMemo(() => [...history].reverse().map((e) => e.date), [history]);
@@ -869,8 +872,8 @@ function CompareSection({
 
       {/* Side-by-side photos */}
       <div className="grid grid-cols-2 gap-3">
-        <CompareSlot label={compareA ? formatDate(compareA) : "Date A"} photo={photoA} side="A" />
-        <CompareSlot label={compareB ? formatDate(compareB) : "Date B"} photo={photoB} side="B" />
+        <CompareSlot label={compareA ? formatDate(compareA) : "Date A"} photo={photoA} side="A" onZoom={onZoom} />
+        <CompareSlot label={compareB ? formatDate(compareB) : "Date B"} photo={photoB} side="B" onZoom={onZoom} />
       </div>
     </div>
   );
@@ -935,10 +938,12 @@ function CompareSlot({
   label,
   photo,
   side,
+  onZoom,
 }: {
   label: string;
   photo: string | null;
   side: "A" | "B";
+  onZoom?: (url: string) => void;
 }) {
   return (
     <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
@@ -950,11 +955,24 @@ function CompareSlot({
       </div>
       <div className="relative aspect-[3/4] bg-muted/30">
         {photo ? (
-          <img
-            src={photo}
-            alt={label}
-            className="h-full w-full object-contain"
-          />
+          <>
+            <img
+              src={photo}
+              alt={label}
+              className="h-full w-full object-contain"
+            />
+            {onZoom && (
+              <button
+                type="button"
+                onClick={() => onZoom(photo)}
+                className="sm:hidden absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+              </button>
+            )}
+          </>
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-2">
             <Camera className="h-6 w-6 text-muted-foreground/30" />

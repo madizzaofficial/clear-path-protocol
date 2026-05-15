@@ -22,10 +22,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as StartTokenRouteImport } from './routes/start.$token'
 import { Route as LessonLessonIdRouteImport } from './routes/lesson.$lessonId'
 import { Route as AdminRoutinesRouteImport } from './routes/admin_.routines'
+import { Route as AdminProductsRouteImport } from './routes/admin_.products'
 import { Route as AdminNutritionRouteImport } from './routes/admin_.nutrition'
 import { Route as AdminCourseEditorRouteImport } from './routes/admin_.course-editor'
 import { Route as AdminStudentUidRouteImport } from './routes/admin_.student.$uid'
-import { Route as AdminProductsRouteImport } from './routes/admin_.products'
 
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
@@ -92,6 +92,11 @@ const AdminRoutinesRoute = AdminRoutinesRouteImport.update({
   path: '/admin/routines',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminProductsRoute = AdminProductsRouteImport.update({
+  id: '/admin_/products',
+  path: '/admin/products',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminNutritionRoute = AdminNutritionRouteImport.update({
   id: '/admin_/nutrition',
   path: '/admin/nutrition',
@@ -105,11 +110,6 @@ const AdminCourseEditorRoute = AdminCourseEditorRouteImport.update({
 const AdminStudentUidRoute = AdminStudentUidRouteImport.update({
   id: '/admin_/student/$uid',
   path: '/admin/student/$uid',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminProductsRoute = AdminProductsRouteImport.update({
-  id: '/admin_/products',
-  path: '/admin/products',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -126,11 +126,11 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof WelcomeRoute
   '/admin/course-editor': typeof AdminCourseEditorRoute
   '/admin/nutrition': typeof AdminNutritionRoute
+  '/admin/products': typeof AdminProductsRoute
   '/admin/routines': typeof AdminRoutinesRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
   '/admin/student/$uid': typeof AdminStudentUidRoute
-  '/admin/products': typeof AdminProductsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -145,11 +145,11 @@ export interface FileRoutesByTo {
   '/welcome': typeof WelcomeRoute
   '/admin/course-editor': typeof AdminCourseEditorRoute
   '/admin/nutrition': typeof AdminNutritionRoute
+  '/admin/products': typeof AdminProductsRoute
   '/admin/routines': typeof AdminRoutinesRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
   '/admin/student/$uid': typeof AdminStudentUidRoute
-  '/admin/products': typeof AdminProductsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -165,11 +165,11 @@ export interface FileRoutesById {
   '/welcome': typeof WelcomeRoute
   '/admin_/course-editor': typeof AdminCourseEditorRoute
   '/admin_/nutrition': typeof AdminNutritionRoute
+  '/admin_/products': typeof AdminProductsRoute
   '/admin_/routines': typeof AdminRoutinesRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
   '/admin_/student/$uid': typeof AdminStudentUidRoute
-  '/admin_/products': typeof AdminProductsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -186,11 +186,11 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/course-editor'
     | '/admin/nutrition'
+    | '/admin/products'
     | '/admin/routines'
     | '/lesson/$lessonId'
     | '/start/$token'
     | '/admin/student/$uid'
-    | '/admin/products'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -205,11 +205,11 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin/course-editor'
     | '/admin/nutrition'
+    | '/admin/products'
     | '/admin/routines'
     | '/lesson/$lessonId'
     | '/start/$token'
     | '/admin/student/$uid'
-    | '/admin/products'
   id:
     | '__root__'
     | '/'
@@ -224,11 +224,11 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/admin_/course-editor'
     | '/admin_/nutrition'
+    | '/admin_/products'
     | '/admin_/routines'
     | '/lesson/$lessonId'
     | '/start/$token'
     | '/admin_/student/$uid'
-    | '/admin_/products'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -244,11 +244,11 @@ export interface RootRouteChildren {
   WelcomeRoute: typeof WelcomeRoute
   AdminCourseEditorRoute: typeof AdminCourseEditorRoute
   AdminNutritionRoute: typeof AdminNutritionRoute
+  AdminProductsRoute: typeof AdminProductsRoute
   AdminRoutinesRoute: typeof AdminRoutinesRoute
   LessonLessonIdRoute: typeof LessonLessonIdRoute
   StartTokenRoute: typeof StartTokenRoute
   AdminStudentUidRoute: typeof AdminStudentUidRoute
-  AdminProductsRoute: typeof AdminProductsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -344,6 +344,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRoutinesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin_/products': {
+      id: '/admin_/products'
+      path: '/admin/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AdminProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin_/nutrition': {
       id: '/admin_/nutrition'
       path: '/admin/nutrition'
@@ -365,13 +372,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminStudentUidRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin_/products': {
-      id: '/admin_/products'
-      path: '/admin/products'
-      fullPath: '/admin/products'
-      preLoaderRoute: typeof AdminProductsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -388,12 +388,22 @@ const rootRouteChildren: RootRouteChildren = {
   WelcomeRoute: WelcomeRoute,
   AdminCourseEditorRoute: AdminCourseEditorRoute,
   AdminNutritionRoute: AdminNutritionRoute,
+  AdminProductsRoute: AdminProductsRoute,
   AdminRoutinesRoute: AdminRoutinesRoute,
   LessonLessonIdRoute: LessonLessonIdRoute,
   StartTokenRoute: StartTokenRoute,
   AdminStudentUidRoute: AdminStudentUidRoute,
-  AdminProductsRoute: AdminProductsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
