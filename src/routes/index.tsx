@@ -346,26 +346,14 @@ function Dashboard() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-1 gap-3">
-              <StatCard
-                icon={TrendingUp}
-                label="Protocole"
-                value={`${progress}%`}
-                sub={`${done}/${lessons.length} leçons`}
-              />
-              <StatCard
-                icon={Sparkles}
-                label="Dans le protocole"
-                value={daysIn !== null ? `J+${daysIn}` : "—"}
-                sub={`Semaine ${position.week} sur 12`}
-              />
-              <StatCard
-                icon={BookOpen}
-                label="Chapitre en cours"
-                value={currentChapter ? `${chapterDone}/${currentChapter.lessons.length}` : "✓"}
-                sub={currentChapter ? currentChapter.title : "Protocole terminé"}
-              />
-            </div>
+            <ProtocolProgressCard
+              progress={progress}
+              done={done}
+              total={lessons.length}
+              week={position.week}
+              currentChapter={currentChapter}
+              chapterDone={chapterDone}
+            />
 
           </div>
         </div>
@@ -574,6 +562,82 @@ function StatCard({ icon: Icon, label, value, sub }: { icon: any; label: string;
       </div>
       <p className="mt-3 font-display text-3xl font-semibold">{value}</p>
       <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">{sub}</p>
+    </div>
+  );
+}
+
+function ProtocolProgressCard({
+  progress,
+  done,
+  total,
+  week,
+  currentChapter,
+  chapterDone,
+}: {
+  progress: number;
+  done: number;
+  total: number;
+  week: number;
+  currentChapter?: { title: string; lessons: { id: string }[] };
+  chapterDone: number;
+}) {
+  const CIRCUMFERENCE = 314.16;
+  const [offset, setOffset] = useState(CIRCUMFERENCE);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      setOffset(CIRCUMFERENCE * (1 - progress / 100));
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [progress]);
+
+  return (
+    <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Progression</p>
+
+      {/* SVG Ring */}
+      <div className="mt-4 flex justify-center">
+        <div className="relative">
+          <svg viewBox="0 0 120 120" className="h-36 w-36 -rotate-90">
+            <circle cx="60" cy="60" r="50" fill="none" strokeWidth="10"
+              stroke="currentColor" className="text-muted/40" />
+            <circle cx="60" cy="60" r="50" fill="none" strokeWidth="10"
+              stroke="currentColor" className="text-primary" strokeLinecap="round"
+              strokeDasharray={CIRCUMFERENCE} strokeDashoffset={offset}
+              style={{ transition: "stroke-dashoffset 0.8s ease" }} />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="font-display text-3xl font-semibold">{progress}%</span>
+            <span className="text-xs text-muted-foreground">{done}/{total} leçons</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Week dots */}
+      <div className="mt-5 flex flex-col gap-1.5">
+        <div className="flex items-center gap-1">
+          <span className="text-[10px] text-muted-foreground/60 w-5 shrink-0">S1</span>
+          <div className="flex flex-1 items-center justify-center gap-1">
+            {Array.from({ length: 12 }, (_, i) => (
+              <div key={i} className={`h-2 w-2 rounded-full transition-colors ${i < week ? "bg-primary" : "bg-muted"}`} />
+            ))}
+          </div>
+          <span className="text-[10px] text-muted-foreground/60 w-5 shrink-0 text-right">S12</span>
+        </div>
+        <p className="text-center text-xs text-muted-foreground">Semaine {week} sur 12</p>
+      </div>
+
+      {/* Chapter */}
+      <div className="mt-5 border-t border-border/60 pt-4">
+        <div className="mb-1 flex items-center gap-2 text-xs text-muted-foreground">
+          <BookOpen className="h-3.5 w-3.5" />
+          Chapitre en cours
+        </div>
+        <p className="text-sm font-medium line-clamp-1">{currentChapter?.title ?? "Protocole terminé"}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {chapterDone}/{currentChapter?.lessons.length ?? 0} leçons
+        </p>
+      </div>
     </div>
   );
 }
