@@ -194,7 +194,7 @@ function TokensPage() {
                 const tokenLink = `${typeof window !== "undefined" ? window.location.origin : ""}/start/${t.id}`;
 
                 return (
-                  <li key={t.id} className="flex items-center gap-4 px-6 py-4">
+                  <li key={t.id} className="flex items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4">
                     <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
                       status === "active" ? "bg-primary-soft" : "bg-muted"
                     }`}>
@@ -225,10 +225,9 @@ function TokensPage() {
                           </span>
                         )}
                       </div>
-                      <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                        <span>
-                          Créé le {new Date(t.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} à {new Date(t.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                        </span>
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        <p>{new Date(t.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>
+                        <p>{new Date(t.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</p>
                         {status === "used" && (
                           <>
                             <span>·</span>

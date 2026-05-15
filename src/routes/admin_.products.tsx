@@ -148,7 +148,7 @@ function ProductsContent() {
 
   return (
     <AdminShell>
-      <div className="mx-auto max-w-7xl px-6 py-8">
+      <div className="mx-auto max-w-7xl px-6 pb-24 pt-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-start justify-between gap-4">
@@ -266,7 +266,7 @@ function ProductCard({
   onDelete: () => void;
 }) {
   return (
-    <li className="group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card transition-shadow hover:shadow-md">
+    <li onClick={onEdit} className="group relative flex cursor-pointer flex-col overflow-hidden rounded-3xl border border-border bg-card transition-shadow hover:shadow-md">
       {/* Image */}
       <div className="relative aspect-square w-full overflow-hidden bg-muted">
         {product.imageUrl ? (
@@ -301,6 +301,7 @@ function ProductCard({
             href={product.purchaseUrl}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
             className="mt-auto text-xs font-medium text-primary hover:underline"
           >
             Lien achat →
@@ -320,7 +321,7 @@ function ProductCard({
         </button>
         <div className="w-px bg-border" />
         <button
-          onClick={onDelete}
+          onClick={(e) => { e.stopPropagation(); onDelete(); }}
           title="Supprimer"
           className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
         >

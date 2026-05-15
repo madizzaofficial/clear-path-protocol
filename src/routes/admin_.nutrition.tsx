@@ -215,7 +215,7 @@ function NutritionContent() {
 
   return (
     <AdminShell>
-      <div className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
+      <div className="mx-auto max-w-7xl overflow-x-hidden px-4 pb-24 pt-8 sm:px-6 md:pt-12">
 
         <header className="mb-10">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>
@@ -268,8 +268,8 @@ function NutritionContent() {
             <section className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
 
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-border/60 px-6 py-5">
-                <div>
+              <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border/60 px-4 py-4 sm:px-6 sm:py-5">
+                <div className="min-w-0">
                   <h2 className="font-display text-xl font-semibold">Consignes nutritionnelles</h2>
                   <p className="mt-0.5 text-sm text-muted-foreground">
                     {selectedUser
@@ -277,7 +277,7 @@ function NutritionContent() {
                       : "Sélectionnez un élève pour configurer sa nutrition."}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex shrink-0 items-center gap-2">
                   {isDirty && (
                     <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-600">
                       Brouillon
@@ -383,8 +383,8 @@ function NutritionContent() {
 
             {/* Global reminders */}
             <section className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
-              <div className="flex items-center justify-between border-b border-border/60 px-6 py-5">
-                <div>
+              <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border/60 px-4 py-4 sm:px-6 sm:py-5">
+                <div className="min-w-0">
                   <h2 className="font-display text-xl font-semibold">Rappels généraux</h2>
                   <p className="mt-0.5 text-sm text-muted-foreground">Conseils affichés à tous les élèves (non cochables).</p>
                 </div>
