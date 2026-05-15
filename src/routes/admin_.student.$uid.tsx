@@ -11,8 +11,11 @@ import {
 } from "lucide-react";
 import { course } from "@/lib/course-data";
 
+type Tab = "profil" | "routine" | "photos" | "progression" | "notes";
+
 export const Route = createFileRoute("/admin_/student/$uid")({
   head: () => ({ meta: [{ title: "Fiche élève — Protocole Clear" }] }),
+  validateSearch: (s): { tab?: Tab } => ({ tab: s.tab as Tab | undefined }),
   component: StudentPage,
 });
 
@@ -78,8 +81,6 @@ function formatDate(dateStr: string): string {
 
 type CoachNote = { id: string; note: string; authorName: string; authorUid: string; createdAt: string };
 
-type Tab = "profil" | "routine" | "photos" | "progression" | "notes";
-
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 function StudentPage() {
@@ -97,7 +98,8 @@ function StudentPage() {
   const [notes, setNotes] = useState<CoachNote[]>([]);
   const [noteInput, setNoteInput] = useState("");
   const [sendingNote, setSendingNote] = useState(false);
-  const [tab, setTab] = useState<Tab>("profil");
+  const { tab: initialTab } = Route.useSearch();
+  const [tab, setTab] = useState<Tab>(initialTab ?? "profil");
   const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
 
   useEffect(() => {

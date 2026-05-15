@@ -276,7 +276,7 @@ function AdminPage() {
                         <td className="px-4 py-3">
                           <div className="flex justify-center">
                             {(reportsMap.get(s.uid) ?? 0) > 0 ? (
-                              <Link to="/admin/student/$uid" params={{ uid: s.uid }}>
+                              <Link to="/admin/student/$uid" params={{ uid: s.uid }} search={{ tab: "routine" }}>
                                 <span className="flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">
                                   <AlertTriangle className="h-3 w-3" />
                                   {reportsMap.get(s.uid)}
