@@ -2,9 +2,9 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, setDoc } from "firebase/firestore";
+import { collection, getDocs, doc, setDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { Link2, Copy, Check, Loader2, Clock, User, Ban } from "lucide-react";
+import { Link2, Copy, Check, Loader2, Clock, User, Ban, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin_/tokens")({
   head: () => ({
@@ -47,6 +47,8 @@ function TokensPage() {
   const [generatingLink, setGeneratingLink] = useState(false);
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [revoking, setRevoking] = useState<Set<string>>(new Set());
+  const [confirmRevoke, setConfirmRevoke] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -84,6 +86,14 @@ function TokensPage() {
     setTokens((prev) => [{ id: token, createdAt: now, expiresAt: now + 7 * 86400000, used: false }, ...prev]);
     await navigator.clipboard.writeText(link).catch(() => {});
     setGeneratingLink(false);
+  }
+
+  async function revokeToken(id: string) {
+    setRevoking((prev) => new Set(prev).add(id));
+    await updateDoc(doc(db, "onboarding_tokens", id), { expiresAt: Date.now() - 1 });
+    setTokens((prev) => prev.map((t) => t.id === id ? { ...t, expiresAt: Date.now() - 1 } : t));
+    setRevoking((prev) => { const s = new Set(prev); s.delete(id); return s; });
+    setConfirmRevoke(null);
   }
 
   async function copyLink(link: string, id: string) {
@@ -216,7 +226,9 @@ function TokensPage() {
                         )}
                       </div>
                       <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                        <span>Créé le {new Date(t.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</span>
+                        <span>
+                          Créé le {new Date(t.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} à {new Date(t.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                        </span>
                         {status === "used" && (
                           <>
                             <span>·</span>
@@ -235,16 +247,43 @@ function TokensPage() {
                     </div>
 
                     {status === "active" && (
-                      <button
-                        onClick={() => copyLink(tokenLink, t.id)}
-                        className="flex shrink-0 items-center gap-1.5 rounded-xl border border-border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-muted"
-                      >
-                        {copiedId === t.id ? (
-                          <><Check className="h-3.5 w-3.5 text-primary" /> Copié</>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <button
+                          onClick={() => copyLink(tokenLink, t.id)}
+                          className="flex items-center gap-1.5 rounded-xl border border-border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-muted"
+                        >
+                          {copiedId === t.id ? (
+                            <><Check className="h-3.5 w-3.5 text-primary" /> Copié</>
+                          ) : (
+                            <><Copy className="h-3.5 w-3.5" /> Copier</>
+                          )}
+                        </button>
+                        {confirmRevoke === t.id ? (
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              onClick={() => revokeToken(t.id)}
+                              disabled={revoking.has(t.id)}
+                              className="flex items-center gap-1 rounded-xl bg-destructive px-3 py-1.5 text-xs font-semibold text-destructive-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+                            >
+                              {revoking.has(t.id) ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                              Confirmer
+                            </button>
+                            <button
+                              onClick={() => setConfirmRevoke(null)}
+                              className="flex items-center rounded-xl border border-border px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
                         ) : (
-                          <><Copy className="h-3.5 w-3.5" /> Copier</>
+                          <button
+                            onClick={() => setConfirmRevoke(t.id)}
+                            className="flex items-center gap-1.5 rounded-xl border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-destructive hover:text-destructive"
+                          >
+                            <Ban className="h-3.5 w-3.5" /> Révoquer
+                          </button>
                         )}
-                      </button>
+                      </div>
                     )}
                   </li>
                 );
