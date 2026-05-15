@@ -1,5 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Home, BookOpen, Sparkles, ShieldCheck, User, LogOut, UserCircle, Camera } from "lucide-react";
+import { Home, BookOpen, Sparkles, ShieldCheck, User, LogOut, UserCircle, Camera, Moon, Sun } from "lucide-react";
+import { useTheme } from "@/hooks/use-theme";
 import { ReactNode } from "react";
 import {
   DropdownMenu,
@@ -15,6 +16,7 @@ import { useAuth } from "@/hooks/use-auth";
 function UserMenu() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggle } = useTheme();
 
   async function handleSignOut() {
     await signOut();
@@ -44,6 +46,10 @@ function UserMenu() {
         </div>
         <DropdownMenuSeparator />
         <div className="p-1">
+          <DropdownMenuItem onClick={toggle} className="cursor-pointer rounded-lg py-2">
+            {theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+            {theme === "dark" ? "Mode clair" : "Mode sombre"}
+          </DropdownMenuItem>
           <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2">
             <Link to="/profile">
               <UserCircle className="mr-2 h-4 w-4" /> Mon profil

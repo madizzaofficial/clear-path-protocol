@@ -5,6 +5,7 @@ import { db, storage } from "@/lib/firebase";
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   query,
   setDoc,
@@ -73,6 +74,10 @@ function formatDateShort(dateStr: string): string {
   });
 }
 
+function photoWeek(date: string, enrolledAt: number): number {
+  return Math.max(1, Math.ceil((new Date(date).getTime() - enrolledAt) / (7 * 86_400_000)) + 1);
+}
+
 // ─── Route ────────────────────────────────────────────────────────────────────
 
 export const Route = createFileRoute("/journal")({
@@ -107,6 +112,7 @@ function JournalContent({ uid }: { uid: string }) {
 
   const [history, setHistory] = useState<PhotoEntry[]>([]);
   const [todayEntry, setTodayEntry] = useState<PhotoEntry | null>(null);
+  const [enrolledAt, setEnrolledAt] = useState<number | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [uploading, setUploading] = useState<Partial<Record<Angle, boolean>>>({});
   const [uploadedAngles, setUploadedAngles] = useState<Set<Angle>>(new Set());
@@ -125,11 +131,11 @@ function JournalContent({ uid }: { uid: string }) {
     async function load() {
       setLoadingData(true);
       try {
-        const q = query(
-          collection(db, "progress_photos"),
-          where("uid", "==", uid)
-        );
-        const snap = await getDocs(q);
+        const [snap, userSnap] = await Promise.all([
+          getDocs(query(collection(db, "progress_photos"), where("uid", "==", uid))),
+          getDoc(doc(db, "users", uid)),
+        ]);
+        if (userSnap.exists()) setEnrolledAt(userSnap.data().enrolledAt ?? null);
         const entries = snap.docs
           .map((d) => d.data() as PhotoEntry)
           .sort((a, b) => b.date.localeCompare(a.date));
@@ -392,6 +398,58 @@ function JournalContent({ uid }: { uid: string }) {
                 </div>
               </section>
             )}
+
+            {/* Timeline */}
+            {enrolledAt && history.length > 0 && (() => {
+              const chronological = [...history].reverse();
+              const map = new Map<number, PhotoEntry[]>();
+              for (const p of chronological) {
+                const w = photoWeek(p.date, enrolledAt);
+                if (!map.has(w)) map.set(w, []);
+                map.get(w)!.push(p);
+              }
+              const groups = [...map.entries()].map(([week, photos]) => ({ week, photos }));
+              return (
+                <section className="mt-8">
+                  <h2 className="mb-4 font-display text-xl font-semibold">Ta progression</h2>
+                  <div className="space-y-6">
+                    {groups.map(({ week, photos }) => (
+                      <div key={week}>
+                        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Semaine {Math.min(week, 12)}
+                        </p>
+                        <div className="flex gap-3 overflow-x-auto pb-2">
+                          {photos.map((p) => {
+                            const mainPhoto = p.front ?? p.left ?? p.right;
+                            return (
+                              <button
+                                key={p.date}
+                                type="button"
+                                onClick={() => setSelectedDate(p.date)}
+                                className="shrink-0 text-left hover:opacity-80 transition-opacity"
+                              >
+                                <div className="relative h-32 w-24 overflow-hidden rounded-2xl bg-muted/30">
+                                  {mainPhoto ? (
+                                    <img src={mainPhoto} alt={p.date} className="h-full w-full object-cover object-top" />
+                                  ) : (
+                                    <div className="flex h-full items-center justify-center">
+                                      <Camera className="h-5 w-5 text-muted-foreground/30" />
+                                    </div>
+                                  )}
+                                </div>
+                                <p className="mt-1 text-center text-[11px] text-muted-foreground">
+                                  {formatDateShort(p.date)}
+                                </p>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
+            })()}
 
             <PhotoDetailDialog
               entry={selectedEntry}

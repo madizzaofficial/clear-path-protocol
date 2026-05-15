@@ -68,18 +68,25 @@ function CoursePage() {
 
         {/* Resume banner */}
         {next && (
-          <div className="border-b border-border/60 bg-background">
-            <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4 md:px-10">
-              <div className="min-w-0">
-                <p className="text-xs font-medium text-muted-foreground">Reprendre là où tu t'es arrêté</p>
-                <p className="mt-0.5 truncate text-sm font-semibold">{next.title}</p>
-              </div>
+          <div className="border-b border-border/60 bg-background px-6 py-4 md:px-10">
+            <div className="mx-auto max-w-7xl">
               <Link
                 to="/lesson/$lessonId"
                 params={{ lessonId: next.id }}
-                className="flex shrink-0 items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background hover:opacity-90"
+                className="group flex items-center justify-between gap-4 rounded-2xl bg-foreground px-6 py-4 text-background transition-opacity hover:opacity-90"
               >
-                Reprendre <ArrowRight className="h-4 w-4" />
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background/15">
+                    <Play className="h-4 w-4 fill-current" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-background/60 uppercase tracking-wider">Reprendre là où tu t'es arrêté</p>
+                    <p className="mt-0.5 truncate text-base font-semibold text-background">{next.title}</p>
+                  </div>
+                </div>
+                <div className="flex shrink-0 items-center gap-2 rounded-full bg-background/15 px-5 py-2 text-sm font-semibold">
+                  Continuer <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                </div>
               </Link>
             </div>
           </div>

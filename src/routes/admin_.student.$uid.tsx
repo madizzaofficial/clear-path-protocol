@@ -2,11 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs, addDoc, orderBy } from "firebase/firestore";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import {
   ArrowLeft, Loader2, Check, Sun, Moon, ClipboardList,
-  BookOpen, ChevronDown, Lock, Play, ImageOff,
+  BookOpen, ChevronDown, Lock, Play, ImageOff, MessageSquare, Send,
 } from "lucide-react";
 import { course } from "@/lib/course-data";
 
@@ -75,7 +76,9 @@ function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 }
 
-type Tab = "profil" | "routine" | "photos" | "progression";
+type CoachNote = { id: string; note: string; authorName: string; authorUid: string; createdAt: string };
+
+type Tab = "profil" | "routine" | "photos" | "progression" | "notes";
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
@@ -90,6 +93,9 @@ function StudentPage() {
   const [routine, setRoutine] = useState<Routine | null>(null);
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [photos, setPhotos] = useState<PhotoEntry[]>([]);
+  const [notes, setNotes] = useState<CoachNote[]>([]);
+  const [noteInput, setNoteInput] = useState("");
+  const [sendingNote, setSendingNote] = useState(false);
   const [tab, setTab] = useState<Tab>("profil");
   const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
 
@@ -102,12 +108,13 @@ function StudentPage() {
     if (!isAdmin || !uid) return;
     async function load() {
       setLoading(true);
-      const [profileSnap, intakeSnap, routineSnap, progressSnap, photosSnap] = await Promise.all([
+      const [profileSnap, intakeSnap, routineSnap, progressSnap, photosSnap, notesSnap] = await Promise.all([
         getDoc(doc(db, "users", uid)),
         getDoc(doc(db, "intake_answers", uid)),
         getDoc(doc(db, "routines", uid)),
         getDoc(doc(db, "progress", uid)),
         getDocs(query(collection(db, "progress_photos"), where("uid", "==", uid))),
+        getDocs(query(collection(db, "users", uid, "notes"), orderBy("createdAt", "desc"))),
       ]);
       setProfile(profileSnap.exists() ? (profileSnap.data() as StudentProfile) : null);
       setIntake(intakeSnap.exists() ? (intakeSnap.data() as IntakeAnswers) : null);
@@ -121,6 +128,7 @@ function StudentPage() {
         .map((d) => d.data() as PhotoEntry)
         .sort((a, b) => b.date.localeCompare(a.date));
       setPhotos(sorted);
+      setNotes(notesSnap.docs.map((d) => ({ id: d.id, ...d.data() } as CoachNote)));
       const initial = Object.fromEntries(course.chapters.map((c) => [c.id, true]));
       setOpenChapters(initial);
       setLoading(false);
@@ -153,7 +161,30 @@ function StudentPage() {
     { id: "routine", label: "Routine", icon: Sun },
     { id: "photos", label: "Photos", icon: ClipboardList },
     { id: "progression", label: "Progression", icon: Check },
+    { id: "notes", label: "Notes", icon: MessageSquare },
   ];
+
+  async function sendNote() {
+    if (!user || !noteInput.trim() || sendingNote) return;
+    setSendingNote(true);
+    try {
+      const newNote = {
+        note: noteInput.trim(),
+        authorUid: user.uid,
+        authorName: user.displayName ?? user.email ?? "Coach",
+        studentUid: uid,
+        createdAt: new Date().toISOString(),
+      };
+      const ref = await addDoc(collection(db, "users", uid, "notes"), newNote);
+      setNotes((prev) => [{ id: ref.id, ...newNote }, ...prev]);
+      setNoteInput("");
+      toast.success("Note envoyée.");
+    } catch {
+      toast.error("Impossible d'envoyer la note.");
+    } finally {
+      setSendingNote(false);
+    }
+  }
 
   return (
     <AppShell>
@@ -444,6 +475,55 @@ function StudentPage() {
             </div>
           </div>
         )}
+        {/* ── Notes ──────────────────────────────────────────────────────────── */}
+        {tab === "notes" && (
+          <div className="space-y-6">
+            {/* Send new note */}
+            <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Envoyer une note
+              </p>
+              <textarea
+                value={noteInput}
+                onChange={(e) => setNoteInput(e.target.value)}
+                placeholder="Écris ton message pour l'élève…"
+                rows={3}
+                className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+              <div className="mt-3 flex justify-end">
+                <button
+                  onClick={sendNote}
+                  disabled={sendingNote || !noteInput.trim()}
+                  className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  {sendingNote ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  Envoyer
+                </button>
+              </div>
+            </div>
+
+            {/* Notes history */}
+            {notes.length === 0 ? (
+              <EmptyState
+                icon="💬"
+                title="Aucune note envoyée"
+                body="Les notes que tu envoies à cet élève apparaîtront ici."
+              />
+            ) : (
+              <div className="space-y-3">
+                {notes.map((n) => (
+                  <div key={n.id} className="rounded-2xl border border-border/60 bg-card p-5 shadow-soft">
+                    <p className="text-sm leading-relaxed text-foreground">{n.note}</p>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {n.authorName} · {new Date(n.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
       </main>
     </AppShell>
   );

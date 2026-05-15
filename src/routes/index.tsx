@@ -24,6 +24,7 @@ export const Route = createFileRoute("/")({
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type RoutineStep = { id: string; category: string; product: string };
+type CoachNote = { id: string; note: string; authorName: string; createdAt: string };
 
 type HomeData = {
   loading: boolean;
@@ -90,6 +91,7 @@ async function computeStreak(uid: string, totalSteps: number): Promise<number> {
 function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [coachNotes, setCoachNotes] = useState<CoachNote[]>([]);
   const [data, setData] = useState<HomeData>({
     loading: true,
     completedLessons: [],
@@ -123,7 +125,8 @@ function Dashboard() {
         where(documentId(), ">=", monthStart),
         where(documentId(), "<=", monthEnd),
       )),
-    ]).then(async ([progressRes, routineRes, userRes, todayRes, monthRes]) => {
+      getDocs(query(collection(db, "users", user.uid, "notes"), orderBy("createdAt", "desc"), limit(3))),
+    ]).then(async ([progressRes, routineRes, userRes, todayRes, monthRes, notesRes]) => {
       const routineSnap = routineRes.status === "fulfilled" ? routineRes.value : null;
       const routineData = routineSnap?.exists() ? routineSnap.data() : null;
       const routine =
@@ -144,6 +147,10 @@ function Dashboard() {
       const progressSnap = progressRes.status === "fulfilled" ? progressRes.value : null;
       const userSnap = userRes.status === "fulfilled" ? userRes.value : null;
       const todaySnap = todayRes.status === "fulfilled" ? todayRes.value : null;
+
+      if (notesRes.status === "fulfilled") {
+        setCoachNotes(notesRes.value.docs.map((d) => ({ id: d.id, ...d.data() } as CoachNote)));
+      }
 
       setData({
         loading: false,
@@ -350,6 +357,25 @@ function Dashboard() {
             currentChapter={currentChapter}
             chapterDone={chapterDone}
           />
+
+          {/* ── Coach notes — row 3, full width ──────────────────────────── */}
+          {coachNotes.length > 0 && (
+            <div className="lg:col-span-3 rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+              <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Messages de ton coach
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {coachNotes.map((n) => (
+                  <div key={n.id} className="rounded-2xl bg-primary-soft/40 p-4">
+                    <p className="text-sm text-foreground leading-relaxed">{n.note}</p>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {n.authorName} · {new Date(n.createdAt).toLocaleDateString("fr-FR")}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
         </div>
       </main>
