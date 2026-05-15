@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { course, allLessons } from "@/lib/course-data";
-import { Play, Check, Sparkles, Sun, Moon, ArrowRight, TrendingUp, BookOpen, Flame, Send, Loader2, MessageSquare } from "lucide-react";
+import { Play, Check, Sparkles, Sun, Moon, ArrowRight, TrendingUp, BookOpen, Flame, Send, Loader2, MessageSquare, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import { useAuth } from "@/hooks/use-auth";
@@ -310,6 +310,16 @@ function Dashboard() {
               ? "Prêt à commencer ? Ta peau va te remercier."
               : `${done} leçon${done > 1 ? "s" : ""} terminée${done > 1 ? "s" : ""}. Continue sur cette lancée.`}
           </p>
+          {allDone && (
+            <div className="mt-4">
+              <Link
+                to="/finish"
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90 transition-opacity"
+              >
+                <Trophy className="h-4 w-4" /> Voir mon récap de fin
+              </Link>
+            </div>
+          )}
         </section>
 
         <div className="grid gap-6 lg:grid-cols-3">

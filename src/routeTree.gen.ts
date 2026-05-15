@@ -26,6 +26,7 @@ import { Route as AdminRoutinesRouteImport } from './routes/admin_.routines'
 import { Route as AdminProductsRouteImport } from './routes/admin_.products'
 import { Route as AdminNutritionRouteImport } from './routes/admin_.nutrition'
 import { Route as AdminCourseEditorRouteImport } from './routes/admin_.course-editor'
+import { Route as FinishRouteImport } from './routes/finish'
 import { Route as AdminStudentUidRouteImport } from './routes/admin_.student.$uid'
 
 const WelcomeRoute = WelcomeRouteImport.update({
@@ -113,6 +114,11 @@ const AdminCourseEditorRoute = AdminCourseEditorRouteImport.update({
   path: '/admin/course-editor',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FinishRoute = FinishRouteImport.update({
+  id: '/finish',
+  path: '/finish',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminStudentUidRoute = AdminStudentUidRouteImport.update({
   id: '/admin_/student/$uid',
   path: '/admin/student/$uid',
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/course': typeof CourseRoute
+  '/finish': typeof FinishRoute
   '/intake': typeof IntakeRoute
   '/journal': typeof JournalRoute
   '/login': typeof LoginRoute
@@ -143,6 +150,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/course': typeof CourseRoute
+  '/finish': typeof FinishRoute
   '/intake': typeof IntakeRoute
   '/journal': typeof JournalRoute
   '/login': typeof LoginRoute
@@ -164,6 +172,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/course': typeof CourseRoute
+  '/finish': typeof FinishRoute
   '/intake': typeof IntakeRoute
   '/journal': typeof JournalRoute
   '/login': typeof LoginRoute
@@ -186,6 +195,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/course'
+    | '/finish'
     | '/intake'
     | '/journal'
     | '/login'
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/course'
+    | '/finish'
     | '/intake'
     | '/journal'
     | '/login'
@@ -226,6 +237,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/course'
+    | '/finish'
     | '/intake'
     | '/journal'
     | '/login'
@@ -247,6 +259,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   CourseRoute: typeof CourseRoute
+  FinishRoute: typeof FinishRoute
   IntakeRoute: typeof IntakeRoute
   JournalRoute: typeof JournalRoute
   LoginRoute: typeof LoginRoute
@@ -329,6 +342,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/finish': {
+      id: '/finish'
+      path: '/finish'
+      fullPath: '/finish'
+      preLoaderRoute: typeof FinishRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -399,6 +419,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   CourseRoute: CourseRoute,
+  FinishRoute: FinishRoute,
   IntakeRoute: IntakeRoute,
   JournalRoute: JournalRoute,
   LoginRoute: LoginRoute,

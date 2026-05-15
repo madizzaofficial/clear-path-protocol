@@ -74,6 +74,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userRef = doc(db, "users", u.uid);
         const userSnap = await getDoc(userRef);
         const admin = await fetchIsAdmin(u.uid, userSnap);
+        if (userSnap.data()?.disabled === true) {
+          await fbSignOut(auth);
+          setUser(null);
+          setIsAdmin(false);
+          setLoading(false);
+          return;
+        }
         const update: Record<string, unknown> = {
           uid: u.uid,
           email: u.email ?? "",
@@ -93,10 +100,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    let cred;
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      cred = await signInWithEmailAndPassword(auth, email, password);
     } catch (err: any) {
       throw new Error(normalizeAuthError(err.code));
+    }
+    const userSnap = await getDoc(doc(db, "users", cred.user.uid));
+    if (userSnap.data()?.disabled === true) {
+      await fbSignOut(auth);
+      throw new Error("Ton compte a été désactivé. Contacte ton coach.");
     }
   };
 
@@ -110,11 +123,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
+    let result;
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      result = await signInWithPopup(auth, provider);
     } catch (err: any) {
       throw new Error(normalizeAuthError(err.code));
+    }
+    const userSnap = await getDoc(doc(db, "users", result.user.uid));
+    if (userSnap.data()?.disabled === true) {
+      await fbSignOut(auth);
+      throw new Error("Ton compte a été désactivé. Contacte ton coach.");
     }
   };
 

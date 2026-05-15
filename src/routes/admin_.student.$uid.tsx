@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Loader2, Check, Sun, Moon, ClipboardList,
   BookOpen, ChevronDown, Lock, Play, ImageOff, MessageSquare, Send, AlertTriangle,
+  Ban, UserCheck, Pencil, X,
 } from "lucide-react";
 import { course } from "@/lib/course-data";
 
@@ -27,6 +28,7 @@ type StudentProfile = {
   displayName: string | null;
   enrolledAt?: number;
   lastSeen?: number;
+  disabled?: boolean;
 };
 
 type IntakeAnswers = {
@@ -99,6 +101,10 @@ function StudentPage() {
   const [noteInput, setNoteInput] = useState("");
   const [sendingNote, setSendingNote] = useState(false);
   const [resolvingReport, setResolvingReport] = useState<string | null>(null);
+  const [isDisabling, setIsDisabling] = useState(false);
+  const [editingIntake, setEditingIntake] = useState(false);
+  const [intakeDraft, setIntakeDraft] = useState<IntakeAnswers>({});
+  const [savingIntake, setSavingIntake] = useState(false);
   const { tab: initialTab } = Route.useSearch();
   const [tab, setTab] = useState<Tab>(initialTab ?? "profil");
   const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
@@ -209,6 +215,36 @@ function StudentPage() {
     }
   }
 
+  async function toggleDisabled() {
+    if (!profile || isDisabling) return;
+    const newDisabled = !profile.disabled;
+    setIsDisabling(true);
+    try {
+      await updateDoc(doc(db, "users", uid), { disabled: newDisabled });
+      setProfile((prev) => prev ? { ...prev, disabled: newDisabled } : prev);
+      toast.success(newDisabled ? "Compte désactivé." : "Compte réactivé.");
+    } catch {
+      toast.error("Impossible de modifier le compte.");
+    } finally {
+      setIsDisabling(false);
+    }
+  }
+
+  async function saveIntake() {
+    if (savingIntake) return;
+    setSavingIntake(true);
+    try {
+      await updateDoc(doc(db, "intake_answers", uid), intakeDraft as Record<string, unknown>);
+      setIntake(intakeDraft);
+      setEditingIntake(false);
+      toast.success("Profil peau mis à jour.");
+    } catch {
+      toast.error("Impossible d'enregistrer.");
+    } finally {
+      setSavingIntake(false);
+    }
+  }
+
   return (
     <AppShell>
       <main className="mx-auto max-w-5xl px-6 pb-24 pt-8 md:pt-10">
@@ -240,13 +276,33 @@ function StudentPage() {
               )}
             </div>
           </div>
-          <Link
-            to="/admin/routines"
-            search={{ uid }}
-            className="flex items-center gap-2 rounded-full bg-primary-soft px-4 py-2 text-sm font-medium text-foreground hover:bg-primary-muted"
-          >
-            <ClipboardList className="h-4 w-4" /> Modifier la routine
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleDisabled}
+              disabled={isDisabling}
+              className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors disabled:opacity-60 ${
+                profile?.disabled
+                  ? "bg-primary-soft text-foreground hover:bg-primary-muted"
+                  : "bg-destructive/10 text-destructive hover:bg-destructive/20"
+              }`}
+            >
+              {isDisabling ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : profile?.disabled ? (
+                <UserCheck className="h-4 w-4" />
+              ) : (
+                <Ban className="h-4 w-4" />
+              )}
+              {profile?.disabled ? "Réactiver" : "Désactiver"}
+            </button>
+            <Link
+              to="/admin/routines"
+              search={{ uid }}
+              className="flex items-center gap-2 rounded-full bg-primary-soft px-4 py-2 text-sm font-medium text-foreground hover:bg-primary-muted"
+            >
+              <ClipboardList className="h-4 w-4" /> Modifier la routine
+            </Link>
+          </div>
         </div>
 
         {/* Tab bar */}
@@ -280,58 +336,169 @@ function StudentPage() {
               />
             ) : (
               <>
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <IntakeSection title="Type de peau">
-                    <span className="rounded-full bg-primary-soft px-4 py-1.5 text-sm font-semibold text-primary">
-                      {SKIN_TYPE_LABELS[intake.skinType ?? ""] ?? intake.skinType ?? "—"}
-                    </span>
-                  </IntakeSection>
-                  <IntakeSection title="Intensité">
-                    <span className={`rounded-full px-4 py-1.5 text-sm font-semibold ${
-                      intake.intensity === "severe"
-                        ? "bg-destructive/10 text-destructive"
-                        : intake.intensity === "moderee"
-                        ? "bg-amber-100 text-amber-700"
-                        : "bg-primary-soft text-primary"
-                    }`}>
-                      {INTENSITY_LABELS[intake.intensity ?? ""] ?? intake.intensity ?? "—"}
-                    </span>
-                  </IntakeSection>
-                  <IntakeSection title="Routine actuelle">
-                    <p className="text-sm font-medium">{intake.currentRoutine ?? "—"}</p>
-                  </IntakeSection>
+                {/* Edit / save toolbar */}
+                <div className="flex justify-end gap-2">
+                  {editingIntake ? (
+                    <>
+                      <button
+                        onClick={() => setEditingIntake(false)}
+                        className="flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted"
+                      >
+                        <X className="h-4 w-4" /> Annuler
+                      </button>
+                      <button
+                        onClick={saveIntake}
+                        disabled={savingIntake}
+                        className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90 disabled:opacity-60"
+                      >
+                        {savingIntake ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                        Enregistrer
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => { setIntakeDraft(intake); setEditingIntake(true); }}
+                      className="flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted"
+                    >
+                      <Pencil className="h-4 w-4" /> Modifier
+                    </button>
+                  )}
                 </div>
 
-                {(intake.acneTypes?.length ?? 0) > 0 && (
-                  <IntakeSection title="Type de boutons">
-                    <div className="flex flex-wrap gap-2">
-                      {intake.acneTypes!.map((t) => (
-                        <Tag key={t}>{ACNE_TYPE_LABELS[t] ?? t}</Tag>
-                      ))}
+                {editingIntake ? (
+                  <div className="space-y-4">
+                    {/* Skin type + intensity */}
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <IntakeSection title="Type de peau">
+                        <select
+                          value={intakeDraft.skinType ?? ""}
+                          onChange={(e) => setIntakeDraft((d) => ({ ...d, skinType: e.target.value }))}
+                          className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                        >
+                          <option value="">—</option>
+                          {Object.entries(SKIN_TYPE_LABELS).map(([k, v]) => (
+                            <option key={k} value={k}>{v}</option>
+                          ))}
+                        </select>
+                      </IntakeSection>
+                      <IntakeSection title="Intensité acné">
+                        <select
+                          value={intakeDraft.intensity ?? ""}
+                          onChange={(e) => setIntakeDraft((d) => ({ ...d, intensity: e.target.value }))}
+                          className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                        >
+                          <option value="">—</option>
+                          {Object.entries(INTENSITY_LABELS).map(([k, v]) => (
+                            <option key={k} value={k}>{v}</option>
+                          ))}
+                        </select>
+                      </IntakeSection>
                     </div>
-                  </IntakeSection>
-                )}
 
-                {intake.mainGoal && (
-                  <IntakeSection title="Objectif principal">
-                    <p className="text-sm leading-relaxed text-foreground/80">{intake.mainGoal}</p>
-                  </IntakeSection>
-                )}
+                    {/* Acne types checkboxes */}
+                    <IntakeSection title="Types de boutons">
+                      <div className="flex flex-wrap gap-3">
+                        {Object.entries(ACNE_TYPE_LABELS).map(([k, v]) => {
+                          const checked = intakeDraft.acneTypes?.includes(k) ?? false;
+                          return (
+                            <label key={k} className="flex cursor-pointer items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() =>
+                                  setIntakeDraft((d) => ({
+                                    ...d,
+                                    acneTypes: checked
+                                      ? (d.acneTypes ?? []).filter((t) => t !== k)
+                                      : [...(d.acneTypes ?? []), k],
+                                  }))
+                                }
+                                className="h-4 w-4 rounded border-border accent-primary"
+                              />
+                              <span className="text-sm">{v}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </IntakeSection>
 
-                {(intake.photoUrls?.length ?? 0) > 0 && (
-                  <IntakeSection title={`Photos de la peau (${intake.photoUrls!.length})`}>
-                    <div className="flex flex-wrap gap-3">
-                      {intake.photoUrls!.map((url, i) => (
-                        <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                          <img
-                            src={url}
-                            alt={`Photo ${i + 1}`}
-                            className="h-32 w-32 rounded-2xl object-cover border border-border transition-opacity hover:opacity-80"
-                          />
-                        </a>
-                      ))}
+                    {/* Routine actuelle */}
+                    <IntakeSection title="Routine actuelle">
+                      <input
+                        value={intakeDraft.currentRoutine ?? ""}
+                        onChange={(e) => setIntakeDraft((d) => ({ ...d, currentRoutine: e.target.value }))}
+                        className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                        placeholder="Ex. Nettoyant La Roche-Posay, hydratant…"
+                      />
+                    </IntakeSection>
+
+                    {/* Objectif */}
+                    <IntakeSection title="Objectif principal">
+                      <textarea
+                        value={intakeDraft.mainGoal ?? ""}
+                        onChange={(e) => setIntakeDraft((d) => ({ ...d, mainGoal: e.target.value }))}
+                        rows={3}
+                        className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                        placeholder="Objectif de l'élève…"
+                      />
+                    </IntakeSection>
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid gap-4 sm:grid-cols-3">
+                      <IntakeSection title="Type de peau">
+                        <span className="rounded-full bg-primary-soft px-4 py-1.5 text-sm font-semibold text-primary">
+                          {SKIN_TYPE_LABELS[intake.skinType ?? ""] ?? intake.skinType ?? "—"}
+                        </span>
+                      </IntakeSection>
+                      <IntakeSection title="Intensité">
+                        <span className={`rounded-full px-4 py-1.5 text-sm font-semibold ${
+                          intake.intensity === "severe"
+                            ? "bg-destructive/10 text-destructive"
+                            : intake.intensity === "moderee"
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-primary-soft text-primary"
+                        }`}>
+                          {INTENSITY_LABELS[intake.intensity ?? ""] ?? intake.intensity ?? "—"}
+                        </span>
+                      </IntakeSection>
+                      <IntakeSection title="Routine actuelle">
+                        <p className="text-sm font-medium">{intake.currentRoutine ?? "—"}</p>
+                      </IntakeSection>
                     </div>
-                  </IntakeSection>
+
+                    {(intake.acneTypes?.length ?? 0) > 0 && (
+                      <IntakeSection title="Type de boutons">
+                        <div className="flex flex-wrap gap-2">
+                          {intake.acneTypes!.map((t) => (
+                            <Tag key={t}>{ACNE_TYPE_LABELS[t] ?? t}</Tag>
+                          ))}
+                        </div>
+                      </IntakeSection>
+                    )}
+
+                    {intake.mainGoal && (
+                      <IntakeSection title="Objectif principal">
+                        <p className="text-sm leading-relaxed text-foreground/80">{intake.mainGoal}</p>
+                      </IntakeSection>
+                    )}
+
+                    {(intake.photoUrls?.length ?? 0) > 0 && (
+                      <IntakeSection title={`Photos de la peau (${intake.photoUrls!.length})`}>
+                        <div className="flex flex-wrap gap-3">
+                          {intake.photoUrls!.map((url, i) => (
+                            <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+                              <img
+                                src={url}
+                                alt={`Photo ${i + 1}`}
+                                className="h-32 w-32 rounded-2xl object-cover border border-border transition-opacity hover:opacity-80"
+                              />
+                            </a>
+                          ))}
+                        </div>
+                      </IntakeSection>
+                    )}
+                  </>
                 )}
               </>
             )}
