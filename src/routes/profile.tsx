@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
-import { db } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { sendPasswordResetEmail, updateProfile } from "firebase/auth";
 import { useState, useEffect } from "react";
-import { Loader2, LogOut, Mail, Calendar } from "lucide-react";
+import { toast } from "sonner";
+import { Calendar, Check, Loader2, LogOut, Mail, Pencil, X } from "lucide-react";
 import { allLessons } from "@/lib/course-data";
 
 type IntakeAnswers = {
@@ -37,6 +39,10 @@ function ProfilePage() {
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [enrolledAt, setEnrolledAt] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState("");
+  const [savingName, setSavingName] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/login" });
@@ -59,6 +65,33 @@ function ProfilePage() {
   async function handleSignOut() {
     await signOut();
     navigate({ to: "/login" });
+  }
+
+  async function handlePasswordReset() {
+    if (!user?.email || resetLoading) return;
+    setResetLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, user.email);
+      toast.success("Email de réinitialisation envoyé à " + user.email);
+    } catch {
+      toast.error("Impossible d'envoyer l'email. Réessaie.");
+    } finally {
+      setResetLoading(false);
+    }
+  }
+
+  async function handleSaveName() {
+    if (!user || savingName || !nameInput.trim()) return;
+    setSavingName(true);
+    try {
+      await updateProfile(user, { displayName: nameInput.trim() });
+      setEditingName(false);
+      toast.success("Prénom mis à jour.");
+    } catch {
+      toast.error("Impossible de mettre à jour le prénom.");
+    } finally {
+      setSavingName(false);
+    }
   }
 
   if (authLoading || !user) return null;
@@ -201,6 +234,71 @@ function ProfilePage() {
             )}
           </>
         )}
+
+        {/* Account settings */}
+        <div className="mb-6 overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
+          <div className="border-b border-border/60 px-6 py-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Paramètres du compte
+            </p>
+          </div>
+
+          {/* Display name row */}
+          {editingName ? (
+            <div className="flex items-center gap-3 border-b border-border/60 px-6 py-4">
+              <input
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") handleSaveName(); if (e.key === "Escape") setEditingName(false); }}
+                className="flex-1 rounded-xl border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                autoFocus
+              />
+              <button
+                onClick={handleSaveName}
+                disabled={savingName}
+                className="rounded-full p-2 text-primary hover:bg-primary-soft disabled:opacity-60"
+              >
+                <Check className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setEditingName(false)}
+                className="rounded-full p-2 text-muted-foreground hover:bg-muted"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <div className={`flex items-center justify-between px-6 py-4 ${user.providerData[0]?.providerId !== "google.com" ? "border-b border-border/60" : ""}`}>
+              <div>
+                <p className="text-xs text-muted-foreground">Prénom</p>
+                <p className="mt-0.5 text-sm font-medium">{user.displayName ?? "—"}</p>
+              </div>
+              <button
+                onClick={() => { setNameInput(user.displayName ?? ""); setEditingName(true); }}
+                className="rounded-full p-2 text-muted-foreground hover:bg-muted"
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+
+          {/* Password reset row — email accounts only */}
+          {user.providerData[0]?.providerId !== "google.com" && (
+            <div className="flex items-center justify-between px-6 py-4">
+              <div>
+                <p className="text-xs text-muted-foreground">Mot de passe</p>
+                <p className="mt-0.5 text-sm font-medium">••••••••</p>
+              </div>
+              <button
+                onClick={handlePasswordReset}
+                disabled={resetLoading}
+                className="text-xs font-medium text-primary hover:underline disabled:opacity-60"
+              >
+                {resetLoading ? "Envoi…" : "Réinitialiser"}
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Sign out */}
         <button
