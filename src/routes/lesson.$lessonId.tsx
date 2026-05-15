@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { course, findLesson, allLessons } from "@/lib/course-data";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, ArrowRight, Check, ChevronDown, Clock, Download, FileText, Lock, Menu, Play, X } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { doc, getDoc, setDoc, arrayUnion, arrayRemove } from "firebase/firestore";
@@ -35,6 +35,10 @@ function LessonPage() {
   const navigate = useNavigate();
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [marking, setMarking] = useState(false);
+  const [note, setNote] = useState("");
+  const [noteSaved, setNoteSaved] = useState(false);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [checked, setChecked] = useState<number[]>([]);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -43,7 +47,12 @@ function LessonPage() {
   useEffect(() => {
     if (!user) return;
     getDoc(doc(db, "progress", user.uid)).then((snap) => {
-      if (snap.exists()) setCompletedLessons(snap.data().completedLessons ?? []);
+      if (snap.exists()) {
+        const data = snap.data();
+        setCompletedLessons(data.completedLessons ?? []);
+        setNote(data.lessonNotes?.[lesson.id] ?? "");
+        setChecked(data.lessonChecks?.[lesson.id] ?? []);
+      }
     });
   }, [user]);
 
@@ -64,6 +73,24 @@ function LessonPage() {
       isCompleted ? prev.filter((id) => id !== lesson.id) : [...prev, lesson.id]
     );
     setMarking(false);
+  }
+
+  function handleNoteChange(val: string) {
+    setNote(val);
+    setNoteSaved(false);
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      if (!user) return;
+      await setDoc(doc(db, "progress", user.uid), { lessonNotes: { [lesson.id]: val } }, { merge: true });
+      setNoteSaved(true);
+    }, 1000);
+  }
+
+  async function toggleCheck(i: number) {
+    const next = checked.includes(i) ? checked.filter((x) => x !== i) : [...checked, i];
+    setChecked(next);
+    if (!user) return;
+    await setDoc(doc(db, "progress", user.uid), { lessonChecks: { [lesson.id]: next } }, { merge: true });
   }
 
   return (
@@ -147,16 +174,26 @@ function LessonPage() {
                     "Réfléchir aux déclencheurs dans tes notes",
                   ].map((item, i) => (
                     <label key={item} className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 hover:bg-primary-soft/40">
-                      <input type="checkbox" defaultChecked={i < 2} className="h-4 w-4 rounded border-border accent-[var(--primary)]" />
-                      <span className="text-sm">{item}</span>
+                      <input
+                        type="checkbox"
+                        checked={checked.includes(i)}
+                        onChange={() => toggleCheck(i)}
+                        className="h-4 w-4 rounded border-border accent-[var(--primary)]"
+                      />
+                      <span className={`text-sm transition-opacity ${checked.includes(i) ? "opacity-50 line-through" : ""}`}>{item}</span>
                     </label>
                   ))}
                 </div>
               </section>
 
               <section>
-                <h2 className="font-display text-xl font-semibold">Tes notes</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="font-display text-xl font-semibold">Tes notes</h2>
+                  {noteSaved && <span className="text-xs text-muted-foreground">Sauvegardées</span>}
+                </div>
                 <textarea
+                  value={note}
+                  onChange={(e) => handleNoteChange(e.target.value)}
                   placeholder="Note tes observations pendant le visionnage…"
                   className="mt-3 min-h-32 w-full resize-none rounded-2xl border border-border bg-card p-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
                 />
@@ -168,16 +205,36 @@ function LessonPage() {
                 <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-soft">
                   <h3 className="font-display text-base font-semibold">Ressources</h3>
                   <ul className="mt-3 space-y-2">
-                    {lesson.resources.map((r: { name: string; size: string }) => (
+                    {lesson.resources.map((r: { name: string; size: string; url?: string }) => (
                       <li key={r.name}>
-                        <button className="flex w-full items-center gap-3 rounded-xl border border-border/60 bg-background p-3 text-left transition-colors hover:bg-primary-soft/40">
-                          <FileText className="h-4 w-4 shrink-0 text-primary" />
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium">{r.name}</p>
-                            <p className="text-xs text-muted-foreground">{r.size}</p>
+                        {r.url ? (
+                          <a
+                            href={r.url}
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex w-full items-center gap-3 rounded-xl border border-border/60 bg-background p-3 text-left transition-colors hover:bg-primary-soft/40"
+                          >
+                            <FileText className="h-4 w-4 shrink-0 text-primary" />
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium">{r.name}</p>
+                              <p className="text-xs text-muted-foreground">{r.size}</p>
+                            </div>
+                            <Download className="h-4 w-4 text-muted-foreground" />
+                          </a>
+                        ) : (
+                          <div
+                            title="Bientôt disponible"
+                            className="flex w-full cursor-not-allowed items-center gap-3 rounded-xl border border-border/60 bg-muted/40 p-3 opacity-50"
+                          >
+                            <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium">{r.name}</p>
+                              <p className="text-xs text-muted-foreground">{r.size}</p>
+                            </div>
+                            <span className="text-[10px] font-medium text-muted-foreground">Bientôt</span>
                           </div>
-                          <Download className="h-4 w-4 text-muted-foreground" />
-                        </button>
+                        )}
                       </li>
                     ))}
                   </ul>

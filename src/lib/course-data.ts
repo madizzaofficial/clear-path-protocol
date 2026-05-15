@@ -4,7 +4,7 @@ export type Lesson = {
   duration: string;
   locked: boolean;
   summary: string;
-  resources: { name: string; size: string }[];
+  resources: { name: string; size: string; url?: string }[];
 };
 
 export type Chapter = {
