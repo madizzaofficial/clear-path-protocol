@@ -803,16 +803,6 @@ function CompareSection({
   const photoB = compareEntryB?.[compareAngle] ?? null;
   const gap = compareA && compareB ? formatGap(compareA, compareB) : null;
 
-  function nearestDate(target: string): string {
-    if (!dates.length) return "";
-    const t = new Date(target + "T00:00:00").getTime();
-    return dates.reduce((best, d) =>
-      Math.abs(new Date(d + "T00:00:00").getTime() - t) <
-      Math.abs(new Date(best + "T00:00:00").getTime() - t)
-        ? d
-        : best
-    );
-  }
 
   if (history.length < 2) {
     return (
@@ -841,34 +831,22 @@ function CompareSection({
           </p>
         )}
 
-        {/* Manual date inputs */}
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div>
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
-              Date A
-            </p>
-            <input
-              type="date"
-              value={compareA}
-              min={dates[0]}
-              max={dates[max]}
-              onChange={(e) => { if (e.target.value) onSetA(nearestDate(e.target.value)); }}
-              className="h-9 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-          <div>
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
-              Date B
-            </p>
-            <input
-              type="date"
-              value={compareB}
-              min={dates[0]}
-              max={dates[max]}
-              onChange={(e) => { if (e.target.value) onSetB(nearestDate(e.target.value)); }}
-              className="h-9 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
+        {/* Date selectors */}
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          {[{ label: "Date A", value: compareA, onChange: onSetA }, { label: "Date B", value: compareB, onChange: onSetB }].map(({ label, value, onChange }) => (
+            <div key={label}>
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">{label}</p>
+              <select
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className="h-9 w-full rounded-xl border border-border bg-background px-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              >
+                {dates.map((d) => (
+                  <option key={d} value={d}>{formatDateShort(d)}</option>
+                ))}
+              </select>
+            </div>
+          ))}
         </div>
       </div>
 
