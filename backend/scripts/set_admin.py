@@ -40,6 +40,12 @@ def main() -> int:
         },
         merge=True,
     )
+    # Keep config/admins.uids[] in sync so frontend check agrees with backend
+    admins_ref = db.collection("config").document("admins")
+    if revoke:
+        admins_ref.update({"uids": firestore.ArrayRemove([user.uid])})
+    else:
+        admins_ref.set({"uids": firestore.ArrayUnion([user.uid])}, merge=True)
     action = "revoked admin from" if revoke else "promoted to admin"
     print(f"✅ {action} {email} (uid={user.uid})")
     return 0

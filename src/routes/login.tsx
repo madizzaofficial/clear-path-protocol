@@ -3,7 +3,7 @@ import { Sparkles, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { auth } from "@/lib/firebase";
-import { GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo, signOut } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo, signOut, sendPasswordResetEmail } from "firebase/auth";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -23,6 +23,8 @@ function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && user) navigate({ to: "/" });
@@ -41,6 +43,22 @@ function LoginPage() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleForgotPassword() {
+    if (!email.trim()) {
+      setError("Entrez votre adresse email, puis cliquez sur Oublié ?");
+      return;
+    }
+    setResetLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+    } catch {
+      // Ne pas révéler si l'email existe ou non
+    } finally {
+      setResetSent(true);
+      setResetLoading(false);
     }
   }
 
@@ -135,7 +153,14 @@ function LoginPage() {
             <div>
               <div className="mb-2 flex items-center justify-between">
                 <label className="text-sm font-medium text-foreground/80">Password</label>
-                <a href="#" className="text-xs font-medium text-primary hover:underline">Oublié ?</a>
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  disabled={resetLoading}
+                  className="text-xs font-medium text-primary hover:underline disabled:opacity-50"
+                >
+                  {resetLoading ? "..." : "Oublié ?"}
+                </button>
               </div>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -148,6 +173,11 @@ function LoginPage() {
                   className="h-12 w-full rounded-2xl border border-border bg-card pl-11 pr-4 text-sm shadow-soft outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
               </div>
+              {resetSent && (
+                <p className="mt-1.5 text-xs text-green-600">
+                  Si un compte existe pour cette adresse, un email de réinitialisation a été envoyé.
+                </p>
+              )}
             </div>
 
             {error && (

@@ -9,7 +9,7 @@ import {
   signInWithPopup,
   updateProfile,
 } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { type DocumentSnapshot, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 type AuthContextType = {
@@ -39,13 +39,14 @@ function normalizeAuthError(code: string): string {
   return map[code] ?? "Something went wrong. Please try again.";
 }
 
-// Fix: if config/admins doc is absent, default to NO admins (not all)
-async function fetchIsAdmin(uid: string): Promise<boolean> {
+// Primary: users/{uid}.is_admin (aligned with backend set_admin.py)
+// Fallback: config/admins.uids[] for admins created before this change
+async function fetchIsAdmin(uid: string, userSnap: DocumentSnapshot): Promise<boolean> {
+  if (userSnap.data()?.is_admin === true) return true;
   try {
     const snap = await getDoc(doc(db, "config", "admins"));
     if (!snap.exists()) return false;
-    const uids: string[] = snap.data()?.uids ?? [];
-    return uids.includes(uid);
+    return (snap.data()?.uids ?? []).includes(uid);
   } catch {
     return false;
   }
@@ -71,7 +72,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(u);
       if (u) {
         const userRef = doc(db, "users", u.uid);
-        const [userSnap, admin] = await Promise.all([getDoc(userRef), fetchIsAdmin(u.uid)]);
+        const userSnap = await getDoc(userRef);
+        const admin = await fetchIsAdmin(u.uid, userSnap);
         const update: Record<string, unknown> = {
           uid: u.uid,
           email: u.email ?? "",
