@@ -279,12 +279,14 @@ function Dashboard() {
             )}
 
             {/* Routine calendar */}
-            <RoutineCalendar
-              totalSteps={totalRoutineSteps}
-              monthCheckins={monthCheckins}
-              checkedAm={checkedAm}
-              checkedPm={checkedPm}
-            />
+            <div className="mt-6 flex-1">
+              <RoutineCalendar
+                totalSteps={totalRoutineSteps}
+                monthCheckins={monthCheckins}
+                checkedAm={checkedAm}
+                checkedPm={checkedPm}
+              />
+            </div>
           </div>
 
           {/* ── Sidebar ───────────────────────────────────────────────────── */}
@@ -346,16 +348,14 @@ function Dashboard() {
             </div>
 
             {/* Stats */}
-            <div className="flex-1">
-              <ProtocolProgressCard
-                progress={progress}
-                done={done}
-                total={lessons.length}
-                week={position.week}
-                currentChapter={currentChapter}
-                chapterDone={chapterDone}
-              />
-            </div>
+            <ProtocolProgressCard
+              progress={progress}
+              done={done}
+              total={lessons.length}
+              week={position.week}
+              currentChapter={currentChapter}
+              chapterDone={chapterDone}
+            />
 
           </div>
         </div>
@@ -485,7 +485,7 @@ function RoutineCalendar({
   const DAY_LABELS = ["L", "M", "M", "J", "V", "S", "D"];
 
   return (
-    <div className="mt-8 rounded-3xl border border-border/60 bg-card p-6 shadow-soft md:p-8">
+    <div className="h-full rounded-3xl border border-border/60 bg-card p-6 shadow-soft md:p-8">
       <div className="mb-5 flex items-center justify-between">
         <h3 className="font-display text-xl font-semibold">Suivi de routine</h3>
         <span className="text-xs capitalize text-muted-foreground">{monthLabel}</span>
@@ -594,7 +594,7 @@ function ProtocolProgressCard({
   }, [progress]);
 
   return (
-    <div className="h-full rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+    <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
       <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Progression</p>
 
       {/* SVG Ring */}
