@@ -24,6 +24,8 @@ import {
   Upload,
   ChevronLeft,
   ChevronRight,
+  Download,
+  RotateCcw,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import * as SliderPrimitive from "@radix-ui/react-slider";
@@ -487,6 +489,13 @@ function JournalContent({ uid }: { uid: string }) {
             onSetB={setCompareB}
             onSetAngle={setCompareAngle}
             onZoom={setZoomedPhoto}
+            onReset={() => {
+              const sorted = [...history].reverse();
+              if (sorted.length >= 2) {
+                setCompareA(sorted[0].date);
+                setCompareB(sorted[sorted.length - 1].date);
+              }
+            }}
           />
         )}
       </main>
@@ -850,6 +859,7 @@ function CompareSection({
   onSetB,
   onSetAngle,
   onZoom,
+  onReset,
 }: {
   history: PhotoEntry[];
   compareA: string;
@@ -861,6 +871,7 @@ function CompareSection({
   onSetB: (d: string) => void;
   onSetAngle: (a: Angle) => void;
   onZoom?: (url: string) => void;
+  onReset?: () => void;
 }) {
   // Oldest-first for left-to-right slider direction
   const dates = useMemo(() => [...history].reverse().map((e) => e.date), [history]);
@@ -936,7 +947,18 @@ function CompareSection({
         ))}
       </div>
 
-      {/* Side-by-side photos */}
+      {/* Avant / Maintenant reset + side-by-side photos */}
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Comparaison</p>
+        {onReset && (
+          <button
+            onClick={onReset}
+            className="flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+          >
+            <RotateCcw className="h-3 w-3" /> Avant / Maintenant
+          </button>
+        )}
+      </div>
       <div className="grid grid-cols-2 gap-3">
         <CompareSlot label={compareA ? formatDate(compareA) : "Date A"} photo={photoA} side="A" onZoom={onZoom} />
         <CompareSlot label={compareB ? formatDate(compareB) : "Date B"} photo={photoB} side="B" onZoom={onZoom} />
@@ -1000,6 +1022,20 @@ function DateRangeSlider({
   );
 }
 
+async function downloadPhoto(url: string, filename: string) {
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch {
+    // silently fail — user can long-press on mobile
+  }
+}
+
 function CompareSlot({
   label,
   photo,
@@ -1017,7 +1053,17 @@ function CompareSlot({
         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary-soft text-[11px] font-bold text-primary">
           {side}
         </span>
-        <p className="truncate text-xs font-medium text-foreground/80">{label}</p>
+        <p className="min-w-0 flex-1 truncate text-xs font-medium text-foreground/80">{label}</p>
+        {photo && (
+          <button
+            type="button"
+            onClick={() => downloadPhoto(photo, `photo-${side}-${label}.jpg`)}
+            className="shrink-0 rounded-lg p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            title="Télécharger"
+          >
+            <Download className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
       <div className="relative aspect-[3/4] bg-muted/30">
         {photo ? (

@@ -2,9 +2,10 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, addDoc } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
-import { TrendingUp, Users, CheckCircle2, AlertCircle, AlertTriangle, Loader2, ClipboardList, Check, Search, Salad, Clock } from "lucide-react";
+import { TrendingUp, Users, CheckCircle2, AlertCircle, AlertTriangle, Loader2, ClipboardList, Check, Search, Salad, Clock, Send, X } from "lucide-react";
+import { toast } from "sonner";
 import { course } from "@/lib/course-data";
 
 export const Route = createFileRoute("/admin")({
@@ -33,6 +34,7 @@ type StudentDoc = {
   displayName: string | null;
   photoURL: string | null;
   enrolledAt?: number;
+  lastSeen?: number;
 };
 
 function AdminPage() {
@@ -46,7 +48,11 @@ function AdminPage() {
   const [reportsMap, setReportsMap] = useState<Map<string, number>>(new Map());
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "sent" | "draft" | "none">("all");
+  const [filterInactive, setFilterInactive] = useState(false);
   const [sortBy, setSortBy] = useState<"name" | "email" | "status">("name");
+  const [quickNoteUid, setQuickNoteUid] = useState<string | null>(null);
+  const [quickNoteText, setQuickNoteText] = useState("");
+  const [sendingQuickNote, setSendingQuickNote] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -98,7 +104,10 @@ function AdminPage() {
     fetchStudents();
   }, [isAdmin]);
 
+  const INACTIVE_THRESHOLD = 7 * 86_400_000;
+
   const filteredStudents = useMemo(() => {
+    const cutoff = Date.now() - INACTIVE_THRESHOLD;
     let result = students;
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -106,6 +115,12 @@ function AdminPage() {
     }
     if (filterStatus !== "all") {
       result = result.filter((s) => (routineStatusMap.get(s.uid) ?? "none") === filterStatus);
+    }
+    if (filterInactive) {
+      result = result.filter((s) => {
+        if (s.lastSeen) return s.lastSeen < cutoff;
+        return s.enrolledAt ? s.enrolledAt < cutoff : false;
+      });
     }
     return [...result].sort((a, b) => {
       if (sortBy === "email") return a.email.localeCompare(b.email);
@@ -115,7 +130,7 @@ function AdminPage() {
       }
       return (a.displayName ?? a.email).localeCompare(b.displayName ?? b.email);
     });
-  }, [students, search, filterStatus, sortBy, routineStatusMap]);
+  }, [students, search, filterStatus, filterInactive, sortBy, routineStatusMap]);
 
   if (loading || !user) {
     return (
@@ -137,6 +152,32 @@ function AdminPage() {
     const pct = (progressMap.get(s.uid) ?? 0) / TOTAL_LESSONS;
     return daysIn > 14 && pct < 0.25;
   }).length;
+
+  function openQuickNote(uid: string, name: string | null) {
+    setQuickNoteUid(uid);
+    setQuickNoteText(`Coucou ${name ?? ""}! Comment se passe ton protocole ? On est là si tu as des questions 👋`);
+  }
+
+  async function sendQuickNote() {
+    if (!user || !quickNoteUid || !quickNoteText.trim() || sendingQuickNote) return;
+    setSendingQuickNote(true);
+    try {
+      await addDoc(collection(db, "users", quickNoteUid, "notes"), {
+        note: quickNoteText.trim(),
+        authorUid: user.uid,
+        authorName: user.displayName ?? user.email ?? "Coach",
+        studentUid: quickNoteUid,
+        createdAt: new Date().toISOString(),
+      });
+      setQuickNoteUid(null);
+      setQuickNoteText("");
+      toast.success("Note envoyée.");
+    } catch {
+      toast.error("Impossible d'envoyer la note.");
+    } finally {
+      setSendingQuickNote(false);
+    }
+  }
 
   return (
     <AdminShell>
@@ -179,6 +220,17 @@ function AdminPage() {
               </button>
             ))}
           </div>
+          <button
+            onClick={() => setFilterInactive((v) => !v)}
+            className={`flex h-10 items-center gap-2 rounded-2xl border px-4 text-sm font-medium transition-colors ${
+              filterInactive
+                ? "border-primary bg-primary-soft text-primary"
+                : "border-border bg-card text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Clock className="h-3.5 w-3.5" />
+            Inactif &gt; 7j
+          </button>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
@@ -289,6 +341,13 @@ function AdminPage() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => openQuickNote(s.uid, s.displayName)}
+                              title="Envoyer une note"
+                              className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                            >
+                              <Send className="h-3.5 w-3.5" />
+                            </button>
                             <Link
                               to="/admin/routines"
                               search={{ uid: s.uid }}
@@ -322,6 +381,51 @@ function AdminPage() {
           )}
         </div>
       </main>
+
+      {/* Quick note modal */}
+      {quickNoteUid && (() => {
+        const student = students.find((s) => s.uid === quickNoteUid);
+        return (
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 backdrop-blur-sm sm:items-center">
+            <div className="w-full max-w-md rounded-3xl border border-border/60 bg-card p-6 shadow-elegant">
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Note rapide</p>
+                  <p className="mt-0.5 text-sm font-semibold">{student?.displayName ?? student?.email}</p>
+                </div>
+                <button
+                  onClick={() => setQuickNoteUid(null)}
+                  className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <textarea
+                value={quickNoteText}
+                onChange={(e) => setQuickNoteText(e.target.value)}
+                rows={4}
+                className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+              <div className="mt-3 flex justify-end gap-2">
+                <button
+                  onClick={() => setQuickNoteUid(null)}
+                  className="rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={sendQuickNote}
+                  disabled={sendingQuickNote || !quickNoteText.trim()}
+                  className="flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  {sendingQuickNote ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  Envoyer
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </AdminShell>
   );
 }

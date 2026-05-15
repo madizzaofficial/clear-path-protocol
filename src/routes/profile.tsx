@@ -38,6 +38,7 @@ function ProfilePage() {
   const [intake, setIntake] = useState<IntakeAnswers | null>(null);
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [enrolledAt, setEnrolledAt] = useState<number | null>(null);
+  const [streak, setStreak] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [resetLoading, setResetLoading] = useState(false);
   const [editingName, setEditingName] = useState(false);
@@ -57,7 +58,10 @@ function ProfilePage() {
     ]).then(([intakeSnap, progressSnap, userSnap]) => {
       if (intakeSnap.exists()) setIntake(intakeSnap.data() as IntakeAnswers);
       if (progressSnap.exists()) setCompletedLessons(progressSnap.data().completedLessons ?? []);
-      if (userSnap.exists()) setEnrolledAt(userSnap.data().enrolledAt ?? null);
+      if (userSnap.exists()) {
+        setEnrolledAt(userSnap.data().enrolledAt ?? null);
+        setStreak(userSnap.data().streak ?? 0);
+      }
       setLoading(false);
     });
   }, [user]);
@@ -153,21 +157,25 @@ function ProfilePage() {
                   Progression protocole
                 </p>
               </div>
-              <div className="grid grid-cols-3 divide-x divide-border/60 p-6">
-                <div className="text-center pr-4">
+              <div className="grid grid-cols-2 divide-x divide-y divide-border/60 sm:grid-cols-4 sm:divide-y-0">
+                <div className="p-5 text-center">
                   <p className="font-display text-3xl font-semibold">{pct}%</p>
                   <p className="mt-1 text-xs text-muted-foreground">Complété</p>
                 </div>
-                <div className="text-center px-4">
+                <div className="p-5 text-center">
                   <p className="font-display text-3xl font-semibold">
                     {done}
                     <span className="text-lg font-normal text-muted-foreground">/{lessons.length}</span>
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">Leçons</p>
                 </div>
-                <div className="text-center pl-4">
+                <div className="p-5 text-center">
                   <p className="font-display text-3xl font-semibold">S{Math.min(week, 12)}</p>
                   <p className="mt-1 text-xs text-muted-foreground">sur 12 semaines</p>
+                </div>
+                <div className="p-5 text-center">
+                  <p className="font-display text-3xl font-semibold">🔥 {streak}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Jours de suite</p>
                 </div>
               </div>
               <div className="px-6 pb-5">
