@@ -59,6 +59,7 @@ function RoutinePage() {
   const [toEat, setToEat] = useState<NutritionItem[]>([]);
   const [toAvoid, setToAvoid] = useState<NutritionItem[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [intakeCompleted, setIntakeCompleted] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/login" });
@@ -73,7 +74,8 @@ function RoutinePage() {
       getDoc(doc(db, "routine_reports", user.uid)),
       getDoc(doc(db, "nutrition", user.uid)),
       getDoc(doc(db, "config", "reminders")),
-    ]).then(([routineRes, checkinRes, reportsRes, nutritionRes, remindersRes]) => {
+      getDoc(doc(db, "intake_answers", user.uid)),
+    ]).then(([routineRes, checkinRes, reportsRes, nutritionRes, remindersRes, intakeRes]) => {
       if (routineRes.status === "fulfilled" && routineRes.value.exists())
         setRoutine(routineRes.value.data() as UserRoutine);
       if (checkinRes.status === "fulfilled" && checkinRes.value.exists()) {
@@ -88,6 +90,8 @@ function RoutinePage() {
       }
       if (remindersRes.status === "fulfilled" && remindersRes.value.exists())
         setReminders(remindersRes.value.data().items ?? []);
+      if (intakeRes.status === "fulfilled" && intakeRes.value.exists())
+        setIntakeCompleted(true);
       setLoadingRoutine(false);
     });
   }, [user]);
@@ -138,6 +142,13 @@ function RoutinePage() {
   }
 
   if (!routine || routine.status !== "sent") {
+    const hasRoutineDraft = routine?.status === "draft";
+    const steps = [
+      { label: "Inscription", done: true },
+      { label: "Bilan peau envoyé", done: intakeCompleted },
+      { label: "Routine en cours", done: hasRoutineDraft },
+      { label: "Routine envoyée", done: false },
+    ];
     return (
       <AppShell>
         <main className="mx-auto max-w-5xl px-6 pb-24 pt-8 md:pt-12">
@@ -147,14 +158,43 @@ function RoutinePage() {
               En cours de préparation
             </h1>
           </header>
-          <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-card py-20 text-center shadow-soft">
-            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary-soft">
-              <Sparkles className="h-7 w-7 text-primary" />
+          <div className="rounded-3xl border border-border/60 bg-card p-8 shadow-soft md:p-12">
+            <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-full bg-primary-soft">
+              <Sparkles className="h-6 w-6 text-primary" />
             </div>
             <h2 className="font-display text-xl font-semibold">Votre routine est en préparation</h2>
-            <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              Votre coach analyse votre bilan et prépare une routine personnalisée pour votre peau. Vous recevrez un e-mail dès qu'elle sera prête.
+            <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
+              Votre coach analyse votre bilan et prépare une routine personnalisée. Vous recevrez un e-mail dès qu'elle sera prête.
             </p>
+            <ol className="mt-8 space-y-0">
+              {steps.map((step, i) => {
+                const isLast = i === steps.length - 1;
+                const isActive = !step.done && (i === 0 || steps[i - 1].done);
+                return (
+                  <li key={step.label} className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold transition-colors ${
+                        step.done
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : isActive
+                          ? "border-primary bg-background text-primary"
+                          : "border-border bg-background text-muted-foreground"
+                      }`}>
+                        {step.done ? <Check className="h-3.5 w-3.5" /> : i + 1}
+                      </div>
+                      {!isLast && (
+                        <div className={`mt-1 w-0.5 flex-1 min-h-[20px] rounded-full ${step.done ? "bg-primary" : "bg-border"}`} />
+                      )}
+                    </div>
+                    <p className={`pb-5 pt-0.5 text-sm font-medium ${
+                      step.done ? "text-foreground" : isActive ? "text-primary" : "text-muted-foreground"
+                    }`}>
+                      {step.label}
+                    </p>
+                  </li>
+                );
+              })}
+            </ol>
           </div>
         </main>
       </AppShell>
