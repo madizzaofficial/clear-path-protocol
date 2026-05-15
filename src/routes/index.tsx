@@ -203,6 +203,7 @@ function Dashboard() {
     const newStreak = !wasComplete && isNowComplete ? data.streak + 1 : data.streak;
 
     setData((prev) => ({ ...prev, [field]: updated, streak: newStreak }));
+    if (!wasComplete && isNowComplete) toast.success("Routine du jour complète ! 🎉");
 
     const key = new Date().toISOString().slice(0, 10);
     try {

@@ -137,16 +137,19 @@ function WelcomePage() {
             icon="📚"
             title="Le protocole"
             body="18 leçons vidéo pour comprendre et traiter ta peau en profondeur."
+            href="/course"
           />
           <FeatureCard
             icon="🧴"
             title="Ta routine"
             body="Ton coach construit une routine AM/PM sur-mesure pour ta peau."
+            href="/products"
           />
           <FeatureCard
             icon="📷"
             title="Le journal"
             body="Photos hebdomadaires pour mesurer ta transformation dans le temps."
+            href="/journal"
           />
         </div>
 
@@ -168,12 +171,13 @@ function WelcomePage() {
   );
 }
 
-function FeatureCard({ icon, title, body }: { icon: string; title: string; body: string }) {
-  return (
-    <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-soft">
+function FeatureCard({ icon, title, body, href }: { icon: string; title: string; body: string; href?: string }) {
+  const content = (
+    <div className={`rounded-2xl border border-border/60 bg-card p-5 shadow-soft ${href ? "cursor-pointer transition-colors hover:bg-primary-soft/30" : ""}`}>
       <span className="text-2xl">{icon}</span>
       <p className="mt-3 font-display text-base font-semibold">{title}</p>
       <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{body}</p>
     </div>
   );
+  return href ? <Link to={href}>{content}</Link> : content;
 }

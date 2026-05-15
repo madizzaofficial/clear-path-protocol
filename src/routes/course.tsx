@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import { course } from "@/lib/course-data";
+import { course, allLessons } from "@/lib/course-data";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
-import { Play, Check, Lock, Clock, ChevronRight } from "lucide-react";
+import { Play, Check, Lock, Clock, ChevronRight, ArrowRight } from "lucide-react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -36,6 +36,7 @@ function CoursePage() {
   const total = course.chapters.reduce((s, c) => s + c.lessons.length, 0);
   const done = completedLessons.length;
   const progress = Math.round((done / total) * 100);
+  const next = allLessons().find((l) => !completedLessons.includes(l.id) && !l.locked);
 
   if (loading || !user) return null;
 
@@ -64,6 +65,25 @@ function CoursePage() {
             </div>
           </div>
         </section>
+
+        {/* Resume banner */}
+        {next && (
+          <div className="border-b border-border/60 bg-background">
+            <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4 md:px-10">
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-muted-foreground">Reprendre là où tu t'es arrêté</p>
+                <p className="mt-0.5 truncate text-sm font-semibold">{next.title}</p>
+              </div>
+              <Link
+                to="/lesson/$lessonId"
+                params={{ lessonId: next.id }}
+                className="flex shrink-0 items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background hover:opacity-90"
+              >
+                Reprendre <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Chapters */}
         <section className="mx-auto max-w-7xl px-6 py-12">
