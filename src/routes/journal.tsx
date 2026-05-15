@@ -625,63 +625,101 @@ function PhotoDetailDialog({
   onZoom: (url: string) => void;
   isZoomed: boolean;
 }) {
+  const [angleIdx, setAngleIdx] = useState(0);
+  useEffect(() => { setAngleIdx(0); }, [entry?.date]);
+
+  const currentAngle = ANGLES[angleIdx];
+  const currentPhoto = entry?.[currentAngle.key as Angle] ?? null;
+
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent
-        className="max-w-2xl p-0 overflow-hidden rounded-3xl"
+        className="max-w-2xl p-0 overflow-hidden rounded-3xl max-h-[90dvh] flex flex-col"
         onInteractOutside={(e) => { if (isZoomed) e.preventDefault(); }}
       >
-        <DialogHeader className="px-5 pt-5 pb-3 border-b border-border/50">
+        {/* Header — date + prev/next jour */}
+        <DialogHeader className="shrink-0 px-5 pt-5 pb-3 border-b border-border/50">
           <div className="flex items-center justify-between pr-6">
             <DialogTitle className="font-display text-lg">
               {entry ? formatDate(entry.date) : ""}
             </DialogTitle>
             <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={onPrev}
-                disabled={!hasPrev}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-border/60 text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed"
-              >
+              <button type="button" onClick={onPrev} disabled={!hasPrev}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-border/60 text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed">
                 <ChevronLeft className="h-4 w-4" />
               </button>
-              <button
-                type="button"
-                onClick={onNext}
-                disabled={!hasNext}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-border/60 text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed"
-              >
+              <button type="button" onClick={onNext} disabled={!hasNext}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-border/60 text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed">
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
           </div>
         </DialogHeader>
-        <div className="grid grid-cols-1 gap-3 p-5 sm:grid-cols-3">
-          {ANGLES.map(({ key, label }) => (
-            <div key={key} className="flex flex-col gap-1.5">
-              <p className="text-center text-xs font-medium text-muted-foreground">{label}</p>
-              <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-muted/30">
-                {entry?.[key as Angle] ? (
-                  <img
-                    src={entry[key as Angle]!}
-                    alt={label}
-                    onClick={() => onZoom(entry[key as Angle]!)}
-                    className="h-full w-full cursor-zoom-in object-cover object-top"
-                  />
+
+        <div className="overflow-y-auto flex-1">
+          {/* Mobile — une photo à la fois avec navigation d'angle */}
+          <div className="sm:hidden">
+            <div className="relative">
+              <button type="button" onClick={() => setAngleIdx(i => Math.max(0, i - 1))} disabled={angleIdx === 0}
+                className="absolute left-2 top-1/2 -translate-y-1/2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-background/80 shadow-md disabled:opacity-30">
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+
+              <div className="relative aspect-[3/4] bg-muted/30">
+                {currentPhoto ? (
+                  <img src={currentPhoto} alt={currentAngle.label}
+                    onClick={() => onZoom(currentPhoto)}
+                    className="h-full w-full cursor-zoom-in object-cover object-top" />
                 ) : (
                   <div className="flex h-full items-center justify-center">
                     <Camera className="h-6 w-6 text-muted-foreground/30" />
                   </div>
                 )}
               </div>
+
+              <button type="button" onClick={() => setAngleIdx(i => Math.min(ANGLES.length - 1, i + 1))} disabled={angleIdx === ANGLES.length - 1}
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-background/80 shadow-md disabled:opacity-30">
+                <ChevronRight className="h-5 w-5" />
+              </button>
             </div>
-          ))}
-        </div>
-        {entry?.note && (
-          <div className="px-5 pb-5">
-            <p className="text-sm leading-relaxed text-muted-foreground">{entry.note}</p>
+
+            <div className="flex flex-col items-center gap-2 py-3">
+              <p className="text-sm font-medium">{currentAngle.label}</p>
+              <div className="flex gap-1.5">
+                {ANGLES.map((_, i) => (
+                  <button key={i} type="button" onClick={() => setAngleIdx(i)}
+                    className={`h-1.5 w-1.5 rounded-full transition-colors ${i === angleIdx ? "bg-primary" : "bg-muted-foreground/30"}`} />
+                ))}
+              </div>
+            </div>
           </div>
-        )}
+
+          {/* Desktop — grille 3 colonnes */}
+          <div className="hidden sm:grid sm:grid-cols-3 gap-3 p-5">
+            {ANGLES.map(({ key, label }) => (
+              <div key={key} className="flex flex-col gap-1.5">
+                <p className="text-center text-xs font-medium text-muted-foreground">{label}</p>
+                <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-muted/30">
+                  {entry?.[key as Angle] ? (
+                    <img src={entry[key as Angle]!} alt={label}
+                      onClick={() => onZoom(entry[key as Angle]!)}
+                      className="h-full w-full cursor-zoom-in object-cover object-top" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center">
+                      <Camera className="h-6 w-6 text-muted-foreground/30" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {entry?.note && (
+            <div className="px-5 pb-5">
+              <p className="text-sm leading-relaxed text-muted-foreground">{entry.note}</p>
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -869,7 +907,8 @@ function DateRangeSlider({
 
   const thumbCls =
     "pointer-events-none absolute inset-0 w-full h-full appearance-none bg-transparent outline-none " +
-    "[&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-runnable-track]:h-0 " +
+    "[&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:rounded-full " +
+    "[&::-moz-range-track]:bg-transparent [&::-moz-range-track]:h-1.5 [&::-moz-range-track]:rounded-full " +
     "[&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none " +
     "[&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full " +
     "[&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md " +
