@@ -842,7 +842,7 @@ function CompareSection({
         )}
 
         {/* Manual date inputs */}
-        <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
               Date A
