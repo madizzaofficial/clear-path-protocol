@@ -146,7 +146,7 @@ function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="h-12 w-full rounded-2xl border border-border bg-card pl-11 pr-4 text-sm shadow-soft outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  className="h-12 w-full rounded-2xl border border-border bg-card pl-11 pr-4 text-base shadow-soft outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
               </div>
             </div>
@@ -170,7 +170,7 @@ function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="h-12 w-full rounded-2xl border border-border bg-card pl-11 pr-4 text-sm shadow-soft outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  className="h-12 w-full rounded-2xl border border-border bg-card pl-11 pr-4 text-base shadow-soft outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
               </div>
               {resetSent && (
