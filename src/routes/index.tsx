@@ -243,121 +243,113 @@ function Dashboard() {
 
         <div className="grid gap-6 lg:grid-cols-3">
 
-          {/* ── Main column ───────────────────────────────────────────────── */}
-          <div className="lg:col-span-2 flex flex-col">
-
-            {/* Hero card */}
-            {!allDone && next ? (
-              <Link to="/lesson/$lessonId" params={{ lessonId: next.id }} className="group block">
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-warm p-8 shadow-elegant md:p-10">
-                  <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gradient-primary opacity-30 blur-3xl" />
-                  <div className="relative">
-                    <span className="inline-flex items-center gap-2 rounded-full bg-background/70 px-3 py-1 text-xs font-medium text-foreground backdrop-blur">
-                      <Play className="h-3 w-3 fill-primary text-primary" />
-                      {done === 0 ? "Commencer le protocole" : "Continuer le protocole"}
-                    </span>
-                    <h2 className="mt-5 font-display text-2xl font-semibold md:text-3xl">{next.title}</h2>
-                    <p className="mt-2 max-w-md text-sm text-foreground/70">{next.summary}</p>
-                    <div className="mt-6 flex items-center gap-4">
-                      <div className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-transform group-hover:scale-[1.02]">
-                        {done === 0 ? "Démarrer" : "Reprendre"} <ArrowRight className="h-4 w-4" />
-                      </div>
-                      <span className="text-sm text-foreground/60">{next.duration}</span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ) : (
-              <div className="relative overflow-hidden rounded-3xl bg-gradient-primary p-8 shadow-elegant md:p-10">
-                <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary-foreground/20 blur-3xl" />
+          {/* ── Hero card — row 1, col 1-2 ────────────────────────────────── */}
+          {!allDone && next ? (
+            <Link to="/lesson/$lessonId" params={{ lessonId: next.id }} className="group block lg:col-span-2">
+              <div className="relative h-full overflow-hidden rounded-3xl bg-gradient-warm p-8 shadow-elegant md:p-10">
+                <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gradient-primary opacity-30 blur-3xl" />
                 <div className="relative">
-                  <p className="text-sm font-medium uppercase tracking-wider text-primary-foreground/80">Terminé</p>
-                  <h2 className="mt-3 font-display text-3xl font-semibold text-primary-foreground">Félicitations ! 🎉</h2>
-                  <p className="mt-2 text-primary-foreground/80">Tu as complété les {lessons.length} leçons du Clear Skin Protocol.</p>
-                </div>
-              </div>
-            )}
-
-            {/* Routine calendar */}
-            <div className="mt-6 flex-1">
-              <RoutineCalendar
-                totalSteps={totalRoutineSteps}
-                monthCheckins={monthCheckins}
-                checkedAm={checkedAm}
-                checkedPm={checkedPm}
-              />
-            </div>
-          </div>
-
-          {/* ── Sidebar ───────────────────────────────────────────────────── */}
-          <div className="flex flex-col gap-6">
-
-            {/* Today's routine */}
-            <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-              <div className="mb-5 flex items-center justify-between">
-                <h3 className="font-display text-lg font-semibold">Routine du jour</h3>
-                {streak > 0 && (
-                  <div className="flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-500 dark:bg-orange-950/40">
-                    <Flame className="h-3.5 w-3.5" />
-                    {streak}j
-                  </div>
-                )}
-              </div>
-              {loading ? (
-                <div className="space-y-2">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-8 animate-pulse rounded-xl bg-muted" />
-                  ))}
-                </div>
-              ) : !routine || (routine.am.length === 0 && routine.pm.length === 0) ? (
-                <div className="rounded-2xl bg-muted/50 p-4 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Ton coach prépare ta routine personnalisée.
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <div className="space-y-5">
-                    {routine.am.length > 0 && (
-                      <HomeRoutineBlock
-                        icon={Sun}
-                        label="Matin"
-                        steps={routine.am}
-                        checked={checkedAm}
-                        onToggle={(id) => toggleStep("am", id)}
-                      />
-                    )}
-                    {routine.pm.length > 0 && (
-                      <HomeRoutineBlock
-                        icon={Moon}
-                        label="Soir"
-                        steps={routine.pm}
-                        checked={checkedPm}
-                        onToggle={(id) => toggleStep("pm", id)}
-                      />
-                    )}
-                  </div>
-                  {routineAllDone && (
-                    <div className="mt-5 flex items-center justify-center gap-2 rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium text-foreground">
-                      <Check className="h-4 w-4 text-primary" />
-                      Routine complète pour aujourd'hui
+                  <span className="inline-flex items-center gap-2 rounded-full bg-background/70 px-3 py-1 text-xs font-medium text-foreground backdrop-blur">
+                    <Play className="h-3 w-3 fill-primary text-primary" />
+                    {done === 0 ? "Commencer le protocole" : "Continuer le protocole"}
+                  </span>
+                  <h2 className="mt-5 font-display text-2xl font-semibold md:text-3xl">{next.title}</h2>
+                  <p className="mt-2 max-w-md text-sm text-foreground/70">{next.summary}</p>
+                  <div className="mt-6 flex items-center gap-4">
+                    <div className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-transform group-hover:scale-[1.02]">
+                      {done === 0 ? "Démarrer" : "Reprendre"} <ArrowRight className="h-4 w-4" />
                     </div>
-                  )}
-                </>
+                    <span className="text-sm text-foreground/60">{next.duration}</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ) : (
+            <div className="relative lg:col-span-2 overflow-hidden rounded-3xl bg-gradient-primary p-8 shadow-elegant md:p-10">
+              <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary-foreground/20 blur-3xl" />
+              <div className="relative">
+                <p className="text-sm font-medium uppercase tracking-wider text-primary-foreground/80">Terminé</p>
+                <h2 className="mt-3 font-display text-3xl font-semibold text-primary-foreground">Félicitations ! 🎉</h2>
+                <p className="mt-2 text-primary-foreground/80">Tu as complété les {lessons.length} leçons du Clear Skin Protocol.</p>
+              </div>
+            </div>
+          )}
+
+          {/* ── Routine du jour — row 1, col 3 ───────────────────────────── */}
+          <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+            <div className="mb-5 flex items-center justify-between">
+              <h3 className="font-display text-lg font-semibold">Routine du jour</h3>
+              {streak > 0 && (
+                <div className="flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-500 dark:bg-orange-950/40">
+                  <Flame className="h-3.5 w-3.5" />
+                  {streak}j
+                </div>
               )}
             </div>
-
-            {/* Stats */}
-            <ProtocolProgressCard
-              progress={progress}
-              done={done}
-              total={lessons.length}
-              week={position.week}
-              currentChapter={currentChapter}
-              chapterDone={chapterDone}
-            />
-
+            {loading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-8 animate-pulse rounded-xl bg-muted" />
+                ))}
+              </div>
+            ) : !routine || (routine.am.length === 0 && routine.pm.length === 0) ? (
+              <div className="rounded-2xl bg-muted/50 p-4 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Ton coach prépare ta routine personnalisée.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-5">
+                  {routine.am.length > 0 && (
+                    <HomeRoutineBlock
+                      icon={Sun}
+                      label="Matin"
+                      steps={routine.am}
+                      checked={checkedAm}
+                      onToggle={(id) => toggleStep("am", id)}
+                    />
+                  )}
+                  {routine.pm.length > 0 && (
+                    <HomeRoutineBlock
+                      icon={Moon}
+                      label="Soir"
+                      steps={routine.pm}
+                      checked={checkedPm}
+                      onToggle={(id) => toggleStep("pm", id)}
+                    />
+                  )}
+                </div>
+                {routineAllDone && (
+                  <div className="mt-5 flex items-center justify-center gap-2 rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium text-foreground">
+                    <Check className="h-4 w-4 text-primary" />
+                    Routine complète pour aujourd'hui
+                  </div>
+                )}
+              </>
+            )}
           </div>
+
+          {/* ── Calendar — row 2, col 1-2 ─────────────────────────────────── */}
+          <div className="lg:col-span-2">
+            <RoutineCalendar
+              totalSteps={totalRoutineSteps}
+              monthCheckins={monthCheckins}
+              checkedAm={checkedAm}
+              checkedPm={checkedPm}
+            />
+          </div>
+
+          {/* ── Progression — row 2, col 3 ────────────────────────────────── */}
+          <ProtocolProgressCard
+            progress={progress}
+            done={done}
+            total={lessons.length}
+            week={position.week}
+            currentChapter={currentChapter}
+            chapterDone={chapterDone}
+          />
+
         </div>
       </main>
     </AppShell>
