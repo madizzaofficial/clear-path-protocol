@@ -21,6 +21,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StartTokenRouteImport } from './routes/start.$token'
 import { Route as LessonLessonIdRouteImport } from './routes/lesson.$lessonId'
+import { Route as AdminTokensRouteImport } from './routes/admin_.tokens'
 import { Route as AdminRoutinesRouteImport } from './routes/admin_.routines'
 import { Route as AdminProductsRouteImport } from './routes/admin_.products'
 import { Route as AdminNutritionRouteImport } from './routes/admin_.nutrition'
@@ -87,6 +88,11 @@ const LessonLessonIdRoute = LessonLessonIdRouteImport.update({
   path: '/lesson/$lessonId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminTokensRoute = AdminTokensRouteImport.update({
+  id: '/admin_/tokens',
+  path: '/admin/tokens',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoutinesRoute = AdminRoutinesRouteImport.update({
   id: '/admin_/routines',
   path: '/admin/routines',
@@ -128,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/admin/nutrition': typeof AdminNutritionRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/routines': typeof AdminRoutinesRoute
+  '/admin/tokens': typeof AdminTokensRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
   '/admin/student/$uid': typeof AdminStudentUidRoute
@@ -147,6 +154,7 @@ export interface FileRoutesByTo {
   '/admin/nutrition': typeof AdminNutritionRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/routines': typeof AdminRoutinesRoute
+  '/admin/tokens': typeof AdminTokensRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
   '/admin/student/$uid': typeof AdminStudentUidRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/admin_/nutrition': typeof AdminNutritionRoute
   '/admin_/products': typeof AdminProductsRoute
   '/admin_/routines': typeof AdminRoutinesRoute
+  '/admin_/tokens': typeof AdminTokensRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
   '/admin_/student/$uid': typeof AdminStudentUidRoute
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/admin/nutrition'
     | '/admin/products'
     | '/admin/routines'
+    | '/admin/tokens'
     | '/lesson/$lessonId'
     | '/start/$token'
     | '/admin/student/$uid'
@@ -207,6 +217,7 @@ export interface FileRouteTypes {
     | '/admin/nutrition'
     | '/admin/products'
     | '/admin/routines'
+    | '/admin/tokens'
     | '/lesson/$lessonId'
     | '/start/$token'
     | '/admin/student/$uid'
@@ -226,6 +237,7 @@ export interface FileRouteTypes {
     | '/admin_/nutrition'
     | '/admin_/products'
     | '/admin_/routines'
+    | '/admin_/tokens'
     | '/lesson/$lessonId'
     | '/start/$token'
     | '/admin_/student/$uid'
@@ -246,6 +258,7 @@ export interface RootRouteChildren {
   AdminNutritionRoute: typeof AdminNutritionRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRoutinesRoute: typeof AdminRoutinesRoute
+  AdminTokensRoute: typeof AdminTokensRoute
   LessonLessonIdRoute: typeof LessonLessonIdRoute
   StartTokenRoute: typeof StartTokenRoute
   AdminStudentUidRoute: typeof AdminStudentUidRoute
@@ -337,6 +350,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LessonLessonIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin_/tokens': {
+      id: '/admin_/tokens'
+      path: '/admin/tokens'
+      fullPath: '/admin/tokens'
+      preLoaderRoute: typeof AdminTokensRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin_/routines': {
       id: '/admin_/routines'
       path: '/admin/routines'
@@ -390,6 +410,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminNutritionRoute: AdminNutritionRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminRoutinesRoute: AdminRoutinesRoute,
+  AdminTokensRoute: AdminTokensRoute,
   LessonLessonIdRoute: LessonLessonIdRoute,
   StartTokenRoute: StartTokenRoute,
   AdminStudentUidRoute: AdminStudentUidRoute,

@@ -2,9 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
-import { TrendingUp, Users, CheckCircle2, AlertCircle, AlertTriangle, BookOpen, Loader2, ClipboardList, Link2, Copy, Check, Search, Apple, Salad, Package } from "lucide-react";
+import { TrendingUp, Users, CheckCircle2, AlertCircle, AlertTriangle, BookOpen, Loader2, ClipboardList, Link2, Check, Search, Apple, Salad, Package } from "lucide-react";
 import { course } from "@/lib/course-data";
 
 export const Route = createFileRoute("/admin")({
@@ -35,21 +35,6 @@ type StudentDoc = {
   enrolledAt?: number;
 };
 
-type TokenDoc = {
-  id: string;
-  createdAt: number;
-  expiresAt: number;
-  used: boolean;
-  usedBy?: string;
-  usedAt?: number;
-};
-
-function tokenStatus(t: TokenDoc): "active" | "used" | "expired" {
-  if (t.used) return "used";
-  if (t.expiresAt < Date.now()) return "expired";
-  return "active";
-}
-
 function AdminPage() {
   const { user, loading, isAdmin } = useAuth();
   const navigate = useNavigate();
@@ -62,11 +47,6 @@ function AdminPage() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "sent" | "draft" | "none">("all");
   const [sortBy, setSortBy] = useState<"name" | "email" | "status">("name");
-  const [generatingLink, setGeneratingLink] = useState(false);
-  const [generatedLink, setGeneratedLink] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [tokens, setTokens] = useState<TokenDoc[]>([]);
-  const [loadingTokens, setLoadingTokens] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -118,17 +98,6 @@ function AdminPage() {
     fetchStudents();
   }, [isAdmin]);
 
-  useEffect(() => {
-    if (!isAdmin) return;
-    getDocs(collection(db, "onboarding_tokens")).then((snap) => {
-      const sorted = snap.docs
-        .map((d) => ({ id: d.id, ...d.data() } as TokenDoc))
-        .sort((a, b) => b.createdAt - a.createdAt);
-      setTokens(sorted);
-      setLoadingTokens(false);
-    });
-  }, [isAdmin]);
-
   const filteredStudents = useMemo(() => {
     let result = students;
     if (search.trim()) {
@@ -156,28 +125,6 @@ function AdminPage() {
     );
   }
 
-  async function generateOnboardingLink() {
-    setGeneratingLink(true);
-    const token = crypto.randomUUID();
-    await setDoc(doc(db, "onboarding_tokens", token), {
-      createdAt: Date.now(),
-      expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
-      used: false,
-    });
-    const link = `${window.location.origin}/start/${token}`;
-    setGeneratedLink(link);
-    setTokens((prev) => [{ id: token, createdAt: Date.now(), expiresAt: Date.now() + 7 * 86400000, used: false }, ...prev]);
-    await navigator.clipboard.writeText(link).catch(() => {});
-    setGeneratingLink(false);
-  }
-
-  async function copyLink() {
-    if (!generatedLink) return;
-    await navigator.clipboard.writeText(generatedLink).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
   if (!isAdmin) return null;
 
   const totalStudents = students.length;
@@ -201,18 +148,13 @@ function AdminPage() {
             <p className="mt-2 text-muted-foreground">Suivez les protocoles, intervenez tôt, célébrez les résultats.</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={generateOnboardingLink}
-              disabled={generatingLink}
-              className="flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background shadow-elegant transition-all hover:opacity-90 disabled:opacity-60"
+            <Link
+              to="/admin/tokens"
+              className="flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background shadow-elegant transition-all hover:opacity-90"
             >
-              {generatingLink ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Link2 className="h-4 w-4" />
-              )}
-              Nouveau lien d'onboarding
-            </button>
+              <Link2 className="h-4 w-4" />
+              Liens d'invitation
+            </Link>
             <Link
               to="/admin/course-editor"
               className="flex items-center gap-2 rounded-full bg-primary-soft px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary-muted"
@@ -236,79 +178,6 @@ function AdminPage() {
             </Link>
           </div>
         </header>
-
-        {/* Generated link banner */}
-        {generatedLink && (
-          <div className="mb-8 flex items-center gap-4 rounded-2xl border border-border/60 bg-card p-4 shadow-soft">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-soft">
-              <Link2 className="h-4 w-4 text-primary" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-0.5">
-                Lien valable 7 jours · usage unique
-              </p>
-              <p className="truncate text-sm font-mono text-foreground">{generatedLink}</p>
-            </div>
-            <button
-              onClick={copyLink}
-              className="flex shrink-0 items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
-            >
-              {copied ? (
-                <><Check className="h-4 w-4 text-primary" /> Copié</>
-              ) : (
-                <><Copy className="h-4 w-4" /> Copier</>
-              )}
-            </button>
-          </div>
-        )}
-
-        {/* Token list */}
-        {!loadingTokens && tokens.length > 0 && (
-          <div className="mb-8 overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
-            <div className="flex items-center gap-3 border-b border-border/60 px-6 py-4">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-soft">
-                <Link2 className="h-3.5 w-3.5 text-primary" />
-              </div>
-              <p className="text-sm font-semibold">Liens d'invitation</p>
-              <span className="ml-auto rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                {tokens.length}
-              </span>
-            </div>
-            <div className="divide-y divide-border/60">
-              {tokens.map((t) => {
-                const status = tokenStatus(t);
-                const usedByStudent = students.find((s) => s.uid === t.usedBy);
-                return (
-                  <div key={t.id} className="flex items-center justify-between px-6 py-3 text-sm">
-                    <div>
-                      <p className="text-xs text-muted-foreground">
-                        Créé le {new Date(t.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
-                      </p>
-                      {status === "used" && usedByStudent && (
-                        <p className="mt-0.5 text-xs font-medium">
-                          Utilisé par {usedByStudent.displayName ?? usedByStudent.email}
-                        </p>
-                      )}
-                    </div>
-                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      status === "active"
-                        ? "bg-primary-soft text-primary"
-                        : status === "used"
-                        ? "bg-muted text-muted-foreground"
-                        : "bg-muted/50 text-muted-foreground/60"
-                    }`}>
-                      {status === "active"
-                        ? `Actif · expire ${new Date(t.expiresAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`
-                        : status === "used"
-                        ? "Utilisé"
-                        : "Expiré"}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* Stats */}
         <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
