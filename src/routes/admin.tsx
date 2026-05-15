@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
-import { TrendingUp, Users, CheckCircle2, AlertCircle, AlertTriangle, Loader2, ClipboardList, Check, Search, Salad } from "lucide-react";
+import { TrendingUp, Users, CheckCircle2, AlertCircle, AlertTriangle, Loader2, ClipboardList, Check, Search, Salad, Clock } from "lucide-react";
 import { course } from "@/lib/course-data";
 
 export const Route = createFileRoute("/admin")({
@@ -201,20 +201,19 @@ function AdminPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border/60 bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
-                    <th className="px-6 py-3.5 font-medium">Élève</th>
-                    <th className="px-6 py-3.5 font-medium">Email</th>
-                    <th className="px-6 py-3.5 font-medium">Progression</th>
-                    <th className="px-6 py-3.5 font-medium">Durée</th>
-                    <th className="px-6 py-3.5 text-center font-medium">Routine</th>
-                    <th className="px-6 py-3.5 text-center font-medium">Nutrition</th>
-                    <th className="px-6 py-3.5 text-center font-medium">Alertes</th>
-                    <th className="px-6 py-3.5"></th>
+                    <th className="px-4 py-3 font-medium">Élève</th>
+                    <th className="px-4 py-3 font-medium">Progression</th>
+                    <th className="px-4 py-3 font-medium">Durée</th>
+                    <th className="px-4 py-3 text-center font-medium">Routine</th>
+                    <th className="px-4 py-3 text-center font-medium">Nutrition</th>
+                    <th className="px-4 py-3 text-center font-medium">Alertes</th>
+                    <th className="px-4 py-3"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60">
                   {filteredStudents.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="py-14 text-center text-sm text-muted-foreground">
+                      <td colSpan={7} className="py-14 text-center text-sm text-muted-foreground">
                         Aucun élève trouvé.
                       </td>
                     </tr>
@@ -226,57 +225,61 @@ function AdminPage() {
                     const pct = Math.round((done / TOTAL_LESSONS) * 100);
                     return (
                       <tr key={s.uid} className="hover:bg-muted/20 transition-colors">
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-3">
                           <Link to="/admin/student/$uid" params={{ uid: s.uid }} className="group flex items-center gap-3">
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-warm text-sm font-semibold">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-warm text-xs font-semibold">
                               {initials}
                             </div>
-                            <p className="text-sm font-semibold transition-colors group-hover:text-primary">{s.displayName ?? "—"}</p>
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold transition-colors group-hover:text-primary">{s.displayName ?? "—"}</p>
+                              <p className="truncate text-xs text-muted-foreground">{s.email}</p>
+                            </div>
                           </Link>
                         </td>
-                        <td className="px-6 py-4 text-sm text-muted-foreground">{s.email}</td>
-                        <td className="px-6 py-4">
-                          <div className="flex min-w-[120px] items-center gap-2">
+                        <td className="px-4 py-3">
+                          <div className="flex min-w-[100px] items-center gap-2">
                             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
                               <div className="h-full rounded-full bg-gradient-primary transition-all" style={{ width: `${pct}%` }} />
                             </div>
                             <span className="text-xs tabular-nums text-muted-foreground">{done}/{TOTAL_LESSONS}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-3">
                           <span className="text-sm tabular-nums text-muted-foreground">{s.enrolledAt ? formatDays(s.enrolledAt) : "—"}</span>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-3">
                           <div className="flex justify-center">
                             {routineStatus === "sent" ? (
-                              <span className="flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
-                                <Check className="h-3 w-3" /> Envoyée
-                              </span>
+                              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-soft" title="Envoyée">
+                                <Check className="h-3.5 w-3.5 text-primary" />
+                              </div>
                             ) : routineStatus === "draft" ? (
-                              <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-600">Brouillon</span>
+                              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-950/40" title="Brouillon">
+                                <Clock className="h-3.5 w-3.5 text-orange-500" />
+                              </div>
                             ) : (
                               <span className="text-xs text-muted-foreground/40">—</span>
                             )}
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-3">
                           <div className="flex justify-center">
                             {hasNutrition ? (
-                              <span className="flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
-                                <Check className="h-3 w-3" /> Configurée
-                              </span>
+                              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-soft" title="Configurée">
+                                <Check className="h-3.5 w-3.5 text-primary" />
+                              </div>
                             ) : (
                               <span className="text-xs text-muted-foreground/40">—</span>
                             )}
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-3">
                           <div className="flex justify-center">
                             {(reportsMap.get(s.uid) ?? 0) > 0 ? (
                               <Link to="/admin/student/$uid" params={{ uid: s.uid }}>
-                                <span className="flex items-center gap-1.5 rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">
+                                <span className="flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">
                                   <AlertTriangle className="h-3 w-3" />
-                                  {reportsMap.get(s.uid)} produit{(reportsMap.get(s.uid) ?? 0) > 1 ? "s" : ""}
+                                  {reportsMap.get(s.uid)}
                                 </span>
                               </Link>
                             ) : (
@@ -284,23 +287,23 @@ function AdminPage() {
                             )}
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-end gap-1.5">
                             <Link
                               to="/admin/routines"
                               search={{ uid: s.uid }}
-                              className="inline-flex items-center gap-1.5 rounded-2xl bg-foreground px-3 py-2 text-xs font-medium text-background transition-opacity hover:opacity-80"
+                              title={routineStatus === "none" ? "Créer routine" : "Éditer routine"}
+                              className="flex h-8 w-8 items-center justify-center rounded-xl bg-foreground text-background transition-opacity hover:opacity-80"
                             >
                               <ClipboardList className="h-3.5 w-3.5" />
-                              {routineStatus === "none" ? "Créer routine" : "Éditer routine"}
                             </Link>
                             <Link
                               to="/admin/nutrition"
                               search={{ uid: s.uid }}
-                              className="inline-flex items-center gap-1.5 rounded-2xl border border-border bg-card px-3 py-2 text-xs font-medium transition-colors hover:bg-muted"
+                              title={hasNutrition ? "Éditer nutrition" : "Créer nutrition"}
+                              className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-card transition-colors hover:bg-muted"
                             >
                               <Salad className="h-3.5 w-3.5" />
-                              {hasNutrition ? "Éditer nutrition" : "Créer nutrition"}
                             </Link>
                           </div>
                         </td>
