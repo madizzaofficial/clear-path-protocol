@@ -10,6 +10,8 @@ import {
 import { AuthProvider } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import { Toaster } from "@/components/ui/sonner";
+import { PwaInstallBanner } from "@/components/PwaInstallBanner";
+import { useEffect } from "react";
 
 import appCss from "../styles.css?url";
 
@@ -124,11 +126,18 @@ function RootComponent() {
   useTheme();
   const { queryClient } = Route.useRouteContext();
 
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Outlet />
         <Toaster position="top-center" richColors />
+        <PwaInstallBanner />
       </AuthProvider>
     </QueryClientProvider>
   );
