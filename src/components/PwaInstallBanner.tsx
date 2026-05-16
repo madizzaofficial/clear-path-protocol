@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X, Share, Plus } from "lucide-react";
+import { X, Share } from "lucide-react";
 
 const STORAGE_KEY = "pwa-install-dismissed";
 
@@ -30,7 +30,6 @@ export function PwaInstallBanner() {
     const p = detectPlatform();
     setPlatform(p);
 
-    // Android / Chrome: listen for native install prompt
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -38,7 +37,6 @@ export function PwaInstallBanner() {
     };
     window.addEventListener("beforeinstallprompt", handler as any);
 
-    // iOS Safari: show manual instructions after a short delay
     if (p === "ios") {
       const timer = setTimeout(() => setShow(true), 1500);
       return () => {
@@ -67,45 +65,40 @@ export function PwaInstallBanner() {
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-50 sm:left-auto sm:right-6 sm:w-80">
-      <div className="rounded-2xl border border-border/60 bg-card p-4 shadow-elegant">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <img src="/icon-192.png" alt="Protocole Clear" className="h-10 w-10 rounded-xl" />
-            <div>
-              <p className="text-sm font-semibold">Protocole Clear</p>
-              <p className="text-xs text-muted-foreground">Ajouter à l'écran d'accueil</p>
-            </div>
-          </div>
-          <button
-            onClick={dismiss}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            aria-label="Fermer"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+    <div className="fixed left-0 right-0 top-16 z-[39] border-b border-border/60 bg-background/95 backdrop-blur-sm">
+      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5 sm:px-6">
+        <img src="/icon-192.png" alt="" className="h-8 w-8 shrink-0 rounded-xl" />
 
-        {platform === "ios" ? (
-          <div className="mt-3 space-y-1.5 rounded-xl bg-muted/50 px-3 py-2.5">
-            <p className="text-xs text-muted-foreground">Pour l'installer :</p>
-            <div className="flex items-center gap-2 text-xs font-medium">
-              <Share className="h-3.5 w-3.5 shrink-0 text-primary" />
-              <span>Appuie sur <strong>Partager</strong></span>
-            </div>
-            <div className="flex items-center gap-2 text-xs font-medium">
-              <Plus className="h-3.5 w-3.5 shrink-0 text-primary" />
-              <span>Puis <strong>« Sur l'écran d'accueil »</strong></span>
-            </div>
-          </div>
-        ) : (
+        <p className="min-w-0 flex-1 truncate text-sm">
+          {platform === "ios" ? (
+            <>
+              Appuie sur{" "}
+              <span className="inline-flex items-center gap-1 font-medium">
+                <Share className="inline h-3.5 w-3.5" /> Partager
+              </span>
+              {" "}puis <strong>« Sur l'écran d'accueil »</strong>
+            </>
+          ) : (
+            <>Ajouter <strong>Protocole Clear</strong> à l'écran d'accueil</>
+          )}
+        </p>
+
+        {platform !== "ios" && (
           <button
             onClick={install}
-            className="mt-3 w-full rounded-xl bg-foreground py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
+            className="shrink-0 rounded-xl bg-foreground px-4 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-90"
           >
-            Installer l'app
+            Installer
           </button>
         )}
+
+        <button
+          onClick={dismiss}
+          aria-label="Fermer"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
     </div>
   );
