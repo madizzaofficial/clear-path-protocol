@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { AppShell } from "./AppShell";
-import { LayoutDashboard, Link2, Package, BookOpen, Apple, ClipboardList } from "lucide-react";
+import { LayoutDashboard, Link2, Package, BookOpen, Apple, ClipboardList, ShieldCheck } from "lucide-react";
 
 const TABS = [
   { label: "Dashboard",          to: "/admin",               icon: LayoutDashboard },
@@ -9,6 +9,7 @@ const TABS = [
   { label: "Routines",           to: "/admin/routines",       icon: ClipboardList },
   { label: "Cours",              to: "/admin/course-editor",  icon: BookOpen },
   { label: "Nutrition",          to: "/admin/nutrition",      icon: Apple },
+  { label: "Admins",             to: "/admin/admins",          icon: ShieldCheck },
 ] as const;
 
 export function AdminShell({ children }: { children: React.ReactNode }) {

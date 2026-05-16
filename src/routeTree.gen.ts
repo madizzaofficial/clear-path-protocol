@@ -21,6 +21,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StartTokenRouteImport } from './routes/start.$token'
 import { Route as LessonLessonIdRouteImport } from './routes/lesson.$lessonId'
+import { Route as AdminAdminsRouteImport } from './routes/admin_.admins'
 import { Route as AdminTokensRouteImport } from './routes/admin_.tokens'
 import { Route as AdminRoutinesRouteImport } from './routes/admin_.routines'
 import { Route as AdminProductsRouteImport } from './routes/admin_.products'
@@ -89,6 +90,11 @@ const LessonLessonIdRoute = LessonLessonIdRouteImport.update({
   path: '/lesson/$lessonId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAdminsRoute = AdminAdminsRouteImport.update({
+  id: '/admin_/admins',
+  path: '/admin/admins',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminTokensRoute = AdminTokensRouteImport.update({
   id: '/admin_/tokens',
   path: '/admin/tokens',
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
+  '/admin/admins': typeof AdminAdminsRoute
   '/admin/course-editor': typeof AdminCourseEditorRoute
   '/admin/nutrition': typeof AdminNutritionRoute
   '/admin/products': typeof AdminProductsRoute
@@ -158,6 +165,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
+  '/admin/admins': typeof AdminAdminsRoute
   '/admin/course-editor': typeof AdminCourseEditorRoute
   '/admin/nutrition': typeof AdminNutritionRoute
   '/admin/products': typeof AdminProductsRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
+  '/admin_/admins': typeof AdminAdminsRoute
   '/admin_/course-editor': typeof AdminCourseEditorRoute
   '/admin_/nutrition': typeof AdminNutritionRoute
   '/admin_/products': typeof AdminProductsRoute
@@ -203,6 +212,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/welcome'
+    | '/admin/admins'
     | '/admin/course-editor'
     | '/admin/nutrition'
     | '/admin/products'
@@ -224,6 +234,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/welcome'
+    | '/admin/admins'
     | '/admin/course-editor'
     | '/admin/nutrition'
     | '/admin/products'
@@ -245,6 +256,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/welcome'
+    | '/admin_/admins'
     | '/admin_/course-editor'
     | '/admin_/nutrition'
     | '/admin_/products'
@@ -261,6 +273,7 @@ export interface RootRouteChildren {
   CourseRoute: typeof CourseRoute
   FinishRoute: typeof FinishRoute
   IntakeRoute: typeof IntakeRoute
+  AdminAdminsRoute: typeof AdminAdminsRoute
   JournalRoute: typeof JournalRoute
   LoginRoute: typeof LoginRoute
   ProductsRoute: typeof ProductsRoute
@@ -398,6 +411,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminNutritionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin_/admins': {
+      id: '/admin_/admins'
+      path: '/admin/admins'
+      fullPath: '/admin/admins'
+      preLoaderRoute: typeof AdminAdminsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin_/course-editor': {
       id: '/admin_/course-editor'
       path: '/admin/course-editor'
@@ -421,6 +441,7 @@ const rootRouteChildren: RootRouteChildren = {
   CourseRoute: CourseRoute,
   FinishRoute: FinishRoute,
   IntakeRoute: IntakeRoute,
+  AdminAdminsRoute: AdminAdminsRoute,
   JournalRoute: JournalRoute,
   LoginRoute: LoginRoute,
   ProductsRoute: ProductsRoute,

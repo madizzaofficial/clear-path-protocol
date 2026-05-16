@@ -46,6 +46,7 @@ type HomeData = {
   checkedPm: string[];
   streak: number;
   monthCheckins: Record<string, { am: string[]; pm: string[] }>;
+  firestoreDisplayName: string | null;
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -116,6 +117,7 @@ function Dashboard() {
     checkedPm: [],
     streak: 0,
     monthCheckins: {},
+    firestoreDisplayName: null,
   });
 
   useEffect(() => {
@@ -177,12 +179,13 @@ function Dashboard() {
         checkedPm: todaySnap?.exists() ? (todaySnap.data().pm ?? []) : [],
         streak,
         monthCheckins,
+        firestoreDisplayName: userSnap?.exists() ? (userSnap.data().displayName ?? null) : null,
       });
     });
   }, [user]);
 
   const lessons = allLessons();
-  const { loading, completedLessons, routine, enrolledAt, checkedAm, checkedPm, streak, monthCheckins } = data;
+  const { loading, completedLessons, routine, enrolledAt, checkedAm, checkedPm, streak, monthCheckins, firestoreDisplayName } = data;
 
   const done = completedLessons.length;
   const progress = Math.round((done / lessons.length) * 100);
@@ -205,7 +208,7 @@ function Dashboard() {
   if (authLoading || !user) return null;
   if (loading) return <AppShell><div className="flex min-h-[60vh] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" /></div></AppShell>;
 
-  const firstName = user.displayName?.split(" ")[0] ?? user.email?.split("@")[0] ?? "toi";
+  const firstName = (firestoreDisplayName ?? user.displayName)?.split(" ")[0] ?? "toi";
   const position = enrolledAt ? getPosition(enrolledAt) : { week: 1, day: 1 };
   const daysIn = enrolledAt ? Math.max(0, Math.floor((Date.now() - enrolledAt) / 86_400_000)) : null;
 

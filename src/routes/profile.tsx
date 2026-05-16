@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
 import { auth, db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { sendPasswordResetEmail, updateProfile } from "firebase/auth";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -88,7 +88,9 @@ function ProfilePage() {
     if (!user || savingName || !nameInput.trim()) return;
     setSavingName(true);
     try {
-      await updateProfile(user, { displayName: nameInput.trim() });
+      const name = nameInput.trim();
+      await updateProfile(user, { displayName: name });
+      await updateDoc(doc(db, "users", user.uid), { displayName: name });
       setEditingName(false);
       toast.success("Prénom mis à jour.");
     } catch {
