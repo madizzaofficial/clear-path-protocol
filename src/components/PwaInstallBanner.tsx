@@ -72,11 +72,10 @@ export function PwaInstallBanner() {
         <div className="min-w-0 flex-1">
           <p className="font-semibold">Ajouter à l'écran d'accueil</p>
           {platform === "ios" ? (
-            <div className="mt-0.5 flex items-center gap-1.5 text-sm text-muted-foreground">
-              <span>Appuie sur</span>
-              <Share className="h-4 w-4 shrink-0" />
-              <span>puis <strong className="text-foreground">Sur l'écran d'accueil</strong></span>
-            </div>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Appuie sur <Share className="inline-block h-4 w-4 align-middle" /> puis{" "}
+              <strong className="text-foreground">Sur l'écran d'accueil</strong>
+            </p>
           ) : (
             <p className="mt-0.5 text-sm text-muted-foreground">
               Accès rapide, mode hors-ligne, expérience native
