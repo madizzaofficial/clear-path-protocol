@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, getDoc, addDoc } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
-import { TrendingUp, Users, CheckCircle2, AlertCircle, AlertTriangle, Loader2, ClipboardList, Check, Search, Salad, Clock, Send, X } from "lucide-react";
+import { TrendingUp, Users, CheckCircle2, AlertCircle, AlertTriangle, Loader2, ClipboardList, Check, Search, Salad, Clock, Send, X, Flame, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import { course } from "@/lib/course-data";
 
@@ -55,6 +55,10 @@ function AdminPage() {
   const [quickNoteText, setQuickNoteText] = useState("");
   const [sendingQuickNote, setSendingQuickNote] = useState(false);
 
+  type IrritantEntry = { product: string; category: string; irritant: number; allergie: number; total: number; studentCount: number };
+  const [irritantsData, setIrritantsData] = useState<IrritantEntry[]>([]);
+  const [showIrritants, setShowIrritants] = useState(false);
+
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
     if (!loading && user && !isAdmin) navigate({ to: "/" });
@@ -91,6 +95,37 @@ function AdminPage() {
           if (count > 0) rptMap.set(d.id, count);
         });
         setReportsMap(rptMap);
+
+        // Build step lookup: uid → stepId → { product, category }
+        const stepLookup = new Map<string, Map<string, { product: string; category: string }>>();
+        routinesSnap.docs.forEach((d) => {
+          const data = d.data() as { am?: { id: string; product: string; category: string }[]; pm?: { id: string; product: string; category: string }[]; extras?: { steps?: { id: string; product: string; category: string }[] }[] };
+          const steps = new Map<string, { product: string; category: string }>();
+          [...(data.am ?? []), ...(data.pm ?? [])].forEach((s) => steps.set(s.id, { product: s.product, category: s.category }));
+          (data.extras ?? []).forEach((b) => (b.steps ?? []).forEach((s) => steps.set(s.id, { product: s.product, category: s.category })));
+          stepLookup.set(d.id, steps);
+        });
+
+        // Aggregate by product name
+        const productMap = new Map<string, { product: string; category: string; irritant: number; allergie: number; uids: Set<string> }>();
+        reportsSnap.docs.forEach((d) => {
+          const stepMap = stepLookup.get(d.id);
+          if (!stepMap) return;
+          Object.entries(d.data() as Record<string, "irritant" | "allergie">).forEach(([stepId, type]) => {
+            const step = stepMap.get(stepId);
+            if (!step) return;
+            const key = step.product.toLowerCase().trim();
+            const entry = productMap.get(key) ?? { product: step.product, category: step.category, irritant: 0, allergie: 0, uids: new Set() };
+            entry[type]++;
+            entry.uids.add(d.id);
+            productMap.set(key, entry);
+          });
+        });
+        setIrritantsData(
+          Array.from(productMap.values())
+            .map((v) => ({ product: v.product, category: v.category, irritant: v.irritant, allergie: v.allergie, total: v.irritant + v.allergie, studentCount: v.uids.size }))
+            .sort((a, b) => b.total - a.total),
+        );
 
         const progressSnaps = await Promise.all(docs.map((s) => getDoc(doc(db, "progress", s.uid))));
         const pMap = new Map<string, number>();
@@ -196,6 +231,70 @@ function AdminPage() {
           <AdminStat icon={CheckCircle2} label="Protocoles terminés" value={loadingStudents ? "…" : String(completedProtocols)} delta={`sur ${totalStudents} élèves`} />
           <AdminStat icon={AlertCircle} label="Élèves à risque" value={loadingStudents ? "…" : String(atRisk)} delta="> 14j, < 25% progression" tone="warn" />
         </div>
+
+        {/* Signalements produits */}
+        {!loadingStudents && irritantsData.length > 0 && (
+          <div className="mb-8 overflow-hidden rounded-3xl border border-orange-200/60 bg-card shadow-soft dark:border-orange-900/30">
+            <button
+              onClick={() => setShowIrritants((v) => !v)}
+              className="flex w-full items-center justify-between gap-4 px-6 py-4"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-orange-100 dark:bg-orange-950/40">
+                  <Flame className="h-4 w-4 text-orange-500" />
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-semibold">Signalements produits</p>
+                  <p className="text-xs text-muted-foreground">
+                    {irritantsData.length} produit{irritantsData.length !== 1 ? "s" : ""} signalé{irritantsData.length !== 1 ? "s" : ""} · {irritantsData.reduce((s, v) => s + v.total, 0)} signalement{irritantsData.reduce((s, v) => s + v.total, 0) !== 1 ? "s" : ""} au total
+                  </p>
+                </div>
+              </div>
+              {showIrritants ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+            </button>
+
+            {showIrritants && (
+              <div className="border-t border-orange-100/60 dark:border-orange-900/20">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border/40 bg-muted/30 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <th className="px-6 py-3 text-left">Produit</th>
+                      <th className="px-4 py-3 text-left">Catégorie</th>
+                      <th className="px-4 py-3 text-center">Irritants</th>
+                      <th className="px-4 py-3 text-center">Allergies</th>
+                      <th className="px-4 py-3 text-center">Élèves</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/40">
+                    {irritantsData.map((item) => (
+                      <tr key={item.product} className="transition-colors hover:bg-muted/20">
+                        <td className="px-6 py-3 font-medium">{item.product}</td>
+                        <td className="px-4 py-3">
+                          <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">{item.category}</span>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          {item.irritant > 0 ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-400">
+                              {item.irritant}
+                            </span>
+                          ) : <span className="text-muted-foreground/40">—</span>}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          {item.allergie > 0 ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700 dark:bg-red-950/40 dark:text-red-400">
+                              {item.allergie}
+                            </span>
+                          ) : <span className="text-muted-foreground/40">—</span>}
+                        </td>
+                        <td className="px-4 py-3 text-center text-xs text-muted-foreground">{item.studentCount}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Controls */}
         <div className="mb-4 flex flex-wrap items-center gap-3">
