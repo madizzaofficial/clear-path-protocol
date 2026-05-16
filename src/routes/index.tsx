@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { PwaInstallBanner } from "@/components/PwaInstallBanner";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -490,6 +491,8 @@ function Dashboard() {
           )}
 
         </div>
+
+        <PwaInstallBanner />
       </main>
     </AppShell>
   );
