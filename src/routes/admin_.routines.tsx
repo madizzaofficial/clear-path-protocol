@@ -345,7 +345,9 @@ function RoutinesContent() {
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<"success" | "error" | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"am" | "pm" | "extras">("am");
+  const [activeTab, setActiveTab] = useState<"am" | "pm">("am");
+  const [editingForExtras, setEditingForExtras] = useState(false);
+  const [deletingExtras, setDeletingExtras] = useState(false);
 
   const [editingStep, setEditingStep] = useState<RoutineStep | null>(null);
   const [isNewStep, setIsNewStep] = useState(false);
@@ -498,15 +500,28 @@ function RoutinesContent() {
     }
   }
 
-  function handleStepDragEnd(tab: "am" | "pm" | "extras", event: DragEndEvent) {
+  function handleStepDragEnd(tab: "am" | "pm", event: DragEndEvent) {
     if (!routine) return;
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const steps = tab === "am" ? routine.am : tab === "pm" ? routine.pm : routine.extras;
+    const steps = tab === "am" ? routine.am : routine.pm;
     const from = steps.findIndex((s) => s.id === active.id);
     const to = steps.findIndex((s) => s.id === over.id);
     const reordered = arrayMove(steps, from, to).map((s, i) => ({ ...s, order: i }));
     const updated = { ...routine, [tab]: reordered, updatedAt: Date.now() };
+    setRoutine(updated);
+    saveRoutine(updated);
+  }
+
+  function handleExtrasDragEnd(event: DragEndEvent) {
+    if (!routine) return;
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const steps = routine.extras;
+    const from = steps.findIndex((s) => s.id === active.id);
+    const to = steps.findIndex((s) => s.id === over.id);
+    const reordered = arrayMove(steps, from, to).map((s, i) => ({ ...s, order: i }));
+    const updated = { ...routine, extras: reordered, updatedAt: Date.now() };
     setRoutine(updated);
     saveRoutine(updated);
   }
@@ -519,7 +534,8 @@ function RoutinesContent() {
     purchaseUrl?: string;
   }) {
     if (!routine) return;
-    const steps = activeTab === "am" ? routine.am : activeTab === "pm" ? routine.pm : routine.extras;
+    const target = editingForExtras ? "extras" : activeTab;
+    const steps = editingForExtras ? routine.extras : (activeTab === "am" ? routine.am : routine.pm);
     let updated: StudentRoutine;
     if (isNewStep) {
       const newStep: RoutineStep = {
@@ -527,16 +543,17 @@ function RoutinesContent() {
         order: steps.length,
         ...data,
       };
-      updated = { ...routine, [activeTab]: [...steps, newStep], updatedAt: Date.now() };
+      updated = { ...routine, [target]: [...steps, newStep], updatedAt: Date.now() };
     } else if (editingStep) {
       updated = {
         ...routine,
-        [activeTab]: steps.map((s) => (s.id === editingStep.id ? { ...s, ...data } : s)),
+        [target]: steps.map((s) => (s.id === editingStep.id ? { ...s, ...data } : s)),
         updatedAt: Date.now(),
       };
     } else return;
     setRoutine(updated);
     setEditingStep(null);
+    setEditingForExtras(false);
     saveRoutine(updated);
   }
 
@@ -630,14 +647,16 @@ function RoutinesContent() {
 
   function handleDeleteStep() {
     if (!routine || !deletingStepId) return;
-    const steps = (activeTab === "am" ? routine.am : activeTab === "pm" ? routine.pm : routine.extras)
+    const target = deletingExtras ? "extras" : activeTab;
+    const steps = (deletingExtras ? routine.extras : (activeTab === "am" ? routine.am : routine.pm))
       .filter((s) => s.id !== deletingStepId)
       .map((s, i) => ({ ...s, order: i }));
-    saveRoutine({ ...routine, [activeTab]: steps, updatedAt: Date.now() });
+    saveRoutine({ ...routine, [target]: steps, updatedAt: Date.now() });
     setDeletingStepId(null);
+    setDeletingExtras(false);
   }
 
-  const currentSteps = routine ? (activeTab === "am" ? routine.am : activeTab === "pm" ? routine.pm : routine.extras) : [];
+  const currentSteps = routine ? (activeTab === "am" ? routine.am : routine.pm) : [];
 
   return (
     <AdminShell>
@@ -756,16 +775,10 @@ function RoutinesContent() {
                 </div>
               ) : (
                 <>
-                  {/* AM / PM / Extras tabs */}
+                  {/* AM / PM tabs */}
                   <div className="flex gap-2 rounded-2xl bg-muted p-1.5">
-                    {(["am", "pm", "extras"] as const).map((tab) => {
-                      const count = routine
-                        ? tab === "am"
-                          ? routine.am.length
-                          : tab === "pm"
-                          ? routine.pm.length
-                          : routine.extras.length
-                        : 0;
+                    {(["am", "pm"] as const).map((tab) => {
+                      const count = routine ? (tab === "am" ? routine.am.length : routine.pm.length) : 0;
                       const isActive = activeTab === tab;
                       return (
                         <button
@@ -777,14 +790,8 @@ function RoutinesContent() {
                               : "text-muted-foreground hover:text-foreground"
                           }`}
                         >
-                          {tab === "am" ? (
-                            <Sun className="h-4 w-4" />
-                          ) : tab === "pm" ? (
-                            <Moon className="h-4 w-4" />
-                          ) : (
-                            <Zap className="h-4 w-4" />
-                          )}
-                          {tab === "am" ? "Matin" : tab === "pm" ? "Soir" : "En cas de"}
+                          {tab === "am" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                          {tab === "am" ? "Matin" : "Soir"}
                           <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-semibold text-primary">
                             {count}
                           </span>
@@ -847,6 +854,76 @@ function RoutinesContent() {
                       </button>
                     </div>
                   </div>
+
+                  {/* ── En cas de (bonus steps) ─────────────────────────── */}
+                  {routine && (
+                    <div className="overflow-hidden rounded-3xl border border-yellow-200/60 bg-card shadow-soft dark:border-yellow-900/30">
+                      {/* Header */}
+                      <div className="flex items-center justify-between border-b border-yellow-100/60 bg-yellow-50/40 px-5 py-4 dark:border-yellow-900/20 dark:bg-yellow-950/10">
+                        <div className="flex items-center gap-2">
+                          <Zap className="h-4 w-4 text-yellow-500" />
+                          <span className="text-sm font-semibold">En cas de…</span>
+                          <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-semibold text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400">
+                            {routine.extras.length}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Conseils situationnels — optionnel</p>
+                      </div>
+
+                      {/* Steps */}
+                      {routine.extras.length > 0 && (
+                        <DndContext
+                          sensors={sensors}
+                          collisionDetection={closestCenter}
+                          onDragEnd={handleExtrasDragEnd}
+                        >
+                          <SortableContext
+                            items={routine.extras.map((s) => s.id)}
+                            strategy={verticalListSortingStrategy}
+                          >
+                            <ul className="divide-y divide-border/40">
+                              {routine.extras.map((step, idx) => (
+                                <SortableStep
+                                  key={step.id}
+                                  step={step}
+                                  idx={idx}
+                                  onEdit={() => {
+                                    setEditingStep(step);
+                                    setIsNewStep(false);
+                                    setEditingForExtras(true);
+                                  }}
+                                  onDelete={() => {
+                                    setDeletingStepId(step.id);
+                                    setDeletingExtras(true);
+                                  }}
+                                />
+                              ))}
+                            </ul>
+                          </SortableContext>
+                        </DndContext>
+                      )}
+
+                      {/* Add button */}
+                      <div className={`p-4 ${routine.extras.length > 0 ? "border-t border-border/40" : ""}`}>
+                        <button
+                          onClick={() => {
+                            setEditingStep({
+                              id: "",
+                              order: routine.extras.length,
+                              category: CATEGORIES[0],
+                              product: "",
+                              instructions: "",
+                            });
+                            setIsNewStep(true);
+                            setEditingForExtras(true);
+                          }}
+                          className="flex items-center gap-2 rounded-2xl border border-dashed border-yellow-300/60 px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:border-yellow-400 hover:bg-yellow-50/60 hover:text-foreground dark:border-yellow-800/40 dark:hover:bg-yellow-950/20"
+                        >
+                          <Plus className="h-4 w-4" /> Ajouter un conseil situationnel
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Send result feedback */}
                   <AnimatePresence>
@@ -916,7 +993,7 @@ function RoutinesContent() {
       <StepDialog
         step={editingStep}
         isNew={isNewStep}
-        onClose={() => setEditingStep(null)}
+        onClose={() => { setEditingStep(null); setEditingForExtras(false); }}
         onSave={handleSaveStep}
         saving={saving}
         catalogProducts={catalogProducts}
@@ -924,7 +1001,7 @@ function RoutinesContent() {
         savingToCatalog={savingToCatalog}
       />
 
-      <AlertDialog open={!!deletingStepId} onOpenChange={(o) => !o && setDeletingStepId(null)}>
+      <AlertDialog open={!!deletingStepId} onOpenChange={(o) => { if (!o) { setDeletingStepId(null); setDeletingExtras(false); } }}>
         <AlertDialogContent className="rounded-3xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-display">Supprimer cette étape ?</AlertDialogTitle>
