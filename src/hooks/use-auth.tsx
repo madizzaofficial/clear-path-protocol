@@ -39,8 +39,8 @@ function normalizeAuthError(code: string): string {
   return map[code] ?? "Something went wrong. Please try again.";
 }
 
-// Force logout after 7 days of inactivity (checked against Firestore lastSeen)
-const IDLE_TIMEOUT_MS = 7 * 24 * 60 * 60 * 1000;
+// Force logout after 12 hours of inactivity (checked against Firestore lastSeen)
+const IDLE_TIMEOUT_MS = 12 * 60 * 60 * 1000;
 
 // Primary: users/{uid}.is_admin (aligned with backend set_admin.py)
 // Fallback: config/admins.uids[] for admins created before this change
