@@ -70,11 +70,15 @@ export function PwaInstallBanner() {
         <img src="/icon-192.png" alt="" className="h-10 w-10 shrink-0 rounded-xl" />
 
         <div className="min-w-0 flex-1">
-          <p className="font-semibold">Ajouter à l'écran d'accueil</p>
+          <p className="font-semibold">
+            {platform === "ios"
+              ? "Installer Protocole Clear sur ton iPhone"
+              : "Installer Protocole Clear sur ton Android"}
+          </p>
           {platform === "ios" ? (
             <p className="mt-0.5 text-sm text-muted-foreground">
               Appuie sur <Share className="inline-block h-4 w-4 align-middle" /> puis{" "}
-              <strong className="text-foreground">Sur l'écran d'accueil</strong>
+              <strong className="text-foreground">« Sur l'écran d'accueil »</strong>
             </p>
           ) : (
             <p className="mt-0.5 text-sm text-muted-foreground">
