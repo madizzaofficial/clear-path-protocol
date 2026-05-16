@@ -29,6 +29,7 @@ import { Route as AdminProductsRouteImport } from './routes/admin_.products'
 import { Route as AdminNutritionRouteImport } from './routes/admin_.nutrition'
 import { Route as AdminCourseEditorRouteImport } from './routes/admin_.course-editor'
 import { Route as AdminAdminsRouteImport } from './routes/admin_.admins'
+import { Route as AdminTemplatesIndexRouteImport } from './routes/admin_.templates.index'
 import { Route as AdminTemplatesTemplateIdRouteImport } from './routes/admin_.templates.$templateId'
 import { Route as AdminStudentUidRouteImport } from './routes/admin_.student.$uid'
 
@@ -132,6 +133,11 @@ const AdminAdminsRoute = AdminAdminsRouteImport.update({
   path: '/admin/admins',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminTemplatesIndexRoute = AdminTemplatesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminTemplatesRoute,
+} as any)
 const AdminTemplatesTemplateIdRoute =
   AdminTemplatesTemplateIdRouteImport.update({
     id: '/$templateId',
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/start/$token': typeof StartTokenRoute
   '/admin/student/$uid': typeof AdminStudentUidRoute
   '/admin/templates/$templateId': typeof AdminTemplatesTemplateIdRoute
+  '/admin/templates/': typeof AdminTemplatesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -185,12 +192,12 @@ export interface FileRoutesByTo {
   '/admin/nutrition': typeof AdminNutritionRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/routines': typeof AdminRoutinesRoute
-  '/admin/templates': typeof AdminTemplatesRouteWithChildren
   '/admin/tokens': typeof AdminTokensRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
   '/admin/student/$uid': typeof AdminStudentUidRoute
   '/admin/templates/$templateId': typeof AdminTemplatesTemplateIdRoute
+  '/admin/templates': typeof AdminTemplatesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -216,6 +223,7 @@ export interface FileRoutesById {
   '/start/$token': typeof StartTokenRoute
   '/admin_/student/$uid': typeof AdminStudentUidRoute
   '/admin_/templates/$templateId': typeof AdminTemplatesTemplateIdRoute
+  '/admin_/templates/': typeof AdminTemplatesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -242,6 +250,7 @@ export interface FileRouteTypes {
     | '/start/$token'
     | '/admin/student/$uid'
     | '/admin/templates/$templateId'
+    | '/admin/templates/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -260,12 +269,12 @@ export interface FileRouteTypes {
     | '/admin/nutrition'
     | '/admin/products'
     | '/admin/routines'
-    | '/admin/templates'
     | '/admin/tokens'
     | '/lesson/$lessonId'
     | '/start/$token'
     | '/admin/student/$uid'
     | '/admin/templates/$templateId'
+    | '/admin/templates'
   id:
     | '__root__'
     | '/'
@@ -290,6 +299,7 @@ export interface FileRouteTypes {
     | '/start/$token'
     | '/admin_/student/$uid'
     | '/admin_/templates/$templateId'
+    | '/admin_/templates/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -458,6 +468,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin_/templates/': {
+      id: '/admin_/templates/'
+      path: '/'
+      fullPath: '/admin/templates/'
+      preLoaderRoute: typeof AdminTemplatesIndexRouteImport
+      parentRoute: typeof AdminTemplatesRoute
+    }
     '/admin_/templates/$templateId': {
       id: '/admin_/templates/$templateId'
       path: '/$templateId'
@@ -477,10 +494,12 @@ declare module '@tanstack/react-router' {
 
 interface AdminTemplatesRouteChildren {
   AdminTemplatesTemplateIdRoute: typeof AdminTemplatesTemplateIdRoute
+  AdminTemplatesIndexRoute: typeof AdminTemplatesIndexRoute
 }
 
 const AdminTemplatesRouteChildren: AdminTemplatesRouteChildren = {
   AdminTemplatesTemplateIdRoute: AdminTemplatesTemplateIdRoute,
+  AdminTemplatesIndexRoute: AdminTemplatesIndexRoute,
 }
 
 const AdminTemplatesRouteWithChildren = AdminTemplatesRoute._addFileChildren(

@@ -137,6 +137,12 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    // ── Routine templates (admin-managed reusable templates) ──────────────────
+    match /routine_templates/{templateId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
     // Deny everything else by default
     match /{document=**} {
       allow read, write: if false;
