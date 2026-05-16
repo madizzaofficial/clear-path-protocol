@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { SearchInput } from "@/components/SearchInput";
 import { createServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
@@ -42,7 +43,6 @@ import {
   Upload,
   X,
   Package,
-  Search,
 } from "lucide-react";
 import {
   Dialog,
@@ -1041,15 +1041,18 @@ function StepDialog({
             </div>
             {showCatalogPicker && (
               <div className="rounded-2xl border border-border bg-muted/40 p-3">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                  <input
-                    value={catalogSearch}
-                    onChange={(e) => setCatalogSearch(e.target.value)}
-                    placeholder="Rechercher dans le catalogue…"
-                    className="h-9 w-full rounded-xl border border-border bg-background pl-9 pr-3 text-sm outline-none focus:border-primary"
-                  />
-                </div>
+                <SearchInput
+                  value={catalogSearch}
+                  onChange={setCatalogSearch}
+                  placeholder="Rechercher dans le catalogue…"
+                  inputClassName="h-9 w-full rounded-xl border border-border bg-background pl-9 pr-3 text-sm outline-none focus:border-primary"
+                  suggestions={catalogSearch.trim() ? catalogResults.slice(0, 6).map((p) => ({
+                    id: p.id,
+                    label: p.name,
+                    sublabel: p.category,
+                    onSelect: () => fillFromCatalog(p),
+                  })) : []}
+                />
                 <ul className="mt-2 max-h-44 overflow-y-auto space-y-0.5">
                   {catalogResults.length === 0 ? (
                     <li className="py-3 text-center text-xs text-muted-foreground">Aucun résultat</li>

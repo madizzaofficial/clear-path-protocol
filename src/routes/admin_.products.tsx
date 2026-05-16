@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AdminShell } from "@/components/AdminShell";
+import { SearchInput } from "@/components/SearchInput";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
@@ -172,15 +173,24 @@ function ProductsContent() {
 
         {/* Filters */}
         <div className="mb-6 flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-48">
-            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Rechercher un produit…"
-              className="h-10 w-full rounded-2xl border border-border bg-background pl-10 pr-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Rechercher un produit…"
+            className="flex-1 min-w-48"
+            suggestions={search.trim() ? products
+              .filter((p) => {
+                const q = search.toLowerCase();
+                return p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
+              })
+              .slice(0, 6)
+              .map((p) => ({
+                id: p.id,
+                label: p.name,
+                sublabel: p.category,
+                onSelect: () => setSearch(p.name),
+              })) : []}
+          />
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}

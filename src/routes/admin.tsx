@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AdminShell } from "@/components/AdminShell";
+import { SearchInput } from "@/components/SearchInput";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, getDoc, addDoc } from "firebase/firestore";
@@ -198,15 +199,25 @@ function AdminPage() {
 
         {/* Controls */}
         <div className="mb-4 flex flex-wrap items-center gap-3">
-          <div className="relative min-w-[220px] flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Rechercher par nom ou email…"
-              className="h-10 w-full rounded-2xl border border-border bg-card pl-10 pr-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Rechercher par nom ou email…"
+            className="min-w-[220px] flex-1"
+            inputClassName="h-10 w-full rounded-2xl border border-border bg-card pl-10 pr-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+            suggestions={search.trim() ? students
+              .filter((s) => {
+                const q = search.toLowerCase();
+                return s.displayName?.toLowerCase().includes(q) || s.email.toLowerCase().includes(q);
+              })
+              .slice(0, 6)
+              .map((s) => ({
+                id: s.uid,
+                label: s.displayName ?? s.email,
+                sublabel: s.displayName ? s.email : undefined,
+                onSelect: () => navigate({ to: "/admin/student/$uid", params: { uid: s.uid } }),
+              })) : []}
+          />
           <div className="flex rounded-xl bg-muted p-1">
             {(["all", "sent", "draft", "none"] as const).map((v) => (
               <button
