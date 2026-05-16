@@ -13,6 +13,7 @@ import {
   ChevronUp,
   Moon,
   Sun,
+  Zap,
   Plus,
 } from "lucide-react";
 import {
@@ -36,6 +37,7 @@ type RoutineTemplate = {
   description?: string;
   am: RoutineStep[];
   pm: RoutineStep[];
+  extras: RoutineStep[];
   createdAt: number;
   updatedAt: number;
 };
@@ -178,6 +180,11 @@ function TemplatesContent() {
                         <span className="flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400">
                           <Moon className="h-3 w-3" /> {t.pm.length} étape{t.pm.length !== 1 ? "s" : ""}
                         </span>
+                        {(t.extras ?? []).length > 0 && (
+                          <span className="flex items-center gap-1 rounded-full bg-yellow-50 px-2.5 py-0.5 text-xs font-medium text-yellow-600 dark:bg-yellow-950/30 dark:text-yellow-400">
+                            <Zap className="h-3 w-3" /> {t.extras.length} bonus
+                          </span>
+                        )}
                         <span className="text-xs text-muted-foreground">
                           {new Date(t.createdAt).toLocaleDateString("fr-FR")}
                         </span>
@@ -211,7 +218,7 @@ function TemplatesContent() {
 
                   {/* Expanded steps */}
                   {expanded && (
-                    <div className="border-t border-border/60 px-5 pb-5 pt-4">
+                    <div className="border-t border-border/60 px-5 pb-5 pt-4 space-y-4">
                       <div className="grid gap-4 sm:grid-cols-2">
                         {(["am", "pm"] as const).map((slot) => {
                           const steps = t[slot];
@@ -227,10 +234,7 @@ function TemplatesContent() {
                               ) : (
                                 <ul className="space-y-1.5">
                                   {steps.map((s, i) => (
-                                    <li
-                                      key={s.id}
-                                      className="flex items-start gap-2.5 rounded-xl bg-muted/40 px-3 py-2"
-                                    >
+                                    <li key={s.id} className="flex items-start gap-2.5 rounded-xl bg-muted/40 px-3 py-2">
                                       <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary-soft text-[10px] font-semibold text-primary">
                                         {i + 1}
                                       </span>
@@ -246,6 +250,26 @@ function TemplatesContent() {
                           );
                         })}
                       </div>
+                      {(t.extras ?? []).length > 0 && (
+                        <div>
+                          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                            <Zap className="h-3.5 w-3.5" /> En cas de
+                          </p>
+                          <ul className="space-y-1.5">
+                            {t.extras.map((s, i) => (
+                              <li key={s.id} className="flex items-start gap-2.5 rounded-xl bg-yellow-50/60 dark:bg-yellow-950/20 px-3 py-2">
+                                <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/40 text-[10px] font-semibold text-yellow-600 dark:text-yellow-400">
+                                  {i + 1}
+                                </span>
+                                <div className="min-w-0">
+                                  <p className="text-xs font-semibold leading-tight">{s.product}</p>
+                                  <p className="text-[10px] text-muted-foreground">{s.category}</p>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

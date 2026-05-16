@@ -39,6 +39,7 @@ import {
   Save,
   Sun,
   Moon,
+  Zap,
   Check,
 } from "lucide-react";
 import { CATEGORIES } from "@/lib/skincare-categories";
@@ -51,6 +52,7 @@ type RoutineTemplate = {
   description?: string;
   am: RoutineStep[];
   pm: RoutineStep[];
+  extras: RoutineStep[];
   createdAt: number;
   updatedAt: number;
 };
@@ -95,7 +97,7 @@ function TemplateEditorContent() {
   const [template, setTemplate] = useState<RoutineTemplate | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [activeTab, setActiveTab] = useState<"am" | "pm">("am");
+  const [activeTab, setActiveTab] = useState<"am" | "pm" | "extras">("am");
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
 
@@ -132,7 +134,7 @@ function TemplateEditorContent() {
           setLoading(false);
         }
       } else {
-        setTemplate({ id: "", name: "", am: [], pm: [], createdAt: 0, updatedAt: 0 });
+        setTemplate({ id: "", name: "", am: [], pm: [], extras: [], createdAt: 0, updatedAt: 0 });
       }
     }
     load();
@@ -159,11 +161,11 @@ function TemplateEditorContent() {
     }
   }
 
-  function handleStepDragEnd(tab: "am" | "pm", event: DragEndEvent) {
+  function handleStepDragEnd(tab: "am" | "pm" | "extras", event: DragEndEvent) {
     if (!template) return;
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const steps = tab === "am" ? template.am : template.pm;
+    const steps = tab === "am" ? template.am : tab === "pm" ? template.pm : template.extras;
     const from = steps.findIndex((s) => s.id === active.id);
     const to = steps.findIndex((s) => s.id === over.id);
     const reordered = arrayMove(steps, from, to).map((s, i) => ({ ...s, order: i }));
@@ -179,7 +181,7 @@ function TemplateEditorContent() {
     purchaseUrl?: string;
   }) {
     if (!template) return;
-    const steps = activeTab === "am" ? template.am : template.pm;
+    const steps = activeTab === "am" ? template.am : activeTab === "pm" ? template.pm : template.extras;
     let updated: RoutineTemplate;
     if (isNewStep) {
       const newStep: RoutineStep = { id: `s-${Date.now()}`, order: steps.length, ...data };
@@ -228,14 +230,14 @@ function TemplateEditorContent() {
 
   function handleDeleteStep() {
     if (!template || !deletingStepId) return;
-    const steps = (activeTab === "am" ? template.am : template.pm)
+    const steps = (activeTab === "am" ? template.am : activeTab === "pm" ? template.pm : template.extras)
       .filter((s) => s.id !== deletingStepId)
       .map((s, i) => ({ ...s, order: i }));
     setTemplate({ ...template, [activeTab]: steps });
     setDeletingStepId(null);
   }
 
-  const currentSteps = template ? (activeTab === "am" ? template.am : template.pm) : [];
+  const currentSteps = template ? (activeTab === "am" ? template.am : activeTab === "pm" ? template.pm : template.extras) : [];
 
   if (loading) {
     return (
@@ -286,10 +288,16 @@ function TemplateEditorContent() {
           </div>
         </div>
 
-        {/* AM / PM tabs */}
+        {/* AM / PM / Extras tabs */}
         <div className="mb-4 flex gap-2 rounded-2xl bg-muted p-1.5">
-          {(["am", "pm"] as const).map((tab) => {
-            const count = template ? (tab === "am" ? template.am.length : template.pm.length) : 0;
+          {(["am", "pm", "extras"] as const).map((tab) => {
+            const count = template
+              ? tab === "am"
+                ? template.am.length
+                : tab === "pm"
+                ? template.pm.length
+                : template.extras.length
+              : 0;
             const isActive = activeTab === tab;
             return (
               <button
@@ -299,8 +307,8 @@ function TemplateEditorContent() {
                   isActive ? "bg-card shadow-soft text-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {tab === "am" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                {tab === "am" ? "Matin" : "Soir"}
+                {tab === "am" ? <Sun className="h-4 w-4" /> : tab === "pm" ? <Moon className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
+                {tab === "am" ? "Matin" : tab === "pm" ? "Soir" : "En cas de"}
                 <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-semibold text-primary">
                   {count}
                 </span>

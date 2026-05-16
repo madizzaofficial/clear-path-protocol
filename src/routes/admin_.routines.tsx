@@ -35,6 +35,7 @@ import {
   Save,
   Sun,
   Moon,
+  Zap,
   Users,
   LayoutTemplate,
   BookmarkPlus,
@@ -70,6 +71,7 @@ type StudentRoutine = {
   uid: string;
   am: RoutineStep[];
   pm: RoutineStep[];
+  extras: RoutineStep[];
   updatedAt: number;
   sentAt: number | null;
   status: "draft" | "sent";
@@ -117,6 +119,7 @@ type RoutineTemplate = {
   description?: string;
   am: RoutineStep[];
   pm: RoutineStep[];
+  extras: RoutineStep[];
   createdAt: number;
   updatedAt: number;
 };
@@ -342,7 +345,7 @@ function RoutinesContent() {
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<"success" | "error" | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"am" | "pm">("am");
+  const [activeTab, setActiveTab] = useState<"am" | "pm" | "extras">("am");
 
   const [editingStep, setEditingStep] = useState<RoutineStep | null>(null);
   const [isNewStep, setIsNewStep] = useState(false);
@@ -423,7 +426,7 @@ function RoutinesContent() {
       setRoutine(
         routineSnap.exists()
           ? (routineSnap.data() as StudentRoutine)
-          : { uid: u.uid, am: [], pm: [], updatedAt: Date.now(), sentAt: null, status: "draft" },
+          : { uid: u.uid, am: [], pm: [], extras: [], updatedAt: Date.now(), sentAt: null, status: "draft" },
       );
       setIntake(intakeSnap.exists() ? (intakeSnap.data() as IntakeAnswers) : null);
     } finally {
@@ -494,11 +497,11 @@ function RoutinesContent() {
     }
   }
 
-  function handleStepDragEnd(tab: "am" | "pm", event: DragEndEvent) {
+  function handleStepDragEnd(tab: "am" | "pm" | "extras", event: DragEndEvent) {
     if (!routine) return;
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const steps = tab === "am" ? routine.am : routine.pm;
+    const steps = tab === "am" ? routine.am : tab === "pm" ? routine.pm : routine.extras;
     const from = steps.findIndex((s) => s.id === active.id);
     const to = steps.findIndex((s) => s.id === over.id);
     const reordered = arrayMove(steps, from, to).map((s, i) => ({ ...s, order: i }));
@@ -515,7 +518,7 @@ function RoutinesContent() {
     purchaseUrl?: string;
   }) {
     if (!routine) return;
-    const steps = activeTab === "am" ? routine.am : routine.pm;
+    const steps = activeTab === "am" ? routine.am : activeTab === "pm" ? routine.pm : routine.extras;
     let updated: StudentRoutine;
     if (isNewStep) {
       const newStep: RoutineStep = {
@@ -588,6 +591,7 @@ function RoutinesContent() {
       ...routine,
       am: remap(t.am),
       pm: remap(t.pm),
+      extras: remap(t.extras ?? []),
       status: "draft",
       sentAt: null,
       updatedAt: Date.now(),
@@ -609,6 +613,7 @@ function RoutinesContent() {
         description: templateDesc.trim() || undefined,
         am: routine.am,
         pm: routine.pm,
+        extras: routine.extras,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -624,14 +629,14 @@ function RoutinesContent() {
 
   function handleDeleteStep() {
     if (!routine || !deletingStepId) return;
-    const steps = (activeTab === "am" ? routine.am : routine.pm)
+    const steps = (activeTab === "am" ? routine.am : activeTab === "pm" ? routine.pm : routine.extras)
       .filter((s) => s.id !== deletingStepId)
       .map((s, i) => ({ ...s, order: i }));
     saveRoutine({ ...routine, [activeTab]: steps, updatedAt: Date.now() });
     setDeletingStepId(null);
   }
 
-  const currentSteps = routine ? (activeTab === "am" ? routine.am : routine.pm) : [];
+  const currentSteps = routine ? (activeTab === "am" ? routine.am : activeTab === "pm" ? routine.pm : routine.extras) : [];
 
   return (
     <AdminShell>
@@ -737,7 +742,7 @@ function RoutinesContent() {
                     setTemplateDesc("");
                     setShowSaveTemplate(true);
                   }}
-                  disabled={!routine || (routine.am.length === 0 && routine.pm.length === 0)}
+                  disabled={!routine || (routine.am.length === 0 && routine.pm.length === 0 && routine.extras.length === 0)}
                   className="flex items-center gap-2 rounded-2xl border border-border bg-card px-4 py-2 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-40"
                 >
                   <BookmarkPlus className="h-4 w-4" /> Sauvegarder comme modèle
@@ -750,13 +755,15 @@ function RoutinesContent() {
                 </div>
               ) : (
                 <>
-                  {/* AM / PM tabs */}
+                  {/* AM / PM / Extras tabs */}
                   <div className="flex gap-2 rounded-2xl bg-muted p-1.5">
-                    {(["am", "pm"] as const).map((tab) => {
+                    {(["am", "pm", "extras"] as const).map((tab) => {
                       const count = routine
                         ? tab === "am"
                           ? routine.am.length
-                          : routine.pm.length
+                          : tab === "pm"
+                          ? routine.pm.length
+                          : routine.extras.length
                         : 0;
                       const isActive = activeTab === tab;
                       return (
@@ -771,10 +778,12 @@ function RoutinesContent() {
                         >
                           {tab === "am" ? (
                             <Sun className="h-4 w-4" />
-                          ) : (
+                          ) : tab === "pm" ? (
                             <Moon className="h-4 w-4" />
+                          ) : (
+                            <Zap className="h-4 w-4" />
                           )}
-                          {tab === "am" ? "Matin" : "Soir"}
+                          {tab === "am" ? "Matin" : tab === "pm" ? "Soir" : "En cas de"}
                           <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-semibold text-primary">
                             {count}
                           </span>
@@ -969,8 +978,7 @@ function RoutinesContent() {
                         </p>
                       )}
                       <p className="mt-1 text-xs text-muted-foreground">
-                        AM : {t.am.length} étape{t.am.length !== 1 ? "s" : ""} · PM : {t.pm.length}{" "}
-                        étape{t.pm.length !== 1 ? "s" : ""}
+                        AM : {t.am.length} · PM : {t.pm.length} · Bonus : {(t.extras ?? []).length}
                       </p>
                     </button>
                   </li>
@@ -1036,8 +1044,7 @@ function RoutinesContent() {
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              AM : {routine?.am.length ?? 0} étape{(routine?.am.length ?? 0) !== 1 ? "s" : ""} · PM
-              : {routine?.pm.length ?? 0} étape{(routine?.pm.length ?? 0) !== 1 ? "s" : ""}
+              AM : {routine?.am.length ?? 0} étape{(routine?.am.length ?? 0) !== 1 ? "s" : ""} · PM : {routine?.pm.length ?? 0} étape{(routine?.pm.length ?? 0) !== 1 ? "s" : ""} · Bonus : {routine?.extras.length ?? 0} étape{(routine?.extras.length ?? 0) !== 1 ? "s" : ""}
             </p>
           </div>
           <DialogFooter>
