@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { SearchInput } from "@/components/SearchInput";
 import { StudentPicker } from "@/components/StudentPicker";
 import { createServerFn } from "@tanstack/react-start";
-import { AppShell } from "@/components/AppShell";
+import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { inngest } from "@/lib/inngest";
@@ -549,7 +549,7 @@ function RoutinesContent() {
   const currentSteps = routine ? (activeTab === "am" ? routine.am : routine.pm) : [];
 
   return (
-    <AppShell>
+    <AdminShell>
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
         {/* Header */}
         <header className="mb-8">
@@ -828,7 +828,7 @@ function RoutinesContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </AppShell>
+    </AdminShell>
   );
 }
 

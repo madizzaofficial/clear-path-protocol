@@ -1,4 +1,5 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { AppShell } from "@/components/AppShell";
 import { course, findLesson, allLessons } from "@/lib/course-data";
 import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, ArrowRight, Check, ChevronDown, Clock, Download, FileText, Lock, Menu, Play, X } from "lucide-react";
@@ -94,6 +95,7 @@ function LessonPage() {
   }
 
   return (
+    <AppShell>
     <div className="flex min-h-screen bg-background">
       {/* Desktop sidebar */}
       <aside className="hidden w-80 shrink-0 border-r border-border/60 bg-sidebar lg:block">
@@ -104,7 +106,7 @@ function LessonPage() {
       {menuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden" onClick={() => setMenuOpen(false)}>
           <div className="absolute inset-0 bg-foreground/30 backdrop-blur-sm" />
-          <div className="absolute left-0 top-0 h-full w-80 max-w-[85%] overflow-y-auto bg-sidebar shadow-elegant" onClick={(e) => e.stopPropagation()}>
+          <div className="absolute left-0 top-0 h-full w-80 max-w-[85%] overflow-y-auto bg-background shadow-elegant" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-end p-4">
               <button onClick={() => setMenuOpen(false)} className="rounded-full p-2 hover:bg-muted"><X className="h-5 w-5" /></button>
             </div>
@@ -130,7 +132,7 @@ function LessonPage() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-5xl px-4 py-8 md:px-10 md:py-12">
+        <div className="mx-auto max-w-5xl px-4 pt-8 pb-28 md:px-10 md:py-12">
           {/* Crumb */}
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">{chapter.title}</p>
           <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight md:text-4xl">{lesson.title}</h1>
@@ -289,6 +291,7 @@ function LessonPage() {
         </div>
       </main>
     </div>
+    </AppShell>
   );
 }
 

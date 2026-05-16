@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AdminShell } from "@/components/AdminShell";
+import { StudentPicker } from "@/components/StudentPicker";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
-  Plus, Trash2, Loader2, GripVertical, Users, ChevronRight, Save, Check, X,
+  Plus, Trash2, Loader2, GripVertical, Users, Save, Check, X,
 } from "lucide-react";
 import {
   DndContext,
@@ -223,46 +224,18 @@ function NutritionContent() {
           <p className="mt-2 text-muted-foreground">Consignes nutritionnelles par élève — rappels généraux communs à tous.</p>
         </header>
 
-        <div className="grid gap-6 lg:grid-cols-[300px,1fr]">
+        {/* Student picker */}
+        <div className="mb-6">
+          <StudentPicker
+            users={users}
+            selected={selectedUser}
+            onSelect={selectUser}
+            loading={loadingUsers}
+          />
+        </div>
 
-          {/* ── Student list ──────────────────────────────────────────────── */}
-          <aside className="rounded-3xl border border-border/60 bg-card shadow-soft">
-            <div className="flex items-center gap-3 border-b border-border/60 px-5 py-4">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="font-display text-base font-semibold">Élèves</span>
-              {!loadingUsers && (
-                <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{users.length}</span>
-              )}
-            </div>
-            {loadingUsers ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              </div>
-            ) : (
-              <ul className="divide-y divide-border/40 p-2">
-                {users.map((u) => (
-                  <li key={u.uid}>
-                    <button
-                      onClick={() => selectUser(u)}
-                      className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-muted/60 ${selectedUser?.uid === u.uid ? "bg-primary-soft" : ""}`}
-                    >
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-semibold text-primary">
-                        {(u.displayName ?? u.email)[0].toUpperCase()}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">{u.displayName ?? u.email}</p>
-                        {u.displayName && <p className="truncate text-xs text-muted-foreground">{u.email}</p>}
-                      </div>
-                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/40" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </aside>
-
-          {/* ── Right panel ───────────────────────────────────────────────── */}
-          <div className="space-y-6">
+        {/* ── Right panel ───────────────────────────────────────────────── */}
+        <div className="space-y-6">
 
             {/* Per-student nutrition editor */}
             <section className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
@@ -436,7 +409,6 @@ function NutritionContent() {
               )}
             </section>
 
-          </div>
         </div>
       </div>
     </AdminShell>
