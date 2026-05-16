@@ -39,6 +39,9 @@ function normalizeAuthError(code: string): string {
   return map[code] ?? "Something went wrong. Please try again.";
 }
 
+// Force logout after 7 days of inactivity (checked against Firestore lastSeen)
+const IDLE_TIMEOUT_MS = 7 * 24 * 60 * 60 * 1000;
+
 // Primary: users/{uid}.is_admin (aligned with backend set_admin.py)
 // Fallback: config/admins.uids[] for admins created before this change
 async function fetchIsAdmin(uid: string, userSnap: DocumentSnapshot): Promise<boolean> {
@@ -75,6 +78,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userSnap = await getDoc(userRef);
         const admin = await fetchIsAdmin(u.uid, userSnap);
         if (userSnap.data()?.disabled === true) {
+          await fbSignOut(auth);
+          setUser(null);
+          setIsAdmin(false);
+          setLoading(false);
+          return;
+        }
+        const prevLastSeen: number | undefined = userSnap.data()?.lastSeen;
+        if (prevLastSeen && Date.now() - prevLastSeen > IDLE_TIMEOUT_MS) {
           await fbSignOut(auth);
           setUser(null);
           setIsAdmin(false);
