@@ -597,8 +597,10 @@ function RoutinesContent() {
           </div>
         ) : (
           <div className="grid gap-6 lg:grid-cols-[280px,1fr]">
-            <SkinProfilePanel intake={intake} loading={loadingIntake} />
-            <div className="space-y-4">
+            <div className="order-2 lg:order-1">
+              <SkinProfilePanel intake={intake} loading={loadingIntake} />
+            </div>
+            <div className="order-1 lg:order-2 space-y-4">
               {/* Student header card */}
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-border/60 bg-card p-5 shadow-soft md:p-6">
                 <div className="flex items-center gap-4">
@@ -836,7 +838,7 @@ function RoutinesContent() {
 
 function SkinProfilePanel({ intake, loading }: { intake: IntakeAnswers | null; loading: boolean }) {
   return (
-    <aside className="sticky top-6 h-fit rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+    <aside className="h-fit rounded-3xl border border-border/60 bg-card p-6 shadow-soft lg:sticky lg:top-6">
       <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         Profil peau
       </p>
