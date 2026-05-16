@@ -65,28 +65,29 @@ export function PwaInstallBanner() {
   if (!show) return null;
 
   return (
-    <div className="fixed left-0 right-0 top-16 z-[39] border-b border-border/60 bg-background/95 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5 sm:px-6">
-        <img src="/icon-192.png" alt="" className="h-8 w-8 shrink-0 rounded-xl" />
+    <div className="fixed left-0 right-0 top-16 z-[39] border-b border-border bg-card shadow-sm">
+      <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6">
+        <img src="/icon-192.png" alt="" className="h-10 w-10 shrink-0 rounded-xl" />
 
-        <p className="min-w-0 flex-1 text-sm leading-snug">
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold">Ajouter à l'écran d'accueil</p>
           {platform === "ios" ? (
-            <>
-              Appuie sur{" "}
-              <span className="inline-flex items-center gap-1 font-medium">
-                <Share className="inline h-3.5 w-3.5" /> Partager
-              </span>
-              {" "}puis <strong>« Sur l'écran d'accueil »</strong>
-            </>
+            <div className="mt-0.5 flex items-center gap-1.5 text-sm text-muted-foreground">
+              <span>Appuie sur</span>
+              <Share className="h-4 w-4 shrink-0" />
+              <span>puis <strong className="text-foreground">Sur l'écran d'accueil</strong></span>
+            </div>
           ) : (
-            <>Ajouter <strong>Protocole Clear</strong> à l'écran d'accueil</>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Accès rapide, mode hors-ligne, expérience native
+            </p>
           )}
-        </p>
+        </div>
 
         {platform !== "ios" && (
           <button
             onClick={install}
-            className="shrink-0 rounded-xl bg-foreground px-4 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-90"
+            className="shrink-0 rounded-xl bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
           >
             Installer
           </button>
@@ -95,7 +96,7 @@ export function PwaInstallBanner() {
         <button
           onClick={dismiss}
           aria-label="Fermer"
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <X className="h-4 w-4" />
         </button>
