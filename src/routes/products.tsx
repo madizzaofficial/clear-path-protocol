@@ -24,11 +24,13 @@ type RoutineStep = {
   purchaseUrl?: string;
 };
 
+type ExtraBlock = { id: string; name: string; steps: RoutineStep[] };
+
 type UserRoutine = {
   uid: string;
   am: RoutineStep[];
   pm: RoutineStep[];
-  extras?: RoutineStep[];
+  extras?: ExtraBlock[];
   updatedAt: number;
   sentAt: number | null;
   status: "draft" | "sent";
@@ -247,7 +249,7 @@ function RoutinePage() {
             )}
 
             {(routine.extras ?? []).length > 0 && (
-              <BonusBlock steps={routine.extras!} />
+              <BonusBlock blocks={routine.extras!} />
             )}
 
             <footer className="rounded-3xl border border-border/60 bg-card p-6 text-center shadow-soft md:p-8">
@@ -507,69 +509,71 @@ function RoutineBlock({
   );
 }
 
-function BonusBlock({ steps }: { steps: RoutineStep[] }) {
+function BonusBlock({ blocks }: { blocks: ExtraBlock[] }) {
+  const totalSteps = blocks.reduce((sum, b) => sum + b.steps.length, 0);
   return (
-    <section className="overflow-hidden rounded-3xl border border-yellow-200/60 bg-card shadow-soft dark:border-yellow-900/30">
-      <div className="relative bg-gradient-to-br from-yellow-50/80 to-amber-50/60 px-6 py-7 dark:from-yellow-950/30 dark:to-amber-950/20 md:px-8">
-        <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-background/80 shadow-soft backdrop-blur">
-            <Zap className="h-6 w-6 text-yellow-500" />
-          </div>
-          <div>
-            <h2 className="font-display text-2xl font-semibold tracking-tight md:text-3xl">En cas de…</h2>
-            <div className="mt-1 flex items-center gap-1.5 text-sm text-foreground/70">
-              <Clock className="h-3.5 w-3.5" />
-              {steps.length} conseil{steps.length !== 1 ? "s" : ""} situationnel{steps.length !== 1 ? "s" : ""}
-            </div>
+    <section className="space-y-4">
+      {/* Section header */}
+      <div className="flex items-center gap-4 overflow-hidden rounded-3xl border border-yellow-200/60 bg-gradient-to-br from-yellow-50/80 to-amber-50/60 px-6 py-7 shadow-soft dark:border-yellow-900/30 dark:from-yellow-950/30 dark:to-amber-950/20 md:px-8">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-background/80 shadow-soft backdrop-blur">
+          <Zap className="h-6 w-6 text-yellow-500" />
+        </div>
+        <div>
+          <h2 className="font-display text-2xl font-semibold tracking-tight md:text-3xl">En cas de…</h2>
+          <div className="mt-1 flex items-center gap-1.5 text-sm text-foreground/70">
+            <Clock className="h-3.5 w-3.5" />
+            {blocks.length} bloc{blocks.length !== 1 ? "s" : ""} · {totalSteps} conseil{totalSteps !== 1 ? "s" : ""}
           </div>
         </div>
       </div>
 
-      <ol className="divide-y divide-border/60">
-        {steps.map((step, i) => (
-          <li key={step.id} className="px-6 py-5 md:px-8">
-            <div className="flex gap-4">
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-yellow-200/60 bg-yellow-50/60 dark:border-yellow-900/30 dark:bg-yellow-950/20 md:h-28 md:w-28">
-                {step.imageUrl ? (
-                  <img src={step.imageUrl} alt={step.product} className="h-full w-full object-contain p-1" />
-                ) : (
-                  <Zap className="h-5 w-5 text-yellow-400/60" />
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="rounded-full bg-yellow-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400">
-                    {step.category}
-                  </span>
-                  <span className="text-[11px] font-medium text-muted-foreground/60">#{i + 1}</span>
+      {/* Each named block */}
+      {blocks.map((block) => (
+        <div key={block.id} className="overflow-hidden rounded-3xl border border-yellow-200/60 bg-card shadow-soft dark:border-yellow-900/30">
+          <div className="border-b border-yellow-100/60 bg-yellow-50/40 px-6 py-4 dark:border-yellow-900/20 dark:bg-yellow-950/10 md:px-8">
+            <h3 className="font-display text-lg font-semibold">{block.name}</h3>
+            <p className="mt-0.5 text-sm text-muted-foreground">{block.steps.length} étape{block.steps.length !== 1 ? "s" : ""}</p>
+          </div>
+          <ol className="divide-y divide-border/60">
+            {block.steps.map((step, i) => (
+              <li key={step.id} className="px-6 py-5 md:px-8">
+                <div className="flex gap-4">
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-yellow-200/60 bg-yellow-50/60 dark:border-yellow-900/30 dark:bg-yellow-950/20 md:h-28 md:w-28">
+                    {step.imageUrl ? (
+                      <img src={step.imageUrl} alt={step.product} className="h-full w-full object-contain p-1" />
+                    ) : (
+                      <Zap className="h-5 w-5 text-yellow-400/60" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-yellow-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400">
+                        {step.category}
+                      </span>
+                      <span className="text-[11px] font-medium text-muted-foreground/60">#{i + 1}</span>
+                    </div>
+                    <h4 className="mt-1.5 font-display text-base font-semibold">{step.product}</h4>
+                    {step.description && <p className="mt-0.5 text-xs italic text-muted-foreground/70">{step.description}</p>}
+                    {step.instructions && (
+                      <div className="mt-2">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">Instructions</p>
+                        <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{step.instructions}</p>
+                      </div>
+                    )}
+                    {step.purchaseUrl && (
+                      <div className="mt-3">
+                        <a href={step.purchaseUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-xl bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-80">
+                          <ShoppingCart className="h-3 w-3" /> Acheter
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <h3 className="mt-1.5 font-display text-base font-semibold">{step.product}</h3>
-                {step.description && (
-                  <p className="mt-0.5 text-xs italic text-muted-foreground/70">{step.description}</p>
-                )}
-                {step.instructions && (
-                  <div className="mt-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">Instructions</p>
-                    <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{step.instructions}</p>
-                  </div>
-                )}
-                {step.purchaseUrl && (
-                  <div className="mt-3">
-                    <a
-                      href={step.purchaseUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-80"
-                    >
-                      <ShoppingCart className="h-3 w-3" /> Acheter
-                    </a>
-                  </div>
-                )}
-              </div>
-            </div>
-          </li>
-        ))}
-      </ol>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ))}
     </section>
   );
 }

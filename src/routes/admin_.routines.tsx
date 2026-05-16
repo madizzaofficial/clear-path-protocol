@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { StudentPicker } from "@/components/StudentPicker";
 import { SortableStep, StepDialog } from "@/components/RoutineStepEditor";
-import type { RoutineStep } from "@/components/RoutineStepEditor";
+import type { RoutineStep, ExtraBlock } from "@/components/RoutineStepEditor";
 import { createServerFn } from "@tanstack/react-start";
 import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
@@ -36,6 +36,8 @@ import {
   Sun,
   Moon,
   Zap,
+  Pencil,
+  Trash2,
   Users,
   LayoutTemplate,
   BookmarkPlus,
@@ -71,7 +73,7 @@ type StudentRoutine = {
   uid: string;
   am: RoutineStep[];
   pm: RoutineStep[];
-  extras: RoutineStep[];
+  extras: ExtraBlock[];
   updatedAt: number;
   sentAt: number | null;
   status: "draft" | "sent";
@@ -119,7 +121,7 @@ type RoutineTemplate = {
   description?: string;
   am: RoutineStep[];
   pm: RoutineStep[];
-  extras: RoutineStep[];
+  extras: ExtraBlock[];
   createdAt: number;
   updatedAt: number;
 };
@@ -346,8 +348,11 @@ function RoutinesContent() {
   const [sendResult, setSendResult] = useState<"success" | "error" | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"am" | "pm">("am");
-  const [editingForExtras, setEditingForExtras] = useState(false);
-  const [deletingExtras, setDeletingExtras] = useState(false);
+  const [editingExtrasBlockId, setEditingExtrasBlockId] = useState<string | null>(null);
+  const [deletingStepInfo, setDeletingStepInfo] = useState<{ blockId: string; stepId: string } | null>(null);
+  const [deletingBlockId, setDeletingBlockId] = useState<string | null>(null);
+  const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
+  const [editingBlockName, setEditingBlockName] = useState("");
 
   const [editingStep, setEditingStep] = useState<RoutineStep | null>(null);
   const [isNewStep, setIsNewStep] = useState(false);
@@ -513,19 +518,6 @@ function RoutinesContent() {
     saveRoutine(updated);
   }
 
-  function handleExtrasDragEnd(event: DragEndEvent) {
-    if (!routine) return;
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-    const steps = routine.extras;
-    const from = steps.findIndex((s) => s.id === active.id);
-    const to = steps.findIndex((s) => s.id === over.id);
-    const reordered = arrayMove(steps, from, to).map((s, i) => ({ ...s, order: i }));
-    const updated = { ...routine, extras: reordered, updatedAt: Date.now() };
-    setRoutine(updated);
-    saveRoutine(updated);
-  }
-
   function handleSaveStep(data: {
     category: string;
     product: string;
@@ -534,26 +526,26 @@ function RoutinesContent() {
     purchaseUrl?: string;
   }) {
     if (!routine) return;
-    const target = editingForExtras ? "extras" : activeTab;
-    const steps = editingForExtras ? routine.extras : (activeTab === "am" ? routine.am : routine.pm);
     let updated: StudentRoutine;
-    if (isNewStep) {
-      const newStep: RoutineStep = {
-        id: `s-${Date.now()}`,
-        order: steps.length,
-        ...data,
-      };
-      updated = { ...routine, [target]: [...steps, newStep], updatedAt: Date.now() };
-    } else if (editingStep) {
-      updated = {
-        ...routine,
-        [target]: steps.map((s) => (s.id === editingStep.id ? { ...s, ...data } : s)),
-        updatedAt: Date.now(),
-      };
-    } else return;
+    if (editingExtrasBlockId !== null) {
+      const block = routine.extras.find((b) => b.id === editingExtrasBlockId);
+      if (!block) return;
+      const newSteps = isNewStep
+        ? [...block.steps, { id: `s-${Date.now()}`, order: block.steps.length, ...data }]
+        : block.steps.map((s) => (s.id === editingStep?.id ? { ...s, ...data } : s));
+      const updatedBlock = { ...block, steps: newSteps };
+      updated = { ...routine, extras: routine.extras.map((b) => (b.id === editingExtrasBlockId ? updatedBlock : b)), updatedAt: Date.now() };
+    } else {
+      const steps = activeTab === "am" ? routine.am : routine.pm;
+      if (isNewStep) {
+        updated = { ...routine, [activeTab]: [...steps, { id: `s-${Date.now()}`, order: steps.length, ...data }], updatedAt: Date.now() };
+      } else if (editingStep) {
+        updated = { ...routine, [activeTab]: steps.map((s) => (s.id === editingStep.id ? { ...s, ...data } : s)), updatedAt: Date.now() };
+      } else return;
+    }
     setRoutine(updated);
     setEditingStep(null);
-    setEditingForExtras(false);
+    setEditingExtrasBlockId(null);
     saveRoutine(updated);
   }
 
@@ -603,13 +595,15 @@ function RoutinesContent() {
 
   function applyTemplate(t: RoutineTemplate) {
     if (!routine) return;
-    const remap = (steps: RoutineStep[]) =>
+    const remapSteps = (steps: RoutineStep[]) =>
       steps.map((s, i) => ({ ...s, id: `s-${Date.now()}-${i}`, order: i }));
+    const remapBlocks = (blocks: ExtraBlock[]) =>
+      (blocks ?? []).map((b, bi) => ({ ...b, id: `b-${Date.now()}-${bi}`, steps: remapSteps(b.steps) }));
     const updated: StudentRoutine = {
       ...routine,
-      am: remap(t.am),
-      pm: remap(t.pm),
-      extras: remap(t.extras ?? []),
+      am: remapSteps(t.am),
+      pm: remapSteps(t.pm),
+      extras: remapBlocks(t.extras ?? []),
       status: "draft",
       sentAt: null,
       updatedAt: Date.now(),
@@ -647,13 +641,51 @@ function RoutinesContent() {
 
   function handleDeleteStep() {
     if (!routine || !deletingStepId) return;
-    const target = deletingExtras ? "extras" : activeTab;
-    const steps = (deletingExtras ? routine.extras : (activeTab === "am" ? routine.am : routine.pm))
+    const steps = (activeTab === "am" ? routine.am : routine.pm)
       .filter((s) => s.id !== deletingStepId)
       .map((s, i) => ({ ...s, order: i }));
-    saveRoutine({ ...routine, [target]: steps, updatedAt: Date.now() });
+    const updated = { ...routine, [activeTab]: steps, updatedAt: Date.now() };
+    setRoutine(updated);
+    saveRoutine(updated);
     setDeletingStepId(null);
-    setDeletingExtras(false);
+  }
+
+  function handleDeleteExtrasStep() {
+    if (!routine || !deletingStepInfo) return;
+    const { blockId, stepId } = deletingStepInfo;
+    const block = routine.extras.find((b) => b.id === blockId);
+    if (!block) { setDeletingStepInfo(null); return; }
+    const steps = block.steps.filter((s) => s.id !== stepId).map((s, i) => ({ ...s, order: i }));
+    const updated = { ...routine, extras: routine.extras.map((b) => (b.id === blockId ? { ...b, steps } : b)), updatedAt: Date.now() };
+    setRoutine(updated);
+    saveRoutine(updated);
+    setDeletingStepInfo(null);
+  }
+
+  function handleDeleteBlock() {
+    if (!routine || !deletingBlockId) return;
+    const updated = { ...routine, extras: routine.extras.filter((b) => b.id !== deletingBlockId), updatedAt: Date.now() };
+    setRoutine(updated);
+    saveRoutine(updated);
+    setDeletingBlockId(null);
+  }
+
+  function addExtrasBlock() {
+    if (!routine) return;
+    const newBlock: ExtraBlock = { id: `b-${Date.now()}`, name: "En cas de…", steps: [] };
+    const updated = { ...routine, extras: [...routine.extras, newBlock], updatedAt: Date.now() };
+    setRoutine(updated);
+    saveRoutine(updated);
+    setEditingBlockId(newBlock.id);
+    setEditingBlockName(newBlock.name);
+  }
+
+  function saveBlockName(blockId: string) {
+    if (!routine || !editingBlockName.trim()) { setEditingBlockId(null); return; }
+    const updated = { ...routine, extras: routine.extras.map((b) => (b.id === blockId ? { ...b, name: editingBlockName.trim() } : b)), updatedAt: Date.now() };
+    setRoutine(updated);
+    saveRoutine(updated);
+    setEditingBlockId(null);
   }
 
   const currentSteps = routine ? (activeTab === "am" ? routine.am : routine.pm) : [];
@@ -855,73 +887,98 @@ function RoutinesContent() {
                     </div>
                   </div>
 
-                  {/* ── En cas de (bonus steps) ─────────────────────────── */}
+                  {/* ── En cas de (named blocks) ─────────────────────────── */}
                   {routine && (
-                    <div className="overflow-hidden rounded-3xl border border-yellow-200/60 bg-card shadow-soft dark:border-yellow-900/30">
-                      {/* Header */}
-                      <div className="flex items-center justify-between border-b border-yellow-100/60 bg-yellow-50/40 px-5 py-4 dark:border-yellow-900/20 dark:bg-yellow-950/10">
-                        <div className="flex items-center gap-2">
-                          <Zap className="h-4 w-4 text-yellow-500" />
-                          <span className="text-sm font-semibold">En cas de…</span>
-                          <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-semibold text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400">
-                            {routine.extras.length}
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">Conseils situationnels — optionnel</p>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 px-1">
+                        <Zap className="h-4 w-4 text-yellow-500" />
+                        <span className="text-sm font-semibold">En cas de…</span>
+                        <span className="text-xs text-muted-foreground">Conseils situationnels — optionnel</span>
                       </div>
 
-                      {/* Steps */}
-                      {routine.extras.length > 0 && (
-                        <DndContext
-                          sensors={sensors}
-                          collisionDetection={closestCenter}
-                          onDragEnd={handleExtrasDragEnd}
-                        >
-                          <SortableContext
-                            items={routine.extras.map((s) => s.id)}
-                            strategy={verticalListSortingStrategy}
-                          >
+                      {routine.extras.map((block) => (
+                        <div key={block.id} className="overflow-hidden rounded-3xl border border-yellow-200/60 bg-card shadow-soft dark:border-yellow-900/30">
+                          {/* Block header */}
+                          <div className="flex items-center gap-2 border-b border-yellow-100/60 bg-yellow-50/40 px-5 py-3 dark:border-yellow-900/20 dark:bg-yellow-950/10">
+                            {editingBlockId === block.id ? (
+                              <input
+                                autoFocus
+                                value={editingBlockName}
+                                onChange={(e) => setEditingBlockName(e.target.value)}
+                                onBlur={() => saveBlockName(block.id)}
+                                onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); if (e.key === "Escape") setEditingBlockId(null); }}
+                                className="flex-1 rounded-xl border border-yellow-300/60 bg-white/60 px-3 py-1 text-sm font-semibold outline-none focus:ring-2 focus:ring-yellow-400/30 dark:bg-yellow-900/20"
+                              />
+                            ) : (
+                              <button
+                                onClick={() => { setEditingBlockId(block.id); setEditingBlockName(block.name); }}
+                                className="flex flex-1 items-center gap-2 text-left"
+                              >
+                                <span className="text-sm font-semibold">{block.name}</span>
+                                <Pencil className="h-3 w-3 text-muted-foreground opacity-60" />
+                              </button>
+                            )}
+                            <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-semibold text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400">
+                              {block.steps.length}
+                            </span>
+                            <button
+                              onClick={() => setDeletingBlockId(block.id)}
+                              className="flex h-7 w-7 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+
+                          {/* Steps — no DnD to avoid double-context bug */}
+                          {block.steps.length > 0 && (
                             <ul className="divide-y divide-border/40">
-                              {routine.extras.map((step, idx) => (
-                                <SortableStep
-                                  key={step.id}
-                                  step={step}
-                                  idx={idx}
-                                  onEdit={() => {
-                                    setEditingStep(step);
-                                    setIsNewStep(false);
-                                    setEditingForExtras(true);
-                                  }}
-                                  onDelete={() => {
-                                    setDeletingStepId(step.id);
-                                    setDeletingExtras(true);
-                                  }}
-                                />
+                              {block.steps.map((step, idx) => (
+                                <li key={step.id} className="flex items-center gap-3 px-5 py-3">
+                                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-yellow-100 text-[10px] font-semibold text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400">
+                                    {idx + 1}
+                                  </span>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-medium">{step.product}</p>
+                                    <p className="text-xs text-muted-foreground">{step.category}</p>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <button
+                                      onClick={() => { setEditingStep(step); setIsNewStep(false); setEditingExtrasBlockId(block.id); }}
+                                      className="flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                    >
+                                      <Pencil className="h-3.5 w-3.5" />
+                                    </button>
+                                    <button
+                                      onClick={() => setDeletingStepInfo({ blockId: block.id, stepId: step.id })}
+                                      className="flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </button>
+                                  </div>
+                                </li>
                               ))}
                             </ul>
-                          </SortableContext>
-                        </DndContext>
-                      )}
+                          )}
 
-                      {/* Add button */}
-                      <div className={`p-4 ${routine.extras.length > 0 ? "border-t border-border/40" : ""}`}>
-                        <button
-                          onClick={() => {
-                            setEditingStep({
-                              id: "",
-                              order: routine.extras.length,
-                              category: CATEGORIES[0],
-                              product: "",
-                              instructions: "",
-                            });
-                            setIsNewStep(true);
-                            setEditingForExtras(true);
-                          }}
-                          className="flex items-center gap-2 rounded-2xl border border-dashed border-yellow-300/60 px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:border-yellow-400 hover:bg-yellow-50/60 hover:text-foreground dark:border-yellow-800/40 dark:hover:bg-yellow-950/20"
-                        >
-                          <Plus className="h-4 w-4" /> Ajouter un conseil situationnel
-                        </button>
-                      </div>
+                          {/* Add step */}
+                          <div className={`p-4 ${block.steps.length > 0 ? "border-t border-border/40" : ""}`}>
+                            <button
+                              onClick={() => { setEditingStep({ id: "", order: block.steps.length, category: CATEGORIES[0], product: "", instructions: "" }); setIsNewStep(true); setEditingExtrasBlockId(block.id); }}
+                              className="flex items-center gap-2 rounded-2xl border border-dashed border-yellow-300/60 px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:border-yellow-400 hover:bg-yellow-50/60 hover:text-foreground dark:border-yellow-800/40 dark:hover:bg-yellow-950/20"
+                            >
+                              <Plus className="h-4 w-4" /> Ajouter une étape
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Add block */}
+                      <button
+                        onClick={addExtrasBlock}
+                        className="flex w-full items-center justify-center gap-2 rounded-3xl border border-dashed border-yellow-300/60 py-4 text-sm font-medium text-muted-foreground transition-colors hover:border-yellow-400 hover:bg-yellow-50/40 hover:text-foreground dark:border-yellow-800/40 dark:hover:bg-yellow-950/20"
+                      >
+                        <Plus className="h-4 w-4" /> Ajouter un bloc « En cas de »
+                      </button>
                     </div>
                   )}
 
@@ -993,7 +1050,7 @@ function RoutinesContent() {
       <StepDialog
         step={editingStep}
         isNew={isNewStep}
-        onClose={() => { setEditingStep(null); setEditingForExtras(false); }}
+        onClose={() => { setEditingStep(null); setEditingExtrasBlockId(null); }}
         onSave={handleSaveStep}
         saving={saving}
         catalogProducts={catalogProducts}
@@ -1001,7 +1058,8 @@ function RoutinesContent() {
         savingToCatalog={savingToCatalog}
       />
 
-      <AlertDialog open={!!deletingStepId} onOpenChange={(o) => { if (!o) { setDeletingStepId(null); setDeletingExtras(false); } }}>
+      {/* Delete AM/PM step */}
+      <AlertDialog open={!!deletingStepId} onOpenChange={(o) => !o && setDeletingStepId(null)}>
         <AlertDialogContent className="rounded-3xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-display">Supprimer cette étape ?</AlertDialogTitle>
@@ -1011,10 +1069,43 @@ function RoutinesContent() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-2xl">Annuler</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteStep}
-              className="rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            <AlertDialogAction onClick={handleDeleteStep} className="rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete extras block step */}
+      <AlertDialog open={!!deletingStepInfo} onOpenChange={(o) => !o && setDeletingStepInfo(null)}>
+        <AlertDialogContent className="rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Supprimer cette étape ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette étape sera définitivement supprimée du bloc.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-2xl">Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteExtrasStep} className="rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete extras block */}
+      <AlertDialog open={!!deletingBlockId} onOpenChange={(o) => !o && setDeletingBlockId(null)}>
+        <AlertDialogContent className="rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Supprimer ce bloc ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Le bloc et toutes ses étapes seront définitivement supprimés.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-2xl">Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteBlock} className="rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -1056,7 +1147,7 @@ function RoutinesContent() {
                         </p>
                       )}
                       <p className="mt-1 text-xs text-muted-foreground">
-                        AM : {t.am.length} · PM : {t.pm.length} · Bonus : {(t.extras ?? []).length}
+                        AM : {t.am.length} · PM : {t.pm.length} · Blocs bonus : {(t.extras ?? []).length}
                       </p>
                     </button>
                   </li>
@@ -1122,7 +1213,7 @@ function RoutinesContent() {
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              AM : {routine?.am.length ?? 0} étape{(routine?.am.length ?? 0) !== 1 ? "s" : ""} · PM : {routine?.pm.length ?? 0} étape{(routine?.pm.length ?? 0) !== 1 ? "s" : ""} · Bonus : {routine?.extras.length ?? 0} étape{(routine?.extras.length ?? 0) !== 1 ? "s" : ""}
+              AM : {routine?.am.length ?? 0} étape{(routine?.am.length ?? 0) !== 1 ? "s" : ""} · PM : {routine?.pm.length ?? 0} étape{(routine?.pm.length ?? 0) !== 1 ? "s" : ""} · Blocs bonus : {routine?.extras.length ?? 0}
             </p>
           </div>
           <DialogFooter>

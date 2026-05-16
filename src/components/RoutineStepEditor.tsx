@@ -39,6 +39,12 @@ export type RoutineStep = {
   purchaseUrl?: string;
 };
 
+export type ExtraBlock = {
+  id: string;
+  name: string;
+  steps: RoutineStep[];
+};
+
 export type StepSaveData = {
   category: string;
   product: string;

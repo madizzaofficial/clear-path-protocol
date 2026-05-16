@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AdminShell } from "@/components/AdminShell";
 import { SortableStep, StepDialog } from "@/components/RoutineStepEditor";
-import type { RoutineStep } from "@/components/RoutineStepEditor";
+import type { RoutineStep, ExtraBlock } from "@/components/RoutineStepEditor";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, doc, getDocs, getDoc, setDoc } from "firebase/firestore";
@@ -40,7 +40,8 @@ import {
   Sun,
   Moon,
   Zap,
-  Check,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { CATEGORIES } from "@/lib/skincare-categories";
 
@@ -52,7 +53,7 @@ type RoutineTemplate = {
   description?: string;
   am: RoutineStep[];
   pm: RoutineStep[];
-  extras: RoutineStep[];
+  extras: ExtraBlock[];
   createdAt: number;
   updatedAt: number;
 };
@@ -97,7 +98,7 @@ function TemplateEditorContent() {
   const [template, setTemplate] = useState<RoutineTemplate | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [activeTab, setActiveTab] = useState<"am" | "pm" | "extras">("am");
+  const [activeTab, setActiveTab] = useState<"am" | "pm">("am");
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
 
@@ -107,6 +108,12 @@ function TemplateEditorContent() {
   const [editingStep, setEditingStep] = useState<RoutineStep | null>(null);
   const [isNewStep, setIsNewStep] = useState(false);
   const [deletingStepId, setDeletingStepId] = useState<string | null>(null);
+
+  const [editingExtrasBlockId, setEditingExtrasBlockId] = useState<string | null>(null);
+  const [deletingStepInfo, setDeletingStepInfo] = useState<{ blockId: string; stepId: string } | null>(null);
+  const [deletingBlockId, setDeletingBlockId] = useState<string | null>(null);
+  const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
+  const [editingBlockName, setEditingBlockName] = useState("");
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -162,11 +169,11 @@ function TemplateEditorContent() {
     }
   }
 
-  function handleStepDragEnd(tab: "am" | "pm" | "extras", event: DragEndEvent) {
+  function handleStepDragEnd(tab: "am" | "pm", event: DragEndEvent) {
     if (!template) return;
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const steps = tab === "am" ? template.am : tab === "pm" ? template.pm : template.extras;
+    const steps = tab === "am" ? template.am : template.pm;
     const from = steps.findIndex((s) => s.id === active.id);
     const to = steps.findIndex((s) => s.id === over.id);
     const reordered = arrayMove(steps, from, to).map((s, i) => ({ ...s, order: i }));
@@ -182,19 +189,25 @@ function TemplateEditorContent() {
     purchaseUrl?: string;
   }) {
     if (!template) return;
-    const steps = activeTab === "am" ? template.am : activeTab === "pm" ? template.pm : template.extras;
     let updated: RoutineTemplate;
-    if (isNewStep) {
-      const newStep: RoutineStep = { id: `s-${Date.now()}`, order: steps.length, ...data };
-      updated = { ...template, [activeTab]: [...steps, newStep] };
-    } else if (editingStep) {
-      updated = {
-        ...template,
-        [activeTab]: steps.map((s) => (s.id === editingStep.id ? { ...s, ...data } : s)),
-      };
-    } else return;
+    if (editingExtrasBlockId !== null) {
+      const block = template.extras.find((b) => b.id === editingExtrasBlockId);
+      if (!block) return;
+      const newSteps = isNewStep
+        ? [...block.steps, { id: `s-${Date.now()}`, order: block.steps.length, ...data }]
+        : block.steps.map((s) => (s.id === editingStep?.id ? { ...s, ...data } : s));
+      updated = { ...template, extras: template.extras.map((b) => (b.id === editingExtrasBlockId ? { ...b, steps: newSteps } : b)) };
+    } else {
+      const steps = activeTab === "am" ? template.am : template.pm;
+      if (isNewStep) {
+        updated = { ...template, [activeTab]: [...steps, { id: `s-${Date.now()}`, order: steps.length, ...data }] };
+      } else if (editingStep) {
+        updated = { ...template, [activeTab]: steps.map((s) => (s.id === editingStep.id ? { ...s, ...data } : s)) };
+      } else return;
+    }
     setTemplate(updated);
     setEditingStep(null);
+    setEditingExtrasBlockId(null);
   }
 
   async function handleSaveToCatalog(data: {
@@ -231,14 +244,44 @@ function TemplateEditorContent() {
 
   function handleDeleteStep() {
     if (!template || !deletingStepId) return;
-    const steps = (activeTab === "am" ? template.am : activeTab === "pm" ? template.pm : template.extras)
+    const steps = (activeTab === "am" ? template.am : template.pm)
       .filter((s) => s.id !== deletingStepId)
       .map((s, i) => ({ ...s, order: i }));
     setTemplate({ ...template, [activeTab]: steps });
     setDeletingStepId(null);
   }
 
-  const currentSteps = template ? (activeTab === "am" ? template.am : activeTab === "pm" ? template.pm : template.extras) : [];
+  function handleDeleteExtrasStep() {
+    if (!template || !deletingStepInfo) return;
+    const { blockId, stepId } = deletingStepInfo;
+    const block = template.extras.find((b) => b.id === blockId);
+    if (!block) { setDeletingStepInfo(null); return; }
+    const steps = block.steps.filter((s) => s.id !== stepId).map((s, i) => ({ ...s, order: i }));
+    setTemplate({ ...template, extras: template.extras.map((b) => (b.id === blockId ? { ...b, steps } : b)) });
+    setDeletingStepInfo(null);
+  }
+
+  function handleDeleteBlock() {
+    if (!template || !deletingBlockId) return;
+    setTemplate({ ...template, extras: template.extras.filter((b) => b.id !== deletingBlockId) });
+    setDeletingBlockId(null);
+  }
+
+  function addExtrasBlock() {
+    if (!template) return;
+    const newBlock: ExtraBlock = { id: `b-${Date.now()}`, name: "En cas de…", steps: [] };
+    setTemplate({ ...template, extras: [...template.extras, newBlock] });
+    setEditingBlockId(newBlock.id);
+    setEditingBlockName(newBlock.name);
+  }
+
+  function saveBlockName(blockId: string) {
+    if (!template || !editingBlockName.trim()) { setEditingBlockId(null); return; }
+    setTemplate({ ...template, extras: template.extras.map((b) => (b.id === blockId ? { ...b, name: editingBlockName.trim() } : b)) });
+    setEditingBlockId(null);
+  }
+
+  const currentSteps = template ? (activeTab === "am" ? template.am : template.pm) : [];
 
   if (loading) {
     return (
@@ -289,16 +332,10 @@ function TemplateEditorContent() {
           </div>
         </div>
 
-        {/* AM / PM / Extras tabs */}
+        {/* AM / PM tabs */}
         <div className="mb-4 flex gap-2 rounded-2xl bg-muted p-1.5">
-          {(["am", "pm", "extras"] as const).map((tab) => {
-            const count = template
-              ? tab === "am"
-                ? template.am.length
-                : tab === "pm"
-                ? template.pm.length
-                : template.extras.length
-              : 0;
+          {(["am", "pm"] as const).map((tab) => {
+            const count = template ? (tab === "am" ? template.am.length : template.pm.length) : 0;
             const isActive = activeTab === tab;
             return (
               <button
@@ -308,39 +345,25 @@ function TemplateEditorContent() {
                   isActive ? "bg-card shadow-soft text-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {tab === "am" ? <Sun className="h-4 w-4" /> : tab === "pm" ? <Moon className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
-                {tab === "am" ? "Matin" : tab === "pm" ? "Soir" : "En cas de"}
-                <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-semibold text-primary">
-                  {count}
-                </span>
+                {tab === "am" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {tab === "am" ? "Matin" : "Soir"}
+                <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-semibold text-primary">{count}</span>
               </button>
             );
           })}
         </div>
 
         {/* Steps list */}
-        <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
+        <div className="mb-4 overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
           {currentSteps.length === 0 ? (
-            <p className="px-6 py-8 text-center text-sm text-muted-foreground">
-              Aucune étape — ajoutez la première ci-dessous.
-            </p>
+            <p className="px-6 py-8 text-center text-sm text-muted-foreground">Aucune étape — ajoutez la première ci-dessous.</p>
           ) : (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={(e) => handleStepDragEnd(activeTab, e)}
-            >
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleStepDragEnd(activeTab, e)}>
               <SortableContext items={currentSteps.map((s) => s.id)} strategy={verticalListSortingStrategy}>
                 <ul className="divide-y divide-border/40">
                   {currentSteps.map((step, idx) => (
-                    <SortableStep
-                      key={step.id}
-                      step={step}
-                      idx={idx}
-                      onEdit={() => {
-                        setEditingStep(step);
-                        setIsNewStep(false);
-                      }}
+                    <SortableStep key={step.id} step={step} idx={idx}
+                      onEdit={() => { setEditingStep(step); setIsNewStep(false); }}
                       onDelete={() => setDeletingStepId(step.id)}
                     />
                   ))}
@@ -350,16 +373,88 @@ function TemplateEditorContent() {
           )}
           <div className={`p-4 ${currentSteps.length > 0 ? "border-t border-border/40" : ""}`}>
             <button
-              onClick={() => {
-                setEditingStep({ id: "", order: currentSteps.length, category: CATEGORIES[0], product: "", instructions: "" });
-                setIsNewStep(true);
-              }}
+              onClick={() => { setEditingStep({ id: "", order: currentSteps.length, category: CATEGORIES[0], product: "", instructions: "" }); setIsNewStep(true); }}
               className="flex items-center gap-2 rounded-2xl border border-dashed border-border px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary-soft/30 hover:text-foreground"
             >
               <Plus className="h-4 w-4" /> Ajouter une étape
             </button>
           </div>
         </div>
+
+        {/* ── En cas de (named blocks) ─────────────────────────── */}
+        {template && (
+          <div className="mb-4 space-y-3">
+            <div className="flex items-center gap-2 px-1">
+              <Zap className="h-4 w-4 text-yellow-500" />
+              <span className="text-sm font-semibold">En cas de…</span>
+              <span className="text-xs text-muted-foreground">Conseils situationnels — optionnel</span>
+            </div>
+
+            {template.extras.map((block) => (
+              <div key={block.id} className="overflow-hidden rounded-3xl border border-yellow-200/60 bg-card shadow-soft dark:border-yellow-900/30">
+                <div className="flex items-center gap-2 border-b border-yellow-100/60 bg-yellow-50/40 px-5 py-3 dark:border-yellow-900/20 dark:bg-yellow-950/10">
+                  {editingBlockId === block.id ? (
+                    <input
+                      autoFocus
+                      value={editingBlockName}
+                      onChange={(e) => setEditingBlockName(e.target.value)}
+                      onBlur={() => saveBlockName(block.id)}
+                      onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); if (e.key === "Escape") setEditingBlockId(null); }}
+                      className="flex-1 rounded-xl border border-yellow-300/60 bg-white/60 px-3 py-1 text-sm font-semibold outline-none focus:ring-2 focus:ring-yellow-400/30 dark:bg-yellow-900/20"
+                    />
+                  ) : (
+                    <button onClick={() => { setEditingBlockId(block.id); setEditingBlockName(block.name); }} className="flex flex-1 items-center gap-2 text-left">
+                      <span className="text-sm font-semibold">{block.name}</span>
+                      <Pencil className="h-3 w-3 text-muted-foreground opacity-60" />
+                    </button>
+                  )}
+                  <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-semibold text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400">{block.steps.length}</span>
+                  <button onClick={() => setDeletingBlockId(block.id)} className="flex h-7 w-7 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+
+                {block.steps.length > 0 && (
+                  <ul className="divide-y divide-border/40">
+                    {block.steps.map((step, idx) => (
+                      <li key={step.id} className="flex items-center gap-3 px-5 py-3">
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-yellow-100 text-[10px] font-semibold text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400">{idx + 1}</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium">{step.product}</p>
+                          <p className="text-xs text-muted-foreground">{step.category}</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button onClick={() => { setEditingStep(step); setIsNewStep(false); setEditingExtrasBlockId(block.id); }} className="flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button onClick={() => setDeletingStepInfo({ blockId: block.id, stepId: step.id })} className="flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                <div className={`p-4 ${block.steps.length > 0 ? "border-t border-border/40" : ""}`}>
+                  <button
+                    onClick={() => { setEditingStep({ id: "", order: block.steps.length, category: CATEGORIES[0], product: "", instructions: "" }); setIsNewStep(true); setEditingExtrasBlockId(block.id); }}
+                    className="flex items-center gap-2 rounded-2xl border border-dashed border-yellow-300/60 px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:border-yellow-400 hover:bg-yellow-50/60 hover:text-foreground dark:border-yellow-800/40 dark:hover:bg-yellow-950/20"
+                  >
+                    <Plus className="h-4 w-4" /> Ajouter une étape
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            <button
+              onClick={addExtrasBlock}
+              className="flex w-full items-center justify-center gap-2 rounded-3xl border border-dashed border-yellow-300/60 py-4 text-sm font-medium text-muted-foreground transition-colors hover:border-yellow-400 hover:bg-yellow-50/40 hover:text-foreground dark:border-yellow-800/40 dark:hover:bg-yellow-950/20"
+            >
+              <Plus className="h-4 w-4" /> Ajouter un bloc « En cas de »
+            </button>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="mt-4 flex justify-end">
@@ -378,7 +473,7 @@ function TemplateEditorContent() {
       <StepDialog
         step={editingStep}
         isNew={isNewStep}
-        onClose={() => setEditingStep(null)}
+        onClose={() => { setEditingStep(null); setEditingExtrasBlockId(null); }}
         onSave={handleSaveStep}
         saving={false}
         catalogProducts={catalogProducts}
@@ -386,7 +481,7 @@ function TemplateEditorContent() {
         savingToCatalog={savingToCatalog}
       />
 
-      {/* Delete confirmation */}
+      {/* Delete AM/PM step */}
       <AlertDialog open={!!deletingStepId} onOpenChange={(o) => !o && setDeletingStepId(null)}>
         <AlertDialogContent className="rounded-3xl">
           <AlertDialogHeader>
@@ -395,12 +490,35 @@ function TemplateEditorContent() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-2xl">Annuler</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteStep}
-              className="rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Supprimer
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDeleteStep} className="rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90">Supprimer</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete extras block step */}
+      <AlertDialog open={!!deletingStepInfo} onOpenChange={(o) => !o && setDeletingStepInfo(null)}>
+        <AlertDialogContent className="rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Supprimer cette étape ?</AlertDialogTitle>
+            <AlertDialogDescription>Cette étape sera supprimée du bloc.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-2xl">Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteExtrasStep} className="rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90">Supprimer</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete extras block */}
+      <AlertDialog open={!!deletingBlockId} onOpenChange={(o) => !o && setDeletingBlockId(null)}>
+        <AlertDialogContent className="rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Supprimer ce bloc ?</AlertDialogTitle>
+            <AlertDialogDescription>Le bloc et toutes ses étapes seront définitivement supprimés.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-2xl">Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteBlock} className="rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90">Supprimer</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
