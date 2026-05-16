@@ -151,7 +151,7 @@ function AdminsPage() {
 
   return (
     <AdminShell>
-      <main className="mx-auto max-w-3xl px-6 pb-24 pt-8 md:pt-10">
+      <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-10">
         <header className="mb-8">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Paramètres</p>
           <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight">Gestion des admins</h1>

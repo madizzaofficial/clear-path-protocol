@@ -5,7 +5,6 @@ import { db } from "@/lib/firebase";
 import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
-  ArrowLeft,
   Loader2,
   LayoutTemplate,
   Trash2,
@@ -105,18 +104,9 @@ function TemplatesContent() {
 
   return (
     <AdminShell>
-      <main className="mx-auto max-w-4xl px-6 pb-24 pt-8 md:pt-12">
+      <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
         {/* Header */}
         <header className="mb-8">
-          <div className="mb-6">
-            <Link
-              to="/admin/routines"
-              search={{ uid: "" }}
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <ArrowLeft className="h-4 w-4" /> Retour aux routines
-            </Link>
-          </div>
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>

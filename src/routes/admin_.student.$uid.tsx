@@ -255,7 +255,7 @@ function StudentPage() {
 
   return (
     <AppShell>
-      <main className="mx-auto max-w-5xl px-6 pb-24 pt-8 md:pt-10">
+      <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-10">
         {/* Back */}
         <Link
           to="/admin"

@@ -249,7 +249,7 @@ function TemplateEditorContent() {
 
   return (
     <AdminShell>
-      <main className="mx-auto max-w-3xl px-6 pb-24 pt-8 md:pt-12">
+      <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
         {/* Back link */}
         <div className="mb-6">
           <Link
