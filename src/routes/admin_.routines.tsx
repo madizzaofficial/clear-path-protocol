@@ -902,7 +902,8 @@ function RoutinesContent() {
                           <div className="flex items-center gap-2 border-b border-yellow-100/60 bg-yellow-50/40 px-5 py-3 dark:border-yellow-900/20 dark:bg-yellow-950/10">
                             {editingBlockId === block.id ? (
                               <input
-                                autoFocus
+
+                                autoComplete="off"                                autoFocus
                                 value={editingBlockName}
                                 onChange={(e) => setEditingBlockName(e.target.value)}
                                 onBlur={() => saveBlockName(block.id)}
@@ -1120,7 +1121,8 @@ function RoutinesContent() {
           </DialogHeader>
           <div className="px-6 py-3 border-b border-border/60">
             <input
-              type="text"
+
+              autoComplete="off"              type="text"
               value={templateSearch}
               onChange={(e) => setTemplateSearch(e.target.value)}
               placeholder="Rechercher un modèle…"
@@ -1193,7 +1195,8 @@ function RoutinesContent() {
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Nom du modèle *</label>
               <input
-                type="text"
+
+                autoComplete="off"                type="text"
                 value={templateName}
                 onChange={(e) => setTemplateName(e.target.value)}
                 placeholder="ex. Peau grasse légère, Peau sensible sévère…"
@@ -1205,7 +1208,8 @@ function RoutinesContent() {
                 Description <span className="text-muted-foreground font-normal">(optionnel)</span>
               </label>
               <textarea
-                value={templateDesc}
+
+                autoComplete="off"                value={templateDesc}
                 onChange={(e) => setTemplateDesc(e.target.value)}
                 placeholder="Indications, profil type…"
                 rows={3}

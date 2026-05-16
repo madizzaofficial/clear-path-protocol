@@ -412,7 +412,8 @@ function AdminPage() {
                 </button>
               </div>
               <textarea
-                value={quickNoteText}
+
+                autoComplete="off"                value={quickNoteText}
                 onChange={(e) => setQuickNoteText(e.target.value)}
                 rows={4}
                 className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"

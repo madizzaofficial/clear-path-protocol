@@ -311,7 +311,8 @@ function TemplateEditorContent() {
           <div>
             <label className="mb-1.5 block text-sm font-medium">Nom du modèle *</label>
             <input
-              type="text"
+
+              autoComplete="off"              type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="ex. Peau grasse légère, Peau sensible sévère…"
@@ -323,7 +324,8 @@ function TemplateEditorContent() {
               Description <span className="font-normal text-muted-foreground">(optionnel)</span>
             </label>
             <textarea
-              value={description}
+
+              autoComplete="off"              value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Indications, profil type…"
               rows={2}
@@ -395,7 +397,8 @@ function TemplateEditorContent() {
                 <div className="flex items-center gap-2 border-b border-yellow-100/60 bg-yellow-50/40 px-5 py-3 dark:border-yellow-900/20 dark:bg-yellow-950/10">
                   {editingBlockId === block.id ? (
                     <input
-                      autoFocus
+
+                      autoComplete="off"                      autoFocus
                       value={editingBlockName}
                       onChange={(e) => setEditingBlockName(e.target.value)}
                       onBlur={() => saveBlockName(block.id)}

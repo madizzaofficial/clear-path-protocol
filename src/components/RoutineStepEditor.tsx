@@ -306,7 +306,8 @@ export function StepDialog({
             <div>
               <label className="mb-2 block text-sm font-medium text-foreground/80">Produit</label>
               <input
-                value={product}
+
+                autoComplete="off"                value={product}
                 onChange={(e) => setProduct(e.target.value)}
                 placeholder="ex. CeraVe Hydrating Cleanser"
                 className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
@@ -318,7 +319,8 @@ export function StepDialog({
                 <span className="font-normal text-muted-foreground">(ce que fait le produit, optionnelle)</span>
               </label>
               <textarea
-                value={description}
+
+                autoComplete="off"                value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={2}
                 placeholder="ex. Nettoyant doux hydratant, idéal pour les peaux sensibles…"
@@ -328,7 +330,8 @@ export function StepDialog({
             <div>
               <label className="mb-2 block text-sm font-medium text-foreground/80">Instructions</label>
               <textarea
-                value={instructions}
+
+                autoComplete="off"                value={instructions}
                 onChange={(e) => setInstructions(e.target.value)}
                 placeholder="ex. Appliquer sur peau humide, masser doucement 30 s puis rincer."
                 rows={3}
@@ -366,7 +369,8 @@ export function StepDialog({
                     <Upload className="h-4 w-4 shrink-0" />
                     Choisir une image
                     <input
-                      type="file"
+
+                      autoComplete="off"                      type="file"
                       accept="image/*"
                       className="sr-only"
                       onChange={(e) => {
@@ -385,7 +389,8 @@ export function StepDialog({
                 <span className="font-normal text-muted-foreground">(URL optionnelle)</span>
               </label>
               <input
-                value={purchaseUrl}
+
+                autoComplete="off"                value={purchaseUrl}
                 onChange={(e) => setPurchaseUrl(e.target.value)}
                 placeholder="https://..."
                 className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"

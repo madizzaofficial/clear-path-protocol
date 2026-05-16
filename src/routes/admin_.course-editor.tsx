@@ -741,7 +741,8 @@ function ChapterDialog({
           <div>
             <label className="mb-2 block text-sm font-medium text-foreground/80">Title</label>
             <input
-              value={title}
+
+              autoComplete="off"              value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Chapter title"
               className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
@@ -750,7 +751,8 @@ function ChapterDialog({
           <div>
             <label className="mb-2 block text-sm font-medium text-foreground/80">Description</label>
             <textarea
-              value={description}
+
+              autoComplete="off"              value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Brief description of this chapter"
               rows={3}
@@ -822,7 +824,8 @@ function LessonDialog({
           <div>
             <label className="mb-2 block text-sm font-medium text-foreground/80">Title</label>
             <input
-              value={title}
+
+              autoComplete="off"              value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Lesson title"
               className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
@@ -832,7 +835,8 @@ function LessonDialog({
           <div>
             <label className="mb-2 block text-sm font-medium text-foreground/80">Duration</label>
             <input
-              value={duration}
+
+              autoComplete="off"              value={duration}
               onChange={(e) => setDuration(e.target.value)}
               placeholder="e.g. 9 min"
               className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
@@ -844,7 +848,8 @@ function LessonDialog({
             <div className="relative">
               <Video className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
-                value={videoUrl}
+
+                autoComplete="off"                value={videoUrl}
                 onChange={(e) => setVideoUrl(e.target.value)}
                 placeholder="https://www.youtube.com/watch?v=…"
                 className="h-11 w-full rounded-2xl border border-border bg-background pl-11 pr-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
@@ -856,7 +861,8 @@ function LessonDialog({
           <div>
             <label className="mb-2 block text-sm font-medium text-foreground/80">Summary</label>
             <textarea
-              value={summary}
+
+              autoComplete="off"              value={summary}
               onChange={(e) => setSummary(e.target.value)}
               placeholder="What students will learn in this lesson"
               rows={3}

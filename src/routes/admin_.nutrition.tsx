@@ -384,13 +384,15 @@ function NutritionContent() {
                   <div className="p-5">
                     <div className="flex gap-2">
                       <input
-                        value={newReminderEmoji}
+
+                        autoComplete="off"                        value={newReminderEmoji}
                         onChange={(e) => setNewReminderEmoji(e.target.value)}
                         placeholder="💡"
                         className="h-11 w-14 rounded-2xl border border-border bg-background px-3 text-center text-lg outline-none focus:border-primary"
                       />
                       <input
-                        value={newReminderText}
+
+                        autoComplete="off"                        value={newReminderText}
                         onChange={(e) => setNewReminderText(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && addReminder()}
                         placeholder="ex. Fais attention à ton alimentation…"
@@ -430,12 +432,14 @@ function AddItemRow({
   return (
     <div className="flex gap-2">
       <input
-        value={emoji}
+
+        autoComplete="off"        value={emoji}
         onChange={(e) => onEmojiChange(e.target.value)}
         className="h-11 w-14 rounded-2xl border border-border bg-background px-3 text-center text-lg outline-none focus:border-primary"
       />
       <input
-        value={label}
+
+        autoComplete="off"        value={label}
         onChange={(e) => onLabelChange(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && onAdd()}
         placeholder={placeholder}

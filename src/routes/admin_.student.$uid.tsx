@@ -411,7 +411,8 @@ function StudentPage() {
                           return (
                             <label key={k} className="flex cursor-pointer items-center gap-2">
                               <input
-                                type="checkbox"
+
+                                autoComplete="off"                                type="checkbox"
                                 checked={checked}
                                 onChange={() =>
                                   setIntakeDraft((d) => ({
@@ -433,7 +434,8 @@ function StudentPage() {
                     {/* Routine actuelle */}
                     <IntakeSection title="Routine actuelle">
                       <input
-                        value={intakeDraft.currentRoutine ?? ""}
+
+                        autoComplete="off"                        value={intakeDraft.currentRoutine ?? ""}
                         onChange={(e) => setIntakeDraft((d) => ({ ...d, currentRoutine: e.target.value }))}
                         className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
                         placeholder="Ex. Nettoyant La Roche-Posay, hydratant…"
@@ -443,7 +445,8 @@ function StudentPage() {
                     {/* Objectif */}
                     <IntakeSection title="Objectif principal">
                       <textarea
-                        value={intakeDraft.mainGoal ?? ""}
+
+                        autoComplete="off"                        value={intakeDraft.mainGoal ?? ""}
                         onChange={(e) => setIntakeDraft((d) => ({ ...d, mainGoal: e.target.value }))}
                         rows={3}
                         className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
@@ -732,7 +735,8 @@ function StudentPage() {
                 Envoyer une note
               </p>
               <textarea
-                value={noteInput}
+
+                autoComplete="off"                value={noteInput}
                 onChange={(e) => setNoteInput(e.target.value)}
                 placeholder="Écris ton message pour l'élève…"
                 rows={3}
