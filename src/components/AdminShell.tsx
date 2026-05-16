@@ -37,7 +37,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                   }`}
                 >
                   <tab.icon className="h-5 w-5 shrink-0 lg:h-4 lg:w-4" />
-                  <span className="hidden lg:inline">{tab.label}</span>
+                  <span className="hidden whitespace-nowrap lg:inline">{tab.label}</span>
                 </Link>
               );
             })}
