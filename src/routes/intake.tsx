@@ -230,9 +230,7 @@ function IntakePage() {
         <div className="mx-auto max-w-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-primary">
-                <img src="/logo_clear.png" alt="Protocole Clear" className="h-full w-full rounded-full object-cover" />
-              </div>
+              <img src="/logo_clear.png" alt="Protocole Clear" className="h-7 w-7 rounded-full object-cover" />
               <span className="font-display text-base font-semibold">Protocole Clear</span>
             </div>
             <span className="text-xs text-muted-foreground">{step + 1} / {STEPS.length}</span>

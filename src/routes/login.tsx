@@ -124,9 +124,7 @@ function LoginPage() {
         <div className="w-full max-w-md">
           <div className="mb-10 lg:hidden">
             <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary shadow-soft">
-                <img src="/logo_clear.png" alt="Protocole Clear" className="h-full w-full rounded-full object-cover" />
-              </div>
+              <img src="/logo_clear.png" alt="Protocole Clear" className="h-8 w-8 rounded-full object-cover" />
               <span className="font-display text-xl font-semibold">Protocole Clear</span>
             </Link>
           </div>
