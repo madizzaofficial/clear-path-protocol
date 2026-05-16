@@ -314,12 +314,12 @@ function StudentPage() {
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap ${
+                className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-2 py-2.5 text-sm font-medium transition-colors sm:px-4 ${
                   active ? "bg-background text-foreground shadow-soft" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <Icon className="h-4 w-4" />
-                {t.label}
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline whitespace-nowrap">{t.label}</span>
               </button>
             );
           })}

@@ -43,6 +43,8 @@ import {
   Upload,
   X,
   Package,
+  LayoutTemplate,
+  BookmarkPlus,
 } from "lucide-react";
 import {
   Dialog,
@@ -109,13 +111,32 @@ type IntakeAnswers = {
 };
 
 const SKIN_TYPE_LABELS: Record<string, string> = {
-  normale: "Normale", grasse: "Grasse", seche: "Sèche", mixte: "Mixte", sensible: "Sensible",
+  normale: "Normale",
+  grasse: "Grasse",
+  seche: "Sèche",
+  mixte: "Mixte",
+  sensible: "Sensible",
 };
 const ACNE_TYPE_LABELS: Record<string, string> = {
-  comedons: "Comédons", papules: "Papules / Pustules", microkystes: "Microkystes", kystes: "Kystes / Nodules",
+  comedons: "Comédons",
+  papules: "Papules / Pustules",
+  microkystes: "Microkystes",
+  kystes: "Kystes / Nodules",
 };
 const INTENSITY_LABELS: Record<string, string> = {
-  legere: "Légère", moderee: "Modérée", severe: "Sévère",
+  legere: "Légère",
+  moderee: "Modérée",
+  severe: "Sévère",
+};
+
+type RoutineTemplate = {
+  id: string;
+  name: string;
+  description?: string;
+  am: RoutineStep[];
+  pm: RoutineStep[];
+  createdAt: number;
+  updatedAt: number;
 };
 
 // ─── Server function ──────────────────────────────────────────────────────────
@@ -138,9 +159,14 @@ function validatePayload(data: unknown): SendEmailPayload {
   for (const step of [...d.am, ...d.pm]) {
     if (typeof step !== "object" || step === null) throw new Error("Étape invalide.");
     const s = step as Record<string, unknown>;
-    if (typeof s.category !== "string" || s.category.length > 100) throw new Error("Catégorie invalide.");
-    if (typeof s.product !== "string" || s.product.length > 200) throw new Error("Nom produit trop long.");
-    if (s.instructions !== undefined && (typeof s.instructions !== "string" || s.instructions.length > 1000))
+    if (typeof s.category !== "string" || s.category.length > 100)
+      throw new Error("Catégorie invalide.");
+    if (typeof s.product !== "string" || s.product.length > 200)
+      throw new Error("Nom produit trop long.");
+    if (
+      s.instructions !== undefined &&
+      (typeof s.instructions !== "string" || s.instructions.length > 1000)
+    )
       throw new Error("Instructions trop longues.");
   }
 
@@ -177,8 +203,7 @@ const sendRoutineEmailFn = createServerFn({ method: "POST" })
     }
 
     return { success: true };
-  }
-);
+  });
 
 const triggerRoutineEventFn = createServerFn({ method: "POST" })
   .inputValidator((d: { uid: string; email: string; firstName: string }) => d)
@@ -199,11 +224,7 @@ function escapeHtml(str: string): string {
     .replace(/'/g, "&#039;");
 }
 
-function buildEmailHtml(
-  firstName: string,
-  am: RoutineStep[],
-  pm: RoutineStep[]
-): string {
+function buildEmailHtml(firstName: string, am: RoutineStep[], pm: RoutineStep[]): string {
   const stepBlock = (steps: RoutineStep[]) =>
     steps.length === 0
       ? `<p style="color:#999;font-size:14px;font-style:italic;margin:0;">Aucune étape configurée.</p>`
@@ -219,7 +240,7 @@ function buildEmailHtml(
     <p style="color:#1a1a1a;font-weight:600;margin:0 0 3px;font-size:14px;">${escapeHtml(s.product)}</p>
     <p style="color:#888;margin:0;font-size:13px;line-height:1.55;">${escapeHtml(s.instructions)}</p>
   </div>
-</div>`
+</div>`,
           )
           .join("");
 
@@ -348,25 +369,37 @@ function RoutinesContent() {
   const [catalogProducts, setCatalogProducts] = useState<CatalogProduct[]>([]);
   const [savingToCatalog, setSavingToCatalog] = useState(false);
 
-  const [routineStatusMap, setRoutineStatusMap] = useState<Map<string, "sent" | "draft">>(new Map());
+  const [routineStatusMap, setRoutineStatusMap] = useState<Map<string, "sent" | "draft">>(
+    new Map(),
+  );
   const [intake, setIntake] = useState<IntakeAnswers | null>(null);
   const [loadingIntake, setLoadingIntake] = useState(false);
+
+  const [templates, setTemplates] = useState<RoutineTemplate[]>([]);
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false);
+  const [templateName, setTemplateName] = useState("");
+  const [templateDesc, setTemplateDesc] = useState("");
+  const [savingTemplate, setSavingTemplate] = useState(false);
+  const [templateSearch, setTemplateSearch] = useState("");
+  const [pendingTemplate, setPendingTemplate] = useState<RoutineTemplate | null>(null);
 
   const { uid: preselectedUid } = Route.useSearch();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
   useEffect(() => {
     async function loadUsers() {
       setLoadingUsers(true);
       try {
-        const [usersSnap, catalogSnap, routinesSnap] = await Promise.all([
+        const [usersSnap, catalogSnap, routinesSnap, templatesSnap] = await Promise.all([
           getDocs(collection(db, "users")),
           getDocs(collection(db, "admin_products")),
           getDocs(collection(db, "routines")),
+          getDocs(collection(db, "routine_templates")),
         ]);
         const fetched = usersSnap.docs.map((d) => d.data() as UserDoc);
         setUsers(fetched);
@@ -377,6 +410,7 @@ function RoutinesContent() {
           if (s) sMap.set(d.id, s);
         });
         setRoutineStatusMap(sMap);
+        setTemplates(templatesSnap.docs.map((d) => d.data() as RoutineTemplate));
 
         // Auto-select if uid was passed via search param
         if (preselectedUid) {
@@ -388,7 +422,7 @@ function RoutinesContent() {
       }
     }
     loadUsers();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preselectedUid]);
 
   async function selectUser(u: UserDoc) {
@@ -407,7 +441,7 @@ function RoutinesContent() {
       setRoutine(
         routineSnap.exists()
           ? (routineSnap.data() as StudentRoutine)
-          : { uid: u.uid, am: [], pm: [], updatedAt: Date.now(), sentAt: null, status: "draft" }
+          : { uid: u.uid, am: [], pm: [], updatedAt: Date.now(), sentAt: null, status: "draft" },
       );
       setIntake(intakeSnap.exists() ? (intakeSnap.data() as IntakeAnswers) : null);
     } finally {
@@ -444,7 +478,11 @@ function RoutinesContent() {
       // Save to Firestore first — always succeeds regardless of email
       await setDoc(doc(db, "routines", selectedUser.uid), JSON.parse(JSON.stringify(toSave)));
       setRoutine(toSave);
-      setRoutineStatusMap((prev) => { const next = new Map(prev); next.set(selectedUser.uid, "sent"); return next; });
+      setRoutineStatusMap((prev) => {
+        const next = new Map(prev);
+        next.set(selectedUser.uid, "sent");
+        return next;
+      });
 
       // Email + Inngest event — failure here doesn't roll back the save
       await sendRoutineEmailFn({
@@ -487,7 +525,13 @@ function RoutinesContent() {
     saveRoutine(updated);
   }
 
-  function handleSaveStep(data: { category: string; product: string; instructions: string; imageUrl?: string; purchaseUrl?: string }) {
+  function handleSaveStep(data: {
+    category: string;
+    product: string;
+    instructions: string;
+    imageUrl?: string;
+    purchaseUrl?: string;
+  }) {
     if (!routine) return;
     const steps = activeTab === "am" ? routine.am : routine.pm;
     let updated: StudentRoutine;
@@ -510,11 +554,20 @@ function RoutinesContent() {
     saveRoutine(updated);
   }
 
-  async function handleSaveToCatalog(data: { category: string; product: string; description?: string; instructions: string; imageUrl?: string; purchaseUrl?: string }) {
+  async function handleSaveToCatalog(data: {
+    category: string;
+    product: string;
+    description?: string;
+    instructions: string;
+    imageUrl?: string;
+    purchaseUrl?: string;
+  }) {
     setSavingToCatalog(true);
     try {
       const existing = catalogProducts.find(
-        (p) => p.name.toLowerCase() === data.product.trim().toLowerCase() && p.category === data.category
+        (p) =>
+          p.name.toLowerCase() === data.product.trim().toLowerCase() &&
+          p.category === data.category,
       );
       const id = existing?.id ?? crypto.randomUUID();
       const entry: CatalogProduct = {
@@ -530,10 +583,60 @@ function RoutinesContent() {
       };
       await setDoc(doc(db, "admin_products", id), entry);
       setCatalogProducts((prev) =>
-        existing ? prev.map((p) => (p.id === id ? entry : p)) : [...prev, entry]
+        existing ? prev.map((p) => (p.id === id ? entry : p)) : [...prev, entry],
       );
     } finally {
       setSavingToCatalog(false);
+    }
+  }
+
+  const filteredTemplates = useMemo(() => {
+    const q = templateSearch.trim().toLowerCase();
+    if (!q) return templates;
+    return templates.filter(
+      (t) => t.name.toLowerCase().includes(q) || (t.description ?? "").toLowerCase().includes(q),
+    );
+  }, [templates, templateSearch]);
+
+  function applyTemplate(t: RoutineTemplate) {
+    if (!routine) return;
+    const remap = (steps: RoutineStep[]) =>
+      steps.map((s, i) => ({ ...s, id: `s-${Date.now()}-${i}`, order: i }));
+    const updated: StudentRoutine = {
+      ...routine,
+      am: remap(t.am),
+      pm: remap(t.pm),
+      status: "draft",
+      sentAt: null,
+      updatedAt: Date.now(),
+    };
+    setRoutine(updated);
+    saveRoutine(updated);
+    setPendingTemplate(null);
+    setShowTemplatePicker(false);
+  }
+
+  async function saveAsTemplate() {
+    if (!routine || !templateName.trim()) return;
+    setSavingTemplate(true);
+    try {
+      const id = crypto.randomUUID();
+      const template: RoutineTemplate = {
+        id,
+        name: templateName.trim(),
+        description: templateDesc.trim() || undefined,
+        am: routine.am,
+        pm: routine.pm,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+      await setDoc(doc(db, "routine_templates", id), template);
+      setTemplates((prev) => [...prev, template]);
+      setShowSaveTemplate(false);
+      setTemplateName("");
+      setTemplateDesc("");
+    } finally {
+      setSavingTemplate(false);
     }
   }
 
@@ -634,6 +737,31 @@ function RoutinesContent() {
                 </div>
               </div>
 
+              {/* Template actions */}
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => {
+                    setTemplateSearch("");
+                    setShowTemplatePicker(true);
+                  }}
+                  disabled={!routine}
+                  className="flex items-center gap-2 rounded-2xl border border-border bg-card px-4 py-2 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-40"
+                >
+                  <LayoutTemplate className="h-4 w-4" /> Charger un modèle
+                </button>
+                <button
+                  onClick={() => {
+                    setTemplateName("");
+                    setTemplateDesc("");
+                    setShowSaveTemplate(true);
+                  }}
+                  disabled={!routine || (routine.am.length === 0 && routine.pm.length === 0)}
+                  className="flex items-center gap-2 rounded-2xl border border-border bg-card px-4 py-2 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-40"
+                >
+                  <BookmarkPlus className="h-4 w-4" /> Sauvegarder comme modèle
+                </button>
+              </div>
+
               {loadingRoutine ? (
                 <div className="flex items-center justify-center py-16">
                   <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -643,7 +771,11 @@ function RoutinesContent() {
                   {/* AM / PM tabs */}
                   <div className="flex gap-2 rounded-2xl bg-muted p-1.5">
                     {(["am", "pm"] as const).map((tab) => {
-                      const count = routine ? (tab === "am" ? routine.am.length : routine.pm.length) : 0;
+                      const count = routine
+                        ? tab === "am"
+                          ? routine.am.length
+                          : routine.pm.length
+                        : 0;
                       const isActive = activeTab === tab;
                       return (
                         <button
@@ -744,7 +876,8 @@ function RoutinesContent() {
                         exit={{ opacity: 0 }}
                         className="rounded-2xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive"
                       >
-                        Échec de l'envoi — {sendError ?? "vérifiez la configuration Resend et le domaine expéditeur."}
+                        Échec de l'envoi —{" "}
+                        {sendError ?? "vérifiez la configuration Resend et le domaine expéditeur."}
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -752,10 +885,7 @@ function RoutinesContent() {
                   {/* Actions */}
                   <div className="flex flex-wrap items-center justify-end gap-3">
                     <button
-                      onClick={() =>
-                        routine &&
-                        saveRoutine({ ...routine, updatedAt: Date.now() })
-                      }
+                      onClick={() => routine && saveRoutine({ ...routine, updatedAt: Date.now() })}
                       disabled={saving || !routine}
                       className="flex items-center gap-2 rounded-2xl border border-border bg-card px-5 py-3 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-40"
                     >
@@ -768,10 +898,7 @@ function RoutinesContent() {
                     </button>
                     <button
                       onClick={handleSendEmail}
-                      disabled={
-                        sending ||
-                        (routine?.am.length === 0 && routine?.pm.length === 0)
-                      }
+                      disabled={sending || (routine?.am.length === 0 && routine?.pm.length === 0)}
                       className="flex items-center gap-2 rounded-2xl bg-foreground px-5 py-3 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
                     >
                       {sending ? (
@@ -781,8 +908,7 @@ function RoutinesContent() {
                       ) : (
                         <>
                           <Send className="h-4 w-4" />
-                          Envoyer à{" "}
-                          {selectedUser.displayName?.split(" ")[0] ?? selectedUser.email}
+                          Envoyer à {selectedUser.displayName?.split(" ")[0] ?? selectedUser.email}
                         </>
                       )}
                     </button>
@@ -806,15 +932,10 @@ function RoutinesContent() {
         savingToCatalog={savingToCatalog}
       />
 
-      <AlertDialog
-        open={!!deletingStepId}
-        onOpenChange={(o) => !o && setDeletingStepId(null)}
-      >
+      <AlertDialog open={!!deletingStepId} onOpenChange={(o) => !o && setDeletingStepId(null)}>
         <AlertDialogContent className="rounded-3xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-display">
-              Supprimer cette étape ?
-            </AlertDialogTitle>
+            <AlertDialogTitle className="font-display">Supprimer cette étape ?</AlertDialogTitle>
             <AlertDialogDescription>
               Cette étape sera définitivement supprimée de la routine.
             </AlertDialogDescription>
@@ -830,6 +951,135 @@ function RoutinesContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Template picker */}
+      <Dialog open={showTemplatePicker} onOpenChange={setShowTemplatePicker}>
+        <DialogContent className="max-h-[80vh] overflow-hidden rounded-3xl flex flex-col gap-0 p-0 sm:max-w-lg">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b border-border/60">
+            <DialogTitle className="font-display">Charger un modèle</DialogTitle>
+          </DialogHeader>
+          <div className="px-6 py-3 border-b border-border/60">
+            <input
+              type="text"
+              value={templateSearch}
+              onChange={(e) => setTemplateSearch(e.target.value)}
+              placeholder="Rechercher un modèle…"
+              className="w-full rounded-xl border border-border bg-muted/40 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          <div className="overflow-y-auto flex-1 px-3 py-3">
+            {filteredTemplates.length === 0 ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                {templates.length === 0 ? "Aucun modèle sauvegardé." : "Aucun résultat."}
+              </p>
+            ) : (
+              <ul className="space-y-1">
+                {filteredTemplates.map((t) => (
+                  <li key={t.id}>
+                    <button
+                      onClick={() => setPendingTemplate(t)}
+                      className="w-full rounded-2xl px-4 py-3 text-left transition-colors hover:bg-muted"
+                    >
+                      <p className="font-medium text-sm">{t.name}</p>
+                      {t.description && (
+                        <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
+                          {t.description}
+                        </p>
+                      )}
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        AM : {t.am.length} étape{t.am.length !== 1 ? "s" : ""} · PM : {t.pm.length}{" "}
+                        étape{t.pm.length !== 1 ? "s" : ""}
+                      </p>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm apply template */}
+      <AlertDialog open={!!pendingTemplate} onOpenChange={(o) => !o && setPendingTemplate(null)}>
+        <AlertDialogContent className="rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">
+              Remplacer la routine actuelle ?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              La routine de {selectedUser?.displayName ?? selectedUser?.email ?? "cet élève"} sera
+              remplacée par le modèle <strong>«&nbsp;{pendingTemplate?.name}&nbsp;»</strong>. Elle
+              passera en brouillon.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-2xl">Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => pendingTemplate && applyTemplate(pendingTemplate)}
+              className="rounded-2xl"
+            >
+              Appliquer le modèle
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Save as template */}
+      <Dialog open={showSaveTemplate} onOpenChange={setShowSaveTemplate}>
+        <DialogContent className="rounded-3xl sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display">Sauvegarder comme modèle</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Nom du modèle *</label>
+              <input
+                type="text"
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+                placeholder="ex. Peau grasse légère, Peau sensible sévère…"
+                className="w-full rounded-xl border border-border bg-muted/40 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">
+                Description <span className="text-muted-foreground font-normal">(optionnel)</span>
+              </label>
+              <textarea
+                value={templateDesc}
+                onChange={(e) => setTemplateDesc(e.target.value)}
+                placeholder="Indications, profil type…"
+                rows={3}
+                className="w-full resize-none rounded-xl border border-border bg-muted/40 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              AM : {routine?.am.length ?? 0} étape{(routine?.am.length ?? 0) !== 1 ? "s" : ""} · PM
+              : {routine?.pm.length ?? 0} étape{(routine?.pm.length ?? 0) !== 1 ? "s" : ""}
+            </p>
+          </div>
+          <DialogFooter>
+            <button
+              onClick={() => setShowSaveTemplate(false)}
+              className="rounded-2xl border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
+            >
+              Annuler
+            </button>
+            <button
+              onClick={saveAsTemplate}
+              disabled={savingTemplate || !templateName.trim()}
+              className="flex items-center gap-2 rounded-2xl bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
+            >
+              {savingTemplate ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <BookmarkPlus className="h-4 w-4" />
+              )}
+              Créer le modèle
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminShell>
   );
 }
@@ -853,26 +1103,34 @@ function SkinProfilePanel({ intake, loading }: { intake: IntakeAnswers | null; l
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-2xl bg-muted/50 p-3">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Type</p>
+              <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                Type
+              </p>
               <p className="mt-1 text-sm font-semibold">
                 {SKIN_TYPE_LABELS[intake.skinType ?? ""] ?? intake.skinType ?? "—"}
               </p>
             </div>
-            <div className={`rounded-2xl p-3 ${
-              intake.intensity === "severe"
-                ? "bg-destructive/10"
-                : intake.intensity === "moderee"
-                ? "bg-orange-50"
-                : "bg-muted/50"
-            }`}>
-              <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Intensité</p>
-              <p className={`mt-1 text-sm font-semibold ${
+            <div
+              className={`rounded-2xl p-3 ${
                 intake.intensity === "severe"
-                  ? "text-destructive"
+                  ? "bg-destructive/10"
                   : intake.intensity === "moderee"
-                  ? "text-orange-600"
-                  : ""
-              }`}>
+                    ? "bg-orange-50"
+                    : "bg-muted/50"
+              }`}
+            >
+              <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                Intensité
+              </p>
+              <p
+                className={`mt-1 text-sm font-semibold ${
+                  intake.intensity === "severe"
+                    ? "text-destructive"
+                    : intake.intensity === "moderee"
+                      ? "text-orange-600"
+                      : ""
+                }`}
+              >
                 {INTENSITY_LABELS[intake.intensity ?? ""] ?? intake.intensity ?? "—"}
               </p>
             </div>
@@ -885,7 +1143,10 @@ function SkinProfilePanel({ intake, loading }: { intake: IntakeAnswers | null; l
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {intake.acneTypes!.map((t) => (
-                  <span key={t} className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-medium text-primary">
+                  <span
+                    key={t}
+                    className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-medium text-primary"
+                  >
                     {ACNE_TYPE_LABELS[t] ?? t}
                   </span>
                 ))}
@@ -929,14 +1190,9 @@ function SortableStep({
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: step.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: step.id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -946,11 +1202,7 @@ function SortableStep({
   };
 
   return (
-    <li
-      ref={setNodeRef}
-      style={style}
-      className="flex items-start gap-3 px-5 py-4 md:px-6"
-    >
+    <li ref={setNodeRef} style={style} className="flex items-start gap-3 px-5 py-4 md:px-6">
       <button
         {...attributes}
         {...listeners}
@@ -970,9 +1222,7 @@ function SortableStep({
           {step.product || <span className="text-muted-foreground italic">—</span>}
         </p>
         {step.instructions && (
-          <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
-            {step.instructions}
-          </p>
+          <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{step.instructions}</p>
         )}
       </div>
       {step.imageUrl && (
@@ -1017,10 +1267,24 @@ function StepDialog({
   step: RoutineStep | null;
   isNew: boolean;
   onClose: () => void;
-  onSave: (d: { category: string; product: string; description?: string; instructions: string; imageUrl?: string; purchaseUrl?: string }) => void;
+  onSave: (d: {
+    category: string;
+    product: string;
+    description?: string;
+    instructions: string;
+    imageUrl?: string;
+    purchaseUrl?: string;
+  }) => void;
   saving: boolean;
   catalogProducts: CatalogProduct[];
-  onSaveToCatalog: (data: { category: string; product: string; description?: string; instructions: string; imageUrl?: string; purchaseUrl?: string }) => Promise<void>;
+  onSaveToCatalog: (data: {
+    category: string;
+    product: string;
+    description?: string;
+    instructions: string;
+    imageUrl?: string;
+    purchaseUrl?: string;
+  }) => Promise<void>;
   savingToCatalog: boolean;
 }) {
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
@@ -1099,174 +1363,203 @@ function StepDialog({
           </DialogTitle>
         </DialogHeader>
         <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="space-y-4 py-2">
-          {/* Catalog picker */}
-          <div>
-            <div className="mb-2 flex items-center justify-between">
-              <label className="text-sm font-medium text-foreground/80">Depuis le catalogue</label>
-              <button
-                type="button"
-                onClick={() => setShowCatalogPicker((v) => !v)}
-                className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
-              >
-                <Package className="h-3 w-3" />
-                {showCatalogPicker ? "Fermer" : "Choisir un produit"}
-              </button>
-            </div>
-            {showCatalogPicker && (
-              <div className="rounded-2xl border border-border bg-muted/40 p-3">
-                <SearchInput
-                  value={catalogSearch}
-                  onChange={setCatalogSearch}
-                  placeholder="Rechercher dans le catalogue…"
-                  inputClassName="h-9 w-full rounded-xl border border-border bg-background pl-9 pr-3 text-sm outline-none focus:border-primary"
-                  suggestions={catalogSearch.trim() ? catalogResults.slice(0, 6).map((p) => ({
-                    id: p.id,
-                    label: p.name,
-                    sublabel: p.category,
-                    onSelect: () => fillFromCatalog(p),
-                  })) : []}
-                />
-                <ul className="mt-2 max-h-44 overflow-y-auto space-y-0.5">
-                  {catalogResults.length === 0 ? (
-                    <li className="py-3 text-center text-xs text-muted-foreground">Aucun résultat</li>
-                  ) : (
-                    catalogResults.map((p) => (
-                      <li key={p.id}>
-                        <button
-                          type="button"
-                          onClick={() => fillFromCatalog(p)}
-                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors hover:bg-background"
-                        >
-                          {p.imageUrl ? (
-                            <img src={p.imageUrl} className="h-8 w-8 shrink-0 rounded-lg object-contain border border-border" />
-                          ) : (
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-muted">
-                              <Package className="h-3.5 w-3.5 text-muted-foreground" />
-                            </div>
-                          )}
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-medium">{p.name}</p>
-                            <p className="text-xs text-muted-foreground">{p.category}</p>
-                          </div>
-                        </button>
-                      </li>
-                    ))
-                  )}
-                </ul>
-              </div>
-            )}
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium text-foreground/80">Catégorie</label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-            >
-              {CATEGORIES.map((c) => (
-                <option key={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="mb-2 block text-sm font-medium text-foreground/80">Produit</label>
-            <input
-              value={product}
-              onChange={(e) => setProduct(e.target.value)}
-              placeholder="ex. CeraVe Hydrating Cleanser"
-              className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-          <div>
-            <label className="mb-2 block text-sm font-medium text-foreground/80">
-              Description <span className="font-normal text-muted-foreground">(ce que fait le produit, optionnelle)</span>
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={2}
-              placeholder="ex. Nettoyant doux hydratant, idéal pour les peaux sensibles…"
-              className="w-full resize-none rounded-2xl border border-border bg-background p-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-          <div>
-            <label className="mb-2 block text-sm font-medium text-foreground/80">Instructions</label>
-            <textarea
-              value={instructions}
-              onChange={(e) => setInstructions(e.target.value)}
-              placeholder="ex. Appliquer sur peau humide, masser doucement 30 s puis rincer."
-              rows={3}
-              className="w-full resize-none rounded-2xl border border-border bg-background p-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-          <div>
-            <label className="mb-2 block text-sm font-medium text-foreground/80">
-              Image du produit <span className="font-normal text-muted-foreground">(optionnelle)</span>
-            </label>
-            {imageUrl ? (
-              <div className="relative inline-block">
-                <img
-                  src={imageUrl}
-                  alt="Aperçu produit"
-                  className="h-24 w-24 rounded-2xl border border-border object-cover"
-                />
+          <div className="space-y-4 py-2">
+            {/* Catalog picker */}
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <label className="text-sm font-medium text-foreground/80">
+                  Depuis le catalogue
+                </label>
                 <button
                   type="button"
-                  onClick={() => setImageUrl("")}
-                  className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-white shadow"
+                  onClick={() => setShowCatalogPicker((v) => !v)}
+                  className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
                 >
-                  <X className="h-3 w-3" />
+                  <Package className="h-3 w-3" />
+                  {showCatalogPicker ? "Fermer" : "Choisir un produit"}
                 </button>
               </div>
-            ) : uploading ? (
-              <div className="flex items-center gap-3 rounded-2xl border border-border bg-background px-4 py-3">
-                <Loader2 className="h-4 w-4 shrink-0 animate-spin text-primary" />
-                <span className="text-sm text-muted-foreground">Upload en cours…</span>
-              </div>
-            ) : (
-              <>
-                <label className="flex cursor-pointer items-center gap-2 rounded-2xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary-soft/30 hover:text-foreground">
-                  <Upload className="h-4 w-4 shrink-0" />
-                  Choisir une image
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="sr-only"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleImageFile(file);
-                    }}
+              {showCatalogPicker && (
+                <div className="rounded-2xl border border-border bg-muted/40 p-3">
+                  <SearchInput
+                    value={catalogSearch}
+                    onChange={setCatalogSearch}
+                    placeholder="Rechercher dans le catalogue…"
+                    inputClassName="h-9 w-full rounded-xl border border-border bg-background pl-9 pr-3 text-sm outline-none focus:border-primary"
+                    suggestions={
+                      catalogSearch.trim()
+                        ? catalogResults.slice(0, 6).map((p) => ({
+                            id: p.id,
+                            label: p.name,
+                            sublabel: p.category,
+                            onSelect: () => fillFromCatalog(p),
+                          }))
+                        : []
+                    }
                   />
-                </label>
-                {uploadError && (
-                  <p className="mt-1.5 text-xs text-destructive">{uploadError}</p>
-                )}
-              </>
-            )}
+                  <ul className="mt-2 max-h-44 overflow-y-auto space-y-0.5">
+                    {catalogResults.length === 0 ? (
+                      <li className="py-3 text-center text-xs text-muted-foreground">
+                        Aucun résultat
+                      </li>
+                    ) : (
+                      catalogResults.map((p) => (
+                        <li key={p.id}>
+                          <button
+                            type="button"
+                            onClick={() => fillFromCatalog(p)}
+                            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors hover:bg-background"
+                          >
+                            {p.imageUrl ? (
+                              <img
+                                src={p.imageUrl}
+                                className="h-8 w-8 shrink-0 rounded-lg object-contain border border-border"
+                              />
+                            ) : (
+                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-muted">
+                                <Package className="h-3.5 w-3.5 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-medium">{p.name}</p>
+                              <p className="text-xs text-muted-foreground">{p.category}</p>
+                            </div>
+                          </button>
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-foreground/80">Catégorie</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-foreground/80">Produit</label>
+              <input
+                value={product}
+                onChange={(e) => setProduct(e.target.value)}
+                placeholder="ex. CeraVe Hydrating Cleanser"
+                className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-foreground/80">
+                Description{" "}
+                <span className="font-normal text-muted-foreground">
+                  (ce que fait le produit, optionnelle)
+                </span>
+              </label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={2}
+                placeholder="ex. Nettoyant doux hydratant, idéal pour les peaux sensibles…"
+                className="w-full resize-none rounded-2xl border border-border bg-background p-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-foreground/80">
+                Instructions
+              </label>
+              <textarea
+                value={instructions}
+                onChange={(e) => setInstructions(e.target.value)}
+                placeholder="ex. Appliquer sur peau humide, masser doucement 30 s puis rincer."
+                rows={3}
+                className="w-full resize-none rounded-2xl border border-border bg-background p-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-foreground/80">
+                Image du produit{" "}
+                <span className="font-normal text-muted-foreground">(optionnelle)</span>
+              </label>
+              {imageUrl ? (
+                <div className="relative inline-block">
+                  <img
+                    src={imageUrl}
+                    alt="Aperçu produit"
+                    className="h-24 w-24 rounded-2xl border border-border object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setImageUrl("")}
+                    className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-white shadow"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : uploading ? (
+                <div className="flex items-center gap-3 rounded-2xl border border-border bg-background px-4 py-3">
+                  <Loader2 className="h-4 w-4 shrink-0 animate-spin text-primary" />
+                  <span className="text-sm text-muted-foreground">Upload en cours…</span>
+                </div>
+              ) : (
+                <>
+                  <label className="flex cursor-pointer items-center gap-2 rounded-2xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary-soft/30 hover:text-foreground">
+                    <Upload className="h-4 w-4 shrink-0" />
+                    Choisir une image
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleImageFile(file);
+                      }}
+                    />
+                  </label>
+                  {uploadError && <p className="mt-1.5 text-xs text-destructive">{uploadError}</p>}
+                </>
+              )}
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-foreground/80">
+                Lien d'achat{" "}
+                <span className="font-normal text-muted-foreground">(URL optionnelle)</span>
+              </label>
+              <input
+                value={purchaseUrl}
+                onChange={(e) => setPurchaseUrl(e.target.value)}
+                placeholder="https://..."
+                className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
           </div>
-          <div>
-            <label className="mb-2 block text-sm font-medium text-foreground/80">
-              Lien d'achat <span className="font-normal text-muted-foreground">(URL optionnelle)</span>
-            </label>
-            <input
-              value={purchaseUrl}
-              onChange={(e) => setPurchaseUrl(e.target.value)}
-              placeholder="https://..."
-              className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-        </div>
         </div>
         <DialogFooter className="shrink-0 gap-2 sm:gap-2">
           <button
             type="button"
-            onClick={() => onSaveToCatalog({ category, product, description: description.trim() || undefined, instructions, imageUrl: imageUrl.trim() || undefined, purchaseUrl: purchaseUrl.trim() || undefined })}
+            onClick={() =>
+              onSaveToCatalog({
+                category,
+                product,
+                description: description.trim() || undefined,
+                instructions,
+                imageUrl: imageUrl.trim() || undefined,
+                purchaseUrl: purchaseUrl.trim() || undefined,
+              })
+            }
             disabled={savingToCatalog || !product.trim()}
             className="mr-auto flex items-center gap-2 rounded-2xl border border-border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-50"
           >
-            {savingToCatalog ? <Loader2 className="h-4 w-4 animate-spin" /> : <Package className="h-4 w-4" />}
+            {savingToCatalog ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Package className="h-4 w-4" />
+            )}
             Catalogue
           </button>
           <button
@@ -1276,7 +1569,16 @@ function StepDialog({
             Annuler
           </button>
           <button
-            onClick={() => onSave({ category, product, description: description.trim() || undefined, instructions, imageUrl: imageUrl.trim() || undefined, purchaseUrl: purchaseUrl.trim() || undefined })}
+            onClick={() =>
+              onSave({
+                category,
+                product,
+                description: description.trim() || undefined,
+                instructions,
+                imageUrl: imageUrl.trim() || undefined,
+                purchaseUrl: purchaseUrl.trim() || undefined,
+              })
+            }
             disabled={saving || !product.trim()}
             className="flex items-center gap-2 rounded-2xl bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
           >

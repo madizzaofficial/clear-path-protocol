@@ -414,7 +414,7 @@ function ProductDialog({
 
   return (
     <Dialog open={!!product} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="rounded-3xl sm:max-w-lg">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto rounded-3xl sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-display text-xl">
             {isNew ? "Nouveau produit" : "Modifier le produit"}

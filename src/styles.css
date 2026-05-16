@@ -124,6 +124,11 @@
     font-family: var(--font-sans);
     font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  /* Prevent iOS auto-zoom on input focus (requires font-size >= 16px) */
+  input, textarea, select {
+    font-size: max(16px, 1em);
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);

@@ -16,18 +16,19 @@ import { Route as ProductsRouteImport } from './routes/products'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as JournalRouteImport } from './routes/journal'
 import { Route as IntakeRouteImport } from './routes/intake'
+import { Route as FinishRouteImport } from './routes/finish'
 import { Route as CourseRouteImport } from './routes/course'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StartTokenRouteImport } from './routes/start.$token'
 import { Route as LessonLessonIdRouteImport } from './routes/lesson.$lessonId'
-import { Route as AdminAdminsRouteImport } from './routes/admin_.admins'
 import { Route as AdminTokensRouteImport } from './routes/admin_.tokens'
+import { Route as AdminTemplatesRouteImport } from './routes/admin_.templates'
 import { Route as AdminRoutinesRouteImport } from './routes/admin_.routines'
 import { Route as AdminProductsRouteImport } from './routes/admin_.products'
 import { Route as AdminNutritionRouteImport } from './routes/admin_.nutrition'
 import { Route as AdminCourseEditorRouteImport } from './routes/admin_.course-editor'
-import { Route as FinishRouteImport } from './routes/finish'
+import { Route as AdminAdminsRouteImport } from './routes/admin_.admins'
 import { Route as AdminStudentUidRouteImport } from './routes/admin_.student.$uid'
 
 const WelcomeRoute = WelcomeRouteImport.update({
@@ -65,6 +66,11 @@ const IntakeRoute = IntakeRouteImport.update({
   path: '/intake',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FinishRoute = FinishRouteImport.update({
+  id: '/finish',
+  path: '/finish',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CourseRoute = CourseRouteImport.update({
   id: '/course',
   path: '/course',
@@ -90,14 +96,14 @@ const LessonLessonIdRoute = LessonLessonIdRouteImport.update({
   path: '/lesson/$lessonId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminAdminsRoute = AdminAdminsRouteImport.update({
-  id: '/admin_/admins',
-  path: '/admin/admins',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminTokensRoute = AdminTokensRouteImport.update({
   id: '/admin_/tokens',
   path: '/admin/tokens',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTemplatesRoute = AdminTemplatesRouteImport.update({
+  id: '/admin_/templates',
+  path: '/admin/templates',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoutinesRoute = AdminRoutinesRouteImport.update({
@@ -120,9 +126,9 @@ const AdminCourseEditorRoute = AdminCourseEditorRouteImport.update({
   path: '/admin/course-editor',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FinishRoute = FinishRouteImport.update({
-  id: '/finish',
-  path: '/finish',
+const AdminAdminsRoute = AdminAdminsRouteImport.update({
+  id: '/admin_/admins',
+  path: '/admin/admins',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminStudentUidRoute = AdminStudentUidRouteImport.update({
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/admin/nutrition': typeof AdminNutritionRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/routines': typeof AdminRoutinesRoute
+  '/admin/templates': typeof AdminTemplatesRoute
   '/admin/tokens': typeof AdminTokensRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/admin/nutrition': typeof AdminNutritionRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/routines': typeof AdminRoutinesRoute
+  '/admin/templates': typeof AdminTemplatesRoute
   '/admin/tokens': typeof AdminTokensRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/admin_/nutrition': typeof AdminNutritionRoute
   '/admin_/products': typeof AdminProductsRoute
   '/admin_/routines': typeof AdminRoutinesRoute
+  '/admin_/templates': typeof AdminTemplatesRoute
   '/admin_/tokens': typeof AdminTokensRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/admin/nutrition'
     | '/admin/products'
     | '/admin/routines'
+    | '/admin/templates'
     | '/admin/tokens'
     | '/lesson/$lessonId'
     | '/start/$token'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/admin/nutrition'
     | '/admin/products'
     | '/admin/routines'
+    | '/admin/templates'
     | '/admin/tokens'
     | '/lesson/$lessonId'
     | '/start/$token'
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/admin_/nutrition'
     | '/admin_/products'
     | '/admin_/routines'
+    | '/admin_/templates'
     | '/admin_/tokens'
     | '/lesson/$lessonId'
     | '/start/$token'
@@ -273,17 +285,18 @@ export interface RootRouteChildren {
   CourseRoute: typeof CourseRoute
   FinishRoute: typeof FinishRoute
   IntakeRoute: typeof IntakeRoute
-  AdminAdminsRoute: typeof AdminAdminsRoute
   JournalRoute: typeof JournalRoute
   LoginRoute: typeof LoginRoute
   ProductsRoute: typeof ProductsRoute
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
   WelcomeRoute: typeof WelcomeRoute
+  AdminAdminsRoute: typeof AdminAdminsRoute
   AdminCourseEditorRoute: typeof AdminCourseEditorRoute
   AdminNutritionRoute: typeof AdminNutritionRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRoutinesRoute: typeof AdminRoutinesRoute
+  AdminTemplatesRoute: typeof AdminTemplatesRoute
   AdminTokensRoute: typeof AdminTokensRoute
   LessonLessonIdRoute: typeof LessonLessonIdRoute
   StartTokenRoute: typeof StartTokenRoute
@@ -341,6 +354,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IntakeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/finish': {
+      id: '/finish'
+      path: '/finish'
+      fullPath: '/finish'
+      preLoaderRoute: typeof FinishRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/course': {
       id: '/course'
       path: '/course'
@@ -353,13 +373,6 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/finish': {
-      id: '/finish'
-      path: '/finish'
-      fullPath: '/finish'
-      preLoaderRoute: typeof FinishRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -390,6 +403,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTokensRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin_/templates': {
+      id: '/admin_/templates'
+      path: '/admin/templates'
+      fullPath: '/admin/templates'
+      preLoaderRoute: typeof AdminTemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin_/routines': {
       id: '/admin_/routines'
       path: '/admin/routines'
@@ -411,18 +431,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminNutritionRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin_/admins': {
-      id: '/admin_/admins'
-      path: '/admin/admins'
-      fullPath: '/admin/admins'
-      preLoaderRoute: typeof AdminAdminsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin_/course-editor': {
       id: '/admin_/course-editor'
       path: '/admin/course-editor'
       fullPath: '/admin/course-editor'
       preLoaderRoute: typeof AdminCourseEditorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin_/admins': {
+      id: '/admin_/admins'
+      path: '/admin/admins'
+      fullPath: '/admin/admins'
+      preLoaderRoute: typeof AdminAdminsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin_/student/$uid': {
@@ -441,17 +461,18 @@ const rootRouteChildren: RootRouteChildren = {
   CourseRoute: CourseRoute,
   FinishRoute: FinishRoute,
   IntakeRoute: IntakeRoute,
-  AdminAdminsRoute: AdminAdminsRoute,
   JournalRoute: JournalRoute,
   LoginRoute: LoginRoute,
   ProductsRoute: ProductsRoute,
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
   WelcomeRoute: WelcomeRoute,
+  AdminAdminsRoute: AdminAdminsRoute,
   AdminCourseEditorRoute: AdminCourseEditorRoute,
   AdminNutritionRoute: AdminNutritionRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminRoutinesRoute: AdminRoutinesRoute,
+  AdminTemplatesRoute: AdminTemplatesRoute,
   AdminTokensRoute: AdminTokensRoute,
   LessonLessonIdRoute: LessonLessonIdRoute,
   StartTokenRoute: StartTokenRoute,
