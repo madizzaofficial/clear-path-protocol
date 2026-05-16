@@ -1,6 +1,7 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Home, BookOpen, Sparkles, ShieldCheck, User, LogOut, UserCircle, Camera, Moon, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
+import { PwaInstallBanner } from "@/components/PwaInstallBanner";
 import { ReactNode } from "react";
 import {
   DropdownMenu,
@@ -86,6 +87,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
+      <PwaInstallBanner />
       {isNavigating && (
         <div className="fixed inset-x-0 top-0 z-50 h-0.5 bg-muted">
           <div className="h-full animate-[progress_1s_ease-in-out_infinite] bg-primary" />

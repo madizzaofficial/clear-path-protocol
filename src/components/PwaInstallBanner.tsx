@@ -65,7 +65,7 @@ export function PwaInstallBanner() {
   if (!show) return null;
 
   return (
-    <div className="fixed left-0 right-0 top-16 z-[39] border-b border-border bg-card shadow-sm">
+    <div className="border-b border-border bg-card shadow-sm">
       <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6">
         <img src="/icon-192.png" alt="" className="h-10 w-10 shrink-0 rounded-xl" />
 
