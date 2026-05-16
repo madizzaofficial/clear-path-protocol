@@ -107,10 +107,10 @@ function TemplatesContent() {
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
         {/* Header */}
         <header className="mb-8">
-          <div className="flex items-start justify-between gap-4">
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>
+          <div className="mt-3 flex items-end justify-between gap-4">
             <div>
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>
-              <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight md:text-5xl">
+              <h1 className="font-display text-4xl font-semibold tracking-tight md:text-5xl">
                 Modèles de routines
               </h1>
               <p className="mt-2 text-muted-foreground">
@@ -120,11 +120,18 @@ function TemplatesContent() {
             <Link
               to="/admin/templates/$templateId"
               params={{ templateId: "new" }}
-              className="flex shrink-0 items-center gap-2 rounded-2xl bg-foreground px-5 py-3 text-sm font-medium text-background transition-opacity hover:opacity-90"
+              className="hidden shrink-0 items-center gap-2 rounded-2xl bg-foreground px-5 py-3 text-sm font-medium text-background transition-opacity hover:opacity-90 sm:flex"
             >
               <Plus className="h-4 w-4" /> Nouveau modèle
             </Link>
           </div>
+          <Link
+            to="/admin/templates/$templateId"
+            params={{ templateId: "new" }}
+            className="mt-4 flex items-center gap-2 rounded-2xl bg-foreground px-5 py-3 text-sm font-medium text-background transition-opacity hover:opacity-90 sm:hidden"
+          >
+            <Plus className="h-4 w-4" /> Nouveau modèle
+          </Link>
         </header>
 
         {loading ? (
