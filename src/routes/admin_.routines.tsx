@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { SearchInput } from "@/components/SearchInput";
+import { StudentPicker } from "@/components/StudentPicker";
 import { createServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
@@ -39,7 +40,6 @@ import {
   Sun,
   Moon,
   Users,
-  ChevronRight,
   Upload,
   X,
   Package,
@@ -68,7 +68,7 @@ type UserDoc = {
   uid: string;
   email: string;
   displayName: string | null;
-  photoURL: string | null;
+  photoURL?: string | null;
 };
 
 type RoutineStep = {
@@ -99,6 +99,24 @@ type SendEmailPayload = {
 };
 
 import { CATEGORIES } from "@/lib/skincare-categories";
+
+type IntakeAnswers = {
+  skinType?: string;
+  acneTypes?: string[];
+  intensity?: string;
+  currentRoutine?: string;
+  mainGoal?: string;
+};
+
+const SKIN_TYPE_LABELS: Record<string, string> = {
+  normale: "Normale", grasse: "Grasse", seche: "Sèche", mixte: "Mixte", sensible: "Sensible",
+};
+const ACNE_TYPE_LABELS: Record<string, string> = {
+  comedons: "Comédons", papules: "Papules / Pustules", microkystes: "Microkystes", kystes: "Kystes / Nodules",
+};
+const INTENSITY_LABELS: Record<string, string> = {
+  legere: "Légère", moderee: "Modérée", severe: "Sévère",
+};
 
 // ─── Server function ──────────────────────────────────────────────────────────
 
@@ -330,6 +348,10 @@ function RoutinesContent() {
   const [catalogProducts, setCatalogProducts] = useState<CatalogProduct[]>([]);
   const [savingToCatalog, setSavingToCatalog] = useState(false);
 
+  const [routineStatusMap, setRoutineStatusMap] = useState<Map<string, "sent" | "draft">>(new Map());
+  const [intake, setIntake] = useState<IntakeAnswers | null>(null);
+  const [loadingIntake, setLoadingIntake] = useState(false);
+
   const { uid: preselectedUid } = Route.useSearch();
 
   const sensors = useSensors(
@@ -341,13 +363,20 @@ function RoutinesContent() {
     async function loadUsers() {
       setLoadingUsers(true);
       try {
-        const [usersSnap, catalogSnap] = await Promise.all([
+        const [usersSnap, catalogSnap, routinesSnap] = await Promise.all([
           getDocs(collection(db, "users")),
           getDocs(collection(db, "admin_products")),
+          getDocs(collection(db, "routines")),
         ]);
         const fetched = usersSnap.docs.map((d) => d.data() as UserDoc);
         setUsers(fetched);
         setCatalogProducts(catalogSnap.docs.map((d) => d.data() as CatalogProduct));
+        const sMap = new Map<string, "sent" | "draft">();
+        routinesSnap.docs.forEach((d) => {
+          const s = d.data().status as "sent" | "draft" | undefined;
+          if (s) sMap.set(d.id, s);
+        });
+        setRoutineStatusMap(sMap);
 
         // Auto-select if uid was passed via search param
         if (preselectedUid) {
@@ -365,18 +394,25 @@ function RoutinesContent() {
   async function selectUser(u: UserDoc) {
     setSelectedUser(u);
     setRoutine(null);
+    setIntake(null);
     setActiveTab("am");
     setSendResult(null);
     setLoadingRoutine(true);
+    setLoadingIntake(true);
     try {
-      const snap = await getDoc(doc(db, "routines", u.uid));
+      const [routineSnap, intakeSnap] = await Promise.all([
+        getDoc(doc(db, "routines", u.uid)),
+        getDoc(doc(db, "intake_answers", u.uid)),
+      ]);
       setRoutine(
-        snap.exists()
-          ? (snap.data() as StudentRoutine)
+        routineSnap.exists()
+          ? (routineSnap.data() as StudentRoutine)
           : { uid: u.uid, am: [], pm: [], updatedAt: Date.now(), sentAt: null, status: "draft" }
       );
+      setIntake(intakeSnap.exists() ? (intakeSnap.data() as IntakeAnswers) : null);
     } finally {
       setLoadingRoutine(false);
+      setLoadingIntake(false);
     }
   }
 
@@ -408,6 +444,7 @@ function RoutinesContent() {
       // Save to Firestore first — always succeeds regardless of email
       await setDoc(doc(db, "routines", selectedUser.uid), JSON.parse(JSON.stringify(toSave)));
       setRoutine(toSave);
+      setRoutineStatusMap((prev) => { const next = new Map(prev); next.set(selectedUser.uid, "sent"); return next; });
 
       // Email + Inngest event — failure here doesn't roll back the save
       await sendRoutineEmailFn({
@@ -535,79 +572,32 @@ function RoutinesContent() {
           </div>
         </header>
 
-        <div className="grid gap-6 lg:grid-cols-[300px,1fr]">
-          {/* Student list */}
-          <aside className="h-fit rounded-3xl border border-border/60 bg-card shadow-soft">
-            <div className="flex items-center gap-3 border-b border-border/60 p-5">
-              <Users className="h-4 w-4 text-primary" />
-              <h2 className="font-display text-base font-semibold">Élèves</h2>
-              {!loadingUsers && (
-                <span className="ml-auto rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">
-                  {users.length}
-                </span>
-              )}
-            </div>
+        {/* Student picker */}
+        <div className="mb-6">
+          <StudentPicker
+            users={users}
+            selected={selectedUser}
+            onSelect={selectUser}
+            loading={loadingUsers}
+            statusMap={routineStatusMap}
+          />
+        </div>
 
-            {loadingUsers ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        {!selectedUser ? (
+          <div className="flex min-h-[420px] items-center justify-center rounded-3xl border border-dashed border-border bg-card">
+            <div className="text-center">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-soft">
+                <Users className="h-5 w-5 text-primary" />
               </div>
-            ) : users.length === 0 ? (
-              <div className="px-5 py-10 text-center">
-                <p className="text-sm text-muted-foreground">Aucun élève inscrit.</p>
-                <p className="mt-1 text-xs text-muted-foreground/60">
-                  Les élèves apparaîtront ici après leur inscription.
-                </p>
-              </div>
-            ) : (
-              <ul className="divide-y divide-border/40 p-2">
-                {users.map((u) => {
-                  const isSelected = selectedUser?.uid === u.uid;
-                  const initials = (u.displayName ?? u.email).slice(0, 2).toUpperCase();
-                  return (
-                    <li key={u.uid}>
-                      <button
-                        onClick={() => selectUser(u)}
-                        className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors ${
-                          isSelected ? "bg-primary-soft" : "hover:bg-muted/60"
-                        }`}
-                      >
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-warm text-sm font-semibold">
-                          {initials}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold">
-                            {u.displayName ?? "—"}
-                          </p>
-                          <p className="truncate text-xs text-muted-foreground">{u.email}</p>
-                        </div>
-                        <ChevronRight
-                          className={`h-4 w-4 shrink-0 text-muted-foreground/40 transition-transform ${
-                            isSelected ? "rotate-90 text-primary" : ""
-                          }`}
-                        />
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </aside>
-
-          {/* Routine editor */}
-          {!selectedUser ? (
-            <div className="flex min-h-[420px] items-center justify-center rounded-3xl border border-dashed border-border bg-card">
-              <div className="text-center">
-                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-soft">
-                  <Users className="h-5 w-5 text-primary" />
-                </div>
-                <p className="text-sm font-medium">Sélectionnez un élève</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  pour éditer sa routine personnalisée
-                </p>
-              </div>
+              <p className="text-sm font-medium">Sélectionnez un élève</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                pour éditer sa routine personnalisée
+              </p>
             </div>
-          ) : (
+          </div>
+        ) : (
+          <div className="grid gap-6 lg:grid-cols-[280px,1fr]">
+            <SkinProfilePanel intake={intake} loading={loadingIntake} />
             <div className="space-y-4">
               {/* Student header card */}
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-border/60 bg-card p-5 shadow-soft md:p-6">
@@ -798,8 +788,8 @@ function RoutinesContent() {
                 </>
               )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </main>
 
       {/* Dialogs */}
@@ -839,6 +829,88 @@ function RoutinesContent() {
         </AlertDialogContent>
       </AlertDialog>
     </AppShell>
+  );
+}
+
+// ─── Skin Profile Panel ───────────────────────────────────────────────────────
+
+function SkinProfilePanel({ intake, loading }: { intake: IntakeAnswers | null; loading: boolean }) {
+  return (
+    <aside className="sticky top-6 h-fit rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+      <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        Profil peau
+      </p>
+
+      {loading ? (
+        <div className="flex justify-center py-8">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
+      ) : !intake ? (
+        <p className="text-sm italic text-muted-foreground">Pas encore de bilan.</p>
+      ) : (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-2xl bg-muted/50 p-3">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Type</p>
+              <p className="mt-1 text-sm font-semibold">
+                {SKIN_TYPE_LABELS[intake.skinType ?? ""] ?? intake.skinType ?? "—"}
+              </p>
+            </div>
+            <div className={`rounded-2xl p-3 ${
+              intake.intensity === "severe"
+                ? "bg-destructive/10"
+                : intake.intensity === "moderee"
+                ? "bg-orange-50"
+                : "bg-muted/50"
+            }`}>
+              <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Intensité</p>
+              <p className={`mt-1 text-sm font-semibold ${
+                intake.intensity === "severe"
+                  ? "text-destructive"
+                  : intake.intensity === "moderee"
+                  ? "text-orange-600"
+                  : ""
+              }`}>
+                {INTENSITY_LABELS[intake.intensity ?? ""] ?? intake.intensity ?? "—"}
+              </p>
+            </div>
+          </div>
+
+          {(intake.acneTypes?.length ?? 0) > 0 && (
+            <div>
+              <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                Types d'acné
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {intake.acneTypes!.map((t) => (
+                  <span key={t} className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-medium text-primary">
+                    {ACNE_TYPE_LABELS[t] ?? t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {intake.currentRoutine && (
+            <div>
+              <p className="mb-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                Routine actuelle
+              </p>
+              <p className="text-xs leading-relaxed text-foreground/80">{intake.currentRoutine}</p>
+            </div>
+          )}
+
+          {intake.mainGoal && (
+            <div>
+              <p className="mb-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                Objectif
+              </p>
+              <p className="text-xs leading-relaxed text-foreground/80">{intake.mainGoal}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </aside>
   );
 }
 
