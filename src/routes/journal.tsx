@@ -263,7 +263,7 @@ function JournalContent({ uid }: { uid: string }) {
 
   return (
     <AppShell>
-      <main className="mx-auto max-w-4xl px-6 pb-24 pt-8 md:pt-12">
+      <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
         {/* Header */}
         <header className="mb-8">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Protocole Clear</p>

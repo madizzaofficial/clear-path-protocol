@@ -329,7 +329,7 @@ function Dashboard() {
 
           {/* ── Hero card — row 1, col 1-2 ────────────────────────────────── */}
           {!allDone && next ? (
-            <Link to="/lesson/$lessonId" params={{ lessonId: next.id }} className="group block lg:col-span-2">
+            <Link to="/lesson/$lessonId" params={{ lessonId: next.id }} className="group block min-w-0 lg:col-span-2">
               <div className="relative h-full overflow-hidden rounded-3xl bg-gradient-warm p-8 shadow-elegant md:p-10">
                 <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gradient-primary opacity-30 blur-3xl" />
                 <div className="relative">
@@ -360,7 +360,7 @@ function Dashboard() {
           )}
 
           {/* ── Routine du jour — row 1, col 3 ───────────────────────────── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+          <div className="min-w-0 overflow-hidden rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
             <div className="mb-5 flex items-center justify-between">
               <h3 className="font-display text-lg font-semibold">Routine du jour</h3>
               {streak > 0 && (
@@ -516,11 +516,11 @@ function WelcomeState({ firstName, next }: { firstName: string; next: ReturnType
       <div className="grid gap-6 lg:grid-cols-3">
 
         {/* ── Main column ─────────────────────────────────────────────── */}
-        <div className="space-y-6 lg:col-span-2">
+        <div className="min-w-0 space-y-6 lg:col-span-2">
 
           {/* Hero CTA */}
           {next ? (
-            <Link to="/lesson/$lessonId" params={{ lessonId: next.id }} className="group block">
+            <Link to="/lesson/$lessonId" params={{ lessonId: next.id }} className="group block min-w-0">
               <div className="relative overflow-hidden rounded-3xl bg-gradient-warm p-8 shadow-elegant md:p-10">
                 <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gradient-primary opacity-30 blur-3xl" />
                 <div className="relative">
@@ -809,7 +809,7 @@ function HomeRoutineBlock({
             <li
               key={s.id}
               onClick={() => onToggle(s.id)}
-              className="flex cursor-pointer select-none items-center gap-3 rounded-xl px-2 py-1.5 text-sm transition-colors hover:bg-muted/60 active:bg-muted"
+              className="flex min-w-0 cursor-pointer select-none items-center gap-3 rounded-xl px-2 py-1.5 text-sm transition-colors hover:bg-muted/60 active:bg-muted"
             >
               <span
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-150 ${
