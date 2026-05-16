@@ -423,11 +423,12 @@ function RoutinesContent() {
         getDoc(doc(db, "routines", u.uid)),
         getDoc(doc(db, "intake_answers", u.uid)),
       ]);
-      setRoutine(
-        routineSnap.exists()
-          ? (routineSnap.data() as StudentRoutine)
-          : { uid: u.uid, am: [], pm: [], extras: [], updatedAt: Date.now(), sentAt: null, status: "draft" },
-      );
+      if (routineSnap.exists()) {
+        const data = routineSnap.data() as StudentRoutine;
+        setRoutine({ ...data, extras: data.extras ?? [] });
+      } else {
+        setRoutine({ uid: u.uid, am: [], pm: [], extras: [], updatedAt: Date.now(), sentAt: null, status: "draft" });
+      }
       setIntake(intakeSnap.exists() ? (intakeSnap.data() as IntakeAnswers) : null);
     } finally {
       setLoadingRoutine(false);

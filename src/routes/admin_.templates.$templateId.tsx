@@ -123,7 +123,8 @@ function TemplateEditorContent() {
         try {
           const snap = await getDoc(doc(db, "routine_templates", templateId));
           if (snap.exists()) {
-            const t = snap.data() as RoutineTemplate;
+            const data = snap.data() as RoutineTemplate;
+            const t = { ...data, extras: data.extras ?? [] };
             setTemplate(t);
             setName(t.name);
             setDescription(t.description ?? "");
