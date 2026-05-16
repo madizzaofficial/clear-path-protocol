@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { collection, deleteDoc, doc, getDocs, setDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
   ArrowLeft,
@@ -14,7 +14,7 @@ import {
   ChevronUp,
   Moon,
   Sun,
-  Check,
+  Plus,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -26,24 +26,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type RoutineStep = {
-  id: string;
-  order: number;
-  category: string;
-  product: string;
-  instructions: string;
-  imageUrl?: string;
-};
+type RoutineStep = { id: string; order: number; category: string; product: string; instructions: string; imageUrl?: string };
 
 type RoutineTemplate = {
   id: string;
@@ -58,9 +44,7 @@ type RoutineTemplate = {
 // ─── Route ────────────────────────────────────────────────────────────────────
 
 export const Route = createFileRoute("/admin_/templates")({
-  head: () => ({
-    meta: [{ title: "Modèles de routines — Protocole Clear" }],
-  }),
+  head: () => ({ meta: [{ title: "Modèles de routines — Protocole Clear" }] }),
   component: TemplatesPage,
 });
 
@@ -93,13 +77,7 @@ function TemplatesContent() {
   const [templates, setTemplates] = useState<RoutineTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-
   const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  const [editingTemplate, setEditingTemplate] = useState<RoutineTemplate | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editDesc, setEditDesc] = useState("");
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -123,24 +101,6 @@ function TemplatesContent() {
     setDeletingId(null);
   }
 
-  async function handleSaveEdit() {
-    if (!editingTemplate || !editName.trim()) return;
-    setSaving(true);
-    try {
-      const updated: RoutineTemplate = {
-        ...editingTemplate,
-        name: editName.trim(),
-        description: editDesc.trim() || undefined,
-        updatedAt: Date.now(),
-      };
-      await setDoc(doc(db, "routine_templates", updated.id), updated);
-      setTemplates((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
-      setEditingTemplate(null);
-    } finally {
-      setSaving(false);
-    }
-  }
-
   const deletingTemplate = templates.find((t) => t.id === deletingId);
 
   return (
@@ -157,14 +117,23 @@ function TemplatesContent() {
               <ArrowLeft className="h-4 w-4" /> Retour aux routines
             </Link>
           </div>
-          <div>
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>
-            <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight md:text-5xl">
-              Modèles de routines
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              Gérez les modèles réutilisables pour créer rapidement des routines élèves.
-            </p>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>
+              <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight md:text-5xl">
+                Modèles de routines
+              </h1>
+              <p className="mt-2 text-muted-foreground">
+                Créez et gérez les modèles réutilisables pour vos élèves.
+              </p>
+            </div>
+            <Link
+              to="/admin/templates/$templateId"
+              params={{ templateId: "new" }}
+              className="flex shrink-0 items-center gap-2 rounded-2xl bg-foreground px-5 py-3 text-sm font-medium text-background transition-opacity hover:opacity-90"
+            >
+              <Plus className="h-4 w-4" /> Nouveau modèle
+            </Link>
           </div>
         </header>
 
@@ -179,15 +148,13 @@ function TemplatesContent() {
                 <LayoutTemplate className="h-5 w-5 text-primary" />
               </div>
               <p className="text-sm font-medium">Aucun modèle</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Créez des modèles depuis l'éditeur de routines.
-              </p>
+              <p className="mt-1 text-xs text-muted-foreground">Créez votre premier modèle pour démarrer.</p>
               <Link
-                to="/admin/routines"
-                search={{ uid: "" }}
+                to="/admin/templates/$templateId"
+                params={{ templateId: "new" }}
                 className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-primary-soft px-4 py-2 text-sm font-medium text-foreground hover:bg-primary/20"
               >
-                Aller à l'éditeur
+                <Plus className="h-4 w-4" /> Créer un modèle
               </Link>
             </div>
           </div>
@@ -196,10 +163,7 @@ function TemplatesContent() {
             {templates.map((t) => {
               const expanded = expandedId === t.id;
               return (
-                <div
-                  key={t.id}
-                  className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft"
-                >
+                <div key={t.id} className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
                   {/* Header row */}
                   <div className="flex items-center gap-4 p-5">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary-soft">
@@ -223,17 +187,14 @@ function TemplatesContent() {
                       </div>
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
-                      <button
-                        onClick={() => {
-                          setEditName(t.name);
-                          setEditDesc(t.description ?? "");
-                          setEditingTemplate(t);
-                        }}
+                      <Link
+                        to="/admin/templates/$templateId"
+                        params={{ templateId: t.id }}
                         className="flex h-9 w-9 items-center justify-center rounded-2xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                        title="Renommer"
+                        title="Modifier"
                       >
                         <Pencil className="h-4 w-4" />
-                      </button>
+                      </Link>
                       <button
                         onClick={() => setDeletingId(t.id)}
                         className="flex h-9 w-9 items-center justify-center rounded-2xl text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
@@ -303,8 +264,8 @@ function TemplatesContent() {
           <AlertDialogHeader>
             <AlertDialogTitle className="font-display">Supprimer ce modèle ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Le modèle <strong>«&nbsp;{deletingTemplate?.name}&nbsp;»</strong> sera définitivement supprimé. Les routines
-              élèves déjà créées à partir de ce modèle ne sont pas affectées.
+              Le modèle <strong>«&nbsp;{deletingTemplate?.name}&nbsp;»</strong> sera définitivement supprimé. Les
+              routines élèves déjà créées à partir de ce modèle ne sont pas affectées.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -318,53 +279,6 @@ function TemplatesContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Edit dialog */}
-      <Dialog open={!!editingTemplate} onOpenChange={(o) => !o && setEditingTemplate(null)}>
-        <DialogContent className="rounded-3xl sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="font-display">Modifier le modèle</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Nom *</label>
-              <input
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                className="w-full rounded-xl border border-border bg-muted/40 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">
-                Description <span className="font-normal text-muted-foreground">(optionnel)</span>
-              </label>
-              <textarea
-                value={editDesc}
-                onChange={(e) => setEditDesc(e.target.value)}
-                rows={3}
-                className="w-full resize-none rounded-xl border border-border bg-muted/40 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <button
-              onClick={() => setEditingTemplate(null)}
-              className="rounded-2xl border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
-            >
-              Annuler
-            </button>
-            <button
-              onClick={handleSaveEdit}
-              disabled={saving || !editName.trim()}
-              className="flex items-center gap-2 rounded-2xl bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
-            >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-              Enregistrer
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </AdminShell>
   );
 }

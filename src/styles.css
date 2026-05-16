@@ -118,6 +118,10 @@
 
 @layer base {
   * { border-color: var(--color-border); }
+  html {
+    overflow-x: hidden;
+    width: 100%;
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
@@ -125,6 +129,8 @@
     font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    width: 100%;
+    position: relative;
   }
   /* Prevent iOS auto-zoom on input focus (requires font-size >= 16px) */
   input, textarea, select {

@@ -29,6 +29,7 @@ import { Route as AdminProductsRouteImport } from './routes/admin_.products'
 import { Route as AdminNutritionRouteImport } from './routes/admin_.nutrition'
 import { Route as AdminCourseEditorRouteImport } from './routes/admin_.course-editor'
 import { Route as AdminAdminsRouteImport } from './routes/admin_.admins'
+import { Route as AdminTemplatesTemplateIdRouteImport } from './routes/admin_.templates.$templateId'
 import { Route as AdminStudentUidRouteImport } from './routes/admin_.student.$uid'
 
 const WelcomeRoute = WelcomeRouteImport.update({
@@ -131,6 +132,12 @@ const AdminAdminsRoute = AdminAdminsRouteImport.update({
   path: '/admin/admins',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminTemplatesTemplateIdRoute =
+  AdminTemplatesTemplateIdRouteImport.update({
+    id: '/$templateId',
+    path: '/$templateId',
+    getParentRoute: () => AdminTemplatesRoute,
+  } as any)
 const AdminStudentUidRoute = AdminStudentUidRouteImport.update({
   id: '/admin_/student/$uid',
   path: '/admin/student/$uid',
@@ -154,11 +161,12 @@ export interface FileRoutesByFullPath {
   '/admin/nutrition': typeof AdminNutritionRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/routines': typeof AdminRoutinesRoute
-  '/admin/templates': typeof AdminTemplatesRoute
+  '/admin/templates': typeof AdminTemplatesRouteWithChildren
   '/admin/tokens': typeof AdminTokensRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
   '/admin/student/$uid': typeof AdminStudentUidRoute
+  '/admin/templates/$templateId': typeof AdminTemplatesTemplateIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -177,11 +185,12 @@ export interface FileRoutesByTo {
   '/admin/nutrition': typeof AdminNutritionRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/routines': typeof AdminRoutinesRoute
-  '/admin/templates': typeof AdminTemplatesRoute
+  '/admin/templates': typeof AdminTemplatesRouteWithChildren
   '/admin/tokens': typeof AdminTokensRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
   '/admin/student/$uid': typeof AdminStudentUidRoute
+  '/admin/templates/$templateId': typeof AdminTemplatesTemplateIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -201,11 +210,12 @@ export interface FileRoutesById {
   '/admin_/nutrition': typeof AdminNutritionRoute
   '/admin_/products': typeof AdminProductsRoute
   '/admin_/routines': typeof AdminRoutinesRoute
-  '/admin_/templates': typeof AdminTemplatesRoute
+  '/admin_/templates': typeof AdminTemplatesRouteWithChildren
   '/admin_/tokens': typeof AdminTokensRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
   '/admin_/student/$uid': typeof AdminStudentUidRoute
+  '/admin_/templates/$templateId': typeof AdminTemplatesTemplateIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -231,6 +241,7 @@ export interface FileRouteTypes {
     | '/lesson/$lessonId'
     | '/start/$token'
     | '/admin/student/$uid'
+    | '/admin/templates/$templateId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -254,6 +265,7 @@ export interface FileRouteTypes {
     | '/lesson/$lessonId'
     | '/start/$token'
     | '/admin/student/$uid'
+    | '/admin/templates/$templateId'
   id:
     | '__root__'
     | '/'
@@ -277,6 +289,7 @@ export interface FileRouteTypes {
     | '/lesson/$lessonId'
     | '/start/$token'
     | '/admin_/student/$uid'
+    | '/admin_/templates/$templateId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -296,7 +309,7 @@ export interface RootRouteChildren {
   AdminNutritionRoute: typeof AdminNutritionRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRoutinesRoute: typeof AdminRoutinesRoute
-  AdminTemplatesRoute: typeof AdminTemplatesRoute
+  AdminTemplatesRoute: typeof AdminTemplatesRouteWithChildren
   AdminTokensRoute: typeof AdminTokensRoute
   LessonLessonIdRoute: typeof LessonLessonIdRoute
   StartTokenRoute: typeof StartTokenRoute
@@ -445,6 +458,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin_/templates/$templateId': {
+      id: '/admin_/templates/$templateId'
+      path: '/$templateId'
+      fullPath: '/admin/templates/$templateId'
+      preLoaderRoute: typeof AdminTemplatesTemplateIdRouteImport
+      parentRoute: typeof AdminTemplatesRoute
+    }
     '/admin_/student/$uid': {
       id: '/admin_/student/$uid'
       path: '/admin/student/$uid'
@@ -454,6 +474,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AdminTemplatesRouteChildren {
+  AdminTemplatesTemplateIdRoute: typeof AdminTemplatesTemplateIdRoute
+}
+
+const AdminTemplatesRouteChildren: AdminTemplatesRouteChildren = {
+  AdminTemplatesTemplateIdRoute: AdminTemplatesTemplateIdRoute,
+}
+
+const AdminTemplatesRouteWithChildren = AdminTemplatesRoute._addFileChildren(
+  AdminTemplatesRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -472,7 +504,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminNutritionRoute: AdminNutritionRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminRoutinesRoute: AdminRoutinesRoute,
-  AdminTemplatesRoute: AdminTemplatesRoute,
+  AdminTemplatesRoute: AdminTemplatesRouteWithChildren,
   AdminTokensRoute: AdminTokensRoute,
   LessonLessonIdRoute: LessonLessonIdRoute,
   StartTokenRoute: StartTokenRoute,

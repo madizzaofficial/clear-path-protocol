@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Loader2, Check, Sun, Moon, ClipboardList,
   BookOpen, ChevronDown, Lock, Play, ImageOff, MessageSquare, Send, AlertTriangle,
-  Ban, UserCheck, Pencil, X,
+  Ban, UserCheck, Pencil, X, ShoppingCart, Package,
 } from "lucide-react";
 import { course } from "@/lib/course-data";
 
@@ -41,7 +41,15 @@ type IntakeAnswers = {
   completedAt?: number;
 };
 
-type RoutineStep = { id: string; order: number; category: string; product: string; instructions: string };
+type RoutineStep = {
+  id: string;
+  order: number;
+  category: string;
+  product: string;
+  instructions: string;
+  imageUrl?: string;
+  purchaseUrl?: string;
+};
 type Routine = { am: RoutineStep[]; pm: RoutineStep[] };
 
 type PhotoEntry = {
@@ -843,16 +851,37 @@ function RoutineBlock({
       {steps.length === 0 ? (
         <p className="text-sm text-muted-foreground">Aucune étape</p>
       ) : (
-        <ol className="space-y-2">
+        <ol className="space-y-3">
           {steps.map((s, i) => (
             <li key={s.id} className="flex items-start gap-3">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-soft text-[10px] font-semibold text-primary">
+              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-soft text-[10px] font-semibold text-primary">
                 {i + 1}
               </span>
+              {s.imageUrl ? (
+                <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-border/60 bg-muted">
+                  <img src={s.imageUrl} alt={s.product} className="h-full w-full object-cover" />
+                </div>
+              ) : (
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted">
+                  <Package className="h-4 w-4 text-muted-foreground/40" />
+                </div>
+              )}
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">{s.product}</p>
+                <p className="text-sm font-medium leading-tight">{s.product}</p>
                 <p className="text-xs text-muted-foreground">{s.category}</p>
-                {s.instructions && <p className="mt-0.5 text-xs italic text-muted-foreground/80">{s.instructions}</p>}
+                {s.instructions && (
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground/80">{s.instructions}</p>
+                )}
+                {s.purchaseUrl && (
+                  <a
+                    href={s.purchaseUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                  >
+                    <ShoppingCart className="h-3 w-3" /> Acheter
+                  </a>
+                )}
               </div>
             </li>
           ))}

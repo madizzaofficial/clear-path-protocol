@@ -85,7 +85,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       {isNavigating && (
         <div className="fixed inset-x-0 top-0 z-50 h-0.5 bg-muted">
           <div className="h-full animate-[progress_1s_ease-in-out_infinite] bg-primary" />
