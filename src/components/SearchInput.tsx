@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, type ElementType } from "react";
 import { Search } from "lucide-react";
 
 export type SearchSuggestion = {
@@ -15,9 +15,13 @@ type Props = {
   placeholder?: string;
   className?: string;
   inputClassName?: string;
+  icon?: ElementType;
+  clearOnSelect?: boolean;
+  onEnter?: () => void;
 };
 
-export function SearchInput({ value, onChange, suggestions, placeholder, className, inputClassName }: Props) {
+export function SearchInput({ value, onChange, suggestions, placeholder, className, inputClassName, icon, clearOnSelect = true, onEnter }: Props) {
+  const Icon = icon ?? Search;
   const [open, setOpen] = useState(false);
   const [cursor, setCursor] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -40,12 +44,14 @@ export function SearchInput({ value, onChange, suggestions, placeholder, classNa
     } else if (e.key === "Escape") {
       setOpen(false);
       setCursor(-1);
+    } else if (e.key === "Enter" && cursor < 0) {
+      onEnter?.();
     }
   }
 
   return (
     <div className={`relative ${className ?? ""}`}>
-      <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Icon className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       <input
         ref={inputRef}
         value={value}
@@ -63,7 +69,7 @@ export function SearchInput({ value, onChange, suggestions, placeholder, classNa
             <li key={s.id}>
               <button
                 type="button"
-                onMouseDown={(e) => { e.preventDefault(); s.onSelect(); setOpen(false); setCursor(-1); onChange(""); }}
+                onMouseDown={(e) => { e.preventDefault(); s.onSelect(); setOpen(false); setCursor(-1); if (clearOnSelect) onChange(""); }}
                 onMouseEnter={() => setCursor(i)}
                 className={`flex w-full flex-col px-4 py-2.5 text-left transition-colors ${
                   cursor === i ? "bg-primary-soft" : "hover:bg-muted/50"

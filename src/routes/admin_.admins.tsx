@@ -1,12 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AdminShell } from "@/components/AdminShell";
+import { SearchInput } from "@/components/SearchInput";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import {
   doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs,
   arrayUnion, arrayRemove,
 } from "firebase/firestore";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck, ShieldOff, UserPlus, Mail } from "lucide-react";
 
@@ -27,6 +28,7 @@ function AdminsPage() {
 
   const [loading, setLoading] = useState(true);
   const [admins, setAdmins] = useState<AdminProfile[]>([]);
+  const [allUsers, setAllUsers] = useState<AdminProfile[]>([]);
   const [emailInput, setEmailInput] = useState("");
   const [adding, setAdding] = useState(false);
   const [revoking, setRevoking] = useState<string | null>(null);
@@ -39,7 +41,32 @@ function AdminsPage() {
   useEffect(() => {
     if (!isAdmin) return;
     loadAdmins();
+    getDocs(collection(db, "users")).then((snap) =>
+      setAllUsers(snap.docs.map((d) => ({
+        uid: d.id,
+        email: d.data().email ?? d.id,
+        displayName: d.data().displayName ?? null,
+      })))
+    );
   }, [isAdmin]);
+
+  const emailSuggestions = useMemo(() => {
+    const q = emailInput.trim().toLowerCase();
+    if (!q) return [];
+    return allUsers
+      .filter((u) =>
+        u.email.toLowerCase().includes(q) ||
+        (u.displayName?.toLowerCase().includes(q) ?? false)
+      )
+      .filter((u) => !admins.some((a) => a.uid === u.uid))
+      .slice(0, 6)
+      .map((u) => ({
+        id: u.uid,
+        label: u.displayName ?? u.email,
+        sublabel: u.displayName ? u.email : undefined,
+        onSelect: () => setEmailInput(u.email),
+      }));
+  }, [emailInput, allUsers, admins]);
 
   async function loadAdmins() {
     setLoading(true);
@@ -139,17 +166,17 @@ function AdminsPage() {
             Ajouter un admin
           </p>
           <div className="flex gap-3">
-            <div className="relative flex-1">
-              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="email"
-                value={emailInput}
-                onChange={(e) => setEmailInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") grantAdmin(); }}
-                placeholder="adresse@email.com"
-                className="w-full rounded-xl border border-border bg-background py-2.5 pl-9 pr-4 text-sm focus:border-primary focus:outline-none"
-              />
-            </div>
+            <SearchInput
+              value={emailInput}
+              onChange={setEmailInput}
+              placeholder="adresse@email.com"
+              icon={Mail}
+              clearOnSelect={false}
+              onEnter={grantAdmin}
+              className="flex-1"
+              inputClassName="w-full rounded-xl border border-border bg-background py-2.5 pl-9 pr-4 text-sm focus:border-primary focus:outline-none"
+              suggestions={emailSuggestions}
+            />
             <button
               onClick={grantAdmin}
               disabled={adding || !emailInput.trim()}
