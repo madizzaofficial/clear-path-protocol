@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import { findLesson, allLessons, course as staticCourse } from "@/lib/course-data";
+import { findLesson, course as staticCourse } from "@/lib/course-data";
 import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, ArrowRight, Check, ChevronDown, Clock, Download, FileText, Lock, Menu, Play, X } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
@@ -65,7 +65,7 @@ export const Route = createFileRoute("/lesson/$lessonId")({
       ],
     };
   },
-  loader: async ({ params }) => {
+  loader: async ({ params }): Promise<{ lesson: FLesson; chapter: FChapter; allChapters: FChapter[]; courseTitle: string }> => {
     const fsCourse = await loadCourseFromFirestore();
     if (fsCourse) {
       for (const chapter of fsCourse.chapters) {
@@ -83,10 +83,18 @@ export const Route = createFileRoute("/lesson/$lessonId")({
     // Fall back to static data
     const found = findLesson(params.lessonId);
     if (!found) throw notFound();
-    const staticAll = allLessons();
     return {
-      lesson: { ...found.lesson, videoUrl: "", completed: false, order: 0, resources: found.lesson.resources as FLesson["resources"] },
-      chapter: { ...found.chapter, order: 0 },
+      lesson: { ...found.lesson, videoUrl: "", order: 0, resources: found.lesson.resources as FLesson["resources"] },
+      chapter: {
+        id: found.chapter.id,
+        title: found.chapter.title,
+        description: found.chapter.description,
+        order: 0,
+        lessons: found.chapter.lessons.map((l, j) => ({
+          id: l.id, title: l.title, duration: l.duration, summary: l.summary,
+          videoUrl: "", locked: l.locked, order: j, resources: l.resources as FLesson["resources"],
+        })),
+      },
       allChapters: staticCourse.chapters.map((ch, i) => ({
         id: ch.id,
         title: ch.title,
@@ -112,7 +120,7 @@ export const Route = createFileRoute("/lesson/$lessonId")({
 // ─── Component ─────────────────────────────────────────────────────────────
 
 function LessonPage() {
-  const { lesson, chapter, allChapters, courseTitle } = Route.useLoaderData();
+  const { lesson, chapter, allChapters, courseTitle } = Route.useLoaderData() as { lesson: FLesson; chapter: FChapter; allChapters: FChapter[]; courseTitle: string };
   const allLessonsFlat = allChapters.flatMap((ch) => ch.lessons);
   const idx = allLessonsFlat.findIndex((l) => l.id === lesson.id);
   const prev = idx > 0 ? allLessonsFlat[idx - 1] : null;

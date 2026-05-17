@@ -1,8 +1,8 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
 import { course as staticCourse } from "@/lib/course-data";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -26,7 +26,7 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   Plus, Pencil, Trash2, GripVertical,
   ChevronDown, ChevronRight, Video, Lock,
-  Loader2, Check, BookOpen, RefreshCw,
+  Loader2, Check, BookOpen,
 } from "lucide-react";
 import {
   Dialog,
@@ -76,6 +76,7 @@ type FirestoreCourse = {
 };
 
 const COURSE_ID = "clear-skin-protocol";
+const DRAFT_ID = "clear-skin-protocol_draft";
 
 // ─── Route ────────────────────────────────────────────────────────────────────
 
@@ -113,8 +114,10 @@ function CourseEditorPage() {
 
 function CourseEditorContent() {
   const [course, setCourse] = useState<FirestoreCourse | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [savedAt, setSavedAt] = useState<Date | null>(null);
+  const [savedAs, setSavedAs] = useState<"draft" | "published" | null>(null);
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
 
   const [editingChapter, setEditingChapter] = useState<FirestoreChapter | null>(null);
@@ -125,84 +128,86 @@ function CourseEditorContent() {
 
   const [deletingChapterId, setDeletingChapterId] = useState<string | null>(null);
   const [deletingLesson, setDeletingLesson] = useState<{ lessonId: string; chapterId: string } | null>(null);
-  const [confirmReseed, setConfirmReseed] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  // Load from Firestore, seed from static data if absent
+  // Load: draft first → published → static seed
   useEffect(() => {
     async function load() {
-      const snap = await getDoc(doc(db, "courses", COURSE_ID));
-      if (snap.exists()) {
-        setCourse(snap.data() as FirestoreCourse);
-      } else {
-        const seeded: FirestoreCourse = {
-          title: staticCourse.title,
-          subtitle: staticCourse.subtitle,
-          estimatedHours: staticCourse.estimatedHours,
-          chapters: staticCourse.chapters.map((ch, i) => ({
-            id: ch.id,
-            title: ch.title,
-            description: ch.description,
-            order: i,
-            lessons: ch.lessons.map((l, j) => ({
-              id: l.id,
-              title: l.title,
-              duration: l.duration,
-              summary: l.summary,
-              videoUrl: "",
-              locked: l.locked,
-              completed: false,
-              order: j,
-              resources: l.resources,
-            })),
-          })),
-        };
-        setCourse(seeded);
+      const draftSnap = await getDoc(doc(db, "courses", DRAFT_ID));
+      if (draftSnap.exists()) {
+        setCourse(draftSnap.data() as FirestoreCourse);
+        setHasDraft(true);
+        return;
       }
+      const pubSnap = await getDoc(doc(db, "courses", COURSE_ID));
+      if (pubSnap.exists()) {
+        setCourse(pubSnap.data() as FirestoreCourse);
+        return;
+      }
+      // First-time seed from static data
+      setCourse({
+        title: staticCourse.title,
+        subtitle: staticCourse.subtitle,
+        estimatedHours: staticCourse.estimatedHours,
+        chapters: staticCourse.chapters.map((ch, i) => ({
+          id: ch.id,
+          title: ch.title,
+          description: ch.description,
+          order: i,
+          lessons: ch.lessons.map((l, j) => ({
+            id: l.id,
+            title: l.title,
+            duration: l.duration,
+            summary: l.summary,
+            videoUrl: "",
+            locked: l.locked,
+            completed: false,
+            order: j,
+            resources: l.resources,
+          })),
+        })),
+      });
+      setIsDirty(true);
     }
     load();
   }, []);
 
-  async function saveCourse(updated: FirestoreCourse) {
+  // Local-only update — marks dirty without writing to Firestore
+  function updateCourse(updated: FirestoreCourse) {
+    setCourse(updated);
+    setIsDirty(true);
+    setSavedAs(null);
+  }
+
+  async function saveAsDraft() {
+    if (!course) return;
     setSaving(true);
     try {
-      await setDoc(doc(db, "courses", COURSE_ID), updated);
-      setCourse(updated);
-      setSavedAt(new Date());
+      await setDoc(doc(db, "courses", DRAFT_ID), course);
+      setIsDirty(false);
+      setHasDraft(true);
+      setSavedAs("draft");
     } finally {
       setSaving(false);
     }
   }
 
-  async function reseedFromStatic() {
-    const seeded: FirestoreCourse = {
-      title: staticCourse.title,
-      subtitle: staticCourse.subtitle,
-      estimatedHours: staticCourse.estimatedHours,
-      chapters: staticCourse.chapters.map((ch, i) => ({
-        id: ch.id,
-        title: ch.title,
-        description: ch.description,
-        order: i,
-        lessons: ch.lessons.map((l, j) => ({
-          id: l.id,
-          title: l.title,
-          duration: l.duration,
-          summary: l.summary,
-          videoUrl: course?.chapters.find(c => c.id === ch.id)?.lessons.find(fl => fl.id === l.id)?.videoUrl ?? "",
-          locked: l.locked,
-          completed: false,
-          order: j,
-          resources: l.resources,
-        })),
-      })),
-    };
-    await saveCourse(seeded);
-    setConfirmReseed(false);
+  async function publish() {
+    if (!course) return;
+    setSaving(true);
+    try {
+      await setDoc(doc(db, "courses", COURSE_ID), course);
+      await deleteDoc(doc(db, "courses", DRAFT_ID)).catch(() => {});
+      setIsDirty(false);
+      setHasDraft(false);
+      setSavedAs("published");
+    } finally {
+      setSaving(false);
+    }
   }
 
   function toggleChapter(id: string) {
@@ -221,7 +226,7 @@ function CourseEditorContent() {
     const from = course.chapters.findIndex((c) => c.id === active.id);
     const to = course.chapters.findIndex((c) => c.id === over.id);
     const reordered = arrayMove(course.chapters, from, to).map((ch, i) => ({ ...ch, order: i }));
-    saveCourse({ ...course, chapters: reordered });
+    updateCourse({ ...course, chapters: reordered });
   }
 
   // ── Lesson drag ──
@@ -234,7 +239,7 @@ function CourseEditorContent() {
     const from = chapter.lessons.findIndex((l) => l.id === active.id);
     const to = chapter.lessons.findIndex((l) => l.id === over.id);
     const reordered = arrayMove(chapter.lessons, from, to).map((l, i) => ({ ...l, order: i }));
-    saveCourse({
+    updateCourse({
       ...course,
       chapters: course.chapters.map((c) =>
         c.id === chapterId ? { ...c, lessons: reordered } : c
@@ -264,13 +269,13 @@ function CourseEditorContent() {
         ),
       };
     }
-    saveCourse(updated);
+    updateCourse(updated);
     setEditingChapter(null);
   }
 
   function handleDeleteChapter() {
     if (!course || !deletingChapterId) return;
-    saveCourse({ ...course, chapters: course.chapters.filter((ch) => ch.id !== deletingChapterId) });
+    updateCourse({ ...course, chapters: course.chapters.filter((ch) => ch.id !== deletingChapterId) });
     setDeletingChapterId(null);
   }
 
@@ -282,7 +287,7 @@ function CourseEditorContent() {
     if (isNewLesson) {
       const newL: FirestoreLesson = {
         id: `l-${Date.now()}`,
-        title: data.title ?? "New Lesson",
+        title: data.title ?? "Nouvelle leçon",
         duration: data.duration ?? "5 min",
         summary: data.summary ?? "",
         videoUrl: data.videoUrl ?? "",
@@ -309,13 +314,13 @@ function CourseEditorContent() {
         ),
       };
     }
-    saveCourse(updated);
+    updateCourse(updated);
     setEditingLesson(null);
   }
 
   function handleDeleteLesson() {
     if (!course || !deletingLesson) return;
-    saveCourse({
+    updateCourse({
       ...course,
       chapters: course.chapters.map((ch) =>
         ch.id === deletingLesson.chapterId
@@ -348,30 +353,54 @@ function CourseEditorContent() {
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>
-              <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight md:text-5xl">Course Editor</h1>
+              <div className="mt-3 flex items-center gap-3">
+                <h1 className="font-display text-4xl font-semibold tracking-tight md:text-5xl">Éditeur de cours</h1>
+                {hasDraft && !isDirty && (
+                  <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
+                    Brouillon
+                  </span>
+                )}
+                {isDirty && (
+                  <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                    Modifications non sauvegardées
+                  </span>
+                )}
+              </div>
               <p className="mt-2 text-muted-foreground">
-                {course.chapters.length} chapters · {totalLessons} lessons
+                {course.chapters.length} chapitre{course.chapters.length !== 1 ? "s" : ""} · {totalLessons} leçon{totalLessons !== 1 ? "s" : ""}
               </p>
             </div>
+
             <div className="flex items-center gap-3 text-sm">
               {saving && (
                 <span className="flex items-center gap-1.5 text-muted-foreground">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" /> Sauvegarde…
                 </span>
               )}
-              {!saving && savedAt && (
+              {!saving && savedAs === "draft" && (
                 <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <Check className="h-3.5 w-3.5 text-primary" />
-                  Sauvegardé à {savedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  <Check className="h-3.5 w-3.5 text-amber-500" /> Brouillon sauvegardé
+                </span>
+              )}
+              {!saving && savedAs === "published" && (
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <Check className="h-3.5 w-3.5 text-primary" /> Publié
                 </span>
               )}
               <button
-                onClick={() => setConfirmReseed(true)}
-                disabled={saving}
-                className="flex items-center gap-2 rounded-2xl border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary-soft/20 hover:text-foreground disabled:opacity-50"
-                title="Importer les chapitres et leçons depuis course-data.ts (conserve les URLs vidéo)"
+                onClick={saveAsDraft}
+                disabled={saving || !isDirty}
+                className="flex items-center gap-2 rounded-2xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:border-amber-400/60 hover:bg-amber-50/60 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-amber-950/20"
               >
-                <RefreshCw className="h-3.5 w-3.5" /> Importer course-data.ts
+                Sauvegarder comme brouillon
+              </button>
+              <button
+                onClick={publish}
+                disabled={saving || (!isDirty && !hasDraft)}
+                className="flex items-center gap-2 rounded-2xl bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                Publier
               </button>
             </div>
           </div>
@@ -439,7 +468,7 @@ function CourseEditorContent() {
             }}
             className="flex w-full items-center justify-center gap-2 rounded-3xl border border-dashed border-border bg-card py-5 text-sm font-medium text-muted-foreground transition-all hover:border-primary/40 hover:bg-primary-soft/20 hover:text-foreground"
           >
-            <Plus className="h-4 w-4" /> Add chapter
+            <Plus className="h-4 w-4" /> Ajouter un chapitre
           </button>
         </div>
       </main>
@@ -451,7 +480,6 @@ function CourseEditorContent() {
         isNew={isNewChapter}
         onClose={() => setEditingChapter(null)}
         onSave={handleSaveChapter}
-        saving={saving}
       />
 
       <LessonDialog
@@ -459,24 +487,23 @@ function CourseEditorContent() {
         isNew={isNewLesson}
         onClose={() => setEditingLesson(null)}
         onSave={handleSaveLesson}
-        saving={saving}
       />
 
       <AlertDialog open={!!deletingChapterId} onOpenChange={(o) => !o && setDeletingChapterId(null)}>
         <AlertDialogContent className="rounded-3xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-display">Delete this chapter?</AlertDialogTitle>
+            <AlertDialogTitle className="font-display">Supprimer ce chapitre ?</AlertDialogTitle>
             <AlertDialogDescription>
-              All lessons inside this chapter will also be permanently deleted.
+              Toutes les leçons de ce chapitre seront également supprimées.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-2xl">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-2xl">Annuler</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteChapter}
               className="rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete chapter
+              Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -485,39 +512,18 @@ function CourseEditorContent() {
       <AlertDialog open={!!deletingLesson} onOpenChange={(o) => !o && setDeletingLesson(null)}>
         <AlertDialogContent className="rounded-3xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-display">Delete this lesson?</AlertDialogTitle>
+            <AlertDialogTitle className="font-display">Supprimer cette leçon ?</AlertDialogTitle>
             <AlertDialogDescription>
-              This lesson will be permanently removed from the course.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-2xl">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteLesson}
-              className="rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete lesson
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={confirmReseed} onOpenChange={(o) => !o && setConfirmReseed(false)}>
-        <AlertDialogContent className="rounded-3xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="font-display">Importer course-data.ts ?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Les chapitres et leçons seront remplacés par le contenu de <strong>course-data.ts</strong>.
-              Les URLs vidéo déjà renseignées seront conservées.
+              Cette leçon sera définitivement supprimée du cours.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-2xl">Annuler</AlertDialogCancel>
             <AlertDialogAction
-              onClick={reseedFromStatic}
-              className="rounded-2xl bg-foreground text-background hover:opacity-90"
+              onClick={handleDeleteLesson}
+              className="rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Importer"}
+              Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -529,17 +535,9 @@ function CourseEditorContent() {
 // ─── Sortable Chapter ─────────────────────────────────────────────────────────
 
 function SortableChapter({
-  ch,
-  chIdx,
-  isOpen,
-  sensors,
-  onToggle,
-  onEditChapter,
-  onDeleteChapter,
-  onAddLesson,
-  onEditLesson,
-  onDeleteLesson,
-  onLessonDragEnd,
+  ch, chIdx, isOpen, sensors, onToggle,
+  onEditChapter, onDeleteChapter, onAddLesson,
+  onEditLesson, onDeleteLesson, onLessonDragEnd,
 }: {
   ch: FirestoreChapter;
   chIdx: number;
@@ -553,15 +551,7 @@ function SortableChapter({
   onDeleteLesson: (lessonId: string) => void;
   onLessonDragEnd: (event: DragEndEvent) => void;
 }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: ch.id });
-
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: ch.id });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -571,28 +561,15 @@ function SortableChapter({
   };
 
   return (
-    <article
-      ref={setNodeRef}
-      style={style}
-      className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft"
-    >
-      {/* Chapter header row */}
+    <article ref={setNodeRef} style={style} className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
       <div className="flex items-center gap-2 p-5 md:p-6">
-        {/* Drag handle */}
         <button
-          {...attributes}
-          {...listeners}
+          {...attributes} {...listeners}
           className="flex h-8 w-8 shrink-0 cursor-grab items-center justify-center rounded-xl text-muted-foreground/30 transition-colors hover:text-muted-foreground active:cursor-grabbing"
-          title="Drag to reorder chapter"
         >
           <GripVertical className="h-5 w-5" />
         </button>
-
-        {/* Expand toggle */}
-        <button
-          onClick={onToggle}
-          className="flex flex-1 items-start gap-4 text-left"
-        >
+        <button onClick={onToggle} className="flex flex-1 items-start gap-4 text-left">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-sm font-semibold text-primary">
             {chIdx + 1}
           </span>
@@ -600,7 +577,7 @@ function SortableChapter({
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-display text-lg font-semibold leading-tight">{ch.title}</h3>
               <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">
-                {ch.lessons.length} lesson{ch.lessons.length !== 1 ? "s" : ""}
+                {ch.lessons.length} leçon{ch.lessons.length !== 1 ? "s" : ""}
               </span>
             </div>
             <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">{ch.description}</p>
@@ -609,27 +586,16 @@ function SortableChapter({
             {isOpen ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
           </span>
         </button>
-
-        {/* Chapter actions */}
         <div className="flex shrink-0 items-center gap-2">
-          <button
-            onClick={onEditChapter}
-            title="Edit chapter"
-            className="flex h-9 w-9 items-center justify-center rounded-2xl border border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
+          <button onClick={onEditChapter} className="flex h-9 w-9 items-center justify-center rounded-2xl border border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
             <Pencil className="h-4 w-4" />
           </button>
-          <button
-            onClick={onDeleteChapter}
-            title="Delete chapter"
-            className="flex h-9 w-9 items-center justify-center rounded-2xl border border-border bg-background text-muted-foreground transition-colors hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
-          >
+          <button onClick={onDeleteChapter} className="flex h-9 w-9 items-center justify-center rounded-2xl border border-border bg-background text-muted-foreground transition-colors hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive">
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      {/* Lessons list — accordion */}
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
@@ -641,40 +607,23 @@ function SortableChapter({
           >
             <div className="border-t border-border/60">
               {ch.lessons.length === 0 && (
-                <p className="px-6 py-5 text-sm text-muted-foreground md:px-8">
-                  No lessons yet — add your first one below.
-                </p>
+                <p className="px-6 py-5 text-sm text-muted-foreground md:px-8">Aucune leçon — ajoutez-en une ci-dessous.</p>
               )}
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={onLessonDragEnd}
-              >
-                <SortableContext
-                  items={ch.lessons.map((l) => l.id)}
-                  strategy={verticalListSortingStrategy}
-                >
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onLessonDragEnd}>
+                <SortableContext items={ch.lessons.map((l) => l.id)} strategy={verticalListSortingStrategy}>
                   <ul className="divide-y divide-border/40">
                     {ch.lessons.map((l, lIdx) => (
-                      <SortableLesson
-                        key={l.id}
-                        l={l}
-                        lIdx={lIdx}
-                        onEdit={() => onEditLesson(l)}
-                        onDelete={() => onDeleteLesson(l.id)}
-                      />
+                      <SortableLesson key={l.id} l={l} lIdx={lIdx} onEdit={() => onEditLesson(l)} onDelete={() => onDeleteLesson(l.id)} />
                     ))}
                   </ul>
                 </SortableContext>
               </DndContext>
-
-              {/* Add lesson */}
               <div className="border-t border-border/40 p-4 md:px-8">
                 <button
                   onClick={onAddLesson}
                   className="flex items-center gap-2 rounded-2xl border border-dashed border-border px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary-soft/30 hover:text-foreground"
                 >
-                  <Plus className="h-4 w-4" /> Add lesson
+                  <Plus className="h-4 w-4" /> Ajouter une leçon
                 </button>
               </div>
             </div>
@@ -687,26 +636,10 @@ function SortableChapter({
 
 // ─── Sortable Lesson ──────────────────────────────────────────────────────────
 
-function SortableLesson({
-  l,
-  lIdx,
-  onEdit,
-  onDelete,
-}: {
-  l: FirestoreLesson;
-  lIdx: number;
-  onEdit: () => void;
-  onDelete: () => void;
+function SortableLesson({ l, lIdx, onEdit, onDelete }: {
+  l: FirestoreLesson; lIdx: number; onEdit: () => void; onDelete: () => void;
 }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: l.id });
-
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: l.id });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -717,17 +650,10 @@ function SortableLesson({
 
   return (
     <li ref={setNodeRef} style={style} className="flex items-center gap-3 px-5 py-4 md:px-8">
-      <button
-        {...attributes}
-        {...listeners}
-        className="cursor-grab text-muted-foreground/30 transition-colors hover:text-muted-foreground/60 active:cursor-grabbing"
-        title="Drag to reorder lesson"
-      >
+      <button {...attributes} {...listeners} className="cursor-grab text-muted-foreground/30 transition-colors hover:text-muted-foreground/60 active:cursor-grabbing">
         <GripVertical className="h-4 w-4 shrink-0" />
       </button>
-      <span className="w-5 shrink-0 text-center text-xs font-medium tabular-nums text-muted-foreground">
-        {lIdx + 1}
-      </span>
+      <span className="w-5 shrink-0 text-center text-xs font-medium tabular-nums text-muted-foreground">{lIdx + 1}</span>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <p className="truncate text-sm font-semibold">{l.title}</p>
@@ -735,28 +661,17 @@ function SortableLesson({
         </div>
         <div className="mt-0.5 flex items-center gap-3">
           <span className="text-xs text-muted-foreground">{l.duration}</span>
-          {l.videoUrl ? (
-            <span className="flex items-center gap-1 text-xs text-primary">
-              <Video className="h-3 w-3" /> Video set
-            </span>
-          ) : (
-            <span className="text-xs text-muted-foreground/50">No video</span>
-          )}
+          {l.videoUrl
+            ? <span className="flex items-center gap-1 text-xs text-primary"><Video className="h-3 w-3" /> Vidéo définie</span>
+            : <span className="text-xs text-muted-foreground/50">Pas de vidéo</span>
+          }
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
-        <button
-          onClick={onEdit}
-          title="Edit lesson"
-          className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
+        <button onClick={onEdit} className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
           <Pencil className="h-3.5 w-3.5" />
         </button>
-        <button
-          onClick={onDelete}
-          title="Delete lesson"
-          className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground transition-colors hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
-        >
+        <button onClick={onDelete} className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground transition-colors hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive">
           <Trash2 className="h-3.5 w-3.5" />
         </button>
       </div>
@@ -766,18 +681,11 @@ function SortableLesson({
 
 // ─── Chapter Dialog ───────────────────────────────────────────────────────────
 
-function ChapterDialog({
-  chapter,
-  isNew,
-  onClose,
-  onSave,
-  saving,
-}: {
+function ChapterDialog({ chapter, isNew, onClose, onSave }: {
   chapter: FirestoreChapter | null;
   isNew: boolean;
   onClose: () => void;
   onSave: (d: { title: string; description: string }) => void;
-  saving: boolean;
 }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -791,46 +699,26 @@ function ChapterDialog({
       <DialogContent className="rounded-3xl sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-display text-xl">
-            {isNew ? "Add chapter" : "Edit chapter"}
+            {isNew ? "Ajouter un chapitre" : "Modifier le chapitre"}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div>
-            <label className="mb-2 block text-sm font-medium text-foreground/80">Title</label>
-            <input
-
-              autoComplete="off"              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Chapter title"
-              className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
+            <label className="mb-2 block text-sm font-medium text-foreground/80">Titre</label>
+            <input autoComplete="off" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Titre du chapitre"
+              className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" />
           </div>
           <div>
             <label className="mb-2 block text-sm font-medium text-foreground/80">Description</label>
-            <textarea
-
-              autoComplete="off"              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Brief description of this chapter"
-              rows={3}
-              className="w-full resize-none rounded-2xl border border-border bg-background p-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
+            <textarea autoComplete="off" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Courte description du chapitre" rows={3}
+              className="w-full resize-none rounded-2xl border border-border bg-background p-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" />
           </div>
         </div>
         <DialogFooter className="gap-2 sm:gap-2">
-          <button
-            onClick={onClose}
-            className="rounded-2xl border border-border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => onSave({ title, description })}
-            disabled={saving || !title.trim()}
-            className="flex items-center gap-2 rounded-2xl bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
-          >
-            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-            {isNew ? "Add chapter" : "Save changes"}
+          <button onClick={onClose} className="rounded-2xl border border-border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted">Annuler</button>
+          <button onClick={() => onSave({ title, description })} disabled={!title.trim()}
+            className="rounded-2xl bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50">
+            {isNew ? "Ajouter" : "Appliquer"}
           </button>
         </DialogFooter>
       </DialogContent>
@@ -840,18 +728,11 @@ function ChapterDialog({
 
 // ─── Lesson Dialog ────────────────────────────────────────────────────────────
 
-function LessonDialog({
-  data,
-  isNew,
-  onClose,
-  onSave,
-  saving,
-}: {
+function LessonDialog({ data, isNew, onClose, onSave }: {
   data: { lesson: FirestoreLesson; chapterId: string } | null;
   isNew: boolean;
   onClose: () => void;
   onSave: (d: Partial<FirestoreLesson>) => void;
-  saving: boolean;
 }) {
   const [title, setTitle] = useState("");
   const [duration, setDuration] = useState("5 min");
@@ -874,91 +755,50 @@ function LessonDialog({
       <DialogContent className="rounded-3xl sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-display text-xl">
-            {isNew ? "Add lesson" : "Edit lesson"}
+            {isNew ? "Ajouter une leçon" : "Modifier la leçon"}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div>
-            <label className="mb-2 block text-sm font-medium text-foreground/80">Title</label>
-            <input
-
-              autoComplete="off"              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Lesson title"
-              className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
+            <label className="mb-2 block text-sm font-medium text-foreground/80">Titre</label>
+            <input autoComplete="off" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Titre de la leçon"
+              className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" />
           </div>
-
           <div>
-            <label className="mb-2 block text-sm font-medium text-foreground/80">Duration</label>
-            <input
-
-              autoComplete="off"              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              placeholder="e.g. 9 min"
-              className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
+            <label className="mb-2 block text-sm font-medium text-foreground/80">Durée</label>
+            <input autoComplete="off" value={duration} onChange={(e) => setDuration(e.target.value)} placeholder="ex : 9 min"
+              className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" />
           </div>
-
           <div>
-            <label className="mb-2 block text-sm font-medium text-foreground/80">Video URL</label>
+            <label className="mb-2 block text-sm font-medium text-foreground/80">URL vidéo</label>
             <div className="relative">
               <Video className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-
-                autoComplete="off"                value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
-                placeholder="https://www.youtube.com/watch?v=…"
-                className="h-11 w-full rounded-2xl border border-border bg-background pl-11 pr-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-              />
+              <input autoComplete="off" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=…"
+                className="h-11 w-full rounded-2xl border border-border bg-background pl-11 pr-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" />
             </div>
-            <p className="mt-1.5 text-xs text-muted-foreground">YouTube, Vimeo, or direct MP4 URL</p>
+            <p className="mt-1.5 text-xs text-muted-foreground">YouTube, Vimeo ou MP4 direct</p>
           </div>
-
           <div>
-            <label className="mb-2 block text-sm font-medium text-foreground/80">Summary</label>
-            <textarea
-
-              autoComplete="off"              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
-              placeholder="What students will learn in this lesson"
-              rows={3}
-              className="w-full resize-none rounded-2xl border border-border bg-background p-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
+            <label className="mb-2 block text-sm font-medium text-foreground/80">Résumé</label>
+            <textarea autoComplete="off" value={summary} onChange={(e) => setSummary(e.target.value)} placeholder="Ce que l'élève apprendra" rows={3}
+              className="w-full resize-none rounded-2xl border border-border bg-background p-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" />
           </div>
-
-          {/* Lock toggle */}
           <div className="flex items-center justify-between rounded-2xl border border-border bg-background p-4">
-            <div className="min-w-0">
-              <p className="text-sm font-medium">Lock lesson</p>
-              <p className="text-xs text-muted-foreground">Requires previous lessons to be completed first</p>
+            <div>
+              <p className="text-sm font-medium">Verrouiller la leçon</p>
+              <p className="text-xs text-muted-foreground">Nécessite de compléter les leçons précédentes</p>
             </div>
-            <button
-              type="button"
-              onClick={() => setLocked((v) => !v)}
-              className={`relative ml-4 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${locked ? "bg-primary" : "bg-muted"}`}
-            >
-              <span
-                className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${locked ? "translate-x-6" : "translate-x-1"}`}
-              />
+            <button type="button" onClick={() => setLocked((v) => !v)}
+              className={`relative ml-4 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${locked ? "bg-primary" : "bg-muted"}`}>
+              <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${locked ? "translate-x-6" : "translate-x-1"}`} />
             </button>
           </div>
         </div>
-
         <DialogFooter className="gap-2 sm:gap-2">
-          <button
-            onClick={onClose}
-            className="rounded-2xl border border-border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => onSave({ title, duration, summary, videoUrl, locked })}
-            disabled={saving || !title.trim()}
-            className="flex items-center gap-2 rounded-2xl bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
-          >
-            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-            {isNew ? "Add lesson" : "Save changes"}
+          <button onClick={onClose} className="rounded-2xl border border-border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted">Annuler</button>
+          <button onClick={() => onSave({ title, duration, summary, videoUrl, locked })} disabled={!title.trim()}
+            className="rounded-2xl bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50">
+            {isNew ? "Ajouter" : "Appliquer"}
           </button>
         </DialogFooter>
       </DialogContent>
