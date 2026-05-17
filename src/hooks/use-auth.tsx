@@ -73,43 +73,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
-      if (u) {
-        const userRef = doc(db, "users", u.uid);
-        const userSnap = await getDoc(userRef);
-        const admin = await fetchIsAdmin(u.uid, userSnap);
-        if (userSnap.data()?.disabled === true) {
-          await fbSignOut(auth);
-          setUser(null);
+      try {
+        if (u) {
+          const userRef = doc(db, "users", u.uid);
+          const userSnap = await getDoc(userRef);
+          const admin = await fetchIsAdmin(u.uid, userSnap);
+          if (userSnap.data()?.disabled === true) {
+            await fbSignOut(auth);
+            setUser(null);
+            setIsAdmin(false);
+            return;
+          }
+          const prevLastSeen: number | undefined = userSnap.data()?.lastSeen;
+          const lastSignInMs = u.metadata?.lastSignInTime
+            ? new Date(u.metadata.lastSignInTime).getTime()
+            : Date.now();
+          const isFreshSignIn = Date.now() - lastSignInMs < 60_000;
+          if (!isFreshSignIn && prevLastSeen && Date.now() - prevLastSeen > IDLE_TIMEOUT_MS) {
+            await fbSignOut(auth);
+            setUser(null);
+            setIsAdmin(false);
+            return;
+          }
+          const update: Record<string, unknown> = {
+            uid: u.uid,
+            email: u.email ?? "",
+            displayName: u.displayName ?? null,
+            photoURL: u.photoURL ?? null,
+            lastSeen: Date.now(),
+          };
+          if (!userSnap.exists()) update.enrolledAt = Date.now();
+          setDoc(userRef, update, { merge: true }).catch(() => {});
+          setIsAdmin(admin);
+        } else {
           setIsAdmin(false);
-          setLoading(false);
-          return;
         }
-        const prevLastSeen: number | undefined = userSnap.data()?.lastSeen;
-        const lastSignInMs = u.metadata?.lastSignInTime
-          ? new Date(u.metadata.lastSignInTime).getTime()
-          : Date.now();
-        const isFreshSignIn = Date.now() - lastSignInMs < 60_000;
-        if (!isFreshSignIn && prevLastSeen && Date.now() - prevLastSeen > IDLE_TIMEOUT_MS) {
-          await fbSignOut(auth);
-          setUser(null);
-          setIsAdmin(false);
-          setLoading(false);
-          return;
-        }
-        const update: Record<string, unknown> = {
-          uid: u.uid,
-          email: u.email ?? "",
-          displayName: u.displayName ?? null,
-          photoURL: u.photoURL ?? null,
-          lastSeen: Date.now(),
-        };
-        if (!userSnap.exists()) update.enrolledAt = Date.now();
-        setDoc(userRef, update, { merge: true }).catch(() => {});
-        setIsAdmin(admin);
-      } else {
-        setIsAdmin(false);
+      } catch {
+        // Firestore inaccessible (réseau coupé, extension bloquante) — on laisse passer avec Auth seul
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
     return unsub;
   }, []);
