@@ -312,7 +312,7 @@ function AdminFaqPage() {
 
       {/* Add / Edit dialog */}
       <Dialog open={dialogOpen} onOpenChange={(open) => !open && setDialogOpen(false)}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto rounded-3xl sm:max-w-2xl">
+        <DialogContent className="top-[2%] translate-y-0 max-h-[96dvh] overflow-y-auto rounded-t-3xl rounded-b-none sm:top-[50%] sm:translate-y-[-50%] sm:max-h-[90dvh] sm:rounded-3xl sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">
               {isNew ? "Nouvelle question" : "Modifier la question"}
