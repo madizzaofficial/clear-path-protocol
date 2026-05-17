@@ -85,7 +85,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
         const prevLastSeen: number | undefined = userSnap.data()?.lastSeen;
-        if (prevLastSeen && Date.now() - prevLastSeen > IDLE_TIMEOUT_MS) {
+        const lastSignInMs = u.metadata?.lastSignInTime
+          ? new Date(u.metadata.lastSignInTime).getTime()
+          : Date.now();
+        const isFreshSignIn = Date.now() - lastSignInMs < 60_000;
+        if (!isFreshSignIn && prevLastSeen && Date.now() - prevLastSeen > IDLE_TIMEOUT_MS) {
           await fbSignOut(auth);
           setUser(null);
           setIsAdmin(false);
