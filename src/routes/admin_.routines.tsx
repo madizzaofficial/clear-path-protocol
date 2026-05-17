@@ -218,16 +218,23 @@ function buildEmailHtml(firstName: string, am: RoutineStep[], pm: RoutineStep[])
       : steps
           .map(
             (s, i) => `
-<div style="display:flex;gap:14px;padding:14px 0;${i < steps.length - 1 ? "border-bottom:1px solid #f0ebe4;" : ""}">
-  <div style="min-width:28px;height:28px;background:#f7f0ec;border-radius:50%;text-align:center;line-height:28px;flex-shrink:0;">
-    <span style="color:#c4724b;font-size:13px;font-weight:700;">${i + 1}</span>
-  </div>
-  <div>
-    <span style="display:inline-block;background:#fff3ec;color:#c4724b;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:2px 10px;border-radius:100px;margin-bottom:6px;">${escapeHtml(s.category)}</span>
-    <p style="color:#1a1a1a;font-weight:600;margin:0 0 3px;font-size:14px;">${escapeHtml(s.product)}</p>
-    <p style="color:#888;margin:0;font-size:13px;line-height:1.55;">${escapeHtml(s.instructions)}</p>
-  </div>
-</div>`,
+<table cellpadding="0" cellspacing="0" style="width:100%;${i < steps.length - 1 ? "border-bottom:1px solid #f0ebe4;" : ""}padding:14px 0;">
+  <tr>
+    <td style="width:60px;vertical-align:top;padding-right:14px;">
+      ${s.imageUrl
+        ? `<img src="${escapeHtml(s.imageUrl)}" alt="${escapeHtml(s.product)}" width="52" height="52" style="border-radius:12px;object-fit:cover;display:block;border:0;" />`
+        : `<div style="width:28px;height:28px;background:#f7f0ec;border-radius:50%;text-align:center;line-height:28px;"><span style="color:#c4724b;font-size:13px;font-weight:700;">${i + 1}</span></div>`
+      }
+    </td>
+    <td style="vertical-align:top;">
+      <span style="display:inline-block;background:#fff3ec;color:#c4724b;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:2px 10px;border-radius:100px;margin-bottom:6px;">${escapeHtml(s.category)}</span>
+      <p style="color:#1a1a1a;font-weight:600;margin:0 0 3px;font-size:14px;">${escapeHtml(s.product)}</p>
+      ${s.description ? `<p style="color:#888;margin:0 0 3px;font-size:13px;font-style:italic;line-height:1.5;">${escapeHtml(s.description)}</p>` : ""}
+      <p style="color:#aaa;margin:0;font-size:13px;line-height:1.55;">${escapeHtml(s.instructions)}</p>
+      ${s.purchaseUrl ? `<a href="${escapeHtml(s.purchaseUrl)}" style="display:inline-block;margin-top:8px;color:#c4724b;font-size:12px;font-weight:600;text-decoration:none;">Acheter →</a>` : ""}
+    </td>
+  </tr>
+</table>`,
           )
           .join("");
 

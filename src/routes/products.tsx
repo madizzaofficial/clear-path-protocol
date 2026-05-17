@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
@@ -35,6 +36,50 @@ type UserRoutine = {
   sentAt: number | null;
   status: "draft" | "sent";
 };
+
+type ReportNotifPayload = {
+  uid: string;
+  studentEmail: string;
+  studentName: string | null;
+  product: string;
+  category: string;
+  type: "irritant" | "allergie";
+};
+
+const notifyAdminReportFn = createServerFn({ method: "POST" })
+  .inputValidator((d: ReportNotifPayload) => d)
+  .handler(async (ctx) => {
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!adminEmail || !apiKey) return;
+    const from = process.env.RESEND_FROM ?? "Protocole Clear <onboarding@resend.dev>";
+    const { uid, studentEmail, studentName, product, category, type } = ctx.data;
+    const label = type === "irritant" ? "Irritant" : "Allergie";
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from,
+        to: adminEmail,
+        subject: `Signalement ${label.toLowerCase()} — ${product}`,
+        html: `
+          <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#111">
+            <h1 style="font-size:22px;font-weight:700;margin:0 0 16px">Signalement produit</h1>
+            <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+              <tr><td style="padding:8px 0;color:#888;font-size:14px;width:120px;">Élève</td><td style="padding:8px 0;font-size:14px;font-weight:600;">${studentName ?? studentEmail}</td></tr>
+              <tr><td style="padding:8px 0;color:#888;font-size:14px;">Email</td><td style="padding:8px 0;font-size:14px;">${studentEmail}</td></tr>
+              <tr><td style="padding:8px 0;color:#888;font-size:14px;">Produit</td><td style="padding:8px 0;font-size:14px;font-weight:600;">${product}</td></tr>
+              <tr><td style="padding:8px 0;color:#888;font-size:14px;">Catégorie</td><td style="padding:8px 0;font-size:14px;">${category}</td></tr>
+              <tr><td style="padding:8px 0;color:#888;font-size:14px;">Type</td><td style="padding:8px 0;font-size:14px;color:${type === "irritant" ? "#d97706" : "#dc2626"};font-weight:600;">${label}</td></tr>
+            </table>
+            <a href="https://app.protocole-clear.com/admin/student/${uid}" style="display:inline-block;background:#c4724b;color:#fff;text-decoration:none;padding:12px 24px;border-radius:9999px;font-weight:600;font-size:14px;">
+              Voir le profil élève →
+            </a>
+          </div>
+        `,
+      }),
+    });
+  });
 
 export const Route = createFileRoute("/products")({
   head: () => ({
@@ -124,6 +169,16 @@ function RoutinePage() {
     setReports(updated);
     try {
       await setDoc(doc(db, "routine_reports", user.uid), updated, { merge: true });
+      notifyAdminReportFn({
+        data: {
+          uid: user.uid,
+          studentEmail: user.email ?? "",
+          studentName: user.displayName ?? null,
+          product: reportStep.product,
+          category: reportStep.category,
+          type,
+        },
+      }).catch(() => {});
       setReportStep(null);
     } catch {
       toast.error("Impossible d'enregistrer le signalement. Réessaie.");

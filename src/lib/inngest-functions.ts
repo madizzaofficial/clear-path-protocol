@@ -82,7 +82,7 @@ export const welcomeSequence = inngest.createFunction(
 export const intakeConfirmation = inngest.createFunction(
   { id: "intake-confirmation", triggers: [{ event: "user/intake.completed" }] },
   async ({ event, step }: { event: { data: UserPayload }; step: any }) => {
-    const { email, firstName } = event.data;
+    const { uid, email, firstName } = event.data;
 
     await step.run("send-confirmation", () =>
       sendEmail(
@@ -97,13 +97,35 @@ export const intakeConfirmation = inngest.createFunction(
           <p style="color:#555;line-height:1.6;margin:0 0 24px">
             En attendant, tu peux commencer les leçons du protocole depuis ton tableau de bord.
           </p>
-          <a href="https://lumen.app/" style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:14px 28px;border-radius:9999px;font-weight:600;font-size:15px">
+          <a href="https://app.protocole-clear.com/" style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:14px 28px;border-radius:9999px;font-weight:600;font-size:15px">
             Accéder à mon tableau de bord →
           </a>
         </div>
         `,
       )
     );
+
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (adminEmail) {
+      await step.run("notify-admin-intake", () =>
+        sendEmail(
+          adminEmail,
+          `Nouveau bilan reçu — ${firstName}`,
+          `
+          <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#111">
+            <h1 style="font-size:22px;font-weight:700;margin:0 0 16px">Nouveau bilan peau soumis</h1>
+            <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+              <tr><td style="padding:8px 0;color:#888;font-size:14px;width:120px;">Élève</td><td style="padding:8px 0;font-size:14px;font-weight:600;">${firstName}</td></tr>
+              <tr><td style="padding:8px 0;color:#888;font-size:14px;">Email</td><td style="padding:8px 0;font-size:14px;">${email}</td></tr>
+            </table>
+            <a href="https://app.protocole-clear.com/admin/student/${uid}" style="display:inline-block;background:#c4724b;color:#fff;text-decoration:none;padding:12px 24px;border-radius:9999px;font-weight:600;font-size:14px;">
+              Voir le profil élève →
+            </a>
+          </div>
+          `,
+        )
+      );
+    }
   },
 );
 
