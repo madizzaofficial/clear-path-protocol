@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Home, BookOpen, Sparkles, ShieldCheck, User, LogOut, UserCircle, Camera, Moon, Sun } from "lucide-react";
+import { Home, BookOpen, Sparkles, ShieldCheck, User, LogOut, UserCircle, Camera, Moon, Sun, HelpCircle } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 import { ReactNode } from "react";
 import {
@@ -81,6 +81,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/course", label: "Protocole", icon: BookOpen },
     { to: "/products", label: "Routine", icon: Sparkles },
     { to: "/journal", label: "Journal", icon: Camera },
+    { to: "/faq", label: "FAQ", icon: HelpCircle },
     ...(isAdmin ? [{ to: "/admin", label: "Admin", icon: ShieldCheck }] : []),
   ] as const;
 
