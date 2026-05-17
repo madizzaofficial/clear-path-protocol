@@ -26,7 +26,7 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   Plus, Pencil, Trash2, GripVertical,
   ChevronDown, ChevronRight, Video, Lock,
-  Loader2, Check, BookOpen,
+  Loader2, Check, BookOpen, RefreshCw,
 } from "lucide-react";
 import {
   Dialog,
@@ -125,6 +125,7 @@ function CourseEditorContent() {
 
   const [deletingChapterId, setDeletingChapterId] = useState<string | null>(null);
   const [deletingLesson, setDeletingLesson] = useState<{ lessonId: string; chapterId: string } | null>(null);
+  const [confirmReseed, setConfirmReseed] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -175,6 +176,33 @@ function CourseEditorContent() {
     } finally {
       setSaving(false);
     }
+  }
+
+  async function reseedFromStatic() {
+    const seeded: FirestoreCourse = {
+      title: staticCourse.title,
+      subtitle: staticCourse.subtitle,
+      estimatedHours: staticCourse.estimatedHours,
+      chapters: staticCourse.chapters.map((ch, i) => ({
+        id: ch.id,
+        title: ch.title,
+        description: ch.description,
+        order: i,
+        lessons: ch.lessons.map((l, j) => ({
+          id: l.id,
+          title: l.title,
+          duration: l.duration,
+          summary: l.summary,
+          videoUrl: course?.chapters.find(c => c.id === ch.id)?.lessons.find(fl => fl.id === l.id)?.videoUrl ?? "",
+          locked: l.locked,
+          completed: false,
+          order: j,
+          resources: l.resources,
+        })),
+      })),
+    };
+    await saveCourse(seeded);
+    setConfirmReseed(false);
   }
 
   function toggleChapter(id: string) {
@@ -328,15 +356,23 @@ function CourseEditorContent() {
             <div className="flex items-center gap-3 text-sm">
               {saving && (
                 <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving…
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Sauvegarde…
                 </span>
               )}
               {!saving && savedAt && (
                 <span className="flex items-center gap-1.5 text-muted-foreground">
                   <Check className="h-3.5 w-3.5 text-primary" />
-                  Saved {savedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  Sauvegardé à {savedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </span>
               )}
+              <button
+                onClick={() => setConfirmReseed(true)}
+                disabled={saving}
+                className="flex items-center gap-2 rounded-2xl border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary-soft/20 hover:text-foreground disabled:opacity-50"
+                title="Importer les chapitres et leçons depuis course-data.ts (conserve les URLs vidéo)"
+              >
+                <RefreshCw className="h-3.5 w-3.5" /> Importer course-data.ts
+              </button>
             </div>
           </div>
         </header>
@@ -461,6 +497,27 @@ function CourseEditorContent() {
               className="rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete lesson
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={confirmReseed} onOpenChange={(o) => !o && setConfirmReseed(false)}>
+        <AlertDialogContent className="rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Importer course-data.ts ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Les chapitres et leçons seront remplacés par le contenu de <strong>course-data.ts</strong>.
+              Les URLs vidéo déjà renseignées seront conservées.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-2xl">Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={reseedFromStatic}
+              className="rounded-2xl bg-foreground text-background hover:opacity-90"
+            >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Importer"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
