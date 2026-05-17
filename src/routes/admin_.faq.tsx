@@ -13,9 +13,11 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
-import { GripVertical, Plus, Pencil, Trash2, Loader2, ImageIcon, Video, FileText, HelpCircle, Upload } from "lucide-react";
+import { GripVertical, Plus, Pencil, Trash2, Loader2, ImageIcon, Video, FileText, HelpCircle, Upload, X } from "lucide-react";
 import { uploadProductImageFn } from "@/lib/upload-image";
 import { toast } from "sonner";
+
+type Block = { type: "text" | "image"; value: string };
 
 type FAQEntry = {
   id: string;
@@ -25,13 +27,14 @@ type FAQEntry = {
   content: string;
   videoUrl: string;
   imageUrl: string;
+  blocks: Block[];
   published: boolean;
   order: number;
   createdAt: number;
   updatedAt: number;
 };
 
-export const Route = createFileRoute("/admin/faq")({
+export const Route = createFileRoute("/admin_/faq")({
   head: () => ({
     meta: [{ title: "FAQ — Admin — Protocole Clear" }],
   }),
@@ -63,11 +66,12 @@ function AdminFaqPage() {
   const [type, setType] = useState<"text" | "video" | "image">("text");
   const [content, setContent] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [blocks, setBlocks] = useState<Block[]>([]);
+  const [uploadingBlockIdx, setUploadingBlockIdx] = useState<number | null>(null);
+  const blockImageInputRef = useRef<HTMLInputElement>(null);
+
   const [published, setPublished] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -83,15 +87,24 @@ function AdminFaqPage() {
     getDocs(collection(db, "faq"))
       .then((snap) => {
         const all = snap.docs
-          .map((d) => ({
-            id: d.id,
-            content: "",
-            videoUrl: "",
-            imageUrl: "",
-            createdAt: 0,
-            updatedAt: 0,
-            ...d.data(),
-          } as FAQEntry))
+          .map((d) => {
+            const data = d.data();
+            return {
+              id: d.id,
+              question: "",
+              category: "",
+              type: "text",
+              content: "",
+              videoUrl: "",
+              imageUrl: "",
+              blocks: [],
+              published: false,
+              order: 0,
+              createdAt: 0,
+              updatedAt: 0,
+              ...data,
+            } as FAQEntry;
+          })
           .sort((a, b) => a.order - b.order);
         setEntries(all);
       })
@@ -99,6 +112,15 @@ function AdminFaqPage() {
   }, [user, isAdmin]);
 
   const existingCategories = [...new Set(entries.map((e) => e.category).filter(Boolean))];
+
+  function loadBlocksForEntry(entry: FAQEntry) {
+    if (entry.blocks && entry.blocks.length > 0) return entry.blocks;
+    // Migrate old single-image entries to block format
+    const migrated: Block[] = [];
+    if (entry.imageUrl) migrated.push({ type: "image", value: entry.imageUrl });
+    if (entry.content) migrated.push({ type: "text", value: entry.content });
+    return migrated;
+  }
 
   function openNew() {
     setIsNew(true);
@@ -110,7 +132,7 @@ function AdminFaqPage() {
     setType("text");
     setContent("");
     setVideoUrl("");
-    setImageUrl("");
+    setBlocks([]);
     setPublished(false);
     setDialogOpen(true);
   }
@@ -125,7 +147,7 @@ function AdminFaqPage() {
     setType(entry.type);
     setContent(entry.content);
     setVideoUrl(entry.videoUrl);
-    setImageUrl(entry.imageUrl);
+    setBlocks(loadBlocksForEntry(entry));
     setPublished(entry.published);
     setDialogOpen(true);
   }
@@ -140,7 +162,8 @@ function AdminFaqPage() {
       type,
       content: content.trim(),
       videoUrl: videoUrl.trim(),
-      imageUrl: imageUrl.trim(),
+      imageUrl: "",
+      blocks: type === "image" ? blocks : [],
       published,
       order: editingOrder,
       createdAt: isNew ? now : (editingCreatedAt || now),
@@ -193,8 +216,27 @@ function AdminFaqPage() {
     );
   }
 
-  async function handleImageUpload(file: File) {
-    setUploadingImage(true);
+  function addTextBlock() {
+    setBlocks((prev) => [...prev, { type: "text", value: "" }]);
+  }
+
+  function updateBlock(idx: number, value: string) {
+    setBlocks((prev) => prev.map((b, i) => i === idx ? { ...b, value } : b));
+  }
+
+  function removeBlock(idx: number) {
+    setBlocks((prev) => prev.filter((_, i) => i !== idx));
+  }
+
+  async function handleBlockImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+
+    const placeholderIdx = blocks.length;
+    setBlocks((prev) => [...prev, { type: "image", value: "__uploading__" }]);
+    setUploadingBlockIdx(placeholderIdx);
+
     try {
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -205,12 +247,13 @@ function AdminFaqPage() {
       const { publicUrl } = await uploadProductImageFn({
         data: { fileName: file.name, contentType: file.type, base64 },
       });
-      setImageUrl(publicUrl);
+      setBlocks((prev) => prev.map((b, i) => i === placeholderIdx ? { type: "image", value: publicUrl } : b));
       toast.success("Image uploadée");
     } catch {
+      setBlocks((prev) => prev.filter((_, i) => i !== placeholderIdx));
       toast.error("Erreur lors de l'upload");
     } finally {
-      setUploadingImage(false);
+      setUploadingBlockIdx(null);
     }
   }
 
@@ -226,8 +269,9 @@ function AdminFaqPage() {
 
   return (
     <AdminShell>
-      <div className="mx-auto max-w-4xl px-6 py-10">
-        <div className="mb-8 flex items-center justify-between">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        {/* Header — wraps on mobile so the button is never cropped */}
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <HelpCircle className="h-6 w-6 text-primary" />
             <h1 className="font-display text-2xl font-semibold">FAQ</h1>
@@ -327,7 +371,7 @@ function AdminFaqPage() {
               </div>
             </div>
 
-            {/* Conditional inputs */}
+            {/* ── Texte ── */}
             {type === "text" && (
               <div className="space-y-1.5">
                 <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Réponse</label>
@@ -341,6 +385,7 @@ function AdminFaqPage() {
               </div>
             )}
 
+            {/* ── Vidéo ── */}
             {type === "video" && (
               <div className="space-y-4">
                 <div className="space-y-1.5">
@@ -352,68 +397,90 @@ function AdminFaqPage() {
                     className="w-full rounded-2xl border border-border bg-background px-4 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Colle l'URL d'embed de ta vidéo. Pour YouTube : remplace <code>watch?v=</code> par <code>embed/</code>.
+                    Colle l'URL d'embed. Pour YouTube : remplace <code>watch?v=</code> par <code>embed/</code>.
                   </p>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Description (optionnel)</label>
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Commentaire sous la vidéo (optionnel)</label>
                   <textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
-                    rows={3}
-                    placeholder="Contexte ou description de la vidéo…"
+                    rows={4}
+                    placeholder="Explications complémentaires, étapes à suivre…"
                     className="w-full resize-none rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
             )}
 
+            {/* ── Image — block editor ── */}
             {type === "image" && (
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Image</label>
-                  {imageUrl ? (
-                    <div className="relative">
-                      <img src={imageUrl} alt="Aperçu" className="max-h-48 w-full rounded-2xl object-cover" />
+              <div className="space-y-3">
+                <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Contenu</label>
+
+                {blocks.length === 0 && (
+                  <p className="rounded-2xl border border-dashed border-border/60 py-6 text-center text-xs text-muted-foreground">
+                    Ajoute des blocs de texte ou d'images ci-dessous
+                  </p>
+                )}
+
+                <div className="space-y-2">
+                  {blocks.map((block, idx) => (
+                    <div key={idx} className="relative rounded-2xl border border-border/60 bg-muted/20 p-3">
                       <button
-                        onClick={() => setImageUrl("")}
-                        className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-background/80 text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                        onClick={() => removeBlock(idx)}
+                        className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-background/80 text-muted-foreground transition-colors hover:bg-background hover:text-destructive"
                       >
-                        ×
+                        <X className="h-3.5 w-3.5" />
                       </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => imageInputRef.current?.click()}
-                      disabled={uploadingImage}
-                      className="flex w-full flex-col items-center gap-2 rounded-2xl border border-dashed border-border py-8 text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground disabled:opacity-50"
-                    >
-                      {uploadingImage ? (
-                        <Loader2 className="h-5 w-5 animate-spin" />
+
+                      {block.type === "text" ? (
+                        <textarea
+                          value={block.value}
+                          onChange={(e) => updateBlock(idx, e.target.value)}
+                          rows={3}
+                          placeholder="Texte…"
+                          className="w-full resize-none rounded-xl border-0 bg-transparent pr-8 text-sm outline-none placeholder:text-muted-foreground/60"
+                        />
+                      ) : block.value === "__uploading__" ? (
+                        <div className="flex h-24 items-center justify-center">
+                          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                        </div>
                       ) : (
-                        <Upload className="h-5 w-5" />
+                        <img src={block.value} alt="" className="max-h-48 w-full rounded-xl object-cover pr-8" />
                       )}
-                      <span className="text-sm">{uploadingImage ? "Upload en cours…" : "Cliquer pour uploader"}</span>
-                    </button>
-                  )}
-                  <input
-                    ref={imageInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0])}
-                  />
+                    </div>
+                  ))}
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Légende (optionnel)</label>
-                  <textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    rows={3}
-                    placeholder="Explication ou contexte de l'image…"
-                    className="w-full resize-none rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-                  />
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={addTextBlock}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-dashed border-border py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+                  >
+                    <FileText className="h-4 w-4" /> Ajouter du texte
+                  </button>
+                  <button
+                    onClick={() => blockImageInputRef.current?.click()}
+                    disabled={uploadingBlockIdx !== null}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-dashed border-border py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground disabled:opacity-50"
+                  >
+                    {uploadingBlockIdx !== null ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    Ajouter une image
+                  </button>
                 </div>
+
+                <input
+                  ref={blockImageInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleBlockImageChange}
+                />
               </div>
             )}
 

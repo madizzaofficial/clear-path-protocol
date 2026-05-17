@@ -6,6 +6,8 @@ import { collection, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { HelpCircle, ChevronDown, Loader2 } from "lucide-react";
 
+type Block = { type: "text" | "image"; value: string };
+
 type FAQEntry = {
   id: string;
   question: string;
@@ -14,6 +16,7 @@ type FAQEntry = {
   content: string;
   videoUrl: string;
   imageUrl: string;
+  blocks: Block[];
   published: boolean;
   order: number;
 };
@@ -58,6 +61,7 @@ function FaqPage() {
             content: "",
             videoUrl: "",
             imageUrl: "",
+            blocks: [],
             ...d.data(),
           } as FAQEntry))
           .filter((e) => e.published)
@@ -179,13 +183,30 @@ function AnswerBody({ entry }: { entry: FAQEntry }) {
     );
   }
 
-  if (entry.type === "image" && entry.imageUrl) {
-    return (
-      <div className="space-y-3">
-        <img src={entry.imageUrl} alt={entry.question} className="w-full rounded-xl object-cover" />
-        {entry.content && <p className="text-sm text-muted-foreground">{entry.content}</p>}
-      </div>
-    );
+  if (entry.type === "image") {
+    // New block-based format
+    if (entry.blocks && entry.blocks.length > 0) {
+      return (
+        <div className="space-y-3">
+          {entry.blocks.map((block, i) =>
+            block.type === "text" ? (
+              <p key={i} className="whitespace-pre-wrap text-sm text-foreground/80">{block.value}</p>
+            ) : (
+              <img key={i} src={block.value} alt="" className="w-full rounded-xl object-cover" />
+            )
+          )}
+        </div>
+      );
+    }
+    // Fallback: old single-image format
+    if (entry.imageUrl) {
+      return (
+        <div className="space-y-3">
+          <img src={entry.imageUrl} alt={entry.question} className="w-full rounded-xl object-cover" />
+          {entry.content && <p className="text-sm text-muted-foreground">{entry.content}</p>}
+        </div>
+      );
+    }
   }
 
   return <p className="whitespace-pre-wrap text-sm text-foreground/80">{entry.content}</p>;
