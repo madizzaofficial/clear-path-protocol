@@ -312,7 +312,7 @@ function AdminFaqPage() {
 
       {/* Add / Edit dialog */}
       <Dialog open={dialogOpen} onOpenChange={(open) => !open && setDialogOpen(false)}>
-        <DialogContent className="top-[2%] translate-y-0 max-h-[96dvh] overflow-y-auto rounded-t-3xl rounded-b-none sm:top-[50%] sm:translate-y-[-50%] sm:max-h-[90dvh] sm:rounded-3xl sm:max-w-2xl">
+        <DialogContent className="left-4 right-4 top-4 w-auto translate-x-0 translate-y-0 max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-3xl sm:left-[50%] sm:right-auto sm:top-[50%] sm:w-full sm:max-w-2xl sm:translate-x-[-50%] sm:translate-y-[-50%] sm:max-h-[90dvh]">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">
               {isNew ? "Nouvelle question" : "Modifier la question"}
@@ -494,17 +494,17 @@ function AdminFaqPage() {
             </div>
           </div>
 
-          <DialogFooter className="gap-2">
+          <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
             <button
               onClick={() => setDialogOpen(false)}
-              className="rounded-2xl border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
+              className="w-full rounded-2xl border border-border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted sm:w-auto"
             >
               Annuler
             </button>
             <button
               onClick={handleSave}
               disabled={saving || !question.trim()}
-              className="flex items-center gap-2 rounded-2xl bg-foreground px-5 py-2 text-sm font-semibold text-background transition-opacity hover:opacity-80 disabled:opacity-40"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition-opacity hover:opacity-80 disabled:opacity-40 sm:w-auto"
             >
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               Sauvegarder
