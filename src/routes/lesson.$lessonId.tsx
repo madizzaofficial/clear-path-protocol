@@ -1,11 +1,59 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import { course, findLesson, allLessons } from "@/lib/course-data";
+import { findLesson, allLessons, course as staticCourse } from "@/lib/course-data";
 import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, ArrowRight, Check, ChevronDown, Clock, Download, FileText, Lock, Menu, Play, X } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { doc, getDoc, setDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+
+// ─── Types ─────────────────────────────────────────────────────────────────
+
+type FLesson = {
+  id: string;
+  title: string;
+  duration: string;
+  summary: string;
+  videoUrl: string;
+  locked: boolean;
+  order: number;
+  resources: { name: string; size: string; url?: string }[];
+};
+
+type FChapter = {
+  id: string;
+  title: string;
+  description: string;
+  order: number;
+  lessons: FLesson[];
+};
+
+type FCourse = {
+  title: string;
+  subtitle: string;
+  estimatedHours: number;
+  chapters: FChapter[];
+};
+
+const COURSE_ID = "clear-skin-protocol";
+
+async function loadCourseFromFirestore(): Promise<FCourse | null> {
+  try {
+    const snap = await getDoc(doc(db, "courses", COURSE_ID));
+    if (!snap.exists()) return null;
+    const data = snap.data() as FCourse;
+    return {
+      ...data,
+      chapters: [...data.chapters]
+        .sort((a, b) => a.order - b.order)
+        .map((ch) => ({ ...ch, lessons: [...ch.lessons].sort((a, b) => a.order - b.order) })),
+    };
+  } catch {
+    return null;
+  }
+}
+
+// ─── Route ─────────────────────────────────────────────────────────────────
 
 export const Route = createFileRoute("/lesson/$lessonId")({
   head: ({ params }) => {
@@ -17,20 +65,59 @@ export const Route = createFileRoute("/lesson/$lessonId")({
       ],
     };
   },
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
+    const fsCourse = await loadCourseFromFirestore();
+    if (fsCourse) {
+      for (const chapter of fsCourse.chapters) {
+        const lesson = chapter.lessons.find((l) => l.id === params.lessonId);
+        if (lesson) {
+          return {
+            lesson,
+            chapter,
+            allChapters: fsCourse.chapters,
+            courseTitle: fsCourse.title,
+          };
+        }
+      }
+    }
+    // Fall back to static data
     const found = findLesson(params.lessonId);
     if (!found) throw notFound();
-    return found;
+    const staticAll = allLessons();
+    return {
+      lesson: { ...found.lesson, videoUrl: "", completed: false, order: 0, resources: found.lesson.resources as FLesson["resources"] },
+      chapter: { ...found.chapter, order: 0 },
+      allChapters: staticCourse.chapters.map((ch, i) => ({
+        id: ch.id,
+        title: ch.title,
+        description: ch.description,
+        order: i,
+        lessons: ch.lessons.map((l, j) => ({
+          id: l.id,
+          title: l.title,
+          duration: l.duration,
+          summary: l.summary,
+          videoUrl: "",
+          locked: l.locked,
+          order: j,
+          resources: l.resources as FLesson["resources"],
+        })),
+      })),
+      courseTitle: staticCourse.title,
+    };
   },
   component: LessonPage,
 });
 
+// ─── Component ─────────────────────────────────────────────────────────────
+
 function LessonPage() {
-  const { lesson, chapter } = Route.useLoaderData();
-  const all = allLessons();
-  const idx = all.findIndex((l) => l.id === lesson.id);
-  const prev = idx > 0 ? all[idx - 1] : null;
-  const next = idx < all.length - 1 ? all[idx + 1] : null;
+  const { lesson, chapter, allChapters, courseTitle } = Route.useLoaderData();
+  const allLessonsFlat = allChapters.flatMap((ch) => ch.lessons);
+  const idx = allLessonsFlat.findIndex((l) => l.id === lesson.id);
+  const prev = idx > 0 ? allLessonsFlat[idx - 1] : null;
+  const next = idx < allLessonsFlat.length - 1 ? allLessonsFlat[idx + 1] : null;
+
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -99,7 +186,12 @@ function LessonPage() {
     <div className="flex min-h-screen bg-background">
       {/* Desktop sidebar */}
       <aside className="hidden w-80 shrink-0 border-r border-border/60 bg-sidebar lg:block">
-        <SidebarContent currentId={lesson.id} completedLessons={completedLessons} />
+        <SidebarContent
+          currentId={lesson.id}
+          completedLessons={completedLessons}
+          allChapters={allChapters}
+          courseTitle={courseTitle}
+        />
       </aside>
 
       {/* Mobile sidebar */}
@@ -110,7 +202,13 @@ function LessonPage() {
             <div className="flex justify-end p-4">
               <button onClick={() => setMenuOpen(false)} className="rounded-full p-2 hover:bg-muted"><X className="h-5 w-5" /></button>
             </div>
-            <SidebarContent currentId={lesson.id} completedLessons={completedLessons} onNavigate={() => setMenuOpen(false)} />
+            <SidebarContent
+              currentId={lesson.id}
+              completedLessons={completedLessons}
+              allChapters={allChapters}
+              courseTitle={courseTitle}
+              onNavigate={() => setMenuOpen(false)}
+            />
           </div>
         </div>
       )}
@@ -128,7 +226,7 @@ function LessonPage() {
             </Link>
           </div>
           <div className="text-xs text-muted-foreground">
-            Leçon {idx + 1} sur {all.length}
+            Leçon {idx + 1} sur {allLessonsFlat.length}
           </div>
         </div>
 
@@ -207,7 +305,7 @@ function LessonPage() {
                 <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-soft">
                   <h3 className="font-display text-base font-semibold">Ressources</h3>
                   <ul className="mt-3 space-y-2">
-                    {lesson.resources.map((r: { name: string; size: string; url?: string }) => (
+                    {lesson.resources.map((r) => (
                       <li key={r.name}>
                         {r.url ? (
                           <a
@@ -295,10 +393,24 @@ function LessonPage() {
   );
 }
 
-function SidebarContent({ currentId, completedLessons, onNavigate }: { currentId: string; completedLessons: string[]; onNavigate?: () => void }) {
-  const initialOpen = course.chapters.find((c) => c.lessons.some((l) => l.id === currentId))?.id;
+// ─── Sidebar ────────────────────────────────────────────────────────────────
+
+function SidebarContent({
+  currentId,
+  completedLessons,
+  allChapters,
+  courseTitle,
+  onNavigate,
+}: {
+  currentId: string;
+  completedLessons: string[];
+  allChapters: FChapter[];
+  courseTitle: string;
+  onNavigate?: () => void;
+}) {
+  const initialOpen = allChapters.find((c) => c.lessons.some((l) => l.id === currentId))?.id;
   const [open, setOpen] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(course.chapters.map((c) => [c.id, c.id === initialOpen]))
+    Object.fromEntries(allChapters.map((c) => [c.id, c.id === initialOpen]))
   );
 
   return (
@@ -311,13 +423,13 @@ function SidebarContent({ currentId, completedLessons, onNavigate }: { currentId
           <span className="font-display text-lg font-semibold">Protocole Clear</span>
         </Link>
         <p className="mt-4 text-xs font-medium uppercase tracking-[0.2em] text-primary">Protocole</p>
-        <p className="mt-1 font-display text-base font-semibold leading-tight">{course.title}</p>
+        <p className="mt-1 font-display text-base font-semibold leading-tight">{courseTitle}</p>
       </div>
       <nav className="flex-1 overflow-y-auto p-4">
-        {course.chapters.map((ch, i) => {
+        {allChapters.map((ch, i) => {
           const isOpen = open[ch.id];
           const cdone = ch.lessons.filter((l) => completedLessons.includes(l.id)).length;
-          const cprog = Math.round((cdone / ch.lessons.length) * 100);
+          const cprog = ch.lessons.length > 0 ? Math.round((cdone / ch.lessons.length) * 100) : 0;
           return (
             <div key={ch.id} className="mb-2">
               <button

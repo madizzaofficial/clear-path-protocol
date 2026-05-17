@@ -1,11 +1,42 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import { course, allLessons } from "@/lib/course-data";
+import { course as staticCourse } from "@/lib/course-data";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
-import { Play, Check, Lock, Clock, ChevronRight, ArrowRight } from "lucide-react";
+import { Play, Check, Lock, Clock, ChevronRight, ArrowRight, Loader2 } from "lucide-react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+
+// ─── Types (mirrored from admin course-editor) ─────────────────────────────
+
+type FLesson = {
+  id: string;
+  title: string;
+  duration: string;
+  summary: string;
+  videoUrl: string;
+  locked: boolean;
+  order: number;
+};
+
+type FChapter = {
+  id: string;
+  title: string;
+  description: string;
+  order: number;
+  lessons: FLesson[];
+};
+
+type FCourse = {
+  title: string;
+  subtitle: string;
+  estimatedHours: number;
+  chapters: FChapter[];
+};
+
+const COURSE_ID = "clear-skin-protocol";
+
+// ─── Route ─────────────────────────────────────────────────────────────────
 
 export const Route = createFileRoute("/course")({
   head: () => ({
@@ -21,6 +52,8 @@ function CoursePage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  const [courseData, setCourseData] = useState<FCourse | null>(null);
+  const [courseLoading, setCourseLoading] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -33,12 +66,66 @@ function CoursePage() {
     });
   }, [user]);
 
-  const total = course.chapters.reduce((s, c) => s + c.lessons.length, 0);
-  const done = completedLessons.length;
-  const progress = Math.round((done / total) * 100);
-  const next = allLessons().find((l) => !completedLessons.includes(l.id) && !l.locked);
+  useEffect(() => {
+    async function load() {
+      setCourseLoading(true);
+      try {
+        const snap = await getDoc(doc(db, "courses", COURSE_ID));
+        if (snap.exists()) {
+          const data = snap.data() as FCourse;
+          // sort chapters and lessons by order
+          const sorted: FCourse = {
+            ...data,
+            chapters: [...data.chapters]
+              .sort((a, b) => a.order - b.order)
+              .map((ch) => ({ ...ch, lessons: [...ch.lessons].sort((a, b) => a.order - b.order) })),
+          };
+          setCourseData(sorted);
+        } else {
+          // Fall back to static if no Firestore doc yet
+          setCourseData({
+            title: staticCourse.title,
+            subtitle: staticCourse.subtitle,
+            estimatedHours: staticCourse.estimatedHours,
+            chapters: staticCourse.chapters.map((ch, i) => ({
+              id: ch.id,
+              title: ch.title,
+              description: ch.description,
+              order: i,
+              lessons: ch.lessons.map((l, j) => ({
+                id: l.id,
+                title: l.title,
+                duration: l.duration,
+                summary: l.summary,
+                videoUrl: "",
+                locked: l.locked,
+                order: j,
+              })),
+            })),
+          });
+        }
+      } finally {
+        setCourseLoading(false);
+      }
+    }
+    load();
+  }, []);
 
-  if (loading || !user) return null;
+  if (loading || !user || courseLoading || !courseData) {
+    return (
+      <AppShell>
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AppShell>
+    );
+  }
+
+  const allLessons = courseData.chapters.flatMap((ch) => ch.lessons);
+  const total = allLessons.length;
+  const done = completedLessons.length;
+  const progress = total > 0 ? Math.round((done / total) * 100) : 0;
+  const next = allLessons.find((l) => !completedLessons.includes(l.id) && !l.locked);
 
   return (
     <AppShell>
@@ -49,13 +136,13 @@ function CoursePage() {
           <div className="relative mx-auto max-w-7xl px-6 py-16 md:py-24">
             <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Ton protocole</p>
             <h1 className="mt-4 max-w-2xl font-display text-4xl font-semibold tracking-tight text-balance md:text-6xl">
-              {course.title}
+              {courseData.title}
             </h1>
-            <p className="mt-4 max-w-xl text-foreground/70 md:text-lg">{course.subtitle}</p>
+            <p className="mt-4 max-w-xl text-foreground/70 md:text-lg">{courseData.subtitle}</p>
             <div className="mt-8 flex flex-wrap items-center gap-6 text-sm">
-              <Stat label="Chapitres" value={String(course.chapters.length)} />
+              <Stat label="Chapitres" value={String(courseData.chapters.length)} />
               <Stat label="Leçons" value={String(total)} />
-              <Stat label="Durée totale" value={`${course.estimatedHours}h`} />
+              <Stat label="Durée totale" value={`${courseData.estimatedHours}h`} />
               <Stat label="Progression" value={`${progress}%`} />
             </div>
             <div className="mt-8 max-w-md">
@@ -95,9 +182,9 @@ function CoursePage() {
         {/* Chapters */}
         <section className="mx-auto max-w-7xl px-6 py-12">
           <div className="space-y-6">
-            {course.chapters.map((ch, i) => {
+            {courseData.chapters.map((ch, i) => {
               const cdone = ch.lessons.filter((l) => completedLessons.includes(l.id)).length;
-              const cprog = Math.round((cdone / ch.lessons.length) * 100);
+              const cprog = ch.lessons.length > 0 ? Math.round((cdone / ch.lessons.length) * 100) : 0;
               return (
                 <article key={ch.id} className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
                   <header className="flex flex-wrap items-start justify-between gap-4 border-b border-border/60 p-6 md:p-8">
