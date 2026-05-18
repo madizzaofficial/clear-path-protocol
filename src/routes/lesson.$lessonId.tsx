@@ -249,16 +249,17 @@ function LessonPage() {
 
           {/* Video */}
           <div className="mt-8 overflow-hidden rounded-3xl bg-foreground shadow-elegant">
-            <div className="relative aspect-video bg-gradient-primary">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <button className="flex h-20 w-20 items-center justify-center rounded-full bg-background/95 shadow-elegant transition-transform hover:scale-105">
-                  <Play className="ml-1 h-8 w-8 fill-foreground text-foreground" />
-                </button>
+            {lesson.videoUrl ? (
+              <LessonVideo url={lesson.videoUrl} />
+            ) : (
+              <div className="relative aspect-video bg-gradient-primary">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-background/95 shadow-elegant">
+                    <Play className="ml-1 h-8 w-8 fill-foreground text-foreground" />
+                  </div>
+                </div>
               </div>
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-background/20">
-                <div className="h-full w-1/3 bg-primary" />
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Content grid */}
@@ -486,6 +487,32 @@ function SidebarContent({
           );
         })}
       </nav>
+    </div>
+  );
+}
+
+function getVideoEmbed(url: string): { kind: "video" | "iframe"; src: string } {
+  if (/\.(mp4|webm|ogg)(\?|$)/i.test(url)) return { kind: "video", src: url };
+  const ytWatch = url.match(/youtube\.com\/watch\?.*v=([^&]+)/);
+  if (ytWatch) return { kind: "iframe", src: `https://www.youtube.com/embed/${ytWatch[1]}` };
+  const ytShort = url.match(/youtu\.be\/([^?]+)/);
+  if (ytShort) return { kind: "iframe", src: `https://www.youtube.com/embed/${ytShort[1]}` };
+  return { kind: "iframe", src: url };
+}
+
+function LessonVideo({ url }: { url: string }) {
+  const embed = getVideoEmbed(url);
+  if (embed.kind === "video") {
+    return <video src={embed.src} controls className="aspect-video w-full" />;
+  }
+  return (
+    <div className="relative aspect-video">
+      <iframe
+        src={embed.src}
+        className="absolute inset-0 h-full w-full"
+        allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
+        allowFullScreen
+      />
     </div>
   );
 }

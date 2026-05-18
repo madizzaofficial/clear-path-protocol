@@ -173,7 +173,7 @@ function AnswerBody({ entry }: { entry: FAQEntry }) {
             <iframe
               src={embed.src}
               className="absolute inset-0 h-full w-full"
-              allow="autoplay; fullscreen"
+              allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
               allowFullScreen
             />
           </div>
