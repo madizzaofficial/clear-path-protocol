@@ -226,12 +226,12 @@ function LessonPage() {
 
       <main className="flex-1 overflow-x-hidden">
         {/* Top bar */}
-        <div className="sticky top-16 z-30 flex items-center justify-between border-b border-border/60 bg-background/80 px-4 py-3 backdrop-blur-xl md:px-8">
-          <div className="flex items-center gap-3">
-            <button onClick={() => setMenuOpen(true)} className="rounded-full p-2 hover:bg-muted lg:hidden">
+        <div className="sticky top-16 z-30 flex items-center justify-between border-b border-border/60 bg-background/80 px-4 py-2 backdrop-blur-xl md:px-8 md:py-3">
+          <div className="flex items-center gap-1.5">
+            <button onClick={() => setMenuOpen(true)} className="rounded-full p-1.5 hover:bg-muted lg:hidden">
               <Menu className="h-5 w-5" />
             </button>
-            <Link to="/course" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+            <Link to="/course" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
               <ArrowLeft className="h-4 w-4" />
               <span className="hidden sm:inline">Retour au protocole</span>
             </Link>
@@ -241,7 +241,7 @@ function LessonPage() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-5xl px-4 pt-8 pb-28 md:px-10 md:py-12">
+        <div className="mx-auto max-w-5xl px-4 pt-12 pb-28 md:px-10 md:py-12">
           {/* Crumb */}
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">{chapter.title}</p>
           <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight md:text-4xl">{lesson.title}</h1>
