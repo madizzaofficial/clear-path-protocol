@@ -226,7 +226,7 @@ function LessonPage() {
 
       <main className="flex-1 overflow-x-hidden">
         {/* Top bar */}
-        <div className="sticky top-16 z-30 flex items-center justify-between border-b border-border/60 bg-background/80 px-4 py-2 backdrop-blur-xl md:px-8 md:py-3 lg:hidden">
+        <div className="fixed top-16 left-0 right-0 z-30 flex items-center justify-between border-b border-border/60 bg-background/95 px-4 py-2 backdrop-blur-xl lg:hidden">
           <div className="flex items-center gap-1.5">
             <button onClick={() => setMenuOpen(true)} className="rounded-full p-1.5 hover:bg-muted lg:hidden">
               <Menu className="h-5 w-5" />
@@ -241,7 +241,7 @@ function LessonPage() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-5xl px-4 pt-12 pb-28 md:px-10 lg:pt-8 lg:pb-16 md:py-12">
+        <div className="mx-auto max-w-5xl px-4 pt-24 pb-28 md:px-10 lg:pt-8 lg:pb-16 md:py-12">
           {/* Crumb */}
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">{chapter.title}</p>
           <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight md:text-4xl">{lesson.title}</h1>
