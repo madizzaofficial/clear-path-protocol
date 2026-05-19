@@ -4,7 +4,7 @@ import { course as staticCourse } from "@/lib/course-data";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
 import { Play, Check, Lock, Clock, ChevronRight, ArrowRight, Loader2 } from "lucide-react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, getDocFromServer } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 // ─── Types (mirrored from admin course-editor) ─────────────────────────────
@@ -70,7 +70,7 @@ function CoursePage() {
     async function load() {
       setCourseLoading(true);
       try {
-        const snap = await getDoc(doc(db, "courses", COURSE_ID));
+        const snap = await getDocFromServer(doc(db, "courses", COURSE_ID));
         if (snap.exists()) {
           const data = snap.data() as FCourse;
           // sort chapters and lessons by order

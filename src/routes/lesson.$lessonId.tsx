@@ -4,7 +4,7 @@ import { findLesson, course as staticCourse } from "@/lib/course-data";
 import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, ArrowRight, Check, ChevronDown, Clock, Download, FileText, Lock, Menu, Play, X } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { doc, getDoc, setDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { doc, getDoc, getDocFromServer, setDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
@@ -42,7 +42,7 @@ const COURSE_ID = "clear-skin-protocol";
 
 async function loadCourseFromFirestore(): Promise<FCourse | null> {
   try {
-    const snap = await getDoc(doc(db, "courses", COURSE_ID));
+    const snap = await getDocFromServer(doc(db, "courses", COURSE_ID));
     if (!snap.exists()) return null;
     const data = snap.data() as FCourse;
     return {
