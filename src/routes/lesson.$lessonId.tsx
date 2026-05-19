@@ -310,7 +310,7 @@ function LessonPage() {
             </div>
 
             <aside className="space-y-6">
-              {lesson.showResources !== false && lesson.resources.length > 0 && (
+              {lesson.showResources && lesson.resources.length > 0 && (
                 <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-soft">
                   <h3 className="font-display text-base font-semibold">Ressources</h3>
                   <ul className="mt-3 space-y-2">
