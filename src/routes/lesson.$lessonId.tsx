@@ -5,7 +5,6 @@ import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, ArrowRight, Check, ChevronDown, Clock, Download, FileText, Lock, Menu, Play, X } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { doc, getDoc, getDocFromServer, setDoc, arrayUnion, arrayRemove } from "firebase/firestore";
-import { getCachedCourse, setCachedCourse } from "@/lib/course-cache";
 import { db } from "@/lib/firebase";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
@@ -42,20 +41,16 @@ type FCourse = {
 const COURSE_ID = "clear-skin-protocol";
 
 async function loadCourseFromFirestore(): Promise<FCourse | null> {
-  const cached = getCachedCourse();
-  if (cached) return cached as FCourse;
   try {
     const snap = await getDocFromServer(doc(db, "courses", COURSE_ID));
     if (!snap.exists()) return null;
     const data = snap.data() as FCourse;
-    const sorted: FCourse = {
+    return {
       ...data,
       chapters: [...data.chapters]
         .sort((a, b) => a.order - b.order)
         .map((ch) => ({ ...ch, lessons: [...ch.lessons].sort((a, b) => a.order - b.order) })),
     };
-    setCachedCourse(sorted);
-    return sorted;
   } catch {
     return null;
   }

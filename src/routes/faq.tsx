@@ -53,19 +53,6 @@ function FaqPage() {
 
   useEffect(() => {
     if (!user) return;
-    const CACHE_KEY = "faq_cache_v1";
-    const TTL = 24 * 60 * 60 * 1000;
-    try {
-      const raw = localStorage.getItem(CACHE_KEY);
-      if (raw) {
-        const { data, ts } = JSON.parse(raw) as { data: FAQEntry[]; ts: number };
-        if (Date.now() - ts < TTL) {
-          setEntries(data);
-          setFaqLoading(false);
-          return;
-        }
-      }
-    } catch {}
     getDocs(collection(db, "faq"))
       .then((snap) => {
         const all = snap.docs
@@ -79,7 +66,6 @@ function FaqPage() {
           } as FAQEntry))
           .filter((e) => e.published)
           .sort((a, b) => a.order - b.order);
-        try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data: all, ts: Date.now() })); } catch {}
         setEntries(all);
       })
       .finally(() => setFaqLoading(false));

@@ -5,7 +5,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
 import { Play, Check, Lock, Clock, ChevronRight, ArrowRight, Loader2 } from "lucide-react";
 import { doc, getDoc, getDocFromServer } from "firebase/firestore";
-import { getCachedCourse, setCachedCourse } from "@/lib/course-cache";
 import { db } from "@/lib/firebase";
 
 // ─── Types (mirrored from admin course-editor) ─────────────────────────────
@@ -71,11 +70,6 @@ function CoursePage() {
     async function load() {
       setCourseLoading(true);
       try {
-        const cached = getCachedCourse();
-        if (cached) {
-          setCourseData(cached as FCourse);
-          return;
-        }
         const snap = await getDocFromServer(doc(db, "courses", COURSE_ID));
         if (snap.exists()) {
           const data = snap.data() as FCourse;
@@ -85,7 +79,6 @@ function CoursePage() {
               .sort((a, b) => a.order - b.order)
               .map((ch) => ({ ...ch, lessons: [...ch.lessons].sort((a, b) => a.order - b.order) })),
           };
-          setCachedCourse(sorted);
           setCourseData(sorted);
         } else {
           setCourseData({
