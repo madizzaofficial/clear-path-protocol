@@ -210,15 +210,13 @@ function LessonPage() {
         <div className="fixed inset-0 z-50 lg:hidden" onClick={() => setMenuOpen(false)}>
           <div className="absolute inset-0 bg-foreground/30 backdrop-blur-sm" />
           <div className="absolute left-0 top-0 h-full w-80 max-w-[85%] overflow-y-auto bg-background shadow-elegant" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-end p-4">
-              <button onClick={() => setMenuOpen(false)} className="rounded-full p-2 hover:bg-muted"><X className="h-5 w-5" /></button>
-            </div>
             <SidebarContent
               currentId={lesson.id}
               completedLessons={completedLessons}
               allChapters={allChapters}
               courseTitle={courseTitle}
               onNavigate={() => setMenuOpen(false)}
+              onClose={() => setMenuOpen(false)}
             />
           </div>
         </div>
@@ -410,12 +408,14 @@ function SidebarContent({
   allChapters,
   courseTitle,
   onNavigate,
+  onClose,
 }: {
   currentId: string;
   completedLessons: string[];
   allChapters: FChapter[];
   courseTitle: string;
   onNavigate?: () => void;
+  onClose?: () => void;
 }) {
   const initialOpen = allChapters.find((c) => c.lessons.some((l) => l.id === currentId))?.id;
   const [open, setOpen] = useState<Record<string, boolean>>(() =>
@@ -425,7 +425,14 @@ function SidebarContent({
   return (
     <div className="flex h-screen flex-col">
       <div className="border-b border-border/60 px-6 py-4">
-        <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">Sommaire</p>
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">Sommaire</p>
+          {onClose && (
+            <button onClick={onClose} className="rounded-full p-1 hover:bg-muted">
+              <X className="h-4 w-4 text-muted-foreground" />
+            </button>
+          )}
+        </div>
         <p className="mt-1 font-display text-base font-semibold leading-tight">{courseTitle}</p>
       </div>
       <nav className="flex-1 overflow-y-auto p-4">
