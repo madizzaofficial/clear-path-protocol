@@ -80,33 +80,33 @@ function CoursePage() {
               .map((ch) => ({ ...ch, lessons: [...ch.lessons].sort((a, b) => a.order - b.order) })),
           };
           setCourseData(sorted);
-        } else {
-          setCourseData({
-            title: staticCourse.title,
-            subtitle: staticCourse.subtitle,
-            estimatedHours: staticCourse.estimatedHours,
-            chapters: staticCourse.chapters.map((ch, i) => ({
-              id: ch.id,
-              title: ch.title,
-              description: ch.description,
-              order: i,
-              lessons: ch.lessons.map((l, j) => ({
-                id: l.id,
-                title: l.title,
-                duration: l.duration,
-                summary: l.summary,
-                videoUrl: "",
-                locked: l.locked,
-                order: j,
-              })),
-            })),
-          });
+          return;
         }
-      } finally {
-        setCourseLoading(false);
+      } catch {
+        // network error — fall through to static fallback
       }
+      setCourseData({
+        title: staticCourse.title,
+        subtitle: staticCourse.subtitle,
+        estimatedHours: staticCourse.estimatedHours,
+        chapters: staticCourse.chapters.map((ch, i) => ({
+          id: ch.id,
+          title: ch.title,
+          description: ch.description,
+          order: i,
+          lessons: ch.lessons.map((l, j) => ({
+            id: l.id,
+            title: l.title,
+            duration: l.duration,
+            summary: l.summary,
+            videoUrl: "",
+            locked: l.locked,
+            order: j,
+          })),
+        })),
+      });
     }
-    load();
+    load().finally(() => setCourseLoading(false));
   }, []);
 
   if (loading || !user || courseLoading || !courseData) {

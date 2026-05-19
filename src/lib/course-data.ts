@@ -68,7 +68,7 @@ export const course = {
     },
     {
       id: "ch-5",
-      title: "Rasage sans casse",
+      title: "Rasage sans casser ta peau",
       description: "Protect your transformation forever.",
       lessons: [
         { id: "l-12", title: "Comprendre ce que l'acné a laissé sur ta peau", duration: "8 min", locked: true, summary: "Adjust your routine before flare-ups happen.", resources: [] },

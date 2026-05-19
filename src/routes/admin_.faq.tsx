@@ -197,7 +197,6 @@ function AdminFaqPage() {
     try {
       await deleteDoc(doc(db, "faq", deletingId));
       setEntries((prev) => prev.filter((e) => e.id !== deletingId));
-      bustFaqCache();
       toast.success("Question supprimée");
     } catch {
       toast.error("Erreur lors de la suppression");

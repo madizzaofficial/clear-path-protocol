@@ -63,7 +63,7 @@ function FaqPage() {
             imageUrl: "",
             blocks: [],
             ...d.data(),
-          } as FAQEntry))
+          } as unknown as FAQEntry))
           .filter((e) => e.published)
           .sort((a, b) => a.order - b.order);
         setEntries(all);

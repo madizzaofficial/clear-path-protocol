@@ -26,7 +26,7 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   Plus, Pencil, Trash2, GripVertical,
   ChevronDown, ChevronRight, Video, Lock,
-  Loader2, Check, BookOpen, X,
+  Loader2, Check, BookOpen, X, UploadCloud, FileText,
 } from "lucide-react";
 import {
   Dialog,
@@ -45,6 +45,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
+import { uploadLessonResourceFn } from "@/lib/upload-image";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -171,6 +173,9 @@ function CourseEditorContent() {
             completed: false,
             order: j,
             resources: l.resources,
+            checklistItems: [],
+            showChecklist: false,
+            showResources: false,
           })),
         })),
       });
@@ -757,7 +762,7 @@ function LessonDialog({ data, isNew, onClose, onSave }: {
   const [showChecklist, setShowChecklist] = useState(false);
   const [checklistItems, setChecklistItems] = useState<string[]>([]);
   const [showResources, setShowResources] = useState(false);
-  const [resources, setResources] = useState<{ name: string; size: string; url: string }[]>([]);
+  const [resources, setResources] = useState<{ _key: string; name: string; size: string; url: string; uploading?: boolean }[]>([]);
 
   useEffect(() => {
     if (data?.lesson) {
@@ -769,7 +774,7 @@ function LessonDialog({ data, isNew, onClose, onSave }: {
       setShowChecklist(data.lesson.showChecklist ?? false);
       setChecklistItems(data.lesson.checklistItems ?? []);
       setShowResources(data.lesson.showResources ?? false);
-      setResources((data.lesson.resources ?? []).map((r) => ({ name: r.name, size: r.size, url: r.url ?? "" })));
+      setResources((data.lesson.resources ?? []).map((r) => ({ _key: r.url || r.name, name: r.name, size: r.size, url: r.url ?? "" })));
     }
   }, [data]);
 
@@ -779,7 +784,7 @@ function LessonDialog({ data, isNew, onClose, onSave }: {
       showChecklist,
       checklistItems: showChecklist ? checklistItems.filter((i) => i.trim()) : [],
       showResources,
-      resources: showResources ? resources.filter((r) => r.name.trim()) : [],
+      resources: showResources ? resources.filter((r) => r.name.trim() && !r.uploading).map(({ _key: _k, uploading: _u, ...r }) => r) : [],
     });
   }
 
@@ -865,36 +870,58 @@ function LessonDialog({ data, isNew, onClose, onSave }: {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">Ressources</p>
-                <p className="text-xs text-muted-foreground">Fichiers ou liens téléchargeables</p>
+                <p className="text-xs text-muted-foreground">Fichiers téléchargeables (PDF, images…)</p>
               </div>
               <ToggleSwitch value={showResources} onChange={setShowResources} />
             </div>
             {showResources && (
-              <div className="mt-4 space-y-3">
-                {resources.map((r, i) => (
-                  <div key={i} className="relative space-y-2 rounded-2xl border border-border/60 bg-muted/30 p-3 pt-4">
-                    <button type="button" onClick={() => setResources((prev) => prev.filter((_, idx) => idx !== i))}
-                      className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive">
-                      <X className="h-3 w-3" />
-                    </button>
-                    <input autoComplete="off" value={r.name}
-                      onChange={(e) => setResources((prev) => prev.map((v, idx) => idx === i ? { ...v, name: e.target.value } : v))}
-                      placeholder="Nom (ex : Guide PDF)"
-                      className="h-9 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" />
-                    <input autoComplete="off" value={r.size}
-                      onChange={(e) => setResources((prev) => prev.map((v, idx) => idx === i ? { ...v, size: e.target.value } : v))}
-                      placeholder="Taille (ex : 2.4 MB)"
-                      className="h-9 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" />
-                    <input autoComplete="off" value={r.url}
-                      onChange={(e) => setResources((prev) => prev.map((v, idx) => idx === i ? { ...v, url: e.target.value } : v))}
-                      placeholder="URL de téléchargement (optionnel)"
-                      className="h-9 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" />
+              <div className="mt-4 space-y-2">
+                {resources.map((r) => (
+                  <div key={r._key} className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/30 px-3 py-2.5">
+                    {r.uploading ? (
+                      <Loader2 className="h-4 w-4 shrink-0 animate-spin text-primary" />
+                    ) : (
+                      <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{r.name || "Fichier"}</p>
+                      {r.size && <p className="text-xs text-muted-foreground">{r.uploading ? "Envoi en cours…" : r.size}</p>}
+                    </div>
+                    {!r.uploading && (
+                      <button type="button" onClick={() => setResources((prev) => prev.filter((v) => v._key !== r._key))}
+                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-destructive">
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    )}
                   </div>
                 ))}
-                <button type="button" onClick={() => setResources((prev) => [...prev, { name: "", size: "", url: "" }])}
-                  className="flex items-center gap-1.5 rounded-xl border border-dashed border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground">
-                  <Plus className="h-3.5 w-3.5" /> Ajouter une ressource
-                </button>
+                <label className="flex cursor-pointer items-center gap-1.5 rounded-xl border border-dashed border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground">
+                  <UploadCloud className="h-3.5 w-3.5" /> Ajouter un fichier
+                  <input type="file" className="sr-only" accept="*/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      e.target.value = "";
+                      const sizeStr = file.size < 1024 * 1024
+                        ? `${(file.size / 1024).toFixed(0)} KB`
+                        : `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
+                      const key = `${Date.now()}-${Math.random()}`;
+                      setResources((prev) => [...prev, { _key: key, name: file.name, size: sizeStr, url: "", uploading: true }]);
+                      try {
+                        const base64 = await new Promise<string>((resolve, reject) => {
+                          const reader = new FileReader();
+                          reader.onload = () => resolve((reader.result as string).split(",")[1]);
+                          reader.onerror = reject;
+                          reader.readAsDataURL(file);
+                        });
+                        const { publicUrl } = await uploadLessonResourceFn({ data: { fileName: file.name, contentType: file.type || "application/octet-stream", base64 } });
+                        setResources((prev) => prev.map((v) => v._key === key ? { ...v, url: publicUrl, uploading: false } : v));
+                      } catch {
+                        setResources((prev) => prev.filter((v) => v._key !== key));
+                      }
+                    }}
+                  />
+                </label>
               </div>
             )}
           </div>
