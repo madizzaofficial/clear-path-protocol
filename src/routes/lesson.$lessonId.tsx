@@ -18,6 +18,9 @@ type FLesson = {
   locked: boolean;
   order: number;
   resources: { name: string; size: string; url?: string }[];
+  checklistItems?: string[];
+  showChecklist?: boolean;
+  showResources?: boolean;
 };
 
 type FChapter = {
@@ -273,27 +276,24 @@ function LessonPage() {
                 </p>
               </section>
 
-              <section>
-                <h2 className="font-display text-xl font-semibold">Liste de contrôle</h2>
-                <div className="mt-4 space-y-2 rounded-2xl border border-border/60 bg-card p-5">
-                  {[
-                    "Regarder la vidéo en entier sans distraction",
-                    "Prendre des photos de référence en lumière naturelle",
-                    "Mettre à jour ta fiche routine du soir",
-                    "Réfléchir aux déclencheurs dans tes notes",
-                  ].map((item, i) => (
-                    <label key={item} className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 hover:bg-primary-soft/40">
-                      <input
-                        type="checkbox"
-                        checked={checked.includes(i)}
-                        onChange={() => toggleCheck(i)}
-                        className="h-4 w-4 rounded border-border accent-[var(--primary)]"
-                      />
-                      <span className={`text-sm transition-opacity ${checked.includes(i) ? "opacity-50 line-through" : ""}`}>{item}</span>
-                    </label>
-                  ))}
-                </div>
-              </section>
+              {lesson.showChecklist !== false && lesson.checklistItems && lesson.checklistItems.length > 0 && (
+                <section>
+                  <h2 className="font-display text-xl font-semibold">Liste de contrôle</h2>
+                  <div className="mt-4 space-y-2 rounded-2xl border border-border/60 bg-card p-5">
+                    {lesson.checklistItems.map((item, i) => (
+                      <label key={i} className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 hover:bg-primary-soft/40">
+                        <input
+                          type="checkbox"
+                          checked={checked.includes(i)}
+                          onChange={() => toggleCheck(i)}
+                          className="h-4 w-4 rounded border-border accent-[var(--primary)]"
+                        />
+                        <span className={`text-sm transition-opacity ${checked.includes(i) ? "opacity-50 line-through" : ""}`}>{item}</span>
+                      </label>
+                    ))}
+                  </div>
+                </section>
+              )}
 
               <section>
                 <div className="flex items-center justify-between">
@@ -310,7 +310,7 @@ function LessonPage() {
             </div>
 
             <aside className="space-y-6">
-              {lesson.resources.length > 0 && (
+              {lesson.showResources !== false && lesson.resources.length > 0 && (
                 <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-soft">
                   <h3 className="font-display text-base font-semibold">Ressources</h3>
                   <ul className="mt-3 space-y-2">

@@ -26,7 +26,7 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   Plus, Pencil, Trash2, GripVertical,
   ChevronDown, ChevronRight, Video, Lock,
-  Loader2, Check, BookOpen,
+  Loader2, Check, BookOpen, X,
 } from "lucide-react";
 import {
   Dialog,
@@ -57,7 +57,10 @@ type FirestoreLesson = {
   locked: boolean;
   completed: boolean;
   order: number;
-  resources: { name: string; size: string }[];
+  resources: { name: string; size: string; url?: string }[];
+  checklistItems: string[];
+  showChecklist: boolean;
+  showResources: boolean;
 };
 
 type FirestoreChapter = {
@@ -294,7 +297,10 @@ function CourseEditorContent() {
         locked: data.locked ?? false,
         completed: false,
         order: 0,
-        resources: [],
+        resources: data.resources ?? [],
+        checklistItems: data.checklistItems ?? [],
+        showChecklist: data.showChecklist ?? false,
+        showResources: data.showResources ?? false,
       };
       updated = {
         ...course,
@@ -445,7 +451,7 @@ function CourseEditorContent() {
                   onDeleteChapter={() => setDeletingChapterId(ch.id)}
                   onAddLesson={() => {
                     setEditingLesson({
-                      lesson: { id: "", title: "", duration: "5 min", summary: "", videoUrl: "", locked: false, completed: false, order: ch.lessons.length, resources: [] },
+                      lesson: { id: "", title: "", duration: "5 min", summary: "", videoUrl: "", locked: false, completed: false, order: ch.lessons.length, resources: [], checklistItems: [], showChecklist: false, showResources: false },
                       chapterId: ch.id,
                     });
                     setIsNewLesson(true);
@@ -728,6 +734,15 @@ function ChapterDialog({ chapter, isNew, onClose, onSave }: {
 
 // ─── Lesson Dialog ────────────────────────────────────────────────────────────
 
+function ToggleSwitch({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button type="button" onClick={() => onChange(!value)}
+      className={`relative ml-4 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${value ? "bg-primary" : "bg-muted"}`}>
+      <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${value ? "translate-x-6" : "translate-x-1"}`} />
+    </button>
+  );
+}
+
 function LessonDialog({ data, isNew, onClose, onSave }: {
   data: { lesson: FirestoreLesson; chapterId: string } | null;
   isNew: boolean;
@@ -739,6 +754,10 @@ function LessonDialog({ data, isNew, onClose, onSave }: {
   const [summary, setSummary] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [locked, setLocked] = useState(false);
+  const [showChecklist, setShowChecklist] = useState(false);
+  const [checklistItems, setChecklistItems] = useState<string[]>([]);
+  const [showResources, setShowResources] = useState(false);
+  const [resources, setResources] = useState<{ name: string; size: string; url: string }[]>([]);
 
   useEffect(() => {
     if (data?.lesson) {
@@ -747,8 +766,22 @@ function LessonDialog({ data, isNew, onClose, onSave }: {
       setSummary(data.lesson.summary);
       setVideoUrl(data.lesson.videoUrl);
       setLocked(data.lesson.locked);
+      setShowChecklist(data.lesson.showChecklist ?? false);
+      setChecklistItems(data.lesson.checklistItems ?? []);
+      setShowResources(data.lesson.showResources ?? false);
+      setResources((data.lesson.resources ?? []).map((r) => ({ name: r.name, size: r.size, url: r.url ?? "" })));
     }
   }, [data]);
+
+  function handleSave() {
+    onSave({
+      title, duration, summary, videoUrl, locked,
+      showChecklist,
+      checklistItems: showChecklist ? checklistItems.filter((i) => i.trim()) : [],
+      showResources,
+      resources: showResources ? resources.filter((r) => r.name.trim()) : [],
+    });
+  }
 
   return (
     <Dialog open={!!data} onOpenChange={(o) => !o && onClose()}>
@@ -776,27 +809,99 @@ function LessonDialog({ data, isNew, onClose, onSave }: {
               <input autoComplete="off" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=…"
                 className="h-11 w-full rounded-2xl border border-border bg-background pl-11 pr-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" />
             </div>
-            <p className="mt-1.5 text-xs text-muted-foreground">YouTube, Vimeo ou MP4 direct</p>
+            <p className="mt-1.5 text-xs text-muted-foreground">YouTube, Vimeo, MP4 direct ou lien Bunnystream</p>
           </div>
           <div>
             <label className="mb-2 block text-sm font-medium text-foreground/80">Résumé</label>
             <textarea autoComplete="off" value={summary} onChange={(e) => setSummary(e.target.value)} placeholder="Ce que l'élève apprendra" rows={3}
               className="w-full resize-none rounded-2xl border border-border bg-background p-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" />
           </div>
+
+          {/* Verrouiller */}
           <div className="flex items-center justify-between rounded-2xl border border-border bg-background p-4">
             <div>
               <p className="text-sm font-medium">Verrouiller la leçon</p>
               <p className="text-xs text-muted-foreground">Nécessite de compléter les leçons précédentes</p>
             </div>
-            <button type="button" onClick={() => setLocked((v) => !v)}
-              className={`relative ml-4 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${locked ? "bg-primary" : "bg-muted"}`}>
-              <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${locked ? "translate-x-6" : "translate-x-1"}`} />
-            </button>
+            <ToggleSwitch value={locked} onChange={setLocked} />
+          </div>
+
+          {/* Liste de contrôle */}
+          <div className="rounded-2xl border border-border bg-background p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Liste de contrôle</p>
+                <p className="text-xs text-muted-foreground">Points à cocher par l'élève après la leçon</p>
+              </div>
+              <ToggleSwitch value={showChecklist} onChange={setShowChecklist} />
+            </div>
+            {showChecklist && (
+              <div className="mt-4 space-y-2">
+                {checklistItems.map((item, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <input
+                      autoComplete="off"
+                      value={item}
+                      onChange={(e) => setChecklistItems((prev) => prev.map((v, idx) => idx === i ? e.target.value : v))}
+                      placeholder={`Étape ${i + 1}`}
+                      className="h-9 flex-1 rounded-xl border border-border bg-muted/40 px-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    />
+                    <button type="button" onClick={() => setChecklistItems((prev) => prev.filter((_, idx) => idx !== i))}
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border text-muted-foreground transition-colors hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+                <button type="button" onClick={() => setChecklistItems((prev) => [...prev, ""])}
+                  className="flex items-center gap-1.5 rounded-xl border border-dashed border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground">
+                  <Plus className="h-3.5 w-3.5" /> Ajouter une étape
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Ressources */}
+          <div className="rounded-2xl border border-border bg-background p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Ressources</p>
+                <p className="text-xs text-muted-foreground">Fichiers ou liens téléchargeables</p>
+              </div>
+              <ToggleSwitch value={showResources} onChange={setShowResources} />
+            </div>
+            {showResources && (
+              <div className="mt-4 space-y-3">
+                {resources.map((r, i) => (
+                  <div key={i} className="relative space-y-2 rounded-2xl border border-border/60 bg-muted/30 p-3 pt-4">
+                    <button type="button" onClick={() => setResources((prev) => prev.filter((_, idx) => idx !== i))}
+                      className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive">
+                      <X className="h-3 w-3" />
+                    </button>
+                    <input autoComplete="off" value={r.name}
+                      onChange={(e) => setResources((prev) => prev.map((v, idx) => idx === i ? { ...v, name: e.target.value } : v))}
+                      placeholder="Nom (ex : Guide PDF)"
+                      className="h-9 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" />
+                    <input autoComplete="off" value={r.size}
+                      onChange={(e) => setResources((prev) => prev.map((v, idx) => idx === i ? { ...v, size: e.target.value } : v))}
+                      placeholder="Taille (ex : 2.4 MB)"
+                      className="h-9 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" />
+                    <input autoComplete="off" value={r.url}
+                      onChange={(e) => setResources((prev) => prev.map((v, idx) => idx === i ? { ...v, url: e.target.value } : v))}
+                      placeholder="URL de téléchargement (optionnel)"
+                      className="h-9 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20" />
+                  </div>
+                ))}
+                <button type="button" onClick={() => setResources((prev) => [...prev, { name: "", size: "", url: "" }])}
+                  className="flex items-center gap-1.5 rounded-xl border border-dashed border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground">
+                  <Plus className="h-3.5 w-3.5" /> Ajouter une ressource
+                </button>
+              </div>
+            )}
           </div>
         </div>
         <DialogFooter className="gap-2 sm:gap-2">
           <button onClick={onClose} className="rounded-2xl border border-border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted">Annuler</button>
-          <button onClick={() => onSave({ title, duration, summary, videoUrl, locked })} disabled={!title.trim()}
+          <button onClick={handleSave} disabled={!title.trim()}
             className="rounded-2xl bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50">
             {isNew ? "Ajouter" : "Appliquer"}
           </button>
