@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
 import { course as staticCourse } from "@/lib/course-data";
+import { bustCourseCache } from "@/lib/course-cache";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -205,6 +206,7 @@ function CourseEditorContent() {
     try {
       await setDoc(doc(db, "courses", COURSE_ID), course);
       await deleteDoc(doc(db, "courses", DRAFT_ID)).catch(() => {});
+      bustCourseCache();
       setIsDirty(false);
       setHasDraft(false);
       setSavedAs("published");
