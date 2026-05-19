@@ -226,7 +226,7 @@ function LessonPage() {
 
       <main className="flex-1 overflow-x-hidden">
         {/* Top bar */}
-        <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border/60 bg-background/80 px-4 py-3 backdrop-blur-xl md:px-8">
+        <div className="sticky top-16 z-30 flex items-center justify-between border-b border-border/60 bg-background/80 px-4 py-3 backdrop-blur-xl md:px-8">
           <div className="flex items-center gap-3">
             <button onClick={() => setMenuOpen(true)} className="rounded-full p-2 hover:bg-muted lg:hidden">
               <Menu className="h-5 w-5" />

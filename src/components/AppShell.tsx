@@ -73,7 +73,6 @@ function UserMenu() {
 export function AppShell({ children }: { children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const isNavigating = useRouterState({ select: (s) => s.isLoading });
-  const onLesson = path.startsWith("/lesson");
   const { isAdmin } = useAuth();
 
   const nav = [
@@ -92,35 +91,33 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="h-full animate-[progress_1s_ease-in-out_infinite] bg-primary" />
         </div>
       )}
-      {!onLesson && (
-        <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
-          <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-            <Link to="/" className="flex items-center gap-2">
-              <img src="/logo_clear.png" alt="Protocole Clear" className="h-20 w-20 rounded-full object-cover" />
-              <span className="font-display text-xl font-semibold tracking-tight">Protocole Clear</span>
-            </Link>
-            <nav className="hidden items-center gap-1 md:flex">
-              {nav.map((n) => {
-                const active = n.to === "/" ? path === "/" : path.startsWith(n.to);
-                return (
-                  <Link
-                    key={n.to}
-                    to={n.to}
-                    className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                      active ? "bg-primary-soft text-foreground" : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {n.label}
-                  </Link>
-                );
-              })}
-            </nav>
-            <div className="flex items-center gap-2">
-              <UserMenu />
-            </div>
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+          <Link to="/" className="flex items-center gap-2">
+            <img src="/logo_clear.png" alt="Protocole Clear" className="h-20 w-20 rounded-full object-cover" />
+            <span className="font-display text-xl font-semibold tracking-tight">Protocole Clear</span>
+          </Link>
+          <nav className="hidden items-center gap-1 md:flex">
+            {nav.map((n) => {
+              const active = n.to === "/" ? path === "/" : path.startsWith(n.to);
+              return (
+                <Link
+                  key={n.to}
+                  to={n.to}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                    active ? "bg-primary-soft text-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {n.label}
+                </Link>
+              );
+            })}
+          </nav>
+          <div className="flex items-center gap-2">
+            <UserMenu />
           </div>
-        </header>
-      )}
+        </div>
+      </header>
       {children}
       {(
         <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/60 bg-background/95 backdrop-blur-xl md:hidden">
