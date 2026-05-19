@@ -3,6 +3,10 @@ import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, addDoc, setDoc, deleteDoc, doc } from "firebase/firestore";
+
+function bustFaqCache() {
+  try { localStorage.removeItem("faq_cache_v1"); } catch {}
+}
 import { useEffect, useRef, useState } from "react";
 import { DndContext, closestCenter, type DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
@@ -173,12 +177,14 @@ function AdminFaqPage() {
       if (isNew) {
         const ref = await addDoc(collection(db, "faq"), entryData);
         setEntries((prev) => [...prev, { id: ref.id, ...entryData }]);
+        bustFaqCache();
         toast.success("Question ajoutée");
       } else {
         await setDoc(doc(db, "faq", editingId!), entryData);
         setEntries((prev) =>
           prev.map((e) => e.id === editingId ? { id: e.id, ...entryData } : e)
         );
+        bustFaqCache();
         toast.success("Question mise à jour");
       }
       setDialogOpen(false);
@@ -195,6 +201,7 @@ function AdminFaqPage() {
     try {
       await deleteDoc(doc(db, "faq", deletingId));
       setEntries((prev) => prev.filter((e) => e.id !== deletingId));
+      bustFaqCache();
       toast.success("Question supprimée");
     } catch {
       toast.error("Erreur lors de la suppression");

@@ -53,10 +53,10 @@ function FaqPage() {
 
   useEffect(() => {
     if (!user) return;
-    const CACHE_KEY = "faq_cache";
-    const TTL = 30 * 60 * 1000;
+    const CACHE_KEY = "faq_cache_v1";
+    const TTL = 24 * 60 * 60 * 1000;
     try {
-      const raw = sessionStorage.getItem(CACHE_KEY);
+      const raw = localStorage.getItem(CACHE_KEY);
       if (raw) {
         const { data, ts } = JSON.parse(raw) as { data: FAQEntry[]; ts: number };
         if (Date.now() - ts < TTL) {
@@ -79,7 +79,7 @@ function FaqPage() {
           } as FAQEntry))
           .filter((e) => e.published)
           .sort((a, b) => a.order - b.order);
-        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: all, ts: Date.now() })); } catch {}
+        try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data: all, ts: Date.now() })); } catch {}
         setEntries(all);
       })
       .finally(() => setFaqLoading(false));
