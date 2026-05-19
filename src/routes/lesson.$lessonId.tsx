@@ -226,7 +226,7 @@ function LessonPage() {
 
       <main className="flex-1 overflow-x-hidden">
         {/* Top bar */}
-        <div className="sticky top-16 z-30 flex items-center justify-between border-b border-border/60 bg-background/80 px-4 py-2 backdrop-blur-xl md:px-8 md:py-3">
+        <div className="sticky top-16 z-30 flex items-center justify-between border-b border-border/60 bg-background/80 px-4 py-2 backdrop-blur-xl md:px-8 md:py-3 lg:hidden">
           <div className="flex items-center gap-1.5">
             <button onClick={() => setMenuOpen(true)} className="rounded-full p-1.5 hover:bg-muted lg:hidden">
               <Menu className="h-5 w-5" />
@@ -241,7 +241,7 @@ function LessonPage() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-5xl px-4 pt-12 pb-28 md:px-10 md:py-12">
+        <div className="mx-auto max-w-5xl px-4 pt-12 pb-28 md:px-10 lg:pt-8 lg:pb-16 md:py-12">
           {/* Crumb */}
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">{chapter.title}</p>
           <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight md:text-4xl">{lesson.title}</h1>
@@ -424,14 +424,8 @@ function SidebarContent({
 
   return (
     <div className="flex h-screen flex-col">
-      <div className="border-b border-border/60 p-6">
-        <Link to="/" className="flex items-center gap-2" onClick={onNavigate}>
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary">
-            <img src="/logo_clear.png" alt="Protocole Clear" className="h-full w-full rounded-full object-cover" />
-          </div>
-          <span className="font-display text-lg font-semibold">Protocole Clear</span>
-        </Link>
-        <p className="mt-4 text-xs font-medium uppercase tracking-[0.2em] text-primary">Protocole</p>
+      <div className="border-b border-border/60 px-6 py-4">
+        <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">Sommaire</p>
         <p className="mt-1 font-display text-base font-semibold leading-tight">{courseTitle}</p>
       </div>
       <nav className="flex-1 overflow-y-auto p-4">
