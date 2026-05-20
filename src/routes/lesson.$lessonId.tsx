@@ -269,9 +269,6 @@ function LessonPage() {
               <section>
                 <h2 className="font-display text-xl font-semibold">Résumé</h2>
                 <p className="mt-3 leading-relaxed text-muted-foreground">{lesson.summary}</p>
-                <p className="mt-3 leading-relaxed text-muted-foreground">
-                  Dans cette leçon, on explore les principes clés étape par étape. Prends des notes pendant le visionnage — tu les appliqueras directement dans ta routine via la liste ci-dessous.
-                </p>
               </section>
 
               {lesson.showChecklist !== false && lesson.checklistItems && lesson.checklistItems.length > 0 && (
