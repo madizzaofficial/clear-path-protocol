@@ -49,7 +49,6 @@ export const ENDOCRINE_DISRUPTORS: Record<string, EDEntry> = {
   // Silicones cycliques
   "CYCLOTETRASILOXANE":          { severity: "medium", reason: "Silicone cyclique D4, PE suspecté (ECHA)", description: "Silicone volatile D4, classée SVHC par l'ECHA. PE suspecté, persistante et bioaccumulable. Interdit >0,1% dans les produits de rinçage EU depuis 2020. Peaux concernées : toutes, impact surtout environnemental." },
   "CYCLOPENTASILOXANE":          { severity: "medium", reason: "Silicone cyclique D5, PE suspecté (ECHA)", description: "Silicone volatile D5, restrictions EU croissantes. PE suspecté, bioaccumulable. Souvent présent dans les sérums et primers. Peaux concernées : toutes, impact surtout environnemental." },
-  "CYCLOHEXASILOXANE":           { severity: "medium", reason: "Silicone cyclique D6, PE suspecté",        description: "Silicone cyclique D6, restrictions EU en cours. PE suspecté par analogie avec D4/D5. Peaux concernées : toutes." },
 
   // Muscs nitrés
   "MUSK AMBRETTE":               { severity: "high",   reason: "Musc nitré, PE avéré, interdit EU",        description: "Musc nitré interdit dans les cosmétiques EU. Neurotoxique, photoallergiène et PE avéré. Peaux concernées : toutes." },
@@ -58,7 +57,6 @@ export const ENDOCRINE_DISRUPTORS: Record<string, EDEntry> = {
 
   // Autres
   "KOJIC ACID":                  { severity: "medium", reason: "PE suspecté (perturbateur thyroïdien)",     description: "Agent dépigmentant populaire contre les taches. Perturbateur thyroïdien suspecté à concentrations élevées. Limité à 1% en EU. Peaux concernées : toutes les peaux sous traitement dépigmentant prolongé." },
-  "PHENOXYETHANOL":              { severity: "medium", reason: "PE suspecté, débat scientifique en cours",  description: "Conservateur courant présenté comme alternative aux parabènes. PE suspecté selon certaines études in vitro, jugé sûr par le SCCS (max 1%). Déconseillé chez les nourrissons. Peaux concernées : peaux sensibles, à utiliser avec modération." },
 };
 
 // ─── Allergènes (UE Règlement 1223/2009 Annexe III + SCCS extended) ──────────
