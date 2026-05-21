@@ -1,17 +1,18 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { AppShell } from "./AppShell";
-import { LayoutDashboard, Link2, Package, BookOpen, Apple, ClipboardList, ShieldCheck, LayoutTemplate, HelpCircle } from "lucide-react";
+import { LayoutDashboard, Link2, Package, BookOpen, Apple, ClipboardList, ShieldCheck, LayoutTemplate, HelpCircle, FlaskConical } from "lucide-react";
 
 const TABS = [
-  { label: "Dashboard",          to: "/admin",               icon: LayoutDashboard },
-  { label: "Liens d'invitation", to: "/admin/tokens",         icon: Link2 },
-  { label: "Catalogue",          to: "/admin/products",       icon: Package },
-  { label: "Routines",           to: "/admin/routines",       icon: ClipboardList },
-  { label: "Modèles",            to: "/admin/templates",      icon: LayoutTemplate },
-  { label: "Cours",              to: "/admin/course-editor",  icon: BookOpen },
-  { label: "Nutrition",          to: "/admin/nutrition",      icon: Apple },
-  { label: "FAQ",                to: "/admin/faq",            icon: HelpCircle },
-  { label: "Admins",             to: "/admin/admins",          icon: ShieldCheck },
+  { label: "Dashboard",          to: "/admin",                        icon: LayoutDashboard },
+  { label: "Liens d'invitation", to: "/admin/tokens",                  icon: Link2 },
+  { label: "Catalogue",          to: "/admin/products",                icon: Package },
+  { label: "Routines",           to: "/admin/routines",                icon: ClipboardList },
+  { label: "Modèles",            to: "/admin/templates",               icon: LayoutTemplate },
+  { label: "Cours",              to: "/admin/course-editor",           icon: BookOpen },
+  { label: "Nutrition",          to: "/admin/nutrition",               icon: Apple },
+  { label: "FAQ",                to: "/admin/faq",                     icon: HelpCircle },
+  { label: "Ingrédients",        to: "/admin/ingredient-analyzer",     icon: FlaskConical },
+  { label: "Admins",             to: "/admin/admins",                  icon: ShieldCheck },
 ] as const;
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
