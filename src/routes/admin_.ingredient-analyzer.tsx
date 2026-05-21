@@ -3,7 +3,7 @@ import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { FlaskConical, AlertTriangle, Info, Leaf } from "lucide-react";
+import { FlaskConical, AlertTriangle, Info, Leaf, Zap, ChevronDown } from "lucide-react";
 import { analyzeIngredients, type AnalysisResult } from "@/lib/cosmetic-ingredients";
 
 export const Route = createFileRoute("/admin_/ingredient-analyzer")({
@@ -18,7 +18,8 @@ function scoreColor(score: number): string {
   return "text-red-600 bg-red-50 border-red-200";
 }
 
-function scoreLabel(score: number): string {
+function scoreLabel(score: number, hasED: boolean): string {
+  if (hasED && score >= 71) return "Bon (PE présent)";
   if (score >= 85) return "Très bon";
   if (score >= 70) return "Bon";
   if (score >= 50) return "Moyen";
@@ -92,7 +93,7 @@ function IngredientAnalyzerPage() {
               <div className={`flex flex-col items-center justify-center rounded-2xl border px-6 py-4 ${scoreColor(result.score)}`}>
                 <span className="font-display text-4xl font-bold tabular-nums">{result.score}</span>
                 <span className="text-xs font-semibold uppercase tracking-wider opacity-70">/ 100</span>
-                <span className="mt-1 text-xs font-medium">{scoreLabel(result.score)}</span>
+                <span className="mt-1 text-xs font-medium">{scoreLabel(result.score, result.edHighCount + result.edMediumCount > 0)}</span>
               </div>
               <div className="flex flex-wrap gap-3">
                 {result.edHighCount > 0 && (
@@ -113,13 +114,19 @@ function IngredientAnalyzerPage() {
                     {result.allergenCount} allergène{result.allergenCount > 1 ? "s" : ""}
                   </div>
                 )}
+                {result.irritantCount > 0 && (
+                  <div className="flex items-center gap-2 rounded-2xl bg-violet-50 px-4 py-2.5 text-sm font-semibold text-violet-600">
+                    <Zap className="h-4 w-4" />
+                    {result.irritantCount} irritant{result.irritantCount > 1 ? "s" : ""}
+                  </div>
+                )}
                 {result.petrochemCount > 0 && (
                   <div className="flex items-center gap-2 rounded-2xl bg-yellow-50 px-4 py-2.5 text-sm font-semibold text-yellow-600">
                     <Leaf className="h-4 w-4" />
                     {result.petrochemCount} pétrochimique{result.petrochemCount > 1 ? "s" : ""}
                   </div>
                 )}
-                {result.edHighCount === 0 && result.edMediumCount === 0 && result.allergenCount === 0 && result.petrochemCount === 0 && (
+                {result.edHighCount === 0 && result.edMediumCount === 0 && result.allergenCount === 0 && result.irritantCount === 0 && result.petrochemCount === 0 && (
                   <p className="text-sm text-emerald-600 font-medium">✓ Aucun ingrédient problématique détecté.</p>
                 )}
               </div>
@@ -144,36 +151,58 @@ function IngredientAnalyzerPage() {
   );
 }
 
-type IngredientRowProps = { ing: ReturnType<typeof analyzeIngredients>["ingredients"][number] };
+type Ing = ReturnType<typeof analyzeIngredients>["ingredients"][number];
 
-function IngredientRow({ ing }: IngredientRowProps) {
-  const config = {
-    ed_high:   { dot: "bg-red-500",     bg: "bg-red-50",     name: "text-red-700 font-semibold",   badge: "bg-red-100 text-red-600",     label: "PE avéré" },
-    ed_medium: { dot: "bg-orange-400",  bg: "bg-orange-50",  name: "text-orange-700 font-semibold", badge: "bg-orange-100 text-orange-600", label: "PE suspecté" },
-    allergen:  { dot: "bg-amber-400",   bg: "bg-amber-50",   name: "text-amber-700 font-semibold",  badge: "bg-amber-100 text-amber-700",  label: "Allergène" },
-    petrochem: { dot: "bg-yellow-400",  bg: "bg-yellow-50",  name: "text-yellow-700 font-medium",   badge: "bg-yellow-100 text-yellow-700", label: "Pétrochimique" },
-    ok:        { dot: "bg-emerald-400", bg: "bg-emerald-50/60", name: "text-emerald-700 font-medium", badge: "", label: "" },
-  }[ing.flag];
+const FLAG_CONFIG: Record<Ing["flag"], { dot: string; bg: string; expandBg: string; name: string; badge: string; label: string }> = {
+  ed_high:   { dot: "bg-red-500",     bg: "bg-red-50",        expandBg: "bg-red-100/60",    name: "text-red-700 font-semibold",    badge: "bg-red-100 text-red-600",      label: "PE avéré" },
+  ed_medium: { dot: "bg-orange-400",  bg: "bg-orange-50",     expandBg: "bg-orange-100/60", name: "text-orange-700 font-semibold", badge: "bg-orange-100 text-orange-600", label: "PE suspecté" },
+  allergen:  { dot: "bg-amber-400",   bg: "bg-amber-50",      expandBg: "bg-amber-100/60",  name: "text-amber-700 font-semibold",  badge: "bg-amber-100 text-amber-700",  label: "Allergène" },
+  irritant:  { dot: "bg-violet-400",  bg: "bg-violet-50/60",  expandBg: "bg-violet-100/60", name: "text-violet-700 font-semibold", badge: "bg-violet-100 text-violet-600", label: "Irritant" },
+  petrochem: { dot: "bg-yellow-400",  bg: "bg-yellow-50",     expandBg: "bg-yellow-100/60", name: "text-yellow-700 font-medium",   badge: "bg-yellow-100 text-yellow-700", label: "Pétrochimique" },
+  ok:        { dot: "bg-emerald-400", bg: "bg-emerald-50/50", expandBg: "bg-emerald-100/40",name: "text-emerald-700 font-medium",  badge: "",                              label: "" },
+};
 
-  const note =
+function IngredientRow({ ing }: { ing: Ing }) {
+  const [open, setOpen] = useState(false);
+  const cfg = FLAG_CONFIG[ing.flag];
+  const hasDetail = !!ing.description;
+
+  const shortNote =
     ing.flag === "allergen"
-      ? ing.euMandatory ? "Allergène — déclaration obligatoire EU (Règlement 1223/2009)" : "Allergène — liste SCCS étendue"
-      : ing.reason ?? (ing.flag === "ok" ? "Aucun signal dans nos bases de données" : undefined);
+      ? ing.euMandatory ? "Allergène — déclaration obligatoire EU" : "Allergène — liste SCCS étendue"
+      : ing.flag === "ok" ? null
+      : ing.reason ?? null;
 
   return (
-    <li className={`flex items-start gap-3 px-6 py-3 ${config.bg}`}>
-      <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${config.dot}`} />
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className={`text-sm ${config.name}`}>{ing.raw}</span>
-          {config.label && (
-            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${config.badge}`}>
-              {config.label}
-            </span>
-          )}
+    <li className={cfg.bg}>
+      <button
+        type="button"
+        onClick={() => hasDetail && setOpen((v) => !v)}
+        className={`flex w-full items-center gap-3 px-6 py-3 text-left ${hasDetail ? "cursor-pointer hover:brightness-95" : "cursor-default"}`}
+      >
+        <span className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${cfg.dot}`} />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`text-sm ${cfg.name}`}>{ing.raw}</span>
+            {cfg.label && (
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${cfg.badge}`}>
+                {cfg.label}
+              </span>
+            )}
+          </div>
+          {shortNote && <p className="mt-0.5 text-xs text-muted-foreground">{shortNote}</p>}
         </div>
-        {note && <p className="mt-0.5 text-xs text-muted-foreground">{note}</p>}
-      </div>
+        {hasDetail && (
+          <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+        )}
+      </button>
+      {open && ing.description && (
+        <div className={`px-6 pb-3 pt-0 ${cfg.expandBg}`}>
+          <p className="rounded-xl border border-border/40 bg-background/60 px-4 py-3 text-xs leading-relaxed text-foreground/80">
+            {ing.description}
+          </p>
+        </div>
+      )}
     </li>
   );
 }
