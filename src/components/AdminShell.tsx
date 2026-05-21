@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { AppShell } from "./AppShell";
-import { LayoutDashboard, Link2, Package, BookOpen, Apple, ClipboardList, ShieldCheck, LayoutTemplate, HelpCircle, FlaskConical } from "lucide-react";
+import { LayoutDashboard, Link2, Package, BookOpen, Apple, ClipboardList, ShieldCheck, LayoutTemplate, HelpCircle } from "lucide-react";
 
 const TABS = [
   { label: "Dashboard",          to: "/admin",                        icon: LayoutDashboard },
@@ -11,7 +11,6 @@ const TABS = [
   { label: "Cours",              to: "/admin/course-editor",           icon: BookOpen },
   { label: "Nutrition",          to: "/admin/nutrition",               icon: Apple },
   { label: "FAQ",                to: "/admin/faq",                     icon: HelpCircle },
-  { label: "Ingrédients",        to: "/admin/ingredient-analyzer",     icon: FlaskConical },
   { label: "Admins",             to: "/admin/admins",                  icon: ShieldCheck },
 ] as const;
 

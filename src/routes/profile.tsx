@@ -6,7 +6,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { sendPasswordResetEmail, updateProfile } from "firebase/auth";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Calendar, Check, Loader2, LogOut, Mail, Pencil, X } from "lucide-react";
+import { Calendar, Check, ChevronRight, FlaskConical, Loader2, LogOut, Mail, Pencil, X } from "lucide-react";
 import { allLessons } from "@/lib/course-data";
 
 type IntakeAnswers = {
@@ -33,7 +33,7 @@ export const Route = createFileRoute("/profile")({
 });
 
 function ProfilePage() {
-  const { user, loading: authLoading, signOut } = useAuth();
+  const { user, isAdmin, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const [intake, setIntake] = useState<IntakeAnswers | null>(null);
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
@@ -309,6 +309,30 @@ function ProfilePage() {
             </div>
           )}
         </div>
+
+        {/* Admin tools */}
+        {isAdmin && (
+          <div className="mb-6 overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
+            <div className="border-b border-border/60 px-6 py-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Outils admin
+              </p>
+            </div>
+            <button
+              onClick={() => navigate({ to: "/admin/ingredient-analyzer" })}
+              className="flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/40"
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-primary-soft">
+                <FlaskConical className="h-4 w-4 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium">Analyseur d'ingrédients</p>
+                <p className="text-xs text-muted-foreground">Analyser une liste INCI cosmétique</p>
+              </div>
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+            </button>
+          </div>
+        )}
 
         {/* Sign out */}
         <button
