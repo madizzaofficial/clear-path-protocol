@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FlaskConical, AlertTriangle, Info, Leaf, Zap, ChevronDown, Droplets } from "lucide-react";
+import { FlaskConical, AlertTriangle, CheckCircle, Info, Leaf, Zap, ChevronDown, Droplets } from "lucide-react";
 import { analyzeIngredients, type AnalysisResult } from "@/lib/cosmetic-ingredients";
 
 function scoreColor(score: number): string {
@@ -121,12 +121,43 @@ export function IngredientAnalyzer() {
         <>
           {/* Score + summary */}
           <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-start gap-4">
+              {/* Score */}
               <div className={`flex flex-col items-center justify-center rounded-2xl border px-6 py-4 ${scoreColor(result.score)}`}>
                 <span className="font-display text-4xl font-bold tabular-nums">{result.score}</span>
                 <span className="text-xs font-semibold uppercase tracking-wider opacity-70">/ 100</span>
                 <span className="mt-1 text-xs font-medium">{scoreLabel(result.score, result.edHighCount + result.edMediumCount > 0)}</span>
               </div>
+
+              {/* Comedogenic status card */}
+              {result.comedogenicCount > 0 ? (
+                <div className="flex flex-col rounded-2xl border border-pink-200 bg-pink-50 px-4 py-3 min-w-[160px]">
+                  <div className="flex items-center gap-1.5 text-pink-700 mb-2">
+                    <Droplets className="h-4 w-4 shrink-0" />
+                    <span className="text-xs font-bold uppercase tracking-wider">Comédogène</span>
+                  </div>
+                  <ul className="space-y-1">
+                    {result.ingredients
+                      .filter((i) => i.flag === "comedogenic")
+                      .map((i, idx) => (
+                        <li key={idx} className="text-xs text-pink-800">
+                          <span className="font-medium">{i.raw}</span>
+                          {i.comedogenicRating && (
+                            <span className="ml-1 text-pink-500">({i.comedogenicRating}/5)</span>
+                          )}
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-emerald-700">
+                  <CheckCircle className="h-5 w-5" />
+                  <span className="mt-1.5 text-xs font-bold uppercase tracking-wider text-center">Non comédogène</span>
+                  <span className="mt-0.5 text-[10px] text-emerald-500 text-center leading-tight">selon notre base</span>
+                </div>
+              )}
+
+              {/* Other flags */}
               <div className="flex flex-wrap gap-3">
                 {result.edHighCount > 0 && (
                   <div className="flex items-center gap-2 rounded-2xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600">
@@ -167,8 +198,8 @@ export function IngredientAnalyzer() {
                 {result.edHighCount === 0 && result.edMediumCount === 0 && result.allergenCount === 0 && result.irritantCount === 0 && result.petrochemCount === 0 && result.comedogenicCount === 0 && (
                   <p className="text-sm text-emerald-600 font-medium">✓ Aucun ingrédient problématique détecté.</p>
                 )}
-              </div>
-            </div>
+              </div>{/* /Other flags */}
+            </div>{/* /flex row */}
 
             {/* Score explanation */}
             <div className="mt-4">

@@ -125,9 +125,6 @@ export const IRRITANTS: Record<string, IrritantEntry> = {
   "ALCOHOL DENAT":               { reason: "Alcool dénaturé, assèche et peut irriter",              description: "Alcool éthylique dénaturé. À fortes concentrations, assèche l'épiderme, détruit le microbiome et peut déclencher un rebond sébacé. Peaux concernées : peaux sèches, sensibles et acnéiques." },
   "SD ALCOHOL":                  { reason: "Alcool dénaturé, assèche et peut irriter",              description: "Alias américain d'Alcohol Denat. Même profil desséchant et potentiellement irritant. Peaux concernées : peaux sèches, sensibles et acnéiques." },
   "ISOPROPYL ALCOHOL":           { reason: "Alcool irritant, perturbateur de barrière",             description: "Alcool isopropylique très astringent. Dégraisse fortement, peut déclencher un rebond sébacé. Peaux concernées : peaux acnéiques, sèches et sensibles." },
-  "ISOPROPYL MYRISTATE":         { reason: "Comédogène avéré",                                      description: "Ester gras très comédogène (indice 5/5). Obstrue facilement les follicules pileux. Peaux concernées : peaux acnéiques et grasses — à éviter absolument." },
-  "ISOPROPYL PALMITATE":         { reason: "Comédogène",                                            description: "Ester gras comédogène (indice 4/5). Peut boucher les pores. Peaux concernées : peaux acnéiques et grasses." },
-  "MYRISTYL MYRISTATE":          { reason: "Comédogène",                                            description: "Ester gras comédogène. Présent dans certains émollients et fonds de teint. Peaux concernées : peaux acnéiques et grasses." },
   "SODIUM CHLORIDE":             { reason: "Sel — peut irriter et assécher à haute concentration",  description: "Sel (chlorure de sodium) utilisé comme modificateur de viscosité. Irritant aux concentrations élevées dans les nettoyants. Peaux concernées : peaux sensibles et peaux sèches." },
 };
 
