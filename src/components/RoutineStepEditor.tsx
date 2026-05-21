@@ -13,6 +13,7 @@ import {
   Trash2,
   Upload,
   X,
+  Clock,
 } from "lucide-react";
 import {
   Dialog,
@@ -37,6 +38,8 @@ export type RoutineStep = {
   description?: string;
   imageUrl?: string;
   purchaseUrl?: string;
+  startWeek?: number;
+  introNote?: string;
 };
 
 export type ExtraBlock = {
@@ -52,6 +55,8 @@ export type StepSaveData = {
   instructions: string;
   imageUrl?: string;
   purchaseUrl?: string;
+  startWeek?: number;
+  introNote?: string;
 };
 
 // ─── SortableStep ─────────────────────────────────────────────────────────────
@@ -156,6 +161,8 @@ export function StepDialog({
   const [instructions, setInstructions] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [purchaseUrl, setPurchaseUrl] = useState("");
+  const [startWeek, setStartWeek] = useState<number | "">("");
+  const [introNote, setIntroNote] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [catalogSearch, setCatalogSearch] = useState("");
@@ -177,6 +184,8 @@ export function StepDialog({
       setInstructions(step.instructions);
       setImageUrl(step.imageUrl ?? "");
       setPurchaseUrl(step.purchaseUrl ?? "");
+      setStartWeek(step.startWeek ?? "");
+      setIntroNote(step.introNote ?? "");
       setUploadError(null);
       setUploading(false);
       setShowCatalogPicker(false);
@@ -389,12 +398,45 @@ export function StepDialog({
                 <span className="font-normal text-muted-foreground">(URL optionnelle)</span>
               </label>
               <input
-
-                autoComplete="off"                value={purchaseUrl}
+                autoComplete="off"
+                value={purchaseUrl}
                 onChange={(e) => setPurchaseUrl(e.target.value)}
                 placeholder="https://..."
                 className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
+            </div>
+
+            {/* Instauration progressive */}
+            <div className="rounded-2xl border border-border/60 bg-muted/30 p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                <p className="text-sm font-medium">Instauration progressive</p>
+                <span className="text-xs text-muted-foreground">(optionnel)</span>
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Semaine d'introduction</label>
+                <input
+                  autoComplete="off"
+                  type="number"
+                  min={1}
+                  max={52}
+                  value={startWeek}
+                  onChange={(e) => setStartWeek(e.target.value === "" ? "" : Number(e.target.value))}
+                  placeholder="ex : 3"
+                  className="h-9 w-28 rounded-xl border border-border bg-background px-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Note de progression</label>
+                <textarea
+                  autoComplete="off"
+                  value={introNote}
+                  onChange={(e) => setIntroNote(e.target.value)}
+                  placeholder="ex : Commencer 2x/sem. pendant 3 semaines avant d'augmenter la fréquence"
+                  rows={2}
+                  className="w-full resize-none rounded-xl border border-border bg-background p-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -411,6 +453,7 @@ export function StepDialog({
                 purchaseUrl: purchaseUrl.trim() || undefined,
               })
             }
+            /* introNote/startWeek are student-specific, not saved to catalogue */
             disabled={savingToCatalog || !product.trim()}
             className="mr-auto flex items-center gap-2 rounded-2xl border border-border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-50"
           >
@@ -432,6 +475,8 @@ export function StepDialog({
                 instructions,
                 imageUrl: imageUrl.trim() || undefined,
                 purchaseUrl: purchaseUrl.trim() || undefined,
+                startWeek: startWeek !== "" ? startWeek : undefined,
+                introNote: introNote.trim() || undefined,
               })
             }
             disabled={saving || !product.trim()}

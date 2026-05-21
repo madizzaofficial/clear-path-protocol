@@ -23,6 +23,8 @@ type RoutineStep = {
   instructions: string;
   imageUrl?: string;
   purchaseUrl?: string;
+  startWeek?: number;
+  introNote?: string;
 };
 
 type ExtraBlock = { id: string; name: string; steps: RoutineStep[] };
@@ -491,6 +493,11 @@ function RoutineBlock({
                           {step.category}
                         </span>
                         <span className="text-[11px] font-medium text-muted-foreground/60">#{i + 1}</span>
+                        {step.startWeek && (
+                          <span className="flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold text-violet-600 dark:bg-violet-950/30 dark:text-violet-400">
+                            <Clock className="h-2.5 w-2.5" /> Sem. {step.startWeek}
+                          </span>
+                        )}
                         {report && (
                           <span className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${report === "allergie" ? "bg-red-100 text-red-600" : "bg-orange-100 text-orange-600"}`}>
                             <AlertTriangle className="h-2.5 w-2.5" />
@@ -509,6 +516,12 @@ function RoutineBlock({
                             step.description
                           )}
                         </p>
+                      )}
+                      {step.introNote && (
+                        <div className="mt-1.5 flex items-start gap-1.5 rounded-xl bg-violet-50 px-3 py-2 dark:bg-violet-950/20">
+                          <Clock className="mt-0.5 h-3 w-3 shrink-0 text-violet-500" />
+                          <p className="text-xs italic text-violet-700 dark:text-violet-300">{step.introNote}</p>
+                        </div>
                       )}
                       {step.instructions && (
                         <div className="mt-2">

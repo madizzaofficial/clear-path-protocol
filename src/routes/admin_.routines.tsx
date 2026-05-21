@@ -231,6 +231,7 @@ function buildEmailHtml(firstName: string, am: RoutineStep[], pm: RoutineStep[])
       <p style="color:#1a1a1a;font-weight:600;margin:0 0 3px;font-size:14px;">${escapeHtml(s.product)}</p>
       ${s.description ? `<p style="color:#888;margin:0 0 3px;font-size:13px;font-style:italic;line-height:1.5;">${escapeHtml(s.description)}</p>` : ""}
       <p style="color:#aaa;margin:0;font-size:13px;line-height:1.55;">${escapeHtml(s.instructions)}</p>
+      ${s.introNote ? `<p style="color:#7c5fa8;background:#f5f0ff;border-radius:8px;padding:6px 10px;margin:6px 0 0;font-size:12px;font-style:italic;line-height:1.5;">⏱ ${escapeHtml(s.introNote)}</p>` : ""}
       ${s.purchaseUrl ? `<a href="${escapeHtml(s.purchaseUrl)}" style="display:inline-block;margin-top:8px;color:#c4724b;font-size:12px;font-weight:600;text-decoration:none;">Acheter →</a>` : ""}
     </td>
   </tr>
