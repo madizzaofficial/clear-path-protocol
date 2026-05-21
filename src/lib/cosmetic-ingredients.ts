@@ -165,7 +165,7 @@ function normalize(s: string): string {
 
 export function analyzeIngredients(raw: string): AnalysisResult {
   const tokens = raw
-    .split(/[,\n]/)
+    .split(/[,\n]|\s\.\s/)
     .map((t) => t.trim())
     .filter(Boolean);
 

@@ -120,57 +120,23 @@ function IngredientAnalyzerPage() {
                   </div>
                 )}
                 {result.edHighCount === 0 && result.edMediumCount === 0 && result.allergenCount === 0 && result.petrochemCount === 0 && (
-                  <p className="text-sm text-muted-foreground">Aucun ingrédient problématique détecté.</p>
+                  <p className="text-sm text-emerald-600 font-medium">✓ Aucun ingrédient problématique détecté.</p>
                 )}
               </div>
             </div>
 
-            {/* Ingredient pills */}
-            <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-              <h2 className="mb-4 font-display text-base font-semibold">Détail par ingrédient</h2>
-              <div className="flex flex-wrap gap-2">
+            {/* Ingredient list — one per row */}
+            <div className="rounded-3xl border border-border/60 bg-card shadow-soft overflow-hidden">
+              <div className="border-b border-border/60 px-6 py-4">
+                <h2 className="font-display text-base font-semibold">Détail par ingrédient</h2>
+                <p className="mt-0.5 text-xs text-muted-foreground">{result.ingredients.length} ingrédients analysés</p>
+              </div>
+              <ul className="divide-y divide-border/40">
                 {result.ingredients.map((ing, i) => (
-                  <IngredientPill key={i} ing={ing} />
+                  <IngredientRow key={i} ing={ing} />
                 ))}
-              </div>
+              </ul>
             </div>
-
-            {/* Flagged details */}
-            {(result.edHighCount + result.edMediumCount + result.allergenCount) > 0 && (
-              <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-                <h2 className="mb-4 font-display text-base font-semibold">Ingrédients signalés</h2>
-                <div className="space-y-2">
-                  {result.ingredients
-                    .filter((i) => i.flag !== "ok" && i.flag !== "petrochem")
-                    .map((ing, i) => (
-                      <div key={i} className={`flex items-start gap-3 rounded-2xl px-4 py-3 ${
-                        ing.flag === "ed_high"   ? "bg-red-50" :
-                        ing.flag === "ed_medium" ? "bg-orange-50" :
-                        "bg-amber-50"
-                      }`}>
-                        <span className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${
-                          ing.flag === "ed_high"   ? "bg-red-500" :
-                          ing.flag === "ed_medium" ? "bg-orange-400" :
-                          "bg-amber-400"
-                        }`} />
-                        <div className="min-w-0">
-                          <p className={`text-sm font-semibold ${
-                            ing.flag === "ed_high"   ? "text-red-700" :
-                            ing.flag === "ed_medium" ? "text-orange-600" :
-                            "text-amber-700"
-                          }`}>{ing.raw}</p>
-                          {ing.reason && <p className="mt-0.5 text-xs text-muted-foreground">{ing.reason}</p>}
-                          {ing.flag === "allergen" && (
-                            <p className="mt-0.5 text-xs text-muted-foreground">
-                              Allergène{ing.euMandatory ? " — déclaration obligatoire EU" : " (liste SCCS étendue)"}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
       </main>
@@ -178,30 +144,36 @@ function IngredientAnalyzerPage() {
   );
 }
 
-function IngredientPill({ ing }: { ing: ReturnType<typeof analyzeIngredients>["ingredients"][number] }) {
-  const [showTip, setShowTip] = useState(false);
+type IngredientRowProps = { ing: ReturnType<typeof analyzeIngredients>["ingredients"][number] };
 
-  const cls =
-    ing.flag === "ed_high"   ? "bg-red-100 text-red-700 border-red-200 cursor-help" :
-    ing.flag === "ed_medium" ? "bg-orange-100 text-orange-600 border-orange-200 cursor-help" :
-    ing.flag === "allergen"  ? "bg-amber-100 text-amber-700 border-amber-200 cursor-help" :
-    ing.flag === "petrochem" ? "bg-yellow-50 text-yellow-700 border-yellow-200" :
-    "bg-muted/50 text-muted-foreground border-border/40";
+function IngredientRow({ ing }: IngredientRowProps) {
+  const config = {
+    ed_high:   { dot: "bg-red-500",     bg: "bg-red-50",     name: "text-red-700 font-semibold",   badge: "bg-red-100 text-red-600",     label: "PE avéré" },
+    ed_medium: { dot: "bg-orange-400",  bg: "bg-orange-50",  name: "text-orange-700 font-semibold", badge: "bg-orange-100 text-orange-600", label: "PE suspecté" },
+    allergen:  { dot: "bg-amber-400",   bg: "bg-amber-50",   name: "text-amber-700 font-semibold",  badge: "bg-amber-100 text-amber-700",  label: "Allergène" },
+    petrochem: { dot: "bg-yellow-400",  bg: "bg-yellow-50",  name: "text-yellow-700 font-medium",   badge: "bg-yellow-100 text-yellow-700", label: "Pétrochimique" },
+    ok:        { dot: "bg-emerald-400", bg: "bg-emerald-50/60", name: "text-emerald-700 font-medium", badge: "", label: "" },
+  }[ing.flag];
+
+  const note =
+    ing.flag === "allergen"
+      ? ing.euMandatory ? "Allergène — déclaration obligatoire EU (Règlement 1223/2009)" : "Allergène — liste SCCS étendue"
+      : ing.reason ?? (ing.flag === "ok" ? "Aucun signal dans nos bases de données" : undefined);
 
   return (
-    <div className="relative">
-      <span
-        className={`inline-block rounded-full border px-2.5 py-1 text-xs font-medium ${cls}`}
-        onMouseEnter={() => setShowTip(true)}
-        onMouseLeave={() => setShowTip(false)}
-      >
-        {ing.raw}
-      </span>
-      {showTip && ing.reason && (
-        <div className="absolute bottom-full left-0 z-10 mb-1.5 w-max max-w-xs rounded-xl border border-border bg-card px-3 py-2 text-xs text-foreground shadow-lg">
-          {ing.reason}
+    <li className={`flex items-start gap-3 px-6 py-3 ${config.bg}`}>
+      <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${config.dot}`} />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`text-sm ${config.name}`}>{ing.raw}</span>
+          {config.label && (
+            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${config.badge}`}>
+              {config.label}
+            </span>
+          )}
         </div>
-      )}
-    </div>
+        {note && <p className="mt-0.5 text-xs text-muted-foreground">{note}</p>}
+      </div>
+    </li>
   );
 }
