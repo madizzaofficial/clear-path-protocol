@@ -310,7 +310,7 @@ function SignalSummaryCards({ result }: { result: AnalysisResultV2 }) {
         <div className="flex flex-col rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/20 px-4 py-3">
           <div className="mb-2 flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
             <Info className="h-4 w-4 shrink-0" />
-            <span className="text-xs font-bold uppercase tracking-wider">Allergènes</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Allergènes potentiels</span>
           </div>
           <ul className="space-y-1">
             {allergens.map((i, idx) => (
@@ -328,7 +328,7 @@ function SignalSummaryCards({ result }: { result: AnalysisResultV2 }) {
         <div className="flex flex-col rounded-2xl border border-violet-200 dark:border-violet-800/40 bg-violet-50 dark:bg-violet-950/20 px-4 py-3">
           <div className="mb-2 flex items-center gap-1.5 text-violet-700 dark:text-violet-400">
             <Zap className="h-4 w-4 shrink-0" />
-            <span className="text-xs font-bold uppercase tracking-wider">Irritants</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Irritants potentiels</span>
           </div>
           <ul className="space-y-1">
             {irritants.map((i, idx) => (
