@@ -409,7 +409,10 @@ function translateToInci(norm: string): string {
   for (const [fr, inci] of Object.entries(FRENCH_TO_INCI)) {
     if (clean.includes(fr) && fr.length > best.length) { best = fr; result = inci; }
   }
-  return result || clean;
+  if (result) return result;
+  // Dehyphenation: "CENTELLA-ASIATICA EXTRACT" → "CENTELLA ASIATICA EXTRACT"
+  const dehyphen = clean.replace(/([A-Z\d])-([A-Z])/g, "$1 $2").replace(/\s+/g, " ").trim();
+  return dehyphen;
 }
 
 function stripQuantity(t: string): string {
@@ -418,7 +421,7 @@ function stripQuantity(t: string): string {
 
 export function analyzeIngredients(raw: string): AnalysisResult {
   const tokens = raw
-    .split(/[,\n]|\s\.\s/)
+    .split(/(?<!\d),(?!\d)|\n|\s\.\s/)
     .map((t) => stripQuantity(t.trim()))
     .filter(Boolean);
 
@@ -899,6 +902,35 @@ export const COMMON_INGREDIENTS: Record<string, CommonEntry> = {
   "PANAX GINSENG ROOT EXTRACT":     { role: "Antioxydant",      description: "Extrait de ginseng rouge (racine). Antioxydant puissant, stimule le métabolisme cellulaire et l'éclat. Peaux concernées : peaux matures et ternes." },
   "PROPOLIS EXTRACT":               { role: "Actif",            description: "Propolis (résine d'abeille). Anti-bactérien naturel, cicatrisant et antioxydant. Peaux concernées : peaux acnéiques et sensibles." },
   "PROPOLIS":                       { role: "Actif",            description: "Propolis (résine d'abeille). Anti-bactérien naturel, cicatrisant et antioxydant. Peaux concernées : peaux acnéiques et sensibles." },
+
+  // ─ Silicones supplémentaires ─
+  "CAPRYLYL METHICONE":             { role: "Émollient",        description: "Silicone légère à chaîne capryloyl. Texture sèche, non grasse, excellente glisse. Non comédogène. Peaux concernées : tous types." },
+  "POLYMETHYLSILSESQUIOXANE":       { role: "Texturant",        description: "Résine silicone en poudre microsphérique. Lisse les rides de surface et matifie. Toucher poudré. Peaux concernées : tous types." },
+  "VINYL DIMETHICONE":              { role: "Émollient",        description: "Silicone vinylique réticulante. Agent de texture filmogène, améliore la douceur et la tenue. Non comédogène. Peaux concernées : tous types." },
+
+  // ─ Alcools gras C14-22 ─
+  "C14-22 ALCOHOLS":                { role: "Émollient",        description: "Mélange d'alcools gras (myristylique à béhénylique). Émollient structurant, texturant et co-émulsifiant. Non comédogène. Peaux concernées : tous types." },
+
+  // ─ Émulsifiants glucosidiques ─
+  "C12-20 ALKYL GLUCOSIDE":         { role: "Émulsifiant",      description: "Émulsifiant non-ionique d'origine sucre (alkyl glucoside). Doux, biodégradable, Ecocert. Peaux concernées : tous types, idéal peaux sensibles." },
+
+  // ─ Polymères conditionneurs ─
+  "POLYQUATERNIUM-51":              { role: "Humectant",        description: "Polymère phospholipidique (phosphorylcholine). Biomimétique de la membrane cellulaire. Hydratant intense et filmogène sans sensation étouffante. Peaux concernées : tous types, idéal peaux déshydratées." },
+
+  // ─ Actifs végétaux rares ─
+  "COPTIS JAPONICA ROOT EXTRACT":   { role: "Antioxydant",      description: "Extrait de rhizome de coptide du Japon. Riche en berbérine : antioxydant, antibactérien et anti-inflammatoire. Peaux concernées : peaux acnéiques et ternes." },
+  "TANNIC ACID":                    { role: "Antioxydant",      description: "Acide tannique (tanin végétal). Astringent, antioxydant et antibactérien. Resserre les pores. Peaux concernées : peaux grasses et acnéiques." },
+
+  // ─ ADN / biotechnologie ─
+  "SODIUM DNA":                     { role: "Actif",            description: "ADN de sodium (sodium désoxyribonucléate). Réparateur cellulaire, hydratant filmogène. Favorise la régénération de la barrière cutanée. Peaux concernées : peaux matures, fragilisées et sèches." },
+
+  // ─ Eaux florales / distillats ─
+  "CENTELLA ASIATICA LEAF WATER":   { role: "Apaisant",         description: "Eau de distillation de centella (CICA). Apaisante, anti-inflammatoire douce. Peaux concernées : peaux sensibles et irritées." },
+  "CAMELLIA SINENSIS LEAF WATER":   { role: "Antioxydant",      description: "Eau de distillation de thé vert. Antioxydante et tonifiante. Peaux concernées : tous types, idéal peaux ternes." },
+  "MELALEUCA ALTERNIFOLIA LEAF WATER": { role: "Antibactérien", description: "Eau de distillation d'arbre à thé. Antibactérienne douce, moins irritante que l'huile essentielle. Peaux concernées : peaux acnéiques." },
+
+  // ─ Acide hyaluronique hydrolysé ─
+  "HYDROLYZED HYALURONIC ACID":     { role: "Humectant",        description: "Acide hyaluronique fragmenté (faible poids moléculaire). Pénètre dans les couches suprabasales. Complément du HA standard pour une hydratation multi-niveaux. Peaux concernées : tous types." },
 };
 
 // ─── V2 : Analyse multi-baromètres ────────────────────────────────────────────
@@ -1090,7 +1122,7 @@ function makeBarometer(score: number): Barometer {
 }
 
 export function analyzeIngredientsV2(raw: string, profile?: SkinProfile): AnalysisResultV2 {
-  const tokens = raw.split(/[,\n]|\s\.\s/).map((t) => stripQuantity(t.trim())).filter(Boolean);
+  const tokens = raw.split(/(?<!\d),(?!\d)|\n|\s\.\s/).map((t) => stripQuantity(t.trim())).filter(Boolean);
 
   const ingredients: AnalyzedIngredient[] = tokens.map((token) => {
     const norm = translateToInci(normalize(token));
