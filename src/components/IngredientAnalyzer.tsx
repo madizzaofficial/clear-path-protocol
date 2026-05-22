@@ -83,7 +83,7 @@ function BarometerCard({
   );
 }
 
-// ─── ProfileBanner ────────────────────────────────────────────────────────────
+// ─── ProfileCard ─────────────────────────────────────────────────────────────
 
 const SKIN_LABELS: Record<string, string> = {
   normale: "normale", grasse: "grasse", seche: "sèche", mixte: "mixte", sensible: "sensible",
@@ -91,19 +91,57 @@ const SKIN_LABELS: Record<string, string> = {
 const INT_LABELS: Record<string, string> = {
   legere: "légère", moderee: "modérée", severe: "sévère",
 };
+const ACNE_TYPE_LABELS: Record<string, string> = {
+  comedons: "comédons", microkystes: "microkystes", papules: "papules",
+  pustules: "pustules", kystes: "kystes", nodules: "nodules",
+};
 
-function ProfileBanner({ profile }: { profile: SkinProfile }) {
-  const parts = [
-    profile.skinType ? `peau ${SKIN_LABELS[profile.skinType] ?? profile.skinType}` : null,
-    profile.intensity ? `acné ${INT_LABELS[profile.intensity] ?? profile.intensity}` : null,
-  ].filter(Boolean);
+const RECO_VERDICT: Record<string, { text: string; color: string; dotColor: string }> = {
+  daily:      { text: "Ce produit semble adapté à ton profil.", color: "text-emerald-700", dotColor: "bg-emerald-500" },
+  occasional: { text: "À utiliser avec modération selon ton profil.", color: "text-amber-700", dotColor: "bg-amber-500" },
+  caution:    { text: "Potentiellement déconseillé pour ton type de peau.", color: "text-orange-700", dotColor: "bg-orange-500" },
+  avoid:      { text: "Déconseillé pour ton profil peau.", color: "text-red-700", dotColor: "bg-red-500" },
+};
+
+function ProfileCard({ profile, usageReco }: { profile: SkinProfile; usageReco: AnalysisResultV2["usageReco"] }) {
+  const skinLabel      = profile.skinType ? SKIN_LABELS[profile.skinType] ?? profile.skinType : null;
+  const intensityLabel = profile.intensity ? INT_LABELS[profile.intensity] ?? profile.intensity : null;
+  const acneLabels     = profile.acneTypes?.map((t) => ACNE_TYPE_LABELS[t] ?? t) ?? [];
+  const verdict        = RECO_VERDICT[usageReco];
 
   return (
-    <div className="flex items-center gap-2 rounded-2xl bg-primary-soft/60 px-4 py-2.5">
-      <User className="h-3.5 w-3.5 shrink-0 text-primary" />
-      <p className="text-xs font-medium text-primary">
-        Analyse adaptée · {parts.join(", ")}
-      </p>
+    <div className="rounded-2xl border border-primary/20 bg-primary-soft/40 p-4">
+      <div className="flex items-start gap-3">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/15">
+          <User className="h-4 w-4 text-primary" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Analyse pour ton profil
+          </p>
+          <div className="mb-2.5 flex flex-wrap gap-1.5">
+            {skinLabel && (
+              <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                Peau {skinLabel}
+              </span>
+            )}
+            {intensityLabel && (
+              <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                Acné {intensityLabel}
+              </span>
+            )}
+            {acneLabels.map((l) => (
+              <span key={l} className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                {l}
+              </span>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`h-2 w-2 shrink-0 rounded-full ${verdict.dotColor}`} />
+            <p className={`text-sm font-semibold ${verdict.color}`}>{verdict.text}</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -282,9 +320,9 @@ export function IngredientAnalyzer() {
       {/* Results */}
       {result && (
         <>
-          {/* Profile banner */}
-          {result.skinProfileUsed && skinProfile && (
-            <ProfileBanner profile={skinProfile} />
+          {/* Profile card */}
+          {skinProfile && (
+            <ProfileCard profile={skinProfile} usageReco={result.usageReco} />
           )}
 
           {/* 3 Barometers */}

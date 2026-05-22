@@ -317,6 +317,122 @@ export function analyzeIngredients(raw: string): AnalysisResult {
   return { ingredients, edHighCount, edMediumCount, allergenCount, irritantCount, petrochemCount, comedogenicCount, score };
 }
 
+// ─── Ingrédients courants (descriptions encyclopédiques) ─────────────────────
+// Fallback avant le flag "ok" générique — couvre ~80% des listes INCI courantes
+
+export type CommonEntry = { role: string; description: string };
+
+export const COMMON_INGREDIENTS: Record<string, CommonEntry> = {
+  // ─ Solvants / bases ─
+  "WATER":                          { role: "Solvant",          description: "Principal solvant des formules cosmétiques. Constitue généralement 50–80% d'une émulsion. Peaux concernées : tous types." },
+  "AQUA":                           { role: "Solvant",          description: "Eau purifiée — principal solvant des formules. Peaux concernées : tous types." },
+
+  // ─ Humectants ─
+  "GLYCERIN":                       { role: "Humectant",        description: "Humectant de référence : attire et retient l'eau dans l'épiderme, renforce la barrière cutanée. Peaux concernées : tous types, idéal peaux sèches et déshydratées." },
+  "GLYCEROL":                       { role: "Humectant",        description: "Alias de la glycérine. Même action hydratante et protectrice de la barrière. Peaux concernées : tous types." },
+  "SODIUM HYALURONATE":             { role: "Humectant",        description: "Sel de l'acide hyaluronique, pénètre mieux dans la peau. Hydratation intense et repulpante. Peaux concernées : tous types, idéal peaux sèches et matures." },
+  "HYALURONIC ACID":                { role: "Humectant",        description: "Acide hyaluronique : retient jusqu'à 1 000× son poids en eau. Effet repulpant immédiat. Peaux concernées : tous types." },
+  "SODIUM HYALURONATE CROSSPOLYMER": { role: "Humectant",       description: "Forme réticulée de l'hyaluronate de sodium — hydratation longue durée en surface. Peaux concernées : tous types." },
+  "PANTHENOL":                      { role: "Actif",            description: "Provitamine B5 : hydratante, apaisante et cicatrisante. Renforce la barrière cutanée. Peaux concernées : tous types, idéal peaux sensibles et irritées." },
+  "BETAINE":                        { role: "Humectant",        description: "Humectant naturel (betterave) : adoucissant et protecteur osmotique. Peaux concernées : tous types." },
+  "SODIUM PCA":                     { role: "Humectant",        description: "Facteur naturel d'hydratation (NMF) de la peau. Hygroscopique, retient l'eau en surface. Peaux concernées : tous types, idéal peaux déshydratées." },
+  "BUTYLENE GLYCOL":                { role: "Humectant",        description: "Humectant et solvant. Améliore la pénétration des actifs. Bien toléré. Peaux concernées : tous types." },
+  "PROPANEDIOL":                    { role: "Humectant",        description: "Solvant et humectant naturel (maïs). Alternative végétale bien tolérée au propylène glycol. Peaux concernées : tous types." },
+  "PROPYLENE GLYCOL":               { role: "Humectant",        description: "Humectant et solvant courant. Bien toléré aux concentrations habituelles. Peaux concernées : tous types." },
+  "PENTYLENE GLYCOL":               { role: "Humectant",        description: "Humectant et conservateur doux. Bien toléré. Peaux concernées : tous types." },
+  "SORBITOL":                       { role: "Humectant",        description: "Polyol humectant d'origine végétale. Adoucissant naturel. Peaux concernées : tous types." },
+  "SODIUM LACTATE":                 { role: "Humectant",        description: "Sel de l'acide lactique. Composant du NMF, maintient l'hydratation naturelle de la peau. Peaux concernées : tous types." },
+  "UREA":                           { role: "Humectant",        description: "Urée : composant naturel du NMF. Hydratant puissant et kératolytique doux. Peaux concernées : peaux sèches, hyperkératosiques." },
+
+  // ─ Actifs ─
+  "NIACINAMIDE":                    { role: "Actif",            description: "Vitamine B3 : réduit les pores, unifie le teint, régule le sébum et renforce la barrière cutanée. L'un des actifs les mieux tolérés. Peaux concernées : tous types, idéal peaux grasses et acnéiques." },
+  "RETINOL":                        { role: "Actif",            description: "Vitamine A : réduit les rides, désobstrue les pores et stimule le renouvellement cellulaire. Peut irriter en début d'utilisation — introduire progressivement. Peaux concernées : peaux matures et acnéiques. Déconseillé enceinte." },
+  "RETINYL PALMITATE":              { role: "Actif",            description: "Précurseur doux du rétinol. Action anti-âge progressive, moins irritant. Peaux concernées : tous types y compris peaux sensibles." },
+  "RETINAL":                        { role: "Actif",            description: "Rétinaldéhyde : plus puissant que le rétinol, moins irritant que la trétinoïne. Anti-âge et anti-acné. Peaux concernées : peaux matures et acnéiques. Déconseillé enceinte." },
+  "BAKUCHIOL":                      { role: "Actif",            description: "Alternative végétale au rétinol (Psoralea corylifolia). Anti-âge doux, anti-inflammatoire. Peaux concernées : tous types, y compris femmes enceintes et peaux sensibles." },
+  "SALICYLIC ACID":                 { role: "Exfoliant BHA",    description: "Acide bêta-hydroxy (BHA) : exfoliant liposoluble qui pénètre dans les pores et régule le sébum. Légèrement irritant à haute dose. Peaux concernées : peaux grasses, acnéiques et à pores dilatés." },
+  "AZELAIC ACID":                   { role: "Actif",            description: "Acide azélaïque : anti-inflammatoire, antibactérien et dépigmentant. Excellente tolérance cutanée. Peaux concernées : acné, rosacée, taches." },
+  "ALPHA ARBUTIN":                  { role: "Actif",            description: "Dépigmentant efficace, dérivé de l'hydroquinone. Unifie le teint progressivement sans irritation. Peaux concernées : tous types avec taches ou hyperpigmentation." },
+  "ARBUTIN":                        { role: "Actif",            description: "Dépigmentant naturel. Unifie le teint. Peaux concernées : tous types avec taches." },
+  "ASCORBIC ACID":                  { role: "Actif",            description: "Vitamine C pure : antioxydante, éclairante et stimulatrice du collagène. Instable à l'air et la lumière. Peaux concernées : tous types, surtout peaux ternes et matures." },
+  "ASCORBYL GLUCOSIDE":             { role: "Actif",            description: "Dérivé stable de la vitamine C. Éclairant progressif, antioxydant. Bien toléré. Peaux concernées : tous types." },
+  "SODIUM ASCORBYL PHOSPHATE":      { role: "Actif",            description: "Dérivé stable de la vitamine C, bien toléré même par les peaux sensibles. Antioxydant et éclairant. Peaux concernées : tous types." },
+  "ASCORBYL TETRAISOPALMITATE":     { role: "Actif",            description: "Dérivé liposoluble stable de la vitamine C. Pénètre facilement, antioxydant. Peaux concernées : tous types." },
+  "ALLANTOIN":                      { role: "Apaisant",         description: "Dérivé naturel apaisant, cicatrisant et kératolytique très doux. Apaise les irritations rapidement. Peaux concernées : tous types, idéal peaux irritées et sensibles." },
+  "BISABOLOL":                      { role: "Apaisant",         description: "Composant actif de la camomille. Anti-inflammatoire et apaisant puissant. Peaux concernées : peaux sensibles, réactives et rosacée." },
+  "CENTELLA ASIATICA EXTRACT":      { role: "Apaisant",         description: "Extrait de centella (CICA) : cicatrisant, anti-inflammatoire et stimulant du collagène. Idéal après-soleil ou après irritation. Peaux concernées : peaux sensibles, irritées et acnéiques." },
+  "CENTELLA ASIATICA LEAF EXTRACT": { role: "Apaisant",         description: "Extrait de feuilles de centella asiatica. Cicatrisant et anti-inflammatoire. Peaux concernées : peaux sensibles et acnéiques." },
+  "ASIATICOSIDE":                   { role: "Apaisant",         description: "Principe actif du centella asiatica. Stimule la synthèse de collagène et accélère la cicatrisation. Peaux concernées : peaux irritées et acnéiques." },
+  "MADECASSOSIDE":                  { role: "Apaisant",         description: "Principe actif du centella asiatica. Puissant anti-inflammatoire et cicatrisant. Peaux concernées : peaux sensibles et acnéiques." },
+  "ADENOSINE":                      { role: "Actif",            description: "Nucléoside naturel : anti-rides et anti-inflammatoire, stimule le collagène. Très bien toléré. Peaux concernées : peaux matures." },
+  "ECTOIN":                         { role: "Protecteur",       description: "Molécule naturelle (bactéries extrêmophiles) : renforce la barrière cutanée et protège du stress environnemental. Peaux concernées : tous types, idéal peaux sensibles et exposées à la pollution." },
+  "TRANEXAMIC ACID":                { role: "Dépigmentant",     description: "Acide tranexamique : inhibe la mélanine, efficace contre le mélasma. Bien toléré, peut être utilisé enceinte. Peaux concernées : tous types avec taches ou mélasma." },
+  "HEXYLRESORCINOL":                { role: "Dépigmentant",     description: "Dépigmentant plus puissant que l'alpha-arbutin. Anti-inflammatoire. Peaux concernées : tous types avec hyperpigmentation." },
+  "ZINC PCA":                       { role: "Sébo-régulateur",  description: "Association zinc + PCA : régule le sébum et resserre les pores. Anti-inflammatoire léger. Peaux concernées : peaux grasses et acnéiques." },
+
+  // ─ Antioxydants ─
+  "TOCOPHEROL":                     { role: "Antioxydant",      description: "Vitamine E naturelle : protège les lipides cutanés de l'oxydation et nourrit la peau. Peaux concernées : tous types, idéal peaux sèches et matures." },
+  "TOCOPHERYL ACETATE":             { role: "Antioxydant",      description: "Forme stable de la vitamine E. Antioxydante et nourrissante. Peaux concernées : tous types." },
+  "FERULIC ACID":                   { role: "Antioxydant",      description: "Polyphénol végétal : potentialise l'efficacité des vitamines C et E. Peaux concernées : tous types." },
+  "RESVERATROL":                    { role: "Antioxydant",      description: "Polyphénol du raisin : protège contre le vieillissement oxydatif et stimule le collagène. Peaux concernées : tous types, surtout peaux matures." },
+  "COENZYME Q10":                   { role: "Antioxydant",      description: "Ubiquinone : antioxydant cellulaire, ralentit le vieillissement cutané. Peaux concernées : peaux matures." },
+  "UBIQUINONE":                     { role: "Antioxydant",      description: "Coenzyme Q10. Antioxydant anti-âge. Peaux concernées : peaux matures." },
+  "HYDROXYACETOPHENONE":            { role: "Antioxydant",      description: "Antioxydant et conservateur naturel. Stabilise la formule et protège les actifs. Peaux concernées : tous types." },
+
+  // ─ Émollients ─
+  "SQUALANE":                       { role: "Émollient",        description: "Huile végétale légère (olive, canne à sucre) mimétique du sébum. Non comédogène, idéale pour hydrater sans graisser. Peaux concernées : tous types y compris peaux acnéiques." },
+  "SIMMONDSIA CHINENSIS SEED OIL":  { role: "Émollient",        description: "Huile de jojoba (cire liquide végétale). Non comédogène, équilibrante, proche du sébum. Peaux concernées : tous types." },
+  "ROSA CANINA FRUIT OIL":          { role: "Émollient",        description: "Huile de rose musquée : réparatrice, riche en acides gras insaturés et rétinol naturel. Peaux concernées : peaux sèches, matures et cicatrices." },
+  "ARGANIA SPINOSA KERNEL OIL":     { role: "Émollient",        description: "Huile d'argan : riche en vitamine E et acides gras, nourrissante et antioxydante. Peaux concernées : peaux sèches et matures." },
+  "CETYL ALCOHOL":                  { role: "Émollient",        description: "Alcool gras (non irritant, à ne pas confondre avec les alcools courts). Adoucit la peau et améliore la texture des crèmes. Peaux concernées : tous types." },
+  "STEARYL ALCOHOL":                { role: "Émollient",        description: "Alcool gras émollient et co-émulsifiant. Non irritant. Peaux concernées : tous types." },
+  "CETEARYL ALCOHOL":               { role: "Émollient",        description: "Mélange d'alcools gras (cétylique + stéarylique). Émollient, co-émulsifiant non irritant. Peaux concernées : tous types." },
+  "DIMETHICONE":                    { role: "Émollient",        description: "Silicone non volatile : forme un film protecteur et améliore la texture sans obstruer les pores. Non comédogène. Peaux concernées : tous types." },
+  "CAPRYLIC/CAPRIC TRIGLYCERIDE":   { role: "Émollient",        description: "Ester d'huile de coco fractionnée : léger, non comédogène, très bien toléré. Peaux concernées : tous types." },
+  "COCO-CAPRYLATE/CAPRATE":         { role: "Émollient",        description: "Émollient léger d'origine coco. Texture sèche, non comédogène. Peaux concernées : tous types." },
+  "BUTYROSPERMUM PARKII BUTTER":    { role: "Émollient",        description: "Beurre de karité : très nourrissant et réparateur. Légèrement comédogène en application pure sur le visage. Peaux concernées : peaux sèches — à limiter sur visage acnéique." },
+  "BUTYROSPERMUM PARKII SEED BUTTER": { role: "Émollient",      description: "Beurre de karité (INCI alternatif). Nourrissant et réparateur. Peaux concernées : peaux sèches." },
+  "HELIANTHUS ANNUUS SEED OIL":     { role: "Émollient",        description: "Huile de tournesol : légère, riche en vitamine E. Non comédogène. Peaux concernées : tous types." },
+
+  // ─ Barrière cutanée ─
+  "CERAMIDE NP":                    { role: "Barrière",         description: "Céramide de type NP : composant essentiel du film lipidique cutané. Restaure la barrière fragilisée. Peaux concernées : peaux sèches, atopiques et sensibles." },
+  "CERAMIDE AP":                    { role: "Barrière",         description: "Céramide de type AP. Renforce la barrière cutanée. Peaux concernées : peaux sèches et sensibles." },
+  "CERAMIDE EOP":                   { role: "Barrière",         description: "Céramide de type EOP. Composant clé du film lipidique. Peaux concernées : peaux sèches et atopiques." },
+  "CERAMIDE 1":                     { role: "Barrière",         description: "Céramide naturel type EOP. Composant essentiel du film lipidique cutané. Peaux concernées : peaux sèches et atopiques." },
+  "CERAMIDE 3":                     { role: "Barrière",         description: "Céramide naturel type NP. Restaure la barrière cutanée. Peaux concernées : peaux sèches et fragilisées." },
+  "CHOLESTEROL":                    { role: "Barrière",         description: "Stérol naturel de la peau : composant du film lipidique, émollient et réparateur. Peaux concernées : peaux sèches et matures." },
+  "PHYTOSPHINGOSINE":               { role: "Barrière",         description: "Sphingolipide naturel : renforce la barrière et possède une action antimicrobienne. Peaux concernées : peaux acnéiques et sensibles." },
+
+  // ─ Filtres UV minéraux ─
+  "ZINC OXIDE":                     { role: "Filtre UV minéral", description: "Filtre UV minéral (UVA + UVB). Anti-inflammatoire, sébo-régulateur, non irritant. Considéré le filtre le plus sûr. Peaux concernées : tous types, idéal peaux sensibles et acnéiques." },
+  "TITANIUM DIOXIDE":               { role: "Filtre UV minéral", description: "Filtre UV minéral. Non irritant, couvrant. Peaux concernées : tous types, idéal peaux sensibles." },
+
+  // ─ Conservateurs sûrs ─
+  "PHENOXYETHANOL":                 { role: "Conservateur",     description: "Conservateur de référence actuel. Considéré sûr par le SCCS jusqu'à 1% (limite EU). Bien toléré. Peaux concernées : tous types." },
+  "SODIUM BENZOATE":                { role: "Conservateur",     description: "Conservateur naturel (sel de l'acide benzoïque). Bien toléré. Peaux concernées : tous types." },
+  "POTASSIUM SORBATE":              { role: "Conservateur",     description: "Conservateur naturel actif contre moisissures et levures. Bien toléré. Peaux concernées : tous types." },
+  "ETHYLHEXYLGLYCERIN":             { role: "Conservateur",     description: "Conservateur et humectant doux d'origine végétale. Souvent associé à la phénoxyéthanol. Peaux concernées : tous types." },
+  "CAPRYLYL GLYCOL":                { role: "Conservateur",     description: "Conservateur et émollient doux. Bien toléré, d'origine végétale. Peaux concernées : tous types." },
+
+  // ─ Texturants / structurants ─
+  "CARBOMER":                       { role: "Épaississant",     description: "Polymère acrylique gélifiant. Donne une texture gel. Non irritant aux concentrations habituelles. Peaux concernées : tous types." },
+  "XANTHAN GUM":                    { role: "Épaississant",     description: "Gomme naturelle (fermentation bactérienne). Gélifiant et stabilisant naturel. Peaux concernées : tous types." },
+  "HYDROXYETHYLCELLULOSE":          { role: "Épaississant",     description: "Dérivé naturel de la cellulose. Épaississant et modificateur de texture. Peaux concernées : tous types." },
+  "HYDROXYPROPYL METHYLCELLULOSE":  { role: "Épaississant",     description: "Épaississant cellulosique. Texture gel, non irritant. Peaux concernées : tous types." },
+
+  // ─ Exfoliants chimiques ─
+  "GLYCOLIC ACID":                  { role: "Exfoliant AHA",    description: "Acide alpha-hydroxy (AHA) : exfoliant puissant, lisse et éclaircit. Peut irriter les peaux sensibles — utiliser progressivement et avec protection solaire. Peaux concernées : peaux ternes et acnéiques — pas sur peaux très sensibles." },
+  "LACTIC ACID":                    { role: "Exfoliant AHA",    description: "AHA doux : exfoliant et humectant à la fois. Plus toléré que l'acide glycolique. Peaux concernées : tous types y compris peaux sensibles." },
+  "MANDELIC ACID":                  { role: "Exfoliant AHA",    description: "AHA à molécule large : exfoliant doux, antibactérien. Idéal pour les peaux sensibles qui ne tolèrent pas l'acide glycolique. Peaux concernées : peaux acnéiques et sensibles." },
+  "CITRIC ACID":                    { role: "Régulateur pH",    description: "Acide citrique : régulateur de pH des formules. Légèrement exfoliant à concentration élevée. Peaux concernées : tous types." },
+  "GLUCONOLACTONE":                 { role: "Exfoliant PHA",    description: "Acide poly-hydroxy (PHA) : exfoliant très doux, hydratant. Idéal pour les peaux sensibles ne tolérant pas les AHA. Peaux concernées : tous types." },
+  "LACTOBIONIC ACID":               { role: "Exfoliant PHA",    description: "PHA très doux : exfoliant, antioxydant et humectant. Peaux concernées : tous types y compris peaux sensibles et réactives." },
+
+  // ─ Chélateurs ─
+  "DISODIUM EDTA":                  { role: "Chélateur",        description: "Agent chélateur : stabilise la formule en neutralisant les ions métalliques. Non irritant aux doses habituelles. Peaux concernées : tous types." },
+  "TRISODIUM ETHYLENEDIAMINE DISUCCINATE": { role: "Chélateur", description: "Chélateur biodégradable, alternative verte à l'EDTA. Stabilise les formules. Peaux concernées : tous types." },
+};
+
 // ─── V2 : Analyse multi-baromètres ────────────────────────────────────────────
 
 export type SkinProfile = {
@@ -389,7 +505,13 @@ export function analyzeIngredientsV2(raw: string, profile?: SkinProfile): Analys
       return { raw: token, normalized: norm, flag: "comedogenic", reason: `Comédogène — indice ${entry.rating}/5`, description: entry.description, comedogenicRating: entry.rating };
     }
 
-    return { raw: token, normalized: norm, flag: "ok", description: "Aucun signal identifié dans les bases consultées (ECHA, SCCS, Acne Clinic NYC). Peaux concernées : tous types." };
+    const commonKey = Object.keys(COMMON_INGREDIENTS).find((k) => norm === k || norm.includes(k));
+    if (commonKey) {
+      const entry = COMMON_INGREDIENTS[commonKey];
+      return { raw: token, normalized: norm, flag: "ok", description: `${entry.role} — ${entry.description}` };
+    }
+
+    return { raw: token, normalized: norm, flag: "ok", description: "Ingrédient non répertorié dans nos bases de données. Peaux concernées : tous types." };
   });
 
   // Scores bruts pondérés par position
@@ -436,6 +558,17 @@ export function analyzeIngredientsV2(raw: string, profile?: SkinProfile): Analys
     }
     if (hasCysts) {
       peScore = Math.min(Math.round(peScore * 1.2), 10);
+      skinProfileUsed = true;
+    }
+
+    const isDry   = profile.skinType === "seche";
+    const isMixed = profile.skinType === "mixte";
+    if (isDry) {
+      irritationScore = Math.min(Math.round(irritationScore * 1.2), 10);
+      skinProfileUsed = true;
+    }
+    if (isMixed) {
+      comedogenicScore = Math.min(Math.round(comedogenicScore * 1.1), 10);
       skinProfileUsed = true;
     }
   }
