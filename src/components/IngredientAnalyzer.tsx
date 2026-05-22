@@ -326,6 +326,7 @@ const ROLE_TO_CATEGORY: Record<string, string> = {
   "Humectant": "Hydratants",
   "Solvant": "Solvants",
   "Émollient": "Émollients",
+  "Émulsifiant": "Émulsifiants",
   "Conservateur": "Conservateurs",
   "Épaississant": "Texturants", "Régulateur pH": "Texturants", "Chélateur": "Texturants",
   "Parfum": "Parfums",
@@ -336,7 +337,7 @@ const ROLE_TO_CATEGORY: Record<string, string> = {
 
 const ALL_CAT_ORDER = [
   "Actifs", "Antioxydants", "Apaisants", "Barrière cutanée", "Filtres UV",
-  "Hydratants", "Émollients", "Solvants", "Conservateurs",
+  "Hydratants", "Émollients", "Émulsifiants", "Solvants", "Conservateurs",
   "Parfums", "Tensioactifs", "Antibactériens",
   "Texturants", "Colorants", "Non classifié",
 ];
@@ -350,6 +351,7 @@ const CATEGORY_INFO: Record<string, string> = {
   "Hydratants":      "Humectants qui attirent et retiennent l'eau dans les couches superficielles de l'épiderme.",
   "Solvants":        "Base de la formule. Dissolvent les autres ingrédients et facilitent leur pénétration.",
   "Émollients":      "Adoucissent et assouplissent la peau en formant un film protecteur sur sa surface.",
+  "Émulsifiants":    "Stabilisent le mélange eau + huile. Permettent d'obtenir crèmes et lotions stables.",
   "Conservateurs":   "Empêchent la prolifération bactérienne pour préserver l'intégrité du produit. Certains conservateurs sont des perturbateurs endocriniens suspectés.",
   "Parfums":         "Molécules parfumantes — 26 allergènes EU à déclaration obligatoire. Peuvent provoquer des réactions de contact chez les peaux sensibles.",
   "Tensioactifs":    "Agents lavants et moussants. Les tensioactifs forts (SLS, ALS) perturbent la barrière cutanée.",
