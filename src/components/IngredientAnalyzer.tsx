@@ -110,10 +110,10 @@ function ProfileCard({ profile, usageReco }: { profile: SkinProfile; usageReco: 
   const verdict        = RECO_VERDICT[usageReco];
 
   return (
-    <div className="rounded-2xl border border-primary/20 bg-primary-soft/40 p-4">
+    <div className="rounded-2xl border border-border/60 bg-muted/50 p-4">
       <div className="flex items-start gap-3">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/15">
-          <User className="h-4 w-4 text-primary" />
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-muted">
+          <User className="h-4 w-4 text-muted-foreground" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -121,17 +121,17 @@ function ProfileCard({ profile, usageReco }: { profile: SkinProfile; usageReco: 
           </p>
           <div className="mb-2.5 flex flex-wrap gap-1.5">
             {skinLabel && (
-              <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+              <span className="rounded-full bg-background border border-border/60 px-2.5 py-0.5 text-xs font-medium text-foreground/70">
                 Peau {skinLabel}
               </span>
             )}
             {intensityLabel && (
-              <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+              <span className="rounded-full bg-background border border-border/60 px-2.5 py-0.5 text-xs font-medium text-foreground/70">
                 Acné {intensityLabel}
               </span>
             )}
             {acneLabels.map((l) => (
-              <span key={l} className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+              <span key={l} className="rounded-full bg-background border border-border/60 px-2.5 py-0.5 text-xs font-medium text-foreground/70">
                 {l}
               </span>
             ))}
