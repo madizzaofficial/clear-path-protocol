@@ -126,6 +126,7 @@ export const IRRITANTS: Record<string, IrritantEntry> = {
   "SD ALCOHOL":                  { irritationLevel: 2, reason: "Alcool dénaturé, assèche et peut irriter",              description: "Alias américain d'Alcohol Denat. Même profil desséchant et potentiellement irritant. Peaux concernées : peaux sèches, sensibles et acnéiques." },
   "ISOPROPYL ALCOHOL":           { irritationLevel: 2, reason: "Alcool irritant, perturbateur de barrière",             description: "Alcool isopropylique très astringent. Dégraisse fortement, peut déclencher un rebond sébacé. Peaux concernées : peaux acnéiques, sèches et sensibles." },
   "SODIUM CHLORIDE":             { irritationLevel: 1, reason: "Sel — peut irriter et assécher à haute concentration",  description: "Sel (chlorure de sodium) utilisé comme modificateur de viscosité. Irritant aux concentrations élevées dans les nettoyants. Peaux concernées : peaux sensibles et peaux sèches." },
+  "ETHANOL":                     { irritationLevel: 2, reason: "Alcool éthylique, assèche et peut irriter",              description: "Alcool éthylique. À fortes concentrations, assèche l'épiderme et peut déclencher un rebond sébacé. Peaux concernées : peaux sèches, sensibles et acnéiques." },
   "BENZOYL PEROXIDE":            { irritationLevel: 2, reason: "Actif anti-acné, peut provoquer sécheresse et desquamation", description: "Peroxyde de benzoyle. Irritant connu : provoque sécheresse, rougeurs et desquamation en début d'utilisation. Introduire progressivement (2,5% → 5%) et utiliser hydratant. Peaux concernées : peaux sensibles et sèches — à protéger." },
   "MELALEUCA ALTERNIFOLIA LEAF OIL": { irritationLevel: 1, reason: "Huile essentielle, irritante à forte concentration", description: "Huile essentielle d'arbre à thé. Bien tolérée aux concentrations cosmétiques (<5%) mais peut irriter les peaux sensibles non diluée. Peaux concernées : peaux sensibles et réactives." },
 };
@@ -219,7 +220,152 @@ export type AnalysisResult = {
 };
 
 function normalize(s: string): string {
-  return s.toUpperCase().replace(/\s+/g, " ").trim();
+  return s
+    .toUpperCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")   // strip diacritics (é→e, à→a…)
+    .replace(/[''ʼ`]/g, " ")                              // apostrophes → espace
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// ─── Traduction noms français → INCI ─────────────────────────────────────────
+// Clés : noms français normalisés (sans accents, majuscules)
+const FRENCH_TO_INCI: Record<string, string> = {
+  // Eau / solvants
+  "EAU":                                        "AQUA",
+  "EAU PURIFIEE":                               "AQUA",
+  "EAU DEMINERALISEE":                          "AQUA",
+  "EAU DISTILLEE":                              "AQUA",
+  "ETHANOL":                                    "ALCOHOL DENAT",
+  "ALCOOL ETHYLIQUE":                           "ALCOHOL DENAT",
+  "ALCOOL DENATURE":                            "ALCOHOL DENAT",
+  "ALCOOL ISOPROPYLIQUE":                       "ISOPROPYL ALCOHOL",
+
+  // Glycols / humectants
+  "GLYCERINE":                                  "GLYCERIN",
+  "GLYCEROL":                                   "GLYCEROL",
+
+  // Actifs
+  "ACIDE SALICYLIQUE":                          "SALICYLIC ACID",
+  "ACIDE GLYCOLIQUE":                           "GLYCOLIC ACID",
+  "ACIDE LACTIQUE":                             "LACTIC ACID",
+  "ACIDE HYALURONIQUE":                         "HYALURONIC ACID",
+  "HYALURONATE DE SODIUM":                      "SODIUM HYALURONATE",
+  "ACIDE ASCORBIQUE":                           "ASCORBIC ACID",
+  "VITAMINE C":                                 "ASCORBIC ACID",
+  "VITAMINE E":                                 "TOCOPHEROL",
+  "ACIDE AZELAIQUE":                            "AZELAIC ACID",
+  "ACIDE TRANEXAMIQUE":                         "TRANEXAMIC ACID",
+  "PEROXYDE DE BENZOYLE":                       "BENZOYL PEROXIDE",
+  "ACIDE MANDELIQUE":                           "MANDELIC ACID",
+  "ACIDE MALIQUE":                              "MALIC ACID",
+  "ACIDE TARTRIQUE":                            "TARTARIC ACID",
+  "ACIDE KOJIQUE":                              "KOJIC ACID",
+  "ACIDE FERULIQUE":                            "FERULIC ACID",
+  "ACIDE PHYTIQUE":                             "PHYTIC ACID",
+  "ACIDE BENZOIQUE":                            "BENZOIC ACID",
+  "ACIDE CITRIQUE":                             "CITRIC ACID",
+  "ACIDE SORBIQUE":                             "SORBIC ACID",
+  "ALLANTOINE":                                 "ALLANTOIN",
+
+  // Conservateurs / parabènes
+  "PARAHYDROXYBENZOATE DE METHYLE":             "METHYLPARABEN",
+  "METHYLPARABENE":                             "METHYLPARABEN",
+  "PARAHYDROXYBENZOATE D ETHYLE":               "ETHYLPARABEN",
+  "ETHYLPARABENE":                              "ETHYLPARABEN",
+  "PARAHYDROXYBENZOATE DE PROPYLE":             "PROPYLPARABEN",
+  "PROPYLPARABENE":                             "PROPYLPARABEN",
+  "PARAHYDROXYBENZOATE DE BUTYLE":              "BUTYLPARABEN",
+  "BUTYLPARABENE":                              "BUTYLPARABEN",
+  "PHENOXYETHANOL":                             "PHENOXYETHANOL",
+  "ALCOOL BENZYLIQUE":                          "BENZYL ALCOHOL",
+  "SORBATE DE POTASSIUM":                       "POTASSIUM SORBATE",
+  "BENZOATE DE SODIUM":                         "SODIUM BENZOATE",
+
+  // Tensioactifs
+  "LAURYL SULFATE DE SODIUM":                   "SODIUM LAURYL SULFATE",
+  "LAURETH SULFATE DE SODIUM":                  "SODIUM LAURETH SULFATE",
+  "LAURYL SULFATE D AMMONIUM":                  "AMMONIUM LAURYL SULFATE",
+  "LAURETH SULFATE D AMMONIUM":                 "AMMONIUM LAURETH SULFATE",
+
+  // Filtres UV
+  "DIOXYDE DE TITANE":                          "TITANIUM DIOXIDE",
+  "OXYDE DE ZINC":                              "ZINC OXIDE",
+  "BENZOPHENONE 3":                             "BENZOPHENONE-3",
+
+  // Texturants / épaississants
+  "CARBOMERE":                                  "CARBOMER",
+  "GOMME XANTHANE":                             "XANTHAN GUM",
+  "SILICE":                                     "SILICA",
+  "ARGILE BLANCHE":                             "KAOLIN",
+  "AMIDON DE TAPIOCA":                          "TAPIOCA STARCH",
+  "POLYETHYLENE GLYCOL":                        "PEG",
+
+  // Régulateurs pH
+  "TROMETAMINE":                                "TROMETHAMINE",
+  "HYDROXYDE DE SODIUM":                        "SODIUM HYDROXIDE",
+  "SOUDE":                                      "SODIUM HYDROXIDE",
+  "LESSIVE DE SOUDE":                           "SODIUM HYDROXIDE",
+  "HYDROXYDE DE POTASSIUM":                     "POTASSIUM HYDROXIDE",
+  "TRIETHANOLAMINE":                            "TRIETHANOLAMINE",
+
+  // Émollients / huiles
+  "VASELINE":                                   "PETROLATUM",
+  "PARAFFINE LIQUIDE":                          "PARAFFINUM LIQUIDUM",
+  "HUILE MINERALE":                             "MINERAL OIL",
+  "BEURRE DE KARITE":                           "BUTYROSPERMUM PARKII BUTTER",
+  "HUILE DE JOJOBA":                            "SIMMONDSIA CHINENSIS SEED OIL",
+  "HUILE D ARGAN":                              "ARGANIA SPINOSA KERNEL OIL",
+  "HUILE DE TOURNESOL":                         "HELIANTHUS ANNUUS SEED OIL",
+  "HUILE DE ROSE MUSQUEE":                      "ROSA CANINA FRUIT OIL",
+  "HUILE DE COCO":                              "COCOS NUCIFERA OIL",
+  "HUILE D AMANDE DOUCE":                       "PRUNUS AMYGDALUS DULCIS OIL",
+  "HUILE D AVOCAT":                             "PERSEA GRATISSIMA OIL",
+  "HUILE D ARBRE A THE":                        "MELALEUCA ALTERNIFOLIA LEAF OIL",
+  "HUILE DE RICIN HYDROGENEE POLYOXYL 40":      "PEG-40 HYDROGENATED CASTOR OIL",
+  "HUILE DE MARULA":                            "MARULA OIL",
+  "HUILE D ARGOUSIER":                          "HIPPOPHAE RHAMNOIDES OIL",
+
+  // Humectants
+  "UREE":                                       "UREA",
+  "PANTHENOL":                                  "PANTHENOL",
+  "BETAINE":                                    "BETAINE",
+  "SORBITOL":                                   "SORBITOL",
+
+  // Émulsifiants
+  "LECITHINE":                                  "LECITHIN",
+  "GOMME DE XANTHANE":                          "XANTHAN GUM",
+
+  // Céramides (terme générique)
+  "CERAMIDE":                                   "CERAMIDE NP",
+
+  // Apaisants
+  "EXTRAIT DE CENTELLA ASIATICA":               "CENTELLA ASIATICA EXTRACT",
+  "EXTRAIT DE THE VERT":                        "CAMELLIA SINENSIS LEAF EXTRACT",
+  "GEL D ALOE VERA":                            "ALOE VERA",
+  "JUS D ALOE VERA":                            "ALOE BARBADENSIS LEAF JUICE",
+  "CAMOMILLE":                                  "CHAMOMILLA RECUTITA EXTRACT",
+  "CALENDULA":                                  "CALENDULA OFFICINALIS EXTRACT",
+  "REGLISSE":                                   "GLYCYRRHIZA GLABRA ROOT EXTRACT",
+
+  // Pétrochimiques communs
+  "CIRE MICROCRISTALLINE":                      "CERA MICROCRISTALLINA",
+  "CIRE DE PARAFFINE":                          "PARAFFIN",
+};
+
+// Traduit un nom normalisé (français ou INCI) vers son équivalent INCI.
+// Retire d'abord les parenthèses (ex : "parabène"), puis cherche par correspondance exacte
+// puis par sous-chaîne (ex : "CARBOMERE INTERPOLYMERE" → "CARBOMER").
+function translateToInci(norm: string): string {
+  const clean = norm.replace(/\([^)]*\)/g, "").replace(/\s+/g, " ").trim();
+  if (FRENCH_TO_INCI[clean]) return FRENCH_TO_INCI[clean];
+  // Substring match — retourne la traduction de la clé la plus longue trouvée dans clean
+  let best = "";
+  let result = "";
+  for (const [fr, inci] of Object.entries(FRENCH_TO_INCI)) {
+    if (clean.includes(fr) && fr.length > best.length) { best = fr; result = inci; }
+  }
+  return result || clean;
 }
 
 export function analyzeIngredients(raw: string): AnalysisResult {
@@ -229,7 +375,7 @@ export function analyzeIngredients(raw: string): AnalysisResult {
     .filter(Boolean);
 
   const ingredients: AnalyzedIngredient[] = tokens.map((token) => {
-    const norm = normalize(token);
+    const norm = translateToInci(normalize(token));
 
     const edKey = Object.keys(ENDOCRINE_DISRUPTORS).find(
       (k) => norm === k || norm.includes(k)
@@ -680,6 +826,8 @@ export const COMMON_INGREDIENTS: Record<string, CommonEntry> = {
 
   // ─ Alias courants ─
   "2-HEXANEDIOL":                   { role: "Conservateur",     description: "Diol conservateur (alias de 1,2-Hexanediol). Actif contre bactéries et moisissures, doux. Peaux concernées : tous types." },
+  "PEG":                            { role: "Humectant",        description: "Polyéthylène glycol (terme générique). Humectant et solvant courant. Non irritant aux concentrations habituelles. Peaux concernées : tous types." },
+  "ETHANOL":                        { role: "Solvant",          description: "Éthanol (alcool éthylique). Solvant et antibactérien. Peut assécher l'épiderme à forte concentration. Peaux concernées : peaux sèches et sensibles." },
 
   // ─ Humectants supplémentaires (INCIDecoder) ─
   "FRUCTOOLIGOSACCHARIDES":         { role: "Humectant",        description: "Prébiotiques végétaux (FOS). Soutiennent le microbiome cutané et hydratent. Peaux concernées : tous types." },
@@ -890,7 +1038,7 @@ export function analyzeIngredientsV2(raw: string, profile?: SkinProfile): Analys
   const tokens = raw.split(/[,\n]|\s\.\s/).map((t) => t.trim()).filter(Boolean);
 
   const ingredients: AnalyzedIngredient[] = tokens.map((token) => {
-    const norm = normalize(token);
+    const norm = translateToInci(normalize(token));
 
     const edKey = Object.keys(ENDOCRINE_DISRUPTORS).find((k) => norm === k || norm.includes(k));
     if (edKey) {
