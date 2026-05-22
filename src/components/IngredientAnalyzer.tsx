@@ -4,6 +4,7 @@ import { analyzeIngredientsV2, type AnalysisResultV2, type SkinProfile } from "@
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // ─── Flag config ──────────────────────────────────────────────────────────────
 
@@ -264,6 +265,167 @@ function ComedogenicCard({ result }: { result: AnalysisResultV2 }) {
   );
 }
 
+// ─── CategorySection ──────────────────────────────────────────────────────────
+
+const ROLE_TO_CATEGORY: Record<string, string> = {
+  "Actif": "Actifs", "Exfoliant BHA": "Actifs", "Exfoliant AHA": "Actifs",
+  "Exfoliant PHA": "Actifs", "Sébo-régulateur": "Actifs", "Dépigmentant": "Actifs",
+  "Antioxydant": "Antioxydants",
+  "Apaisant": "Apaisants", "Protecteur": "Apaisants",
+  "Barrière": "Barrière cutanée",
+  "Filtre UV minéral": "Filtres UV",
+  "Humectant": "Hydratants",
+  "Solvant": "Solvants",
+  "Émollient": "Émollients",
+  "Conservateur": "Conservateurs",
+  "Épaississant": "Texturants", "Régulateur pH": "Texturants", "Chélateur": "Texturants",
+};
+
+const FLAG_TO_CATEGORY: Partial<Record<IngFlag, string>> = {
+  ed_high:     "Perturbateurs endocriniens",
+  ed_medium:   "Perturbateurs endocriniens",
+  allergen:    "Allergènes",
+  irritant:    "Irritants",
+  petrochem:   "Pétrochimiques",
+  comedogenic: "Comédogènes",
+};
+
+const PRIORITY_CATS = ["Actifs", "Antioxydants", "Apaisants", "Barrière cutanée", "Filtres UV"];
+const SIGNAL_CATS   = ["Perturbateurs endocriniens", "Allergènes", "Irritants", "Comédogènes", "Pétrochimiques"];
+const FUNCTIONAL_CAT_ORDER = ["Hydratants", "Émollients", "Solvants", "Conservateurs", "Texturants", "Non classifié"];
+
+const CATEGORY_INFO: Record<string, string> = {
+  "Actifs":                       "Molécules à effet biologique démontré : exfoliants, vitamines, régulateurs de sébum, dépigmentants...",
+  "Antioxydants":                  "Protègent les cellules du stress oxydatif et freinent le vieillissement prématuré.",
+  "Apaisants":                     "Réduisent les rougeurs et inflammations. Idéaux pour les peaux réactives et sensibles.",
+  "Barrière cutanée":             "Céramides et lipides qui reconstituent le film hydrolipidique naturel de la peau.",
+  "Filtres UV":                    "Protègent des UVA/UVB. Les filtres minéraux (zinc, titane) sont les mieux tolérés.",
+  "Hydratants":                    "Humectants qui attirent et retiennent l'eau dans les couches superficielles de l'épiderme.",
+  "Solvants":                      "Base de la formule. Dissolvent les autres ingrédients et facilitent leur pénétration.",
+  "Émollients":                    "Adoucissent et assouplissent la peau en formant un film protecteur sur sa surface.",
+  "Conservateurs":                 "Empêchent la prolifération bactérienne pour préserver l'intégrité du produit.",
+  "Texturants":                    "Donnent la texture, l'épaisseur et la stabilité à la formule sans effet actif sur la peau.",
+  "Perturbateurs endocriniens":   "Molécules suspectées ou avérées d'interférer avec le système hormonal.",
+  "Allergènes":                    "Molécules pouvant provoquer des réactions de contact chez les peaux sensibles.",
+  "Irritants":                     "Peuvent altérer ou fragiliser la barrière cutanée, surtout en tête de liste.",
+  "Pétrochimiques":                "Dérivés du pétrole — inertes sur la peau mais d'origine non renouvelable.",
+  "Comédogènes":                   "Peuvent obstruer les pores et favoriser la formation de comédons.",
+  "Non classifié":                 "Ingrédients non encore répertoriés dans notre base de données.",
+};
+
+const CATEGORY_PILL: Record<string, string> = {
+  "Actifs":                       "bg-emerald-50 text-emerald-700 border-emerald-200",
+  "Antioxydants":                  "bg-emerald-50 text-emerald-700 border-emerald-200",
+  "Apaisants":                     "bg-teal-50 text-teal-700 border-teal-200",
+  "Barrière cutanée":             "bg-sky-50 text-sky-700 border-sky-200",
+  "Filtres UV":                    "bg-sky-50 text-sky-700 border-sky-200",
+  "Hydratants":                    "bg-blue-50 text-blue-700 border-blue-200",
+  "Solvants":                      "bg-muted/80 text-muted-foreground border-border/50",
+  "Émollients":                    "bg-muted/80 text-muted-foreground border-border/50",
+  "Conservateurs":                 "bg-muted/80 text-muted-foreground border-border/50",
+  "Texturants":                    "bg-muted/80 text-muted-foreground border-border/50",
+  "Perturbateurs endocriniens":   "bg-red-50 text-red-700 border-red-200",
+  "Allergènes":                    "bg-amber-50 text-amber-700 border-amber-200",
+  "Irritants":                     "bg-violet-50 text-violet-700 border-violet-200",
+  "Pétrochimiques":                "bg-yellow-50 text-yellow-700 border-yellow-200",
+  "Comédogènes":                   "bg-pink-50 text-pink-700 border-pink-200",
+  "Non classifié":                 "bg-muted/60 text-muted-foreground/70 border-border/40",
+};
+
+function CategorySection({ ingredients }: { ingredients: Ing[] }) {
+  const [showFunctional, setShowFunctional] = useState(false);
+  const [openTip, setOpenTip] = useState<string | null>(null);
+
+  const grouped = new Map<string, Ing[]>();
+  for (const ing of ingredients) {
+    const cat =
+      ing.flag !== "ok"
+        ? (FLAG_TO_CATEGORY[ing.flag] ?? "Non classifié")
+        : (ing.role ? (ROLE_TO_CATEGORY[ing.role] ?? "Non classifié") : "Non classifié");
+    if (!grouped.has(cat)) grouped.set(cat, []);
+    grouped.get(cat)!.push(ing);
+  }
+
+  const priorityVisible = PRIORITY_CATS.filter((c) => grouped.has(c));
+  const signalVisible   = SIGNAL_CATS.filter((c) => grouped.has(c));
+  const functionalKeys  = FUNCTIONAL_CAT_ORDER.filter((c) => grouped.has(c));
+  const functionalCount = functionalKeys.reduce((n, c) => n + (grouped.get(c)?.length ?? 0), 0);
+
+  function renderCategory(cat: string) {
+    const ings = grouped.get(cat)!;
+    const pill = CATEGORY_PILL[cat] ?? "bg-muted/80 text-muted-foreground border-border/50";
+    return (
+      <div key={cat}>
+        <div className="mb-2 flex items-center gap-1.5">
+          <span className="text-xs font-semibold text-foreground/80">{cat}</span>
+          <Tooltip
+            open={openTip === cat}
+            onOpenChange={(o) => { if (!o) setOpenTip(null); }}
+          >
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                className="text-muted-foreground/40 transition-colors hover:text-muted-foreground"
+                onMouseEnter={() => setOpenTip(cat)}
+                onMouseLeave={() => setOpenTip(null)}
+                onClick={() => setOpenTip(openTip === cat ? null : cat)}
+              >
+                <Info className="h-3 w-3" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[240px] text-center leading-relaxed" side="top">
+              {CATEGORY_INFO[cat] ?? cat}
+            </TooltipContent>
+          </Tooltip>
+          <span className="text-[10px] text-muted-foreground/40">({ings.length})</span>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {ings.map((ing, i) => (
+            <span key={i} className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${pill}`}>
+              {ing.raw}
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const hasAnything = priorityVisible.length > 0 || signalVisible.length > 0 || functionalCount > 0;
+  if (!hasAnything) return null;
+
+  return (
+    <TooltipProvider delayDuration={0}>
+      <div className="rounded-3xl border border-border/60 bg-card shadow-soft overflow-hidden">
+        <div className="border-b border-border/60 px-6 py-4">
+          <h2 className="font-display text-base font-semibold">Ingrédients par catégorie</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">Cliquer sur (i) pour la description de la catégorie</p>
+        </div>
+        <div className="space-y-5 px-6 py-5">
+          {priorityVisible.map(renderCategory)}
+          {signalVisible.map(renderCategory)}
+          {functionalCount > 0 && (
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowFunctional((v) => !v)}
+                className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showFunctional ? "rotate-180" : ""}`} />
+                {showFunctional ? "Masquer" : "Voir"} les ingrédients fonctionnels ({functionalCount})
+              </button>
+              {showFunctional && (
+                <div className="mt-5 space-y-5">
+                  {functionalKeys.map(renderCategory)}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </TooltipProvider>
+  );
+}
+
 // ─── IngredientAnalyzer ───────────────────────────────────────────────────────
 
 export function IngredientAnalyzer() {
@@ -415,6 +577,9 @@ export function IngredientAnalyzer() {
               )}
             </div>
           </div>
+
+          {/* Category grouping */}
+          <CategorySection ingredients={result.ingredients} />
 
           {/* Ingredient list */}
           <div className="rounded-3xl border border-border/60 bg-card shadow-soft overflow-hidden">

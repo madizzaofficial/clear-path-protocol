@@ -202,6 +202,7 @@ export type AnalyzedIngredient = {
   description?: string;
   euMandatory?: boolean;
   comedogenicRating?: number;
+  role?: string;
 };
 
 export type AnalysisResult = {
@@ -508,7 +509,7 @@ export function analyzeIngredientsV2(raw: string, profile?: SkinProfile): Analys
     const commonKey = Object.keys(COMMON_INGREDIENTS).find((k) => norm === k || norm.includes(k));
     if (commonKey) {
       const entry = COMMON_INGREDIENTS[commonKey];
-      return { raw: token, normalized: norm, flag: "ok", description: `${entry.role} — ${entry.description}` };
+      return { raw: token, normalized: norm, flag: "ok", description: `${entry.role} — ${entry.description}`, role: entry.role };
     }
 
     return { raw: token, normalized: norm, flag: "ok", description: "Ingrédient non répertorié dans nos bases de données. Peaux concernées : tous types." };
