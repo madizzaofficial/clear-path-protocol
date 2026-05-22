@@ -660,6 +660,17 @@ export const COMMON_INGREDIENTS: Record<string, CommonEntry> = {
   "FRUCTOOLIGOSACCHARIDES":         { role: "Humectant",        description: "Prébiotiques végétaux (FOS). Soutiennent le microbiome cutané et hydratent. Peaux concernées : tous types." },
   "GLUCOSE":                        { role: "Humectant",        description: "Sucre naturel. Humectant doux, water-binding. Peaux concernées : tous types." },
   "LACTOSE":                        { role: "Humectant",        description: "Sucre du lait. Humectant doux, améliore la texture. Peaux concernées : tous types." },
+
+  // ─ Actifs populaires manquants ─
+  "BENZOYL PEROXIDE":               { role: "Actif",            description: "Peroxyde de benzoyle. Anti-acné puissant : détruit C. acnes et kératolytique. Peut irriter et décolorer les textiles — introduire progressivement. Peaux concernées : peaux acnéiques." },
+  "HYDROQUINONE":                   { role: "Dépigmentant",     description: "Dépigmentant de référence médicale. Inhibe la tyrosinase. Soumis à prescription en Europe. Peaux concernées : hyperpigmentation sévère et mélasma." },
+  "MELALEUCA ALTERNIFOLIA LEAF OIL": { role: "Actif",           description: "Huile essentielle d'arbre à thé. Anti-bactérienne, anti-fongique et anti-inflammatoire. Doit être diluée — irritante pure. Peaux concernées : peaux acnéiques." },
+  "ARTEMISIA VULGARIS EXTRACT":     { role: "Apaisant",         description: "Extrait d'armoise (mugwort). Apaisant et antioxydant. Populaire dans la K-beauty pour les peaux sensibles. Peaux concernées : peaux sensibles et irritées." },
+  "GALACTOMYCES FERMENT FILTRATE":  { role: "Actif",            description: "Filtrat de fermentation de levure Galactomyces. Éclairant, resserre les pores et renforce la barrière. Popularisé par la K-beauty. Peaux concernées : tous types, idéal peaux grasses et ternes." },
+  "SNAIL SECRETION FILTRATE":       { role: "Actif",            description: "Filtrat de bave d'escargot. Hydratant, cicatrisant et anti-âge. Riche en allantoïne, glycoprotéines et hyaluronique. Peaux concernées : tous types." },
+  "PANAX GINSENG ROOT EXTRACT":     { role: "Antioxydant",      description: "Extrait de ginseng rouge (racine). Antioxydant puissant, stimule le métabolisme cellulaire et l'éclat. Peaux concernées : peaux matures et ternes." },
+  "PROPOLIS EXTRACT":               { role: "Actif",            description: "Propolis (résine d'abeille). Anti-bactérien naturel, cicatrisant et antioxydant. Peaux concernées : peaux acnéiques et sensibles." },
+  "PROPOLIS":                       { role: "Actif",            description: "Propolis (résine d'abeille). Anti-bactérien naturel, cicatrisant et antioxydant. Peaux concernées : peaux acnéiques et sensibles." },
 };
 
 // ─── V2 : Analyse multi-baromètres ────────────────────────────────────────────
