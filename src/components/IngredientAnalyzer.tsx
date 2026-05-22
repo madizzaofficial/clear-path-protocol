@@ -244,7 +244,7 @@ export function IngredientAnalyzer() {
 
 export function IngredientAnalyzerPage() {
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10">
+    <main className="mx-auto max-w-4xl px-6 pb-28 pt-10">
       <div className="mb-8">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-soft">
