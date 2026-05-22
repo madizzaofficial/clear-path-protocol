@@ -161,7 +161,7 @@ export type ComedogenicEntry = { rating: 1 | 2 | 3 | 4 | 5; description: string 
 
 export const COMEDOGENIC_INGREDIENTS: Record<string, ComedogenicEntry> = {
   // Indice 5 — très comédogène
-  "ISOPROPYL MYRISTATE":          { rating: 5, description: "Ester gras synthétique. Indice comédogénique maximal (5/5) : obstrue quasi systématiquement les follicules pileux. Peaux concernées : peaux acnéiques et grasses — à éviter absolument dans les soins visage." },
+  "ISOPROPYL MYRISTATE":          { rating: 4, description: "Ester gras synthétique léger. Indice comédogénique élevé (4/5 — sources : Kligman 1989 + études humaines). Présent dans de nombreux écrans solaires et soins. À surveiller sur peau acnéique, en particulier en application quotidienne sur le visage. Peaux concernées : peaux acnéiques et grasses." },
   "ISOPROPYL PALMITATE":          { rating: 4, description: "Ester gras synthétique comédogène (4/5). Peut boucher les pores en s'accumulant. Peaux concernées : peaux acnéiques et grasses." },
   "MYRISTYL MYRISTATE":           { rating: 5, description: "Ester gras très comédogène (5/5). Présent dans certains émollients et fonds de teint. Peaux concernées : peaux acnéiques et grasses." },
   "OCTYL STEARATE":               { rating: 5, description: "Ester gras synthétique. Indice comédogénique très élevé (5/5). Peaux concernées : peaux acnéiques — à éviter dans les formules visage." },
