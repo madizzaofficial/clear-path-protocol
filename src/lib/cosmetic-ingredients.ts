@@ -411,7 +411,8 @@ function translateToInci(norm: string): string {
   }
   if (result) return result;
   // Dehyphenation: "CENTELLA-ASIATICA EXTRACT" → "CENTELLA ASIATICA EXTRACT"
-  const dehyphen = clean.replace(/([A-Z\d])-([A-Z])/g, "$1 $2").replace(/\s+/g, " ").trim();
+  // Only replace letter-to-letter hyphens — never digit-to-letter (preserves "1,2-HEXANEDIOL")
+  const dehyphen = clean.replace(/([A-Z])-([A-Z])/g, "$1 $2").replace(/\s+/g, " ").trim();
   return dehyphen;
 }
 

@@ -11,21 +11,21 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 type IngFlag = AnalysisResultV2["ingredients"][number]["flag"];
 
 const FLAG_CONFIG: Record<IngFlag, { dot: string; bg: string; expandBg: string; name: string; badge: string; label: string }> = {
-  ed_high:     { dot: "bg-red-500",     bg: "bg-red-50",        expandBg: "bg-red-100/60",     name: "text-red-700 font-semibold",    badge: "bg-red-100 text-red-600",       label: "PE avéré" },
-  ed_medium:   { dot: "bg-orange-400",  bg: "bg-orange-50",     expandBg: "bg-orange-100/60",  name: "text-orange-700 font-semibold", badge: "bg-orange-100 text-orange-600",  label: "PE suspecté" },
-  allergen:    { dot: "bg-amber-400",   bg: "bg-amber-50",      expandBg: "bg-amber-100/60",   name: "text-amber-700 font-semibold",  badge: "bg-amber-100 text-amber-700",   label: "Allergène" },
-  irritant:    { dot: "bg-violet-400",  bg: "bg-violet-50/60",  expandBg: "bg-violet-100/60",  name: "text-violet-700 font-semibold", badge: "bg-violet-100 text-violet-600",  label: "Irritant" },
-  petrochem:   { dot: "bg-yellow-400",  bg: "bg-yellow-50",     expandBg: "bg-yellow-100/60",  name: "text-yellow-700 font-medium",   badge: "bg-yellow-100 text-yellow-700",  label: "Pétrochimique" },
-  comedogenic: { dot: "bg-pink-400",    bg: "bg-pink-50",       expandBg: "bg-pink-100/60",    name: "text-pink-700 font-semibold",   badge: "bg-pink-100 text-pink-700",      label: "Comédogène" },
-  ok:          { dot: "bg-emerald-400", bg: "bg-emerald-50/50", expandBg: "bg-emerald-100/40", name: "text-emerald-700 font-medium",  badge: "",                               label: "" },
+  ed_high:     { dot: "bg-red-500",     bg: "bg-red-50 dark:bg-red-950/20",           expandBg: "bg-red-100/60 dark:bg-red-950/30",     name: "text-red-700 dark:text-red-400 font-semibold",    badge: "bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400",       label: "PE avéré" },
+  ed_medium:   { dot: "bg-orange-400",  bg: "bg-orange-50 dark:bg-orange-950/20",     expandBg: "bg-orange-100/60 dark:bg-orange-950/30",  name: "text-orange-700 dark:text-orange-400 font-semibold", badge: "bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400",  label: "PE suspecté" },
+  allergen:    { dot: "bg-amber-400",   bg: "bg-amber-50 dark:bg-amber-950/20",       expandBg: "bg-amber-100/60 dark:bg-amber-950/30",    name: "text-amber-700 dark:text-amber-400 font-semibold",  badge: "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400",   label: "Allergène" },
+  irritant:    { dot: "bg-violet-400",  bg: "bg-violet-50/60 dark:bg-violet-950/20",  expandBg: "bg-violet-100/60 dark:bg-violet-950/30",  name: "text-violet-700 dark:text-violet-400 font-semibold", badge: "bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400",  label: "Irritant" },
+  petrochem:   { dot: "bg-yellow-400",  bg: "bg-yellow-50 dark:bg-yellow-950/20",     expandBg: "bg-yellow-100/60 dark:bg-yellow-950/30",  name: "text-yellow-700 dark:text-yellow-400 font-medium",   badge: "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400",  label: "Pétrochimique" },
+  comedogenic: { dot: "bg-pink-400",    bg: "bg-pink-50 dark:bg-pink-950/20",         expandBg: "bg-pink-100/60 dark:bg-pink-950/30",      name: "text-pink-700 dark:text-pink-400 font-semibold",   badge: "bg-pink-100 dark:bg-pink-900/40 text-pink-700 dark:text-pink-400",      label: "Comédogène" },
+  ok:          { dot: "bg-emerald-400", bg: "bg-emerald-50/50 dark:bg-emerald-950/10", expandBg: "bg-emerald-100/40 dark:bg-emerald-950/20", name: "text-emerald-700 dark:text-emerald-400 font-medium",  badge: "",                               label: "" },
 };
 
 // ─── BarometerCard ────────────────────────────────────────────────────────────
 
 const BAR_COLORS = {
-  low:    { text: "text-emerald-600", badge: "bg-emerald-100 text-emerald-700", border: "border-emerald-200", bg: "bg-emerald-50/60", dot: "#10b981" },
-  medium: { text: "text-amber-600",   badge: "bg-amber-100 text-amber-700",     border: "border-amber-200",   bg: "bg-amber-50/60",   dot: "#f59e0b" },
-  high:   { text: "text-red-600",     badge: "bg-red-100 text-red-700",         border: "border-red-200",     bg: "bg-red-50/60",     dot: "#ef4444" },
+  low:    { text: "text-emerald-600 dark:text-emerald-400", badge: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400", border: "border-emerald-200 dark:border-emerald-800/40", bg: "bg-emerald-50/60 dark:bg-emerald-950/20", dot: "#10b981" },
+  medium: { text: "text-amber-600 dark:text-amber-400",     badge: "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400",         border: "border-amber-200 dark:border-amber-800/40",     bg: "bg-amber-50/60 dark:bg-amber-950/20",     dot: "#f59e0b" },
+  high:   { text: "text-red-600 dark:text-red-400",         badge: "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400",                 border: "border-red-200 dark:border-red-800/40",         bg: "bg-red-50/60 dark:bg-red-950/20",         dot: "#ef4444" },
 } as const;
 
 function BarometerCard({
@@ -98,10 +98,10 @@ const ACNE_TYPE_LABELS: Record<string, string> = {
 };
 
 const RECO_VERDICT: Record<string, { text: string; color: string; dotColor: string }> = {
-  daily:      { text: "Ce produit semble adapté à ton profil.", color: "text-emerald-700", dotColor: "bg-emerald-500" },
-  occasional: { text: "À utiliser avec modération selon ton profil.", color: "text-amber-700", dotColor: "bg-amber-500" },
-  caution:    { text: "Potentiellement déconseillé pour ton type de peau.", color: "text-orange-700", dotColor: "bg-orange-500" },
-  avoid:      { text: "Déconseillé pour ton profil peau.", color: "text-red-700", dotColor: "bg-red-500" },
+  daily:      { text: "Ce produit semble adapté à ton profil.", color: "text-emerald-700 dark:text-emerald-400", dotColor: "bg-emerald-500" },
+  occasional: { text: "À utiliser avec modération selon ton profil.", color: "text-amber-700 dark:text-amber-400", dotColor: "bg-amber-500" },
+  caution:    { text: "Potentiellement déconseillé pour ton type de peau.", color: "text-orange-700 dark:text-orange-400", dotColor: "bg-orange-500" },
+  avoid:      { text: "Déconseillé pour ton profil peau.", color: "text-red-700 dark:text-red-400", dotColor: "bg-red-500" },
 };
 
 function ProfileCard({ profile, usageReco }: { profile: SkinProfile; usageReco: AnalysisResultV2["usageReco"] }) {
@@ -150,10 +150,10 @@ function ProfileCard({ profile, usageReco }: { profile: SkinProfile; usageReco: 
 // ─── UsageReco ────────────────────────────────────────────────────────────────
 
 const RECO_CONFIG = {
-  daily:      { label: "Usage quotidien possible", sub: "Aucun signal majeur détecté sur la formulation globale.", icon: CheckCircle, color: "text-emerald-700 bg-emerald-50 border-emerald-200" },
-  occasional: { label: "Usage occasionnel conseillé", sub: "Certains signaux modérés — limiter la fréquence d'application.", icon: Info, color: "text-amber-700 bg-amber-50 border-amber-200" },
-  caution:    { label: "Utiliser avec prudence", sub: "Signaux élevés détectés. Surveiller la tolérance cutanée.", icon: AlertTriangle, color: "text-orange-700 bg-orange-50 border-orange-200" },
-  avoid:      { label: "Utilisation déconseillée", sub: "Formulation à risque élevé selon votre profil peau.", icon: AlertTriangle, color: "text-red-700 bg-red-50 border-red-200" },
+  daily:      { label: "Usage quotidien possible", sub: "Aucun signal majeur détecté sur la formulation globale.", icon: CheckCircle, color: "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/40" },
+  occasional: { label: "Usage occasionnel conseillé", sub: "Certains signaux modérés — limiter la fréquence d'application.", icon: Info, color: "text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/40" },
+  caution:    { label: "Utiliser avec prudence", sub: "Signaux élevés détectés. Surveiller la tolérance cutanée.", icon: AlertTriangle, color: "text-orange-700 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800/40" },
+  avoid:      { label: "Utilisation déconseillée", sub: "Formulation à risque élevé selon votre profil peau.", icon: AlertTriangle, color: "text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800/40" },
 };
 
 function UsageReco({ reco, productType }: { reco: AnalysisResultV2["usageReco"]; productType: AnalysisResultV2["productType"] }) {
@@ -243,71 +243,71 @@ function SignalSummaryCards({ result }: { result: AnalysisResultV2 }) {
   return (
     <div className="flex flex-wrap gap-3">
       {comedogenic.length > 0 && (
-        <div className="flex flex-col rounded-2xl border border-pink-200 bg-pink-50 px-4 py-3">
-          <div className="mb-2 flex items-center gap-1.5 text-pink-700">
+        <div className="flex flex-col rounded-2xl border border-pink-200 dark:border-pink-800/40 bg-pink-50 dark:bg-pink-950/20 px-4 py-3">
+          <div className="mb-2 flex items-center gap-1.5 text-pink-700 dark:text-pink-400">
             <Droplets className="h-4 w-4 shrink-0" />
             <span className="text-xs font-bold uppercase tracking-wider">Comédogènes</span>
           </div>
           <ul className="space-y-1">
             {comedogenic.map((i, idx) => (
-              <li key={idx} className="text-xs text-pink-800">
+              <li key={idx} className="text-xs text-pink-800 dark:text-pink-300">
                 <span className="font-medium">{i.raw}</span>
-                {i.comedogenicRating && <span className="ml-1 text-pink-500">({i.comedogenicRating}/5)</span>}
+                {i.comedogenicRating && <span className="ml-1 text-pink-500 dark:text-pink-400">({i.comedogenicRating}/5)</span>}
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-[10px] italic leading-tight text-pink-600/80">À éviter pour les peaux grasses ou à tendance acnéique.</p>
+          <p className="mt-2 text-[10px] italic leading-tight text-pink-600/80 dark:text-pink-400/70">À éviter pour les peaux grasses ou à tendance acnéique.</p>
         </div>
       )}
 
       {petrochem.length > 0 && (
-        <div className="flex flex-col rounded-2xl border border-yellow-200 bg-yellow-50 px-4 py-3">
-          <div className="mb-2 flex items-center gap-1.5 text-yellow-700">
+        <div className="flex flex-col rounded-2xl border border-yellow-200 dark:border-yellow-800/40 bg-yellow-50 dark:bg-yellow-950/20 px-4 py-3">
+          <div className="mb-2 flex items-center gap-1.5 text-yellow-700 dark:text-yellow-400">
             <Leaf className="h-4 w-4 shrink-0" />
             <span className="text-xs font-bold uppercase tracking-wider">Pétrochimiques</span>
           </div>
           <ul className="space-y-1">
             {petrochem.map((i, idx) => (
-              <li key={idx} className="text-xs font-medium text-yellow-800">{i.raw}</li>
+              <li key={idx} className="text-xs font-medium text-yellow-800 dark:text-yellow-300">{i.raw}</li>
             ))}
           </ul>
-          <p className="mt-2 text-[10px] italic leading-tight text-yellow-700/80">Dérivés du pétrole — inertes sur la peau, origine non renouvelable.</p>
+          <p className="mt-2 text-[10px] italic leading-tight text-yellow-700/80 dark:text-yellow-400/70">Dérivés du pétrole — inertes sur la peau, origine non renouvelable.</p>
         </div>
       )}
 
       {allergens.length > 0 && (
-        <div className="flex flex-col rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-          <div className="mb-2 flex items-center gap-1.5 text-amber-700">
+        <div className="flex flex-col rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/20 px-4 py-3">
+          <div className="mb-2 flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
             <Info className="h-4 w-4 shrink-0" />
             <span className="text-xs font-bold uppercase tracking-wider">Allergènes</span>
           </div>
           <ul className="space-y-1">
             {allergens.map((i, idx) => (
-              <li key={idx} className="text-xs text-amber-800">
+              <li key={idx} className="text-xs text-amber-800 dark:text-amber-300">
                 <span className="font-medium">{i.raw}</span>
-                {i.euMandatory && <span className="ml-1 text-amber-500">(EU)</span>}
+                {i.euMandatory && <span className="ml-1 text-amber-500 dark:text-amber-400">(EU)</span>}
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-[10px] italic leading-tight text-amber-700/80">Peuvent provoquer des réactions de contact chez les peaux sensibles.</p>
+          <p className="mt-2 text-[10px] italic leading-tight text-amber-700/80 dark:text-amber-400/70">Peuvent provoquer des réactions de contact chez les peaux sensibles.</p>
         </div>
       )}
 
       {irritants.length > 0 && (
-        <div className="flex flex-col rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3">
-          <div className="mb-2 flex items-center gap-1.5 text-violet-700">
+        <div className="flex flex-col rounded-2xl border border-violet-200 dark:border-violet-800/40 bg-violet-50 dark:bg-violet-950/20 px-4 py-3">
+          <div className="mb-2 flex items-center gap-1.5 text-violet-700 dark:text-violet-400">
             <Zap className="h-4 w-4 shrink-0" />
             <span className="text-xs font-bold uppercase tracking-wider">Irritants</span>
           </div>
           <ul className="space-y-1">
             {irritants.map((i, idx) => (
-              <li key={idx} className="text-xs text-violet-800">
+              <li key={idx} className="text-xs text-violet-800 dark:text-violet-300">
                 <span className="font-medium">{i.raw}</span>
-                {i.reason && <span className="ml-1 text-violet-500 font-normal">— {i.reason}</span>}
+                {i.reason && <span className="ml-1 text-violet-500 dark:text-violet-400 font-normal">— {i.reason}</span>}
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-[10px] italic leading-tight text-violet-700/80">Peuvent fragiliser la barrière cutanée, surtout en tête de liste.</p>
+          <p className="mt-2 text-[10px] italic leading-tight text-violet-700/80 dark:text-violet-400/70">Peuvent fragiliser la barrière cutanée, surtout en tête de liste.</p>
         </div>
       )}
     </div>
@@ -328,7 +328,8 @@ const ROLE_TO_CATEGORY: Record<string, string> = {
   "Émollient": "Émollients",
   "Émulsifiant": "Émulsifiants",
   "Conservateur": "Conservateurs",
-  "Épaississant": "Texturants", "Régulateur pH": "Texturants", "Chélateur": "Texturants",
+  "Épaississant": "Texturants", "Texturant": "Texturants", "Régulateur pH": "Texturants", "Chélateur": "Texturants",
+  "Conditionneur": "Émollients",
   "Parfum": "Parfums",
   "Tensioactif": "Tensioactifs",
   "Antibactérien": "Antibactériens",
