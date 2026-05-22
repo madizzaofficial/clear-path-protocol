@@ -537,9 +537,6 @@ export function IngredientAnalyzer() {
             />
           </div>
 
-          {/* Allergen badge */}
-          <AllergenBadge ingredients={result.ingredients} />
-
           {/* Usage reco + score info */}
           <div className="space-y-2">
             <UsageReco reco={result.usageReco} productType={result.productType} />
