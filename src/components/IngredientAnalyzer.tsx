@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FlaskConical, AlertTriangle, CheckCircle, Info, Leaf, Zap, ChevronDown, Droplets, User, ShieldAlert } from "lucide-react";
+import { FlaskConical, AlertTriangle, CheckCircle, Info, Zap, ChevronDown, Droplets, User, ShieldAlert } from "lucide-react";
 import { analyzeIngredientsV2, type AnalysisResultV2, type SkinProfile } from "@/lib/cosmetic-ingredients";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
@@ -111,7 +111,7 @@ function ProfileCard({ profile, usageReco }: { profile: SkinProfile; usageReco: 
   const verdict        = RECO_VERDICT[usageReco];
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-muted/50 p-4">
+    <div className="rounded-2xl border border-border/60 bg-card p-4">
       <div className="flex items-start gap-3">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-muted">
           <User className="h-4 w-4 text-muted-foreground" />
@@ -230,42 +230,7 @@ function IngredientRow({ ing }: { ing: Ing }) {
   );
 }
 
-// ─── ComedogenicCard ──────────────────────────────────────────────────────────
-
-function ComedogenicCard({ result }: { result: AnalysisResultV2 }) {
-  if (result.comedogenicCount === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-emerald-700">
-        <CheckCircle className="h-5 w-5" />
-        <span className="mt-1.5 text-xs font-bold uppercase tracking-wider text-center">Non comédogène</span>
-        <span className="mt-0.5 text-[10px] text-emerald-500 text-center leading-tight">selon notre base</span>
-      </div>
-    );
-  }
-  return (
-    <div className="flex flex-col rounded-2xl border border-pink-200 bg-pink-50 px-4 py-3 min-w-[160px]">
-      <div className="flex items-center gap-1.5 text-pink-700 mb-2">
-        <Droplets className="h-4 w-4 shrink-0" />
-        <span className="text-xs font-bold uppercase tracking-wider">Comédogène</span>
-      </div>
-      <ul className="space-y-1">
-        {result.ingredients
-          .filter((i) => i.flag === "comedogenic")
-          .map((i, idx) => (
-            <li key={idx} className="text-xs text-pink-800">
-              <span className="font-medium">{i.raw}</span>
-              {i.comedogenicRating && (
-                <span className="ml-1 text-pink-500">({i.comedogenicRating}/5)</span>
-              )}
-            </li>
-          ))}
-      </ul>
-      <p className="mt-2 text-[10px] italic leading-tight text-pink-600/80">À éviter pour les peaux grasses ou à tendance acnéique.</p>
-    </div>
-  );
-}
-
-// ─── CategorySection ──────────────────────────────────────────────────────────
+// ─── GroupedIngredientList ────────────────────────────────────────────────────
 
 const ROLE_TO_CATEGORY: Record<string, string> = {
   "Actif": "Actifs", "Exfoliant BHA": "Actifs", "Exfoliant AHA": "Actifs",
@@ -313,26 +278,7 @@ const CATEGORY_INFO: Record<string, string> = {
   "Non classifié":                 "Ingrédients non encore répertoriés dans notre base de données.",
 };
 
-const CATEGORY_PILL: Record<string, string> = {
-  "Actifs":                       "bg-emerald-50 text-emerald-700 border-emerald-200",
-  "Antioxydants":                  "bg-emerald-50 text-emerald-700 border-emerald-200",
-  "Apaisants":                     "bg-teal-50 text-teal-700 border-teal-200",
-  "Barrière cutanée":             "bg-sky-50 text-sky-700 border-sky-200",
-  "Filtres UV":                    "bg-sky-50 text-sky-700 border-sky-200",
-  "Hydratants":                    "bg-blue-50 text-blue-700 border-blue-200",
-  "Solvants":                      "bg-muted/80 text-muted-foreground border-border/50",
-  "Émollients":                    "bg-muted/80 text-muted-foreground border-border/50",
-  "Conservateurs":                 "bg-muted/80 text-muted-foreground border-border/50",
-  "Texturants":                    "bg-muted/80 text-muted-foreground border-border/50",
-  "Perturbateurs endocriniens":   "bg-red-50 text-red-700 border-red-200",
-  "Allergènes":                    "bg-amber-50 text-amber-700 border-amber-200",
-  "Irritants":                     "bg-violet-50 text-violet-700 border-violet-200",
-  "Pétrochimiques":                "bg-yellow-50 text-yellow-700 border-yellow-200",
-  "Comédogènes":                   "bg-pink-50 text-pink-700 border-pink-200",
-  "Non classifié":                 "bg-muted/60 text-muted-foreground/70 border-border/40",
-};
-
-function CategorySection({ ingredients }: { ingredients: Ing[] }) {
+function GroupedIngredientList({ ingredients }: { ingredients: Ing[] }) {
   const [showFunctional, setShowFunctional] = useState(false);
   const [openTip, setOpenTip] = useState<string | null>(null);
 
@@ -353,15 +299,11 @@ function CategorySection({ ingredients }: { ingredients: Ing[] }) {
 
   function renderCategory(cat: string) {
     const ings = grouped.get(cat)!;
-    const pill = CATEGORY_PILL[cat] ?? "bg-muted/80 text-muted-foreground border-border/50";
     return (
       <div key={cat}>
-        <div className="mb-2 flex items-center gap-1.5">
-          <span className="text-xs font-semibold text-foreground/80">{cat}</span>
-          <Tooltip
-            open={openTip === cat}
-            onOpenChange={(o) => { if (!o) setOpenTip(null); }}
-          >
+        <div className="flex items-center gap-2 border-y border-border/40 bg-muted/30 px-6 py-2">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{cat}</span>
+          <Tooltip open={openTip === cat} onOpenChange={(o) => { if (!o) setOpenTip(null); }}>
             <TooltipTrigger asChild>
               <button
                 type="button"
@@ -377,50 +319,39 @@ function CategorySection({ ingredients }: { ingredients: Ing[] }) {
               {CATEGORY_INFO[cat] ?? cat}
             </TooltipContent>
           </Tooltip>
-          <span className="text-[10px] text-muted-foreground/40">({ings.length})</span>
+          <span className="ml-auto text-[10px] text-muted-foreground/40">{ings.length}</span>
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {ings.map((ing, i) => (
-            <span key={i} className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${pill}`}>
-              {ing.raw}
-            </span>
-          ))}
-        </div>
+        <ul className="divide-y divide-border/40">
+          {ings.map((ing, i) => <IngredientRow key={i} ing={ing} />)}
+        </ul>
       </div>
     );
   }
-
-  const hasAnything = priorityVisible.length > 0 || signalVisible.length > 0 || functionalCount > 0;
-  if (!hasAnything) return null;
 
   return (
     <TooltipProvider delayDuration={0}>
       <div className="rounded-3xl border border-border/60 bg-card shadow-soft overflow-hidden">
         <div className="border-b border-border/60 px-6 py-4">
-          <h2 className="font-display text-base font-semibold">Ingrédients par catégorie</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">Cliquer sur (i) pour la description de la catégorie</p>
+          <h2 className="font-display text-base font-semibold">Ingrédients</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {ingredients.length} analysés · cliquer sur un ingrédient pour le détail
+          </p>
         </div>
-        <div className="space-y-5 px-6 py-5">
-          {priorityVisible.map(renderCategory)}
-          {signalVisible.map(renderCategory)}
-          {functionalCount > 0 && (
-            <div>
-              <button
-                type="button"
-                onClick={() => setShowFunctional((v) => !v)}
-                className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showFunctional ? "rotate-180" : ""}`} />
-                {showFunctional ? "Masquer" : "Voir"} les ingrédients fonctionnels ({functionalCount})
-              </button>
-              {showFunctional && (
-                <div className="mt-5 space-y-5">
-                  {functionalKeys.map(renderCategory)}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        {priorityVisible.map(renderCategory)}
+        {signalVisible.map(renderCategory)}
+        {functionalCount > 0 && (
+          <div className="px-6 py-4">
+            <button
+              type="button"
+              onClick={() => setShowFunctional((v) => !v)}
+              className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showFunctional ? "rotate-180" : ""}`} />
+              {showFunctional ? "Masquer" : "Voir"} les ingrédients fonctionnels ({functionalCount})
+            </button>
+            {showFunctional && <div className="mt-1">{functionalKeys.map(renderCategory)}</div>}
+          </div>
+        )}
       </div>
     </TooltipProvider>
   );
@@ -535,66 +466,8 @@ export function IngredientAnalyzer() {
             )}
           </div>
 
-          {/* Comedogenic detail card */}
-          <div className="flex flex-wrap gap-3">
-            <ComedogenicCard result={result} />
-
-            {/* Flag summary badges */}
-            <div className="flex flex-wrap gap-2 items-start content-start">
-              {result.edHighCount > 0 && (
-                <div className="flex items-center gap-2 rounded-2xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600">
-                  <AlertTriangle className="h-4 w-4" />
-                  {result.edHighCount} PE avéré{result.edHighCount > 1 ? "s" : ""}
-                </div>
-              )}
-              {result.edMediumCount > 0 && (
-                <div className="flex items-center gap-2 rounded-2xl bg-orange-50 px-4 py-2.5 text-sm font-semibold text-orange-500">
-                  <AlertTriangle className="h-4 w-4" />
-                  {result.edMediumCount} PE suspecté{result.edMediumCount > 1 ? "s" : ""}
-                </div>
-              )}
-              {result.allergenCount > 0 && (
-                <div className="flex items-center gap-2 rounded-2xl bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-600">
-                  <Info className="h-4 w-4" />
-                  {result.allergenCount} allergène{result.allergenCount > 1 ? "s" : ""}
-                </div>
-              )}
-              {result.irritantCount > 0 && (
-                <div className="flex items-center gap-2 rounded-2xl bg-violet-50 px-4 py-2.5 text-sm font-semibold text-violet-600">
-                  <Zap className="h-4 w-4" />
-                  {result.irritantCount} irritant{result.irritantCount > 1 ? "s" : ""}
-                </div>
-              )}
-              {result.petrochemCount > 0 && (
-                <div className="flex items-center gap-2 rounded-2xl bg-yellow-50 px-4 py-2.5 text-sm font-semibold text-yellow-600">
-                  <Leaf className="h-4 w-4" />
-                  {result.petrochemCount} pétrochimique{result.petrochemCount > 1 ? "s" : ""}
-                </div>
-              )}
-              {result.edHighCount === 0 && result.edMediumCount === 0 && result.allergenCount === 0 &&
-               result.irritantCount === 0 && result.petrochemCount === 0 && result.comedogenicCount === 0 && (
-                <p className="text-sm text-emerald-600 font-medium pt-1">✓ Aucun ingrédient problématique détecté.</p>
-              )}
-            </div>
-          </div>
-
-          {/* Category grouping */}
-          <CategorySection ingredients={result.ingredients} />
-
-          {/* Ingredient list */}
-          <div className="rounded-3xl border border-border/60 bg-card shadow-soft overflow-hidden">
-            <div className="border-b border-border/60 px-6 py-4">
-              <h2 className="font-display text-base font-semibold">Détail par ingrédient</h2>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {result.ingredients.length} ingrédients analysés · cliquer pour voir le détail
-              </p>
-            </div>
-            <ul className="divide-y divide-border/40">
-              {result.ingredients.map((ing, i) => (
-                <IngredientRow key={i} ing={ing} />
-              ))}
-            </ul>
-          </div>
+          {/* Grouped ingredient list (catégories + détail fusionnés) */}
+          <GroupedIngredientList ingredients={result.ingredients} />
         </>
       )}
     </div>
