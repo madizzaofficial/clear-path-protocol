@@ -316,7 +316,6 @@ function SignalSummaryCards({ result }: { result: AnalysisResultV2 }) {
             {allergens.map((i, idx) => (
               <li key={idx} className="text-xs text-amber-800 dark:text-amber-300">
                 <span className="font-medium">{i.raw}</span>
-                {i.euMandatory && <span className="ml-1 text-amber-500 dark:text-amber-400">(EU)</span>}
               </li>
             ))}
           </ul>
