@@ -237,18 +237,22 @@ function AllergenBadge({ ingredients }: { ingredients: Ing[] }) {
   const ext = ingredients.filter((i) => i.flag === "allergen" && !i.euMandatory);
   if (!eu.length && !ext.length) return null;
 
-  const shown = eu.slice(0, 3).map((i) => i.raw);
-  const rest  = eu.length - shown.length;
+  const all   = [...eu, ...ext];
+  const shown = all.slice(0, 4).map((i) => i.raw);
+  const rest  = all.length - shown.length;
 
   return (
     <div className="flex items-start gap-3 rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/20 px-4 py-3">
       <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">
-          {eu.length} allergène{eu.length > 1 ? "s" : ""} EU
+          {eu.length > 0 && `${eu.length} allergène${eu.length > 1 ? "s" : ""} EU`}
+          {eu.length > 0 && ext.length > 0 && (
+            <span className="font-normal text-amber-600/70 dark:text-amber-400/60"> · </span>
+          )}
           {ext.length > 0 && (
-            <span className="font-normal text-amber-600/70 dark:text-amber-400/60">
-              {" "}· {ext.length} étendu{ext.length > 1 ? "s" : ""}
+            <span className={eu.length > 0 ? "font-normal text-amber-600/70 dark:text-amber-400/60" : ""}>
+              {ext.length} étendu{ext.length > 1 ? "s" : ""}
             </span>
           )}
         </p>

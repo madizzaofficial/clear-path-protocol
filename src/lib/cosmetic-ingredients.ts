@@ -113,6 +113,13 @@ export const ALLERGENS: Record<string, AllergenEntry> = {
   "NARCISSUS POETICUS":                      { euMandatory: false, description: "Extrait de narcisse. Allergisant potentiel. Peaux concernées : peaux sensibles." },
   "ATRANORIN":                               { euMandatory: false, description: "Composant des mousses de chêne, fort sensitisant. Peaux concernées : peaux sensibles." },
   "CHLOROATRANORIN":                         { euMandatory: false, description: "Composant des mousses de chêne, allergisant. Peaux concernées : peaux sensibles." },
+
+  // Muscs synthétiques et molécules parfumantes — liste SCCS étendue
+  "HEXAMETHYLINDANOPYRAN":                   { euMandatory: false, description: "Galaxolide (HHCB) : musc synthétique polycyclique très répandu en parfumerie. Faiblement biodégradable, retrouvé dans l'environnement et le plasma humain. Sensitisant pour certains profils. Peaux concernées : peaux sensibles." },
+  "TETRAMETHYL ACETYLOCTAHYDRONAPHTHALENES": { euMandatory: false, description: "Tonalide (AHTN) : musc polycyclique synthétique. Sensitisant potentiel, bioaccumulable. Peaux concernées : peaux sensibles." },
+  "TRIMETHYLBENZENEPROPANOL":                { euMandatory: false, description: "Majantol : molécule parfumante proposée sur la liste étendue EU. Sensitisant cutané documenté. Peaux concernées : peaux sensibles." },
+  "LINALYL ACETATE":                         { euMandatory: false, description: "Ester lié au linalool (lavande, bergamote). Peut provoquer des réactions de contact chez les peaux sensibilisées. Peaux concernées : peaux sensibles et réactives." },
+  "TERPINEOL":                               { euMandatory: false, description: "Terpène alcoolique (pin, arbre à thé, lavande). Parfum naturel, sensitisant potentiel pour les peaux réactives. Peaux concernées : peaux sensibles." },
 };
 
 // ─── Irritants cutanés ────────────────────────────────────────────────────────
@@ -420,10 +427,14 @@ function stripQuantity(t: string): string {
   return t.replace(/\s*\d+[,.]?\d*\s*(mg|g|ml|µg|mcg|%|mL|µL)\b/gi, "").trim();
 }
 
-// Word-boundary match: prevents "ETHANOL" from matching "PHENOXYETHANOL" or "TRIETHANOLAMINE"
+// Word-boundary match: prevents "ETHANOL" from matching "PHENOXYETHANOL" or "TRIETHANOLAMINE".
+// Also dehyphenates the key (letter-letter only) to match tokens that went through translateToInci
+// e.g. key "BIS-ETHYLHEXYLOXYPHENOL..." matches norm "BIS ETHYLHEXYLOXYPHENOL..."
 function matchesKey(norm: string, key: string): boolean {
   if (norm === key) return true;
-  const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const keyD = key.replace(/([A-Z])-([A-Z])/g, "$1 $2");
+  if (norm === keyD) return true;
+  const escaped = keyD.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return new RegExp(`(^|[\\s/,])${escaped}($|[\\s/,])`).test(norm);
 }
 
@@ -970,6 +981,30 @@ export const COMMON_INGREDIENTS: Record<string, CommonEntry> = {
 
   // ─ Régulateurs pH naturels ─
   "VINEGAR":                        { role: "Régulateur pH",    description: "Vinaigre (acide acétique dilué). Acidifie légèrement les formules, propriétés antimicrobiennes douces. Peaux concernées : tous types." },
+
+  // ─ Filtres UV ─
+  "DIETHYLHEXYL BUTAMIDO TRIAZONE": { role: "Filtre UV",        description: "Uvasorb HEB : filtre UVB très photostable et à faible pénétration cutanée. Bien toléré, souvent combiné aux filtres UVA. Peaux concernées : tous types." },
+
+  // ─ Émollients ─
+  "BUTYLOCTYL SALICYLATE":          { role: "Émollient",        description: "Ester salicylique utilisé comme émollient léger et booster de SPF. Améliore la stabilité des filtres UVA. Peaux concernées : tous types, y compris peaux grasses." },
+  "C12-C15 ALKYL BENZOATE":         { role: "Émollient",        description: "Ester synthétique léger (C12-C15 Alkyl Benzoate). Texture sèche, non comédogène, bonne glisse sur la peau. Souvent dans les SPF et les crèmes légères. Peaux concernées : tous types." },
+  "HYDROGENATED VEGETABLE GLYCERIDES": { role: "Émollient",     description: "Glycérides végétaux hydrogénés. Émollient riche issus d'huiles végétales. Structure la formule, adoucit et nourrit. Peaux concernées : tous types, idéal peaux sèches." },
+
+  // ─ Humectants ─
+  "METHYL GLUCETH-20":              { role: "Humectant",        description: "Dérivé méthylé du polyéthylène glycol de glucose. Humectant doux et filmogène. Compatible peaux sensibles. Peaux concernées : tous types." },
+
+  // ─ Texturants ─
+  "ALUMINA":                        { role: "Texturant",        description: "Oxyde d'aluminium (Al₂O₃). Abrasif doux, opacifiant et stabilisateur de formule. Non irritant aux doses cosmétiques. Peaux concernées : tous types." },
+  "TRIACONTANYL PVP":               { role: "Texturant",        description: "Copolymère PVP-triacontanol, filmogène. Améliore la tenue et la résistance à l'eau des formules SPF. Peaux concernées : tous types." },
+
+  // ─ Émulsifiants ─
+  "POLYGLYCERYL-2 CAPRATE":         { role: "Émulsifiant",      description: "Émulsifiant polyglycérol doux, origine végétale. Bien toléré, non irritant. Peaux concernées : tous types, idéal peaux sensibles." },
+
+  // ─ Antioxydants ─
+  "TOCOPHERYL PHOSPHATE DIPOTASSIUM SALT": { role: "Antioxydant", description: "Phosphate de tocophérol (sel dipotassique). Forme hydrosoluble de la vitamine E, très stable. Antioxydant et protecteur cellulaire. Peaux concernées : tous types." },
+
+  // ─ Antibactériens ─
+  "OCTENIDINE":                     { role: "Antibactérien",    description: "Octénidine HCl. Antiseptique très efficace contre bactéries et levures, utilisé en dermato médicale. Conservateur de plus en plus présent dans les soins clean. Peaux concernées : tous types." },
 };
 
 // ─── V2 : Analyse multi-baromètres ────────────────────────────────────────────
@@ -1050,8 +1085,13 @@ export const FUNCTIONAL_ROLES: Record<string, string> = {
   "ROSE FLOWER OIL":              "Parfum",
   "CANANGA ODORATA":              "Parfum",
   "NARCISSUS POETICUS":           "Parfum",
-  "ATRANORIN":                    "Parfum",
-  "CHLOROATRANORIN":              "Parfum",
+  "ATRANORIN":                         "Parfum",
+  "CHLOROATRANORIN":                   "Parfum",
+  "HEXAMETHYLINDANOPYRAN":             "Parfum",
+  "TETRAMETHYL ACETYLOCTAHYDRONAPHTHALENES": "Parfum",
+  "TRIMETHYLBENZENEPROPANOL":          "Parfum",
+  "LINALYL ACETATE":                   "Parfum",
+  "TERPINEOL":                         "Parfum",
 
   // ─ Perturbateurs endocriniens ─
   "BENZOPHENONE-3":               "Filtre UV",
@@ -1190,6 +1230,16 @@ function inferRoleFromName(inci: string): { role: string; description: string } 
     return { role: "Émulsifiant",     description: "Agent conditionneur ou émulsifiant ionique." };
   if (/PHOSPHATE$|CARBONATE$|HYDROXIDE$/.test(inci))
     return { role: "Régulateur pH",   description: "Régulateur de pH minéral." };
+  if (/TRIAZINE$|TRIAZONE$/.test(inci))
+    return { role: "Filtre UV",       description: "Filtre UV photostable (triazine ou triazone)." };
+  if (/PVP$|POLYVINYLPYRROLIDONE$/.test(inci))
+    return { role: "Texturant",       description: "Polymère PVP filmogène — stabilisateur et modificateur de texture." };
+  if (/^POLYGLYCERYL/.test(inci))
+    return { role: "Émulsifiant",     description: "Émulsifiant polyglycérol d'origine végétale, doux." };
+  if (/GLUCETH/.test(inci))
+    return { role: "Humectant",       description: "Dérivé éthoxylé du glucose — humectant filmogène doux." };
+  if (/BENZOATE$/.test(inci))
+    return { role: "Émollient",       description: "Ester benzoate — émollient léger à texture sèche." };
   return null;
 }
 
