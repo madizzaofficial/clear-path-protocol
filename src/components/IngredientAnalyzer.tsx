@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FlaskConical, AlertTriangle, CheckCircle, Info, Zap, ChevronDown, Droplets, User, ShieldAlert } from "lucide-react";
+import { FlaskConical, AlertTriangle, CheckCircle, Info, Leaf, Zap, ChevronDown, Droplets, User, ShieldAlert } from "lucide-react";
 import { analyzeIngredientsV2, type AnalysisResultV2, type SkinProfile } from "@/lib/cosmetic-ingredients";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
@@ -230,6 +230,90 @@ function IngredientRow({ ing }: { ing: Ing }) {
   );
 }
 
+// ─── SignalSummaryCards ───────────────────────────────────────────────────────
+
+function SignalSummaryCards({ result }: { result: AnalysisResultV2 }) {
+  const comedogenic = result.ingredients.filter((i) => i.flag === "comedogenic");
+  const petrochem   = result.ingredients.filter((i) => i.flag === "petrochem");
+  const allergens   = result.ingredients.filter((i) => i.flag === "allergen");
+  const irritants   = result.ingredients.filter((i) => i.flag === "irritant");
+
+  if (!comedogenic.length && !petrochem.length && !allergens.length && !irritants.length) return null;
+
+  return (
+    <div className="flex flex-wrap gap-3">
+      {comedogenic.length > 0 && (
+        <div className="flex flex-col rounded-2xl border border-pink-200 bg-pink-50 px-4 py-3">
+          <div className="mb-2 flex items-center gap-1.5 text-pink-700">
+            <Droplets className="h-4 w-4 shrink-0" />
+            <span className="text-xs font-bold uppercase tracking-wider">Comédogènes</span>
+          </div>
+          <ul className="space-y-1">
+            {comedogenic.map((i, idx) => (
+              <li key={idx} className="text-xs text-pink-800">
+                <span className="font-medium">{i.raw}</span>
+                {i.comedogenicRating && <span className="ml-1 text-pink-500">({i.comedogenicRating}/5)</span>}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-[10px] italic leading-tight text-pink-600/80">À éviter pour les peaux grasses ou à tendance acnéique.</p>
+        </div>
+      )}
+
+      {petrochem.length > 0 && (
+        <div className="flex flex-col rounded-2xl border border-yellow-200 bg-yellow-50 px-4 py-3">
+          <div className="mb-2 flex items-center gap-1.5 text-yellow-700">
+            <Leaf className="h-4 w-4 shrink-0" />
+            <span className="text-xs font-bold uppercase tracking-wider">Pétrochimiques</span>
+          </div>
+          <ul className="space-y-1">
+            {petrochem.map((i, idx) => (
+              <li key={idx} className="text-xs font-medium text-yellow-800">{i.raw}</li>
+            ))}
+          </ul>
+          <p className="mt-2 text-[10px] italic leading-tight text-yellow-700/80">Dérivés du pétrole — inertes sur la peau, origine non renouvelable.</p>
+        </div>
+      )}
+
+      {allergens.length > 0 && (
+        <div className="flex flex-col rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <div className="mb-2 flex items-center gap-1.5 text-amber-700">
+            <Info className="h-4 w-4 shrink-0" />
+            <span className="text-xs font-bold uppercase tracking-wider">Allergènes</span>
+          </div>
+          <ul className="space-y-1">
+            {allergens.map((i, idx) => (
+              <li key={idx} className="text-xs text-amber-800">
+                <span className="font-medium">{i.raw}</span>
+                {i.euMandatory && <span className="ml-1 text-amber-500">(EU)</span>}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-[10px] italic leading-tight text-amber-700/80">Peuvent provoquer des réactions de contact chez les peaux sensibles.</p>
+        </div>
+      )}
+
+      {irritants.length > 0 && (
+        <div className="flex flex-col rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3">
+          <div className="mb-2 flex items-center gap-1.5 text-violet-700">
+            <Zap className="h-4 w-4 shrink-0" />
+            <span className="text-xs font-bold uppercase tracking-wider">Irritants</span>
+          </div>
+          <ul className="space-y-1">
+            {irritants.map((i, idx) => (
+              <li key={idx} className="text-xs text-violet-800">
+                <span className="font-medium">{i.raw}</span>
+                {i.reason && <span className="ml-1 text-violet-500 font-normal">— {i.reason}</span>}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-[10px] italic leading-tight text-violet-700/80">Peuvent fragiliser la barrière cutanée, surtout en tête de liste.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── GroupedIngredientList ────────────────────────────────────────────────────
 
 const ROLE_TO_CATEGORY: Record<string, string> = {
@@ -247,16 +331,16 @@ const ROLE_TO_CATEGORY: Record<string, string> = {
 };
 
 const FLAG_TO_CATEGORY: Partial<Record<IngFlag, string>> = {
-  ed_high:     "Perturbateurs endocriniens",
-  ed_medium:   "Perturbateurs endocriniens",
-  allergen:    "Allergènes",
-  irritant:    "Irritants",
-  petrochem:   "Pétrochimiques",
-  comedogenic: "Comédogènes",
+  ed_high:   "Perturbateurs endocriniens",
+  ed_medium: "Perturbateurs endocriniens",
+  allergen:  "Allergènes",
+  irritant:  "Irritants",
+  petrochem: "Pétrochimiques",
+  // comedogenic: intentionally absent — these use their functional role instead
 };
 
 const PRIORITY_CATS = ["Actifs", "Antioxydants", "Apaisants", "Barrière cutanée", "Filtres UV"];
-const SIGNAL_CATS   = ["Perturbateurs endocriniens", "Allergènes", "Irritants", "Comédogènes", "Pétrochimiques"];
+const SIGNAL_CATS   = ["Perturbateurs endocriniens", "Allergènes", "Irritants", "Pétrochimiques"];
 const FUNCTIONAL_CAT_ORDER = ["Hydratants", "Émollients", "Solvants", "Conservateurs", "Texturants", "Non classifié"];
 
 const CATEGORY_INFO: Record<string, string> = {
@@ -284,8 +368,9 @@ function GroupedIngredientList({ ingredients }: { ingredients: Ing[] }) {
 
   const grouped = new Map<string, Ing[]>();
   for (const ing of ingredients) {
+    // comedogenic ingredients use their functional role (emollient, etc.) not a signal category
     const cat =
-      ing.flag !== "ok"
+      ing.flag !== "ok" && ing.flag !== "comedogenic"
         ? (FLAG_TO_CATEGORY[ing.flag] ?? "Non classifié")
         : (ing.role ? (ROLE_TO_CATEGORY[ing.role] ?? "Non classifié") : "Non classifié");
     if (!grouped.has(cat)) grouped.set(cat, []);
@@ -465,6 +550,9 @@ export function IngredientAnalyzer() {
               </div>
             )}
           </div>
+
+          {/* Signal summary cards */}
+          <SignalSummaryCards result={result} />
 
           {/* Grouped ingredient list (catégories + détail fusionnés) */}
           <GroupedIngredientList ingredients={result.ingredients} />

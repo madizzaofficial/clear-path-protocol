@@ -503,7 +503,13 @@ export function analyzeIngredientsV2(raw: string, profile?: SkinProfile): Analys
     const comedoKey = Object.keys(COMEDOGENIC_INGREDIENTS).find((k) => norm === k || norm.includes(k));
     if (comedoKey) {
       const entry = COMEDOGENIC_INGREDIENTS[comedoKey];
-      return { raw: token, normalized: norm, flag: "comedogenic", reason: `Comédogène — indice ${entry.rating}/5`, description: entry.description, comedogenicRating: entry.rating };
+      if (entry.rating >= 3) {
+        // Fetch functional role from COMMON_INGREDIENTS so it's categorised correctly
+        const commonKeyForComedo = Object.keys(COMMON_INGREDIENTS).find((k) => norm === k || norm.includes(k));
+        const role = commonKeyForComedo ? COMMON_INGREDIENTS[commonKeyForComedo].role : undefined;
+        return { raw: token, normalized: norm, flag: "comedogenic", reason: `Comédogène — indice ${entry.rating}/5`, description: entry.description, comedogenicRating: entry.rating, role };
+      }
+      // Rating 1–2 : not flagged, fall through to COMMON_INGREDIENTS for description
     }
 
     const commonKey = Object.keys(COMMON_INGREDIENTS).find((k) => norm === k || norm.includes(k));
