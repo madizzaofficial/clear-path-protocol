@@ -65,10 +65,16 @@ function IngredientRow({ ing }: { ing: Ing }) {
         <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && ing.description && (
-        <div className={`px-6 py-3 ${cfg.expandBg}`}>
+        <div className={`space-y-2 px-6 py-3 ${cfg.expandBg}`}>
           <p className="rounded-xl border border-border/40 bg-background/60 px-4 py-3 text-xs leading-relaxed text-foreground/80">
             {ing.description}
           </p>
+          {shortNote && (
+            <div className={`rounded-xl px-4 py-2.5 ${cfg.bg} border border-current/10`}>
+              <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider opacity-50">Signal identifié</p>
+              <p className={`text-xs font-medium ${cfg.name}`}>{shortNote}</p>
+            </div>
+          )}
         </div>
       )}
     </li>
@@ -148,6 +154,7 @@ export function IngredientAnalyzer() {
                         </li>
                       ))}
                   </ul>
+                  <p className="mt-2 text-[10px] italic leading-tight text-pink-600/80">À éviter pour les peaux grasses ou à tendance acnéique.</p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-emerald-700">

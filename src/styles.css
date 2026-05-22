@@ -132,10 +132,6 @@
     width: 100%;
     position: relative;
   }
-  /* Prevent iOS auto-zoom on input focus (requires font-size >= 16px) */
-  input, textarea, select {
-    font-size: max(16px, 1em);
-  }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
@@ -148,6 +144,11 @@
   .shadow-soft { box-shadow: var(--shadow-soft); }
   .shadow-elegant { box-shadow: var(--shadow-elegant); }
   .text-balance { text-wrap: balance; }
+}
+
+/* Prevent iOS auto-zoom — outside any layer to override Tailwind utilities */
+input, textarea, select {
+  font-size: max(16px, 1em);
 }
 
 @keyframes progress {
