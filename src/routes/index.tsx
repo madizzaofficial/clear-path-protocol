@@ -99,6 +99,25 @@ async function computeStreak(uid: string, totalSteps: number): Promise<number> {
   return streak;
 }
 
+// ── Skeleton (rendu pendant l'initialisation Firebase) ────────────────────────
+
+function DashboardSkeleton() {
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-lg px-4 pb-28 pt-6 space-y-4 animate-pulse">
+        <div className="h-7 w-40 rounded-lg bg-muted" />
+        <div className="h-4 w-56 rounded-md bg-muted" />
+        <div className="h-32 rounded-2xl bg-muted" />
+        <div className="grid grid-cols-3 gap-3">
+          {[0, 1, 2].map((i) => <div key={i} className="h-20 rounded-xl bg-muted" />)}
+        </div>
+        <div className="h-24 rounded-2xl bg-muted" />
+        <div className="h-24 rounded-2xl bg-muted" />
+      </div>
+    </div>
+  );
+}
+
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 
 function Dashboard() {
@@ -124,6 +143,8 @@ function Dashboard() {
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/login" });
   }, [user, authLoading, navigate]);
+
+  if (authLoading) return <DashboardSkeleton />;
 
   useEffect(() => {
     if (!user) return;
