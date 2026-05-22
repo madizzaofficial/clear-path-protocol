@@ -126,6 +126,8 @@ export const IRRITANTS: Record<string, IrritantEntry> = {
   "SD ALCOHOL":                  { irritationLevel: 2, reason: "Alcool dénaturé, assèche et peut irriter",              description: "Alias américain d'Alcohol Denat. Même profil desséchant et potentiellement irritant. Peaux concernées : peaux sèches, sensibles et acnéiques." },
   "ISOPROPYL ALCOHOL":           { irritationLevel: 2, reason: "Alcool irritant, perturbateur de barrière",             description: "Alcool isopropylique très astringent. Dégraisse fortement, peut déclencher un rebond sébacé. Peaux concernées : peaux acnéiques, sèches et sensibles." },
   "SODIUM CHLORIDE":             { irritationLevel: 1, reason: "Sel — peut irriter et assécher à haute concentration",  description: "Sel (chlorure de sodium) utilisé comme modificateur de viscosité. Irritant aux concentrations élevées dans les nettoyants. Peaux concernées : peaux sensibles et peaux sèches." },
+  "BENZOYL PEROXIDE":            { irritationLevel: 2, reason: "Actif anti-acné, peut provoquer sécheresse et desquamation", description: "Peroxyde de benzoyle. Irritant connu : provoque sécheresse, rougeurs et desquamation en début d'utilisation. Introduire progressivement (2,5% → 5%) et utiliser hydratant. Peaux concernées : peaux sensibles et sèches — à protéger." },
+  "MELALEUCA ALTERNIFOLIA LEAF OIL": { irritationLevel: 1, reason: "Huile essentielle, irritante à forte concentration", description: "Huile essentielle d'arbre à thé. Bien tolérée aux concentrations cosmétiques (<5%) mais peut irriter les peaux sensibles non diluée. Peaux concernées : peaux sensibles et réactives." },
 };
 
 // ─── Pétrochimiques ────────────────────────────────────────────────────────────
@@ -500,6 +502,7 @@ export const COMMON_INGREDIENTS: Record<string, CommonEntry> = {
   // ─ Silicones fonctionnels ─
   "PHENYL TRIMETHICONE":            { role: "Émollient",        description: "Silicone phénylée brillante et lisse. Améliore la brillance et la douceur. Non comédogène. Peaux concernées : tous types." },
   "DIMETHICONOL":                   { role: "Émollient",        description: "Silicone hydroxylée. Lissante et filmogène, améliore la texture des formules. Non comédogène. Peaux concernées : tous types." },
+  "METHYL TRIMETHICONE":            { role: "Émollient",        description: "Silicone ramifiée légère. Texture sèche et non grasse, excellente glisse. Volatile, très proche des silicones cycliques mais plus sûre. Peaux concernées : tous types." },
 
   // ─ Texturants inorganiques ─
   "SILICA":                         { role: "Texturant",        description: "Dioxyde de silicium (silice). Matifiant, absorbe le sébum et améliore la texture. Non irritant. Peaux concernées : tous types, idéal peaux grasses." },
@@ -632,6 +635,8 @@ export const COMMON_INGREDIENTS: Record<string, CommonEntry> = {
   "GLYCERYL OLEATE":                { role: "Émulsifiant",      description: "Co-émulsifiant naturel (glycérol + acide oléique). Adoucissant, aide à stabiliser les émulsions. Peaux concernées : tous types." },
 
   // ─ Épaississants supplémentaires (INCIDecoder) ─
+  "AMMONIUM ACRYLOYLDIMETHYLTAURATE/VP COPOLYMER": { role: "Épaississant", description: "Polymère acrylique (Aristoflex AVC). Gélifiant haute performance, crée des textures légères et non-collantes. Très utilisé en K-beauty. Peaux concernées : tous types." },
+  "ACRYLATES/AMMONIUM METHACRYLATE COPOLYMER": { role: "Épaississant",   description: "Copolymère acrylique (Carbopol Aqua SF-1). Gélifiant et stabilisant d'émulsion. Texture légère. Peaux concernées : tous types." },
   "CARNAUBA":                       { role: "Épaississant",     description: "Cire de carnauba (alias CARNAUBA WAX). Végétale, structurante, point de fusion élevé. Peaux concernées : tous types." },
   "SYNTHETIC BEESWAX":              { role: "Épaississant",     description: "Cire d'abeille synthétique. Propriétés similaires à la cire naturelle. Structurante et filmogène. Peaux concernées : tous types." },
   "METHYLCELLULOSE":                { role: "Épaississant",     description: "Dérivé méthylé de la cellulose. Gélifiant et épaississant, sensible à la température. Peaux concernées : tous types." },
@@ -642,6 +647,7 @@ export const COMMON_INGREDIENTS: Record<string, CommonEntry> = {
   // ─ Émulsifiants supplémentaires (INCIDecoder) ─
   "CETEARETH-12":                   { role: "Émulsifiant",      description: "Alcool cétéarylique éthoxylé (12 OE). Émulsifiant et co-stabilisant. Peaux concernées : tous types." },
   "CETEARETH-20":                   { role: "Émulsifiant",      description: "Alcool cétéarylique éthoxylé (20 OE). Émulsifiant huile-dans-eau courant. Peaux concernées : tous types." },
+  "SORBITAN ISOSTEARATE":           { role: "Émulsifiant",      description: "Émulsifiant non-ionique lipophile (sorbitol + acide isostéarique). Crée des émulsions eau-dans-huile douces. Peaux concernées : tous types." },
 
   // ─ Solvants supplémentaires (INCIDecoder) ─
   "DIPROPYLENE GLYCOL":             { role: "Solvant",          description: "Diol de synthèse. Solvant et humectant léger, bon tolérance. Peaux concernées : tous types." },
@@ -655,6 +661,25 @@ export const COMMON_INGREDIENTS: Record<string, CommonEntry> = {
 
   // ─ Régulateurs pH supplémentaires (INCIDecoder) ─
   "PHOSPHORIC ACID":                { role: "Régulateur pH",    description: "Acide phosphorique. Ajuste le pH des formules. Utilisé à très faibles doses. Peaux concernées : tous types." },
+  "TROMETHAMINE":                   { role: "Régulateur pH",    description: "Trométhamine (TRIS). Base organique douce pour ajuster le pH, notamment des formules acides (carbomère, acide hyaluronique). Bien tolérée. Peaux concernées : tous types." },
+
+  // ─ Acides aminés NMF supplémentaires ─
+  "PCA":                            { role: "Humectant",        description: "Acide pyrrolidone carboxylique (forme libre). Composant majeur du NMF (facteur naturel d'hydratation). Hygroscopique, retient l'eau dans le stratum corneum. Peaux concernées : tous types." },
+  "ALANINE":                        { role: "Humectant",        description: "Acide aminé non essentiel. Composant du NMF, hydratant et water-binding. Peaux concernées : tous types." },
+  "GLUTAMIC ACID":                  { role: "Humectant",        description: "Acide aminé acide. Composant du NMF, humectant naturel présent dans la peau. Peaux concernées : tous types." },
+  "HISTIDINE":                      { role: "Humectant",        description: "Acide aminé essentiel. Composant du NMF, antioxydant et humectant. Peaux concernées : tous types." },
+  "HISTIDINE HCL":                  { role: "Humectant",        description: "Chlorhydrate d'histidine. Forme soluble de l'histidine. Humectant et antioxydant doux. Peaux concernées : tous types." },
+  "CITRULLINE":                     { role: "Humectant",        description: "Acide aminé naturel (pastèque). Améliore la microhydratation cellulaire et l'éclat. Peaux concernées : tous types." },
+  "GLYCOGEN":                       { role: "Humectant",        description: "Polysaccharide de réserve énergétique. Hydratant filmogène, stimule le renouvellement cellulaire. Peaux concernées : tous types, idéal peaux fatiguées." },
+
+  // ─ Barrière supplémentaire ─
+  "HYDROXYPROPYL BISPALMITAMIDE MEA": { role: "Barrière",       description: "Lipide bifonctionnel (céramide synthétique). Restaure la barrière lipidique cutanée. Peaux concernées : peaux sèches, atopiques et fragilisées." },
+
+  // ─ Acide gras supplémentaire ─
+  "ARACHIDIC ACID":                 { role: "Émollient",        description: "Acide gras saturé (C20) naturel. Co-émulsifiant et émollient structurant, non comédogène. Peaux concernées : tous types." },
+
+  // ─ Alias courants ─
+  "2-HEXANEDIOL":                   { role: "Conservateur",     description: "Diol conservateur (alias de 1,2-Hexanediol). Actif contre bactéries et moisissures, doux. Peaux concernées : tous types." },
 
   // ─ Humectants supplémentaires (INCIDecoder) ─
   "FRUCTOOLIGOSACCHARIDES":         { role: "Humectant",        description: "Prébiotiques végétaux (FOS). Soutiennent le microbiome cutané et hydratent. Peaux concernées : tous types." },
