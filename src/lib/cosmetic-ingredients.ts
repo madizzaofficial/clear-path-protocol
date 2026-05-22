@@ -1,7 +1,7 @@
 export type EDSeverity = "high" | "medium";
 export type EDEntry = { severity: EDSeverity; reason: string; description: string };
 export type AllergenEntry = { euMandatory: boolean; description: string };
-export type IrritantEntry = { reason: string; description: string };
+export type IrritantEntry = { reason: string; description: string; irritationLevel: 1 | 2 | 3 };
 export type PetrochemEntry = { description: string };
 
 // ─── Perturbateurs endocriniens ───────────────────────────────────────────────
@@ -117,15 +117,15 @@ export const ALLERGENS: Record<string, AllergenEntry> = {
 
 // ─── Irritants cutanés ────────────────────────────────────────────────────────
 export const IRRITANTS: Record<string, IrritantEntry> = {
-  "SODIUM LAURYL SULFATE":       { reason: "Tensioactif irritant, perturbateur de barrière cutanée", description: "SLS : tensioactif très moussant mais agressif. Détruit le film lipidique, augmente l'inflammation et déshydrate l'épiderme. Peaux concernées : peaux acnéiques, sensibles et à barrière fragilisée — à éviter dans les nettoyants visage." },
-  "SODIUM DODECYL SULFATE":      { reason: "Alias du SLS — tensioactif irritant",                   description: "Alias chimique du Sodium Lauryl Sulfate. Même profil d'irritation et de perturbation de barrière. Peaux concernées : peaux acnéiques et sensibles." },
-  "SODIUM LAURETH SULFATE":      { reason: "Tensioactif, peut être contaminé au 1,4-dioxane",       description: "SLES : version moins irritante du SLS, mais peut contenir du 1,4-dioxane (cancérogène possible, sous-produit de fabrication). Peaux concernées : peaux sensibles et réactives." },
-  "AMMONIUM LAURYL SULFATE":     { reason: "Tensioactif irritant, similaire au SLS",                description: "Tensioactif anionique proche du SLS, même potentiel irritant. Peaux concernées : peaux acnéiques et sensibles." },
-  "AMMONIUM LAURETH SULFATE":    { reason: "Tensioactif irritant",                                  description: "Version ammonium du SLES. Profil irritant similaire. Peaux concernées : peaux sensibles." },
-  "ALCOHOL DENAT":               { reason: "Alcool dénaturé, assèche et peut irriter",              description: "Alcool éthylique dénaturé. À fortes concentrations, assèche l'épiderme, détruit le microbiome et peut déclencher un rebond sébacé. Peaux concernées : peaux sèches, sensibles et acnéiques." },
-  "SD ALCOHOL":                  { reason: "Alcool dénaturé, assèche et peut irriter",              description: "Alias américain d'Alcohol Denat. Même profil desséchant et potentiellement irritant. Peaux concernées : peaux sèches, sensibles et acnéiques." },
-  "ISOPROPYL ALCOHOL":           { reason: "Alcool irritant, perturbateur de barrière",             description: "Alcool isopropylique très astringent. Dégraisse fortement, peut déclencher un rebond sébacé. Peaux concernées : peaux acnéiques, sèches et sensibles." },
-  "SODIUM CHLORIDE":             { reason: "Sel — peut irriter et assécher à haute concentration",  description: "Sel (chlorure de sodium) utilisé comme modificateur de viscosité. Irritant aux concentrations élevées dans les nettoyants. Peaux concernées : peaux sensibles et peaux sèches." },
+  "SODIUM LAURYL SULFATE":       { irritationLevel: 3, reason: "Tensioactif irritant, perturbateur de barrière cutanée", description: "SLS : tensioactif très moussant mais agressif. Détruit le film lipidique, augmente l'inflammation et déshydrate l'épiderme. Peaux concernées : peaux acnéiques, sensibles et à barrière fragilisée — à éviter dans les nettoyants visage." },
+  "SODIUM DODECYL SULFATE":      { irritationLevel: 3, reason: "Alias du SLS — tensioactif irritant",                   description: "Alias chimique du Sodium Lauryl Sulfate. Même profil d'irritation et de perturbation de barrière. Peaux concernées : peaux acnéiques et sensibles." },
+  "SODIUM LAURETH SULFATE":      { irritationLevel: 2, reason: "Tensioactif, peut être contaminé au 1,4-dioxane",       description: "SLES : version moins irritante du SLS, mais peut contenir du 1,4-dioxane (cancérogène possible, sous-produit de fabrication). Peaux concernées : peaux sensibles et réactives." },
+  "AMMONIUM LAURYL SULFATE":     { irritationLevel: 3, reason: "Tensioactif irritant, similaire au SLS",                description: "Tensioactif anionique proche du SLS, même potentiel irritant. Peaux concernées : peaux acnéiques et sensibles." },
+  "AMMONIUM LAURETH SULFATE":    { irritationLevel: 2, reason: "Tensioactif irritant",                                  description: "Version ammonium du SLES. Profil irritant similaire. Peaux concernées : peaux sensibles." },
+  "ALCOHOL DENAT":               { irritationLevel: 2, reason: "Alcool dénaturé, assèche et peut irriter",              description: "Alcool éthylique dénaturé. À fortes concentrations, assèche l'épiderme, détruit le microbiome et peut déclencher un rebond sébacé. Peaux concernées : peaux sèches, sensibles et acnéiques." },
+  "SD ALCOHOL":                  { irritationLevel: 2, reason: "Alcool dénaturé, assèche et peut irriter",              description: "Alias américain d'Alcohol Denat. Même profil desséchant et potentiellement irritant. Peaux concernées : peaux sèches, sensibles et acnéiques." },
+  "ISOPROPYL ALCOHOL":           { irritationLevel: 2, reason: "Alcool irritant, perturbateur de barrière",             description: "Alcool isopropylique très astringent. Dégraisse fortement, peut déclencher un rebond sébacé. Peaux concernées : peaux acnéiques, sèches et sensibles." },
+  "SODIUM CHLORIDE":             { irritationLevel: 1, reason: "Sel — peut irriter et assécher à haute concentration",  description: "Sel (chlorure de sodium) utilisé comme modificateur de viscosité. Irritant aux concentrations élevées dans les nettoyants. Peaux concernées : peaux sensibles et peaux sèches." },
 };
 
 // ─── Pétrochimiques ────────────────────────────────────────────────────────────
@@ -315,4 +315,159 @@ export function analyzeIngredients(raw: string): AnalysisResult {
   if (edMediumCount > 0) score = Math.min(score, 70);
 
   return { ingredients, edHighCount, edMediumCount, allergenCount, irritantCount, petrochemCount, comedogenicCount, score };
+}
+
+// ─── V2 : Analyse multi-baromètres ────────────────────────────────────────────
+
+export type SkinProfile = {
+  skinType?: "normale" | "grasse" | "seche" | "mixte" | "sensible";
+  acneTypes?: string[];
+  intensity?: "legere" | "moderee" | "severe";
+};
+
+export type Barometer = { score: number; label: "Faible" | "Modéré" | "Élevé" };
+
+export type AnalysisResultV2 = {
+  ingredients: AnalyzedIngredient[];
+  barometers: { irritation: Barometer; comedogenic: Barometer; pe: Barometer };
+  productType: "Nettoyant" | "Tonique" | "Crème/Huile" | null;
+  usageReco: "daily" | "occasional" | "caution" | "avoid";
+  skinProfileUsed: boolean;
+  edHighCount: number; edMediumCount: number; allergenCount: number;
+  irritantCount: number; petrochemCount: number; comedogenicCount: number;
+};
+
+const SURFACTANT_KEYS = new Set([
+  "SODIUM LAURYL SULFATE", "SODIUM DODECYL SULFATE",
+  "SODIUM LAURETH SULFATE", "AMMONIUM LAURYL SULFATE", "AMMONIUM LAURETH SULFATE",
+]);
+const ALCOHOL_DENAT_KEYS = new Set(["ALCOHOL DENAT", "SD ALCOHOL"]);
+
+function posWeight(index: number): number {
+  if (index < 3)  return 2.0;
+  if (index < 10) return 1.2;
+  return 0.8;
+}
+
+function makeBarometer(score: number): Barometer {
+  return { score, label: score <= 3 ? "Faible" : score <= 6 ? "Modéré" : "Élevé" };
+}
+
+export function analyzeIngredientsV2(raw: string, profile?: SkinProfile): AnalysisResultV2 {
+  const tokens = raw.split(/[,\n]|\s\.\s/).map((t) => t.trim()).filter(Boolean);
+
+  const ingredients: AnalyzedIngredient[] = tokens.map((token) => {
+    const norm = normalize(token);
+
+    const edKey = Object.keys(ENDOCRINE_DISRUPTORS).find((k) => norm === k || norm.includes(k));
+    if (edKey) {
+      const entry = ENDOCRINE_DISRUPTORS[edKey];
+      return { raw: token, normalized: norm, flag: entry.severity === "high" ? "ed_high" : "ed_medium", reason: entry.reason, description: entry.description };
+    }
+
+    const allergenKey = Object.keys(ALLERGENS).find((k) => norm === k || norm.includes(k));
+    if (allergenKey) {
+      const entry = ALLERGENS[allergenKey];
+      return { raw: token, normalized: norm, flag: "allergen", euMandatory: entry.euMandatory, description: entry.description };
+    }
+
+    const irritantKey = Object.keys(IRRITANTS).find((k) => norm === k || norm.includes(k));
+    if (irritantKey) {
+      const entry = IRRITANTS[irritantKey];
+      return { raw: token, normalized: norm, flag: "irritant", reason: entry.reason, description: entry.description };
+    }
+
+    const petroKey = Object.keys(PETROCHEMICALS).find((k) => norm === k || norm.includes(k));
+    if (petroKey) {
+      const entry = PETROCHEMICALS[petroKey];
+      return { raw: token, normalized: norm, flag: "petrochem", description: entry.description };
+    }
+
+    const comedoKey = Object.keys(COMEDOGENIC_INGREDIENTS).find((k) => norm === k || norm.includes(k));
+    if (comedoKey) {
+      const entry = COMEDOGENIC_INGREDIENTS[comedoKey];
+      return { raw: token, normalized: norm, flag: "comedogenic", reason: `Comédogène — indice ${entry.rating}/5`, description: entry.description, comedogenicRating: entry.rating };
+    }
+
+    return { raw: token, normalized: norm, flag: "ok", description: "Aucun signal identifié dans les bases consultées (ECHA, SCCS, Acne Clinic NYC). Peaux concernées : tous types." };
+  });
+
+  // Scores bruts pondérés par position
+  let irritationRaw = 0;
+  let peRaw = 0;
+  let comedogenicRaw = 0;
+
+  ingredients.forEach((ing, i) => {
+    const w = posWeight(i);
+    if (ing.flag === "irritant") {
+      const key = Object.keys(IRRITANTS).find((k) => ing.normalized === k || ing.normalized.includes(k));
+      irritationRaw += (key ? IRRITANTS[key].irritationLevel : 1) * w;
+    }
+    if (ing.flag === "allergen") irritationRaw += 1 * w;
+    if (ing.flag === "ed_high")   peRaw += 3 * w;
+    if (ing.flag === "ed_medium") peRaw += 1.5 * w;
+    if (ing.flag === "comedogenic" && ing.comedogenicRating) {
+      const r = ing.comedogenicRating;
+      comedogenicRaw += (r >= 5 ? 3 : r === 4 ? 2 : r === 3 ? 1.5 : 0.5) * w;
+    }
+  });
+
+  // Normalisation 0-10
+  let irritationScore  = Math.min(Math.round((irritationRaw  / 12) * 10), 10);
+  let peScore          = Math.min(Math.round((peRaw          /  9) * 10), 10);
+  let comedogenicScore = Math.min(Math.round((comedogenicRaw /  9) * 10), 10);
+
+  // Pondération profil peau
+  let skinProfileUsed = false;
+  if (profile) {
+    const isOily        = profile.skinType === "grasse";
+    const hasAcneComedo = profile.acneTypes?.some((t) => ["comedons", "microkystes"].includes(t)) ?? false;
+    const isSensitive   = profile.skinType === "sensible";
+    const isSevere      = profile.intensity === "severe";
+    const hasCysts      = profile.acneTypes?.includes("kystes") ?? false;
+
+    if (isOily || hasAcneComedo) {
+      comedogenicScore = Math.min(Math.round(comedogenicScore * 1.4), 10);
+      skinProfileUsed = true;
+    }
+    if (isSensitive || isSevere) {
+      irritationScore = Math.min(Math.round(irritationScore * 1.4), 10);
+      skinProfileUsed = true;
+    }
+    if (hasCysts) {
+      peScore = Math.min(Math.round(peScore * 1.2), 10);
+      skinProfileUsed = true;
+    }
+  }
+
+  // Détection type produit
+  const top10 = ingredients.slice(0, 10);
+  const top5  = ingredients.slice(0, 5);
+  let productType: AnalysisResultV2["productType"] = null;
+  if (top10.some((i) => SURFACTANT_KEYS.has(i.normalized)))         productType = "Nettoyant";
+  else if (top5.some((i) => ALCOHOL_DENAT_KEYS.has(i.normalized))) productType = "Tonique";
+  else if (top5.filter((i) => i.flag === "comedogenic").length >= 3) productType = "Crème/Huile";
+
+  // Recommandation d'usage
+  const maxScore = Math.max(irritationScore, comedogenicScore, peScore);
+  const usageReco: AnalysisResultV2["usageReco"] =
+    maxScore >= 10 ? "avoid" : maxScore >= 7 ? "caution" : maxScore >= 4 ? "occasional" : "daily";
+
+  const edHighCount      = ingredients.filter((i) => i.flag === "ed_high").length;
+  const edMediumCount    = ingredients.filter((i) => i.flag === "ed_medium").length;
+  const allergenCount    = ingredients.filter((i) => i.flag === "allergen").length;
+  const irritantCount    = ingredients.filter((i) => i.flag === "irritant").length;
+  const petrochemCount   = ingredients.filter((i) => i.flag === "petrochem").length;
+  const comedogenicCount = ingredients.filter((i) => i.flag === "comedogenic").length;
+
+  return {
+    ingredients,
+    barometers: {
+      irritation:   makeBarometer(irritationScore),
+      comedogenic:  makeBarometer(comedogenicScore),
+      pe:           makeBarometer(peScore),
+    },
+    productType, usageReco, skinProfileUsed,
+    edHighCount, edMediumCount, allergenCount, irritantCount, petrochemCount, comedogenicCount,
+  };
 }
