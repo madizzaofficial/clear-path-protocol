@@ -28,6 +28,7 @@ import { Route as AdminTemplatesRouteImport } from './routes/admin_.templates'
 import { Route as AdminRoutinesRouteImport } from './routes/admin_.routines'
 import { Route as AdminProductsRouteImport } from './routes/admin_.products'
 import { Route as AdminNutritionRouteImport } from './routes/admin_.nutrition'
+import { Route as AdminIngredientAnalyzerRouteImport } from './routes/admin_.ingredient-analyzer'
 import { Route as AdminFaqRouteImport } from './routes/admin_.faq'
 import { Route as AdminCourseEditorRouteImport } from './routes/admin_.course-editor'
 import { Route as AdminAdminsRouteImport } from './routes/admin_.admins'
@@ -130,6 +131,11 @@ const AdminNutritionRoute = AdminNutritionRouteImport.update({
   path: '/admin/nutrition',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIngredientAnalyzerRoute = AdminIngredientAnalyzerRouteImport.update({
+  id: '/admin_/ingredient-analyzer',
+  path: '/admin/ingredient-analyzer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminFaqRoute = AdminFaqRouteImport.update({
   id: '/admin_/faq',
   path: '/admin/faq',
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/admin/admins': typeof AdminAdminsRoute
   '/admin/course-editor': typeof AdminCourseEditorRoute
   '/admin/faq': typeof AdminFaqRoute
+  '/admin/ingredient-analyzer': typeof AdminIngredientAnalyzerRoute
   '/admin/nutrition': typeof AdminNutritionRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/routines': typeof AdminRoutinesRoute
@@ -205,6 +212,7 @@ export interface FileRoutesByTo {
   '/admin/admins': typeof AdminAdminsRoute
   '/admin/course-editor': typeof AdminCourseEditorRoute
   '/admin/faq': typeof AdminFaqRoute
+  '/admin/ingredient-analyzer': typeof AdminIngredientAnalyzerRoute
   '/admin/nutrition': typeof AdminNutritionRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/routines': typeof AdminRoutinesRoute
@@ -232,6 +240,7 @@ export interface FileRoutesById {
   '/admin_/admins': typeof AdminAdminsRoute
   '/admin_/course-editor': typeof AdminCourseEditorRoute
   '/admin_/faq': typeof AdminFaqRoute
+  '/admin_/ingredient-analyzer': typeof AdminIngredientAnalyzerRoute
   '/admin_/nutrition': typeof AdminNutritionRoute
   '/admin_/products': typeof AdminProductsRoute
   '/admin_/routines': typeof AdminRoutinesRoute
@@ -261,6 +270,7 @@ export interface FileRouteTypes {
     | '/admin/admins'
     | '/admin/course-editor'
     | '/admin/faq'
+    | '/admin/ingredient-analyzer'
     | '/admin/nutrition'
     | '/admin/products'
     | '/admin/routines'
@@ -288,6 +298,7 @@ export interface FileRouteTypes {
     | '/admin/admins'
     | '/admin/course-editor'
     | '/admin/faq'
+    | '/admin/ingredient-analyzer'
     | '/admin/nutrition'
     | '/admin/products'
     | '/admin/routines'
@@ -314,6 +325,7 @@ export interface FileRouteTypes {
     | '/admin_/admins'
     | '/admin_/course-editor'
     | '/admin_/faq'
+    | '/admin_/ingredient-analyzer'
     | '/admin_/nutrition'
     | '/admin_/products'
     | '/admin_/routines'
@@ -342,6 +354,7 @@ export interface RootRouteChildren {
   AdminAdminsRoute: typeof AdminAdminsRoute
   AdminCourseEditorRoute: typeof AdminCourseEditorRoute
   AdminFaqRoute: typeof AdminFaqRoute
+  AdminIngredientAnalyzerRoute: typeof AdminIngredientAnalyzerRoute
   AdminNutritionRoute: typeof AdminNutritionRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRoutinesRoute: typeof AdminRoutinesRoute
@@ -487,6 +500,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminNutritionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin_/ingredient-analyzer': {
+      id: '/admin_/ingredient-analyzer'
+      path: '/admin/ingredient-analyzer'
+      fullPath: '/admin/ingredient-analyzer'
+      preLoaderRoute: typeof AdminIngredientAnalyzerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin_/faq': {
       id: '/admin_/faq'
       path: '/admin/faq'
@@ -562,6 +582,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAdminsRoute: AdminAdminsRoute,
   AdminCourseEditorRoute: AdminCourseEditorRoute,
   AdminFaqRoute: AdminFaqRoute,
+  AdminIngredientAnalyzerRoute: AdminIngredientAnalyzerRoute,
   AdminNutritionRoute: AdminNutritionRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminRoutinesRoute: AdminRoutinesRoute,

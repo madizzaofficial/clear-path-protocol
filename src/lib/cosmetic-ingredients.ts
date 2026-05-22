@@ -165,9 +165,8 @@ export const COMEDOGENIC_INGREDIENTS: Record<string, ComedogenicEntry> = {
   "WHEAT GERM OIL":               { rating: 5, description: "Huile de germe de blé, riche en acides gras lourds. Indice comédogénique 5/5. Peaux concernées : peaux acnéiques et mixtes à grasses — malgré ses qualités nutritives, à éviter sur le visage acnéique." },
   "TRITICUM VULGARE GERM OIL":    { rating: 5, description: "Huile de germe de blé (nom INCI). Indice comédogénique 5/5. Peaux concernées : peaux acnéiques et grasses." },
   "LAURETH-4":                    { rating: 5, description: "Tensioactif éthoxylé dérivé de l'acide laurique. Indice comédogénique 5/5. Peaux concernées : peaux acnéiques." },
-  "MYRISTIC ACID":                { rating: 5, description: "Acide gras saturé à chaîne moyenne (C14). Indice comédogénique très élevé (5/5), peut obstruer les pores rapidement. Présent naturellement dans les huiles de coco, palmiste et noix de muscade. Peaux concernées : peaux acnéiques et grasses." },
-  "ACETYLATED LANOLIN":           { rating: 5, description: "Lanoline acétylée. Indice comédogénique 5/5. Très occlusif, bouche fortement les pores. Peaux concernées : peaux acnéiques — à éviter sur le visage." },
-  "ACETYLATED LANOLIN ALCOHOL":   { rating: 4, description: "Alcool de lanoline acétylé. Indice comédogénique 4/5. Peaux concernées : peaux acnéiques." },
+  "MYRISTIC ACID":                { rating: 3, description: "Acide gras saturé (C14) présent dans les huiles de coco, palmiste et muscade. Indice comédogénique 3/5 (INCIDecoder). Peaux concernées : peaux acnéiques et grasses." },
+  "ACETYLATED LANOLIN ALCOHOL":   { rating: 5, description: "Alcool de lanoline acétylé. Indice comédogénique élevé 4-5/5 (INCIDecoder). Peaux concernées : peaux acnéiques." },
 
   // Indice 4 — fortement comédogène
   "ETHYLHEXYL PALMITATE":         { rating: 4, description: "Ester très répandu dans les écrans solaires et fond de teint. Indice comédogénique 4/5 : peut accélérer la formation de comédons. Peaux concernées : peaux acnéiques et grasses — présence à surveiller notamment dans les SPF quotidiens." },
@@ -175,14 +174,14 @@ export const COMEDOGENIC_INGREDIENTS: Record<string, ComedogenicEntry> = {
   "COCOS NUCIFERA OIL":           { rating: 4, description: "Huile de coco. Riche en acide laurique (antibactérien) mais indice comédogénique élevé (4/5). Peut aggraver l'acné sur le visage malgré ses propriétés bénéfiques pour le corps. Peaux concernées : peaux acnéiques et grasses — usage déconseillé sur le visage." },
   "COCOS NUCIFERA FRUIT OIL":     { rating: 4, description: "Huile de coco (nom INCI alternatif). Même profil comédogénique élevé (4/5). Peaux concernées : peaux acnéiques et grasses." },
   "THEOBROMA CACAO SEED BUTTER":  { rating: 4, description: "Beurre de cacao. Indice comédogénique élevé (4/5) malgré ses propriétés émollientes. Peaux concernées : peaux acnéiques — à éviter sur le visage, convient pour le corps." },
-  "LANOLIN ALCOHOL":              { rating: 4, description: "Alcool de lanoline. Indice comédogénique 4/5, peut obstruer les pores. Peaux concernées : peaux acnéiques et grasses." },
-  "DECYL OLEATE":                 { rating: 4, description: "Ester de l'acide oléique. Indice comédogénique 3-4/5. Peaux concernées : peaux acnéiques." },
-  "ISOPROPYL ISOSTEARATE":        { rating: 4, description: "Ester synthétique. Indice comédogénique 4-5/5, très occlusif. Peaux concernées : peaux acnéiques et grasses." },
+  "LANOLIN ALCOHOL":              { rating: 2, description: "Alcool de lanoline. Légèrement comédogène (indice 0-2/5 selon INCIDecoder, 4/5 selon certaines sources). Peaux concernées : peaux acnéiques sensibles à la lanoline." },
+  "DECYL OLEATE":                 { rating: 3, description: "Ester de l'acide oléique. Indice comédogénique 3/5 (INCIDecoder). Peaux concernées : peaux acnéiques." },
+  "ISOPROPYL ISOSTEARATE":        { rating: 5, description: "Ester synthétique très occlusif. Indice comédogénique 4-5/5 (INCIDecoder). Peaux concernées : peaux acnéiques et grasses — à éviter sur le visage." },
   "LINUM USITATISSIMUM SEED OIL": { rating: 4, description: "Huile de lin. Riche en oméga-3 mais s'oxyde rapidement et peut déclencher de l'acné. Indice comédogénique 4/5. Peaux concernées : peaux acnéiques — malgré son image 'naturelle', peut aggraver l'acné." },
 
   // Indice 3 — modérément comédogène
   "BUTYL STEARATE":               { rating: 3, description: "Ester gras synthétique. Indice comédogénique 3/5. Peaux concernées : peaux acnéiques et grasses." },
-  "CETYL ACETATE":                { rating: 3, description: "Ester de l'acide acétique et du cétanol. Indice comédogénique 3/5. Peaux concernées : peaux acnéiques." },
+  "CETYL ACETATE":                { rating: 4, description: "Ester de l'acide acétique et du cétanol. Indice comédogénique 4/5 (INCIDecoder). Peaux concernées : peaux acnéiques." },
   "ISOSTEARYL NEOPENTANOATE":     { rating: 3, description: "Ester synthétique. Indice comédogénique 3-4/5. Peaux concernées : peaux acnéiques et mixtes." },
   "POLYGLYCERYL-3-DIISOSTEARATE": { rating: 3, description: "Émulsifiant lipidique. Indice comédogénique 3-4/5. Peaux concernées : peaux acnéiques." },
   "LAURIC ACID":                  { rating: 4, description: "Acide gras saturé (C12) présent dans l'huile de coco et de palmiste. Indice comédogénique 4/5. Bien que possédant des propriétés antibactériennes sur Cutibacterium acnes, peut obstruer les pores. Peaux concernées : peaux acnéiques — à surveiller dans les formules riches." },
