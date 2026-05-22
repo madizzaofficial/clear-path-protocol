@@ -266,7 +266,7 @@ function AllergenBadge({ ingredients }: { ingredients: Ing[] }) {
 function SignalSummaryCards({ result }: { result: AnalysisResultV2 }) {
   const comedogenic = result.ingredients.filter((i) => i.flag === "comedogenic");
   const petrochem   = result.ingredients.filter((i) => i.flag === "petrochem");
-  const allergens   = result.ingredients.filter((i) => i.flag === "allergen" && i.euMandatory === true);
+  const allergens   = result.ingredients.filter((i) => i.flag === "allergen");
   const irritants   = result.ingredients.filter((i) => i.flag === "irritant");
 
   if (!comedogenic.length && !petrochem.length && !allergens.length && !irritants.length) return null;
