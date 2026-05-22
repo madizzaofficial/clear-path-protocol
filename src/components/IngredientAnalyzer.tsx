@@ -246,13 +246,10 @@ function AllergenBadge({ ingredients }: { ingredients: Ing[] }) {
       <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">
-          {eu.length > 0 && `${eu.length} allergène${eu.length > 1 ? "s" : ""} EU`}
-          {eu.length > 0 && ext.length > 0 && (
-            <span className="font-normal text-amber-600/70 dark:text-amber-400/60"> · </span>
-          )}
-          {ext.length > 0 && (
-            <span className={eu.length > 0 ? "font-normal text-amber-600/70 dark:text-amber-400/60" : ""}>
-              {ext.length} étendu{ext.length > 1 ? "s" : ""}
+          {all.length} allergène{all.length > 1 ? "s" : ""} détecté{all.length > 1 ? "s" : ""}
+          {eu.length > 0 && (
+            <span className="font-normal text-amber-600/70 dark:text-amber-400/60">
+              {" "}· dont {eu.length} à déclaration obligatoire (UE)
             </span>
           )}
         </p>
