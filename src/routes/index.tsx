@@ -144,8 +144,6 @@ function Dashboard() {
     if (!authLoading && !user) navigate({ to: "/login" });
   }, [user, authLoading, navigate]);
 
-  if (authLoading) return <DashboardSkeleton />;
-
   useEffect(() => {
     if (!user) return;
     const now = new Date();
@@ -227,7 +225,7 @@ function Dashboard() {
   const next = lessons.find((l) => !completedLessons.includes(l.id) && !l.locked);
   const allDone = done === lessons.length;
 
-  if (authLoading || !user) return null;
+  if (authLoading || !user) return <DashboardSkeleton />;
   if (loading) return <AppShell><div className="flex min-h-[60vh] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" /></div></AppShell>;
 
   const firstName = (firestoreDisplayName ?? user.displayName)?.split(" ")[0] ?? "toi";
