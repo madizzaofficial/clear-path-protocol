@@ -581,6 +581,85 @@ export const COMMON_INGREDIENTS: Record<string, CommonEntry> = {
   "CALOPHYLLUM INOPHYLLUM SEED OIL": { role: "Émollient",       description: "Huile de tamanu. Réparatrice, cicatrisante, anti-inflammatoire. Peaux concernées : peaux irritées, cicatrices." },
   "CAMELLIA SINENSIS SEED OIL":     { role: "Émollient",        description: "Huile de caméllia (thé vert). Légère, riche en oléique. Non comédogène. Peaux concernées : tous types." },
   "HIPPOPHAE RHAMNOIDES OIL":       { role: "Actif",            description: "Huile d'argousier. Très riche en caroténoïdes et vitamine C. Actif réparateur et antioxydant puissant. Peaux concernées : peaux irritées, sèches et matures." },
+
+  // ─ Huiles végétales supplémentaires (INCIDecoder) ─
+  "ROSEHIP OIL":                    { role: "Émollient",        description: "Huile de rose musquée. Riche en linoléique et acides gras essentiels. Réparatrice. Peaux concernées : peaux sèches, matures et cicatrices." },
+  "MARULA OIL":                     { role: "Émollient",        description: "Huile de marula (Afrique). Légère, riche en oléique. Pénètre facilement, nourrissante sans film gras. Peaux concernées : tous types." },
+  "MEADOWFOAM SEED OIL":            { role: "Émollient",        description: "Huile de limnanthe (meadowfoam). Très stable grâce à ses acides gras longs (C20-C22). Émolliente longue durée. Peaux concernées : tous types." },
+  "LIMNANTHES ALBA SEED OIL":       { role: "Émollient",        description: "Huile de limnanthe (INCI officiel). Stable, légère et émolliente. Peaux concernées : tous types." },
+  "SQUALENE":                       { role: "Émollient",        description: "Squalène — précurseur naturel du squalane (forme non hydrogénée). Antioxydant naturel du sébum. Peaux concernées : tous types." },
+  "SPHINGOLIPIDS":                  { role: "Barrière",         description: "Sphingolipides naturels (membrane cellulaire). Renforcent la barrière cutanée et l'hydratation. Peaux concernées : peaux sèches et atopiques." },
+
+  // ─ Actifs supplémentaires (INCIDecoder) ─
+  "COPPER TRIPEPTIDE-1":            { role: "Actif",            description: "Tripeptide cuivre GHK-Cu. Stimule le collagène et l'élastine, cicatrisant. Peaux concernées : peaux matures et acnéiques." },
+  "ASCORBYL PALMITATE":             { role: "Antioxydant",      description: "Dérivé liposoluble de la vitamine C. Antioxydant mais moins stable que l'acide ascorbique. Peaux concernées : tous types." },
+  "SH-OLIGOPEPTIDE-1":              { role: "Actif",            description: "EGF (Epidermal Growth Factor) biosimilaire. Stimule le renouvellement cellulaire et la synthèse de collagène. Peaux concernées : peaux matures." },
+  "TRIPEPTIDE-1":                   { role: "Actif",            description: "Peptide GHK (glycine-histidine-lysine). Fragment de collagène naturel, stimule la synthèse de collagène. Peaux concernées : peaux matures." },
+  "GLUTAMINE":                      { role: "Actif",            description: "Acide aminé conditionnel. Précurseur du glutathion, antioxydant cellulaire. Peaux concernées : tous types." },
+  "LYSINE":                         { role: "Actif",            description: "Acide aminé essentiel. Composant clé du collagène, aide à la cicatrisation. Peaux concernées : tous types." },
+  "PROLINE":                        { role: "Actif",            description: "Acide aminé (collagène). Non essentiel, améliore l'élasticité cutanée. Peaux concernées : peaux matures." },
+  "SERINE":                         { role: "Humectant",        description: "Acide aminé naturel (NMF). Hydratant et water-binding. Peaux concernées : tous types." },
+  "GLYCINE":                        { role: "Humectant",        description: "Acide aminé le plus simple. Composant du NMF, humectant. Peaux concernées : tous types." },
+  "THREONINE":                      { role: "Actif",            description: "Acide aminé essentiel. Précurseur de la collagénopoïèse, hydratant. Peaux concernées : tous types." },
+  "PYRUVIC ACID":                   { role: "Exfoliant AHA",    description: "Acide pyruvique. AHA très actif et pénétrant. Exfoliant puissant, à utiliser prudemment. Peaux concernées : peaux épaisses, acnéiques." },
+  "TARTARIC ACID":                  { role: "Exfoliant AHA",    description: "AHA (acide tartrique) extrait de raisin. Exfoliant doux, améliore la texture. Peaux concernées : tous types." },
+  "MALIC ACID":                     { role: "Exfoliant AHA",    description: "AHA (acide malique) extrait de pomme. Exfoliant doux, améliore l'éclat. Peaux concernées : tous types." },
+  "HYDROLYZED WHEAT PROTEIN":       { role: "Actif",            description: "Protéines de blé hydrolysées. Film protecteur, renforce les fibres cutanées. Peaux concernées : tous types." },
+  "HYDROLYZED SOY PROTEIN":         { role: "Actif",            description: "Protéines de soja hydrolysées. Renforce la barrière, lissant. Peaux concernées : tous types." },
+  "HYDROLYZED OAT PROTEIN":         { role: "Apaisant",         description: "Protéines d'avoine hydrolysées. Apaisantes, anti-irritantes, réparatrices. Peaux concernées : peaux sensibles et atopiques." },
+
+  // ─ Apaisants supplémentaires (INCIDecoder) ─
+  "ALOE VERA":                      { role: "Apaisant",         description: "Gel d'aloe vera. Hydratant, apaisant et cicatrisant naturel. Peaux concernées : tous types, idéal peaux irritées et après-soleil." },
+  "ALOE BARBADENSIS LEAF JUICE":    { role: "Apaisant",         description: "Jus de feuille d'aloe vera. Hydratant, apaisant et anti-inflammatoire. Peaux concernées : tous types." },
+  "BETA-GLUCAN":                    { role: "Apaisant",         description: "Polysaccharide de levure ou avoine. Apaisant, immunomodulateur et hydratant. Peaux concernées : peaux sensibles, irritées et matures." },
+  "AVENA SATIVA KERNEL EXTRACT":    { role: "Apaisant",         description: "Extrait de noyau d'avoine. Apaisant cliniquement prouvé, anti-prurit. Peaux concernées : peaux sensibles et atopiques." },
+  "OAT EXTRACT":                    { role: "Apaisant",         description: "Extrait d'avoine colloïdale. Apaisant anti-irritant. Peaux concernées : peaux sensibles, eczémateuses." },
+  "CALENDULA OFFICINALIS EXTRACT":  { role: "Apaisant",         description: "Extrait de calendula (souci). Apaisant, cicatrisant et anti-inflammatoire. Peaux concernées : peaux sensibles et irritées." },
+  "CHAMOMILLA RECUTITA EXTRACT":    { role: "Apaisant",         description: "Extrait de camomille matricaire. Puissant apaisant anti-inflammatoire. Peaux concernées : peaux sensibles et réactives." },
+
+  // ─ Antioxydants supplémentaires (INCIDecoder) ─
+  "CAMELLIA SINENSIS LEAF EXTRACT": { role: "Antioxydant",      description: "Extrait de feuille de thé vert. Riche en EGCG et polyphénols. Antioxydant puissant et anti-inflammatoire. Peaux concernées : tous types." },
+  "GREEN TEA EXTRACT":              { role: "Antioxydant",      description: "Extrait de thé vert. Polyphénols antioxydants, anti-inflammatoire. Peaux concernées : tous types." },
+  "BHT":                            { role: "Antioxydant",      description: "Butylhydroxytoluène. Antioxydant synthétique, stabilise les formules. Bien toléré à faibles doses. Peaux concernées : tous types." },
+  "SODIUM METABISULFITE":           { role: "Antioxydant",      description: "Agent anti-oxydant et conservateur. Stabilise les formules à base de vitamine C. Peaux concernées : tous types." },
+
+  // ─ Émollients supplémentaires (INCIDecoder) ─
+  "COCO-CAPRYLATE":                 { role: "Émollient",        description: "Ester d'origine coco. Alternative légère aux silicones volatiles, texture sèche. Peaux concernées : tous types." },
+  "DICAPRYLYL ETHER":               { role: "Émollient",        description: "Éther capryloyl léger. Texture sèche, étalement facile. Non comédogène. Peaux concernées : tous types." },
+  "ETHYLHEXYL STEARATE":            { role: "Émollient",        description: "Ester de l'acide stéarique. Émollient moyen, réduit le film gras des autres huiles. Peaux concernées : tous types." },
+  "NEOPENTYL GLYCOL DIHEPTANOATE":  { role: "Émollient",        description: "Ester synthétique très léger, presque volatile. Texture sèche, idéal écrans solaires. Peaux concernées : tous types." },
+  "ISOPROPYL PALMITATE":            { role: "Émollient",        description: "Ester isopropylique de l'acide palmitique. Émollient léger à bonne glisse. Légèrement comédogène. Peaux concernées : tous types sauf peaux très acnéiques." },
+  "GLYCERYL OLEATE":                { role: "Émulsifiant",      description: "Co-émulsifiant naturel (glycérol + acide oléique). Adoucissant, aide à stabiliser les émulsions. Peaux concernées : tous types." },
+
+  // ─ Épaississants supplémentaires (INCIDecoder) ─
+  "CARNAUBA":                       { role: "Épaississant",     description: "Cire de carnauba (alias CARNAUBA WAX). Végétale, structurante, point de fusion élevé. Peaux concernées : tous types." },
+  "SYNTHETIC BEESWAX":              { role: "Épaississant",     description: "Cire d'abeille synthétique. Propriétés similaires à la cire naturelle. Structurante et filmogène. Peaux concernées : tous types." },
+  "METHYLCELLULOSE":                { role: "Épaississant",     description: "Dérivé méthylé de la cellulose. Gélifiant et épaississant, sensible à la température. Peaux concernées : tous types." },
+  "CELLULOSE":                      { role: "Épaississant",     description: "Polymère végétal naturel (paroi cellulaire). Épaississant et améliorant de texture. Peaux concernées : tous types." },
+  "TAPIOCA STARCH":                 { role: "Épaississant",     description: "Amidon de tapioca. Poudre douce absorbante, remplace le talc. Matifiante. Peaux concernées : tous types." },
+  "STARCH":                         { role: "Épaississant",     description: "Amidon végétal. Texturant absorbant, matifiant. Peaux concernées : tous types." },
+
+  // ─ Émulsifiants supplémentaires (INCIDecoder) ─
+  "CETEARETH-12":                   { role: "Émulsifiant",      description: "Alcool cétéarylique éthoxylé (12 OE). Émulsifiant et co-stabilisant. Peaux concernées : tous types." },
+  "CETEARETH-20":                   { role: "Émulsifiant",      description: "Alcool cétéarylique éthoxylé (20 OE). Émulsifiant huile-dans-eau courant. Peaux concernées : tous types." },
+
+  // ─ Solvants supplémentaires (INCIDecoder) ─
+  "DIPROPYLENE GLYCOL":             { role: "Solvant",          description: "Diol de synthèse. Solvant et humectant léger, bon tolérance. Peaux concernées : tous types." },
+  "ETHOXYDIGLYCOL":                 { role: "Solvant",          description: "Solvant polaire. Améliore la pénétration des actifs (vitamine C, DHA). Peaux concernées : tous types." },
+  "HEXYLENE GLYCOL":                { role: "Solvant",          description: "Diol court, solvant fluidifiant. Réduit la viscosité des formules. Peaux concernées : tous types." },
+
+  // ─ Conservateurs supplémentaires (INCIDecoder) ─
+  "SODIUM LEVULINATE":              { role: "Conservateur",     description: "Sel de l'acide lévulinique (sucre). Conservateur naturel doux, Ecocert. Peaux concernées : tous types." },
+  "SODIUM ANISATE":                 { role: "Conservateur",     description: "Sel de l'acide anisique. Conservateur naturel antibactérien et antifongique. Peaux concernées : tous types." },
+  "SORBIC ACID":                    { role: "Conservateur",     description: "Acide sorbique. Conservateur naturel actif contre levures et moisissures. Peaux concernées : tous types." },
+
+  // ─ Régulateurs pH supplémentaires (INCIDecoder) ─
+  "PHOSPHORIC ACID":                { role: "Régulateur pH",    description: "Acide phosphorique. Ajuste le pH des formules. Utilisé à très faibles doses. Peaux concernées : tous types." },
+
+  // ─ Humectants supplémentaires (INCIDecoder) ─
+  "FRUCTOOLIGOSACCHARIDES":         { role: "Humectant",        description: "Prébiotiques végétaux (FOS). Soutiennent le microbiome cutané et hydratent. Peaux concernées : tous types." },
+  "GLUCOSE":                        { role: "Humectant",        description: "Sucre naturel. Humectant doux, water-binding. Peaux concernées : tous types." },
+  "LACTOSE":                        { role: "Humectant",        description: "Sucre du lait. Humectant doux, améliore la texture. Peaux concernées : tous types." },
 };
 
 // ─── V2 : Analyse multi-baromètres ────────────────────────────────────────────
