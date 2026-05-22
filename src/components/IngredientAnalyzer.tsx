@@ -230,6 +230,36 @@ function IngredientRow({ ing }: { ing: Ing }) {
   );
 }
 
+// ─── AllergenBadge ────────────────────────────────────────────────────────────
+
+function AllergenBadge({ ingredients }: { ingredients: Ing[] }) {
+  const eu  = ingredients.filter((i) => i.flag === "allergen" && i.euMandatory === true);
+  const ext = ingredients.filter((i) => i.flag === "allergen" && !i.euMandatory);
+  if (!eu.length && !ext.length) return null;
+
+  const shown = eu.slice(0, 3).map((i) => i.raw);
+  const rest  = eu.length - shown.length;
+
+  return (
+    <div className="flex items-start gap-3 rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/20 px-4 py-3">
+      <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">
+          {eu.length} allergène{eu.length > 1 ? "s" : ""} EU
+          {ext.length > 0 && (
+            <span className="font-normal text-amber-600/70 dark:text-amber-400/60">
+              {" "}· {ext.length} étendu{ext.length > 1 ? "s" : ""}
+            </span>
+          )}
+        </p>
+        <p className="mt-0.5 text-xs text-amber-700/70 dark:text-amber-400/60">
+          {shown.join(", ")}{rest > 0 ? ` et ${rest} autre${rest > 1 ? "s" : ""}` : ""}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ─── SignalSummaryCards ───────────────────────────────────────────────────────
 
 function SignalSummaryCards({ result }: { result: AnalysisResultV2 }) {
@@ -488,7 +518,7 @@ export function IngredientAnalyzer() {
               score={result.barometers.irritation.score}
               barLabel={result.barometers.irritation.label}
               icon={Zap}
-              description="Tensioactifs, alcools, allergènes"
+              description="Tensioactifs et alcools irritants"
             />
             <BarometerCard
               label="Comédogénicité"
@@ -505,6 +535,9 @@ export function IngredientAnalyzer() {
               description="PE avérés et suspectés"
             />
           </div>
+
+          {/* Allergen badge */}
+          <AllergenBadge ingredients={result.ingredients} />
 
           {/* Usage reco + score info */}
           <div className="space-y-2">

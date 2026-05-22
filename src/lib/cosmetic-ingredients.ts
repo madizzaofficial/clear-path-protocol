@@ -1271,7 +1271,6 @@ export function analyzeIngredientsV2(raw: string, profile?: SkinProfile): Analys
       const key = Object.keys(IRRITANTS).find((k) => ing.normalized === k || ing.normalized.includes(k));
       irritationRaw += (key ? IRRITANTS[key].irritationLevel : 1) * w;
     }
-    if (ing.flag === "allergen") irritationRaw += 1 * w;
     if (ing.flag === "ed_high")   peRaw += 3 * w;
     if (ing.flag === "ed_medium") peRaw += 1.5 * w;
     if (ing.flag === "comedogenic" && ing.comedogenicRating) {
