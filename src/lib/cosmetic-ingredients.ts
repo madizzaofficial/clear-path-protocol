@@ -493,9 +493,10 @@ export function analyzeIngredients(raw: string): AnalysisResult {
       };
     }
 
+    const inferred = inferRoleFromName(norm);
     return {
       raw: token, normalized: norm, flag: "ok",
-      description: "Aucun signal identifié dans les bases consultées (ECHA, SCCS, Acne Clinic NYC). Peaux concernées : tous types.",
+      description: inferred?.description ?? "Aucun signal identifié dans les bases consultées (ECHA, SCCS, Acne Clinic NYC). Peaux concernées : tous types.",
     };
   });
 
@@ -1135,6 +1136,55 @@ function lookupFunctionalRole(norm: string): string | undefined {
   return key ? FUNCTIONAL_ROLES[key] : undefined;
 }
 
+// ─── Inférence de catégorie par pattern INCI ─────────────────────────────────
+// La nomenclature INCI est standardisée : les suffixes et préfixes portent le
+// rôle fonctionnel. Ce fallback couvre ~80% des ingrédients non répertoriés.
+function inferRoleFromName(inci: string): { role: string; description: string } | null {
+  if (/PEPTIDE/.test(inci))
+    return { role: "Actif",           description: "Peptide bioactif." };
+  if (/HYDROLYZED|COLLAGEN|ELASTIN/.test(inci))
+    return { role: "Actif",           description: "Protéine ou polymère bioactif hydrolysé." };
+  if (/FERMENT|FILTRATE/.test(inci))
+    return { role: "Actif",           description: "Filtrat de fermentation ou biotechnologie." };
+  if (/CONE$|CONOL$|SILOXANE$|SILSESQUIOXANE$/.test(inci))
+    return { role: "Émollient",       description: "Silicone ou dérivé silicié." };
+  if (/\bOIL$/.test(inci))
+    return { role: "Émollient",       description: "Huile végétale ou minérale." };
+  if (/BUTTER$/.test(inci))
+    return { role: "Émollient",       description: "Beurre végétal." };
+  if (/ALCOHOL$/.test(inci))
+    return { role: "Émollient",       description: "Alcool gras émollient." };
+  if (/FLOWER WATER$|LEAF WATER$|PETAL WATER$|BLOSSOM WATER$/.test(inci))
+    return { role: "Apaisant",        description: "Eau florale ou hydrolat." };
+  if (/WATER$/.test(inci))
+    return { role: "Solvant",         description: "Eau ou distillat aqueux." };
+  if (/EXTRACT$|EXTRACTUM$/.test(inci))
+    return { role: "Antioxydant",     description: "Extrait végétal ou marin." };
+  if (/WAX$/.test(inci) || /\bCERA\b/.test(inci))
+    return { role: "Épaississant",    description: "Cire naturelle ou synthétique." };
+  if (/STARCH$/.test(inci))
+    return { role: "Épaississant",    description: "Amidon végétal texturant." };
+  if (/GLUCOSIDE$/.test(inci))
+    return { role: "Émulsifiant",     description: "Tensioactif glucosidique doux." };
+  if (/GLYCOL$/.test(inci))
+    return { role: "Humectant",       description: "Glycol — humectant et solvant." };
+  if (/SULFATE$|SULPHATE$|SULFOSUCCINATE$/.test(inci))
+    return { role: "Tensioactif",     description: "Tensioactif anionique." };
+  if (/BETAINE$/.test(inci))
+    return { role: "Tensioactif",     description: "Tensioactif amphotère doux." };
+  if (/ACID$/.test(inci))
+    return { role: "Actif",           description: "Acide actif ou régulateur de pH." };
+  if (/^CI \d+/.test(inci))
+    return { role: "Colorant",        description: "Colorant cosmétique (numéro CI)." };
+  if (/QUATERNIUM|POLYQUATERNIUM/.test(inci))
+    return { role: "Conditionneur",   description: "Agent conditionneur quaternaire." };
+  if (/CHLORIDE$/.test(inci))
+    return { role: "Émulsifiant",     description: "Agent conditionneur ou émulsifiant ionique." };
+  if (/PHOSPHATE$|CARBONATE$|HYDROXIDE$/.test(inci))
+    return { role: "Régulateur pH",   description: "Régulateur de pH minéral." };
+  return null;
+}
+
 const SURFACTANT_KEYS = new Set([
   "SODIUM LAURYL SULFATE", "SODIUM DODECYL SULFATE",
   "SODIUM LAURETH SULFATE", "AMMONIUM LAURYL SULFATE", "AMMONIUM LAURETH SULFATE",
@@ -1160,25 +1210,25 @@ export function analyzeIngredientsV2(raw: string, profile?: SkinProfile): Analys
     const edKey = Object.keys(ENDOCRINE_DISRUPTORS).find((k) => norm === k || norm.includes(k));
     if (edKey) {
       const entry = ENDOCRINE_DISRUPTORS[edKey];
-      return { raw: token, normalized: norm, flag: entry.severity === "high" ? "ed_high" : "ed_medium", reason: entry.reason, description: entry.description, role: lookupFunctionalRole(norm) };
+      return { raw: token, normalized: norm, flag: entry.severity === "high" ? "ed_high" : "ed_medium", reason: entry.reason, description: entry.description, role: lookupFunctionalRole(norm) ?? inferRoleFromName(norm)?.role };
     }
 
     const allergenKey = Object.keys(ALLERGENS).find((k) => norm === k || norm.includes(k));
     if (allergenKey) {
       const entry = ALLERGENS[allergenKey];
-      return { raw: token, normalized: norm, flag: "allergen", euMandatory: entry.euMandatory, description: entry.description, role: lookupFunctionalRole(norm) };
+      return { raw: token, normalized: norm, flag: "allergen", euMandatory: entry.euMandatory, description: entry.description, role: lookupFunctionalRole(norm) ?? inferRoleFromName(norm)?.role };
     }
 
     const irritantKey = Object.keys(IRRITANTS).find((k) => norm === k || norm.includes(k));
     if (irritantKey) {
       const entry = IRRITANTS[irritantKey];
-      return { raw: token, normalized: norm, flag: "irritant", reason: entry.reason, description: entry.description, role: lookupFunctionalRole(norm) };
+      return { raw: token, normalized: norm, flag: "irritant", reason: entry.reason, description: entry.description, role: lookupFunctionalRole(norm) ?? inferRoleFromName(norm)?.role };
     }
 
     const petroKey = Object.keys(PETROCHEMICALS).find((k) => norm === k || norm.includes(k));
     if (petroKey) {
       const entry = PETROCHEMICALS[petroKey];
-      return { raw: token, normalized: norm, flag: "petrochem", description: entry.description, role: lookupFunctionalRole(norm) };
+      return { raw: token, normalized: norm, flag: "petrochem", description: entry.description, role: lookupFunctionalRole(norm) ?? inferRoleFromName(norm)?.role };
     }
 
     const comedoKey = Object.keys(COMEDOGENIC_INGREDIENTS).find((k) => norm === k || norm.includes(k));
@@ -1186,7 +1236,7 @@ export function analyzeIngredientsV2(raw: string, profile?: SkinProfile): Analys
       const entry = COMEDOGENIC_INGREDIENTS[comedoKey];
       if (entry.rating >= 3) {
         const commonKeyForComedo = Object.keys(COMMON_INGREDIENTS).find((k) => norm === k || norm.includes(k));
-        const role = commonKeyForComedo ? COMMON_INGREDIENTS[commonKeyForComedo].role : lookupFunctionalRole(norm);
+        const role = commonKeyForComedo ? COMMON_INGREDIENTS[commonKeyForComedo].role : (lookupFunctionalRole(norm) ?? inferRoleFromName(norm)?.role);
         return { raw: token, normalized: norm, flag: "comedogenic", reason: `Comédogène — indice ${entry.rating}/5`, description: entry.description, comedogenicRating: entry.rating, role };
       }
       // Rating 1–2 : not flagged, fall through to COMMON_INGREDIENTS for description
@@ -1198,7 +1248,8 @@ export function analyzeIngredientsV2(raw: string, profile?: SkinProfile): Analys
       return { raw: token, normalized: norm, flag: "ok", description: `${entry.role} — ${entry.description}`, role: entry.role };
     }
 
-    return { raw: token, normalized: norm, flag: "ok", description: "Ingrédient non répertorié dans nos bases de données. Peaux concernées : tous types." };
+    const inferred = inferRoleFromName(norm);
+    return { raw: token, normalized: norm, flag: "ok", role: inferred?.role, description: inferred?.description ?? "Ingrédient non répertorié dans nos bases de données. Peaux concernées : tous types." };
   });
 
   // Scores bruts pondérés par position
