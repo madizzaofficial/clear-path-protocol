@@ -13,8 +13,8 @@ type IngFlag = AnalysisResultV2["ingredients"][number]["flag"];
 const FLAG_CONFIG: Record<IngFlag, { dot: string; bg: string; expandBg: string; name: string; badge: string; label: string }> = {
   ed_high:     { dot: "bg-red-500",     bg: "bg-red-50 dark:bg-red-950/20",           expandBg: "bg-red-100/60 dark:bg-red-950/30",     name: "text-red-700 dark:text-red-400 font-semibold",    badge: "bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400",       label: "PE avéré" },
   ed_medium:   { dot: "bg-orange-400",  bg: "bg-orange-50 dark:bg-orange-950/20",     expandBg: "bg-orange-100/60 dark:bg-orange-950/30",  name: "text-orange-700 dark:text-orange-400 font-semibold", badge: "bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400",  label: "PE suspecté" },
-  allergen:    { dot: "bg-amber-400",   bg: "bg-amber-50 dark:bg-amber-950/20",       expandBg: "bg-amber-100/60 dark:bg-amber-950/30",    name: "text-amber-700 dark:text-amber-400 font-semibold",  badge: "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400",   label: "Allergène" },
-  irritant:    { dot: "bg-violet-400",  bg: "bg-violet-50/60 dark:bg-violet-950/20",  expandBg: "bg-violet-100/60 dark:bg-violet-950/30",  name: "text-violet-700 dark:text-violet-400 font-semibold", badge: "bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400",  label: "Irritant" },
+  allergen:    { dot: "bg-amber-400",   bg: "bg-amber-50 dark:bg-amber-950/20",       expandBg: "bg-amber-100/60 dark:bg-amber-950/30",    name: "text-amber-700 dark:text-amber-400 font-semibold",  badge: "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400",   label: "Allergène potentiel" },
+  irritant:    { dot: "bg-violet-400",  bg: "bg-violet-50/60 dark:bg-violet-950/20",  expandBg: "bg-violet-100/60 dark:bg-violet-950/30",  name: "text-violet-700 dark:text-violet-400 font-semibold", badge: "bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400",  label: "Irritant potentiel" },
   petrochem:   { dot: "bg-yellow-400",  bg: "bg-yellow-50 dark:bg-yellow-950/20",     expandBg: "bg-yellow-100/60 dark:bg-yellow-950/30",  name: "text-yellow-700 dark:text-yellow-400 font-medium",   badge: "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400",  label: "Pétrochimique" },
   comedogenic: { dot: "bg-pink-400",    bg: "bg-pink-50 dark:bg-pink-950/20",         expandBg: "bg-pink-100/60 dark:bg-pink-950/30",      name: "text-pink-700 dark:text-pink-400 font-semibold",   badge: "bg-pink-100 dark:bg-pink-900/40 text-pink-700 dark:text-pink-400",      label: "Comédogène" },
   ok:          { dot: "bg-emerald-400", bg: "bg-emerald-50/50 dark:bg-emerald-950/10", expandBg: "bg-emerald-100/40 dark:bg-emerald-950/20", name: "text-emerald-700 dark:text-emerald-400 font-medium",  badge: "",                               label: "" },
@@ -246,7 +246,7 @@ function AllergenBadge({ ingredients }: { ingredients: Ing[] }) {
       <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">
-          {all.length} allergène{all.length > 1 ? "s" : ""} détecté{all.length > 1 ? "s" : ""}
+          {all.length} allergène{all.length > 1 ? "s" : ""} potentiel{all.length > 1 ? "s" : ""}
           {eu.length > 0 && (
             <span className="font-normal text-amber-600/70 dark:text-amber-400/60">
               {" "}· dont {eu.length} à déclaration obligatoire (UE)
