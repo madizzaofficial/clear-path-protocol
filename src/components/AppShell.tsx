@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 
 
 function UserMenu() {
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { theme, toggle } = useTheme();
 
@@ -49,13 +49,11 @@ function UserMenu() {
             {theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
             {theme === "dark" ? "Mode clair" : "Mode sombre"}
           </DropdownMenuItem>
-          {isAdmin && (
-            <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2">
-              <Link to="/admin/ingredient-analyzer">
-                <FlaskConical className="mr-2 h-4 w-4" /> Analyseur INCI
-              </Link>
-            </DropdownMenuItem>
-          )}
+          <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2">
+            <Link to="/ingredient-analyzer">
+              <FlaskConical className="mr-2 h-4 w-4" /> Analyseur INCI
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2">
             <Link to="/profile">
               <UserCircle className="mr-2 h-4 w-4" /> Mon profil

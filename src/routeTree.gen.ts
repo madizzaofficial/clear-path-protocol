@@ -16,6 +16,7 @@ import { Route as ProductsRouteImport } from './routes/products'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as JournalRouteImport } from './routes/journal'
 import { Route as IntakeRouteImport } from './routes/intake'
+import { Route as IngredientAnalyzerRouteImport } from './routes/ingredient-analyzer'
 import { Route as FinishRouteImport } from './routes/finish'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as CourseRouteImport } from './routes/course'
@@ -69,6 +70,11 @@ const JournalRoute = JournalRouteImport.update({
 const IntakeRoute = IntakeRouteImport.update({
   id: '/intake',
   path: '/intake',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IngredientAnalyzerRoute = IngredientAnalyzerRouteImport.update({
+  id: '/ingredient-analyzer',
+  path: '/ingredient-analyzer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FinishRoute = FinishRouteImport.update({
@@ -174,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/course': typeof CourseRoute
   '/faq': typeof FaqRoute
   '/finish': typeof FinishRoute
+  '/ingredient-analyzer': typeof IngredientAnalyzerRoute
   '/intake': typeof IntakeRoute
   '/journal': typeof JournalRoute
   '/login': typeof LoginRoute
@@ -202,6 +209,7 @@ export interface FileRoutesByTo {
   '/course': typeof CourseRoute
   '/faq': typeof FaqRoute
   '/finish': typeof FinishRoute
+  '/ingredient-analyzer': typeof IngredientAnalyzerRoute
   '/intake': typeof IntakeRoute
   '/journal': typeof JournalRoute
   '/login': typeof LoginRoute
@@ -230,6 +238,7 @@ export interface FileRoutesById {
   '/course': typeof CourseRoute
   '/faq': typeof FaqRoute
   '/finish': typeof FinishRoute
+  '/ingredient-analyzer': typeof IngredientAnalyzerRoute
   '/intake': typeof IntakeRoute
   '/journal': typeof JournalRoute
   '/login': typeof LoginRoute
@@ -260,6 +269,7 @@ export interface FileRouteTypes {
     | '/course'
     | '/faq'
     | '/finish'
+    | '/ingredient-analyzer'
     | '/intake'
     | '/journal'
     | '/login'
@@ -288,6 +298,7 @@ export interface FileRouteTypes {
     | '/course'
     | '/faq'
     | '/finish'
+    | '/ingredient-analyzer'
     | '/intake'
     | '/journal'
     | '/login'
@@ -315,6 +326,7 @@ export interface FileRouteTypes {
     | '/course'
     | '/faq'
     | '/finish'
+    | '/ingredient-analyzer'
     | '/intake'
     | '/journal'
     | '/login'
@@ -344,6 +356,7 @@ export interface RootRouteChildren {
   CourseRoute: typeof CourseRoute
   FaqRoute: typeof FaqRoute
   FinishRoute: typeof FinishRoute
+  IngredientAnalyzerRoute: typeof IngredientAnalyzerRoute
   IntakeRoute: typeof IntakeRoute
   JournalRoute: typeof JournalRoute
   LoginRoute: typeof LoginRoute
@@ -414,6 +427,13 @@ declare module '@tanstack/react-router' {
       path: '/intake'
       fullPath: '/intake'
       preLoaderRoute: typeof IntakeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ingredient-analyzer': {
+      id: '/ingredient-analyzer'
+      path: '/ingredient-analyzer'
+      fullPath: '/ingredient-analyzer'
+      preLoaderRoute: typeof IngredientAnalyzerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/finish': {
@@ -572,6 +592,7 @@ const rootRouteChildren: RootRouteChildren = {
   CourseRoute: CourseRoute,
   FaqRoute: FaqRoute,
   FinishRoute: FinishRoute,
+  IngredientAnalyzerRoute: IngredientAnalyzerRoute,
   IntakeRoute: IntakeRoute,
   JournalRoute: JournalRoute,
   LoginRoute: LoginRoute,
