@@ -405,9 +405,10 @@ const FRENCH_TO_INCI: Record<string, string> = {
 };
 
 // Traduit un nom normalisé (français ou INCI) vers son équivalent INCI.
-// Retire d'abord les parenthèses (ex : "parabène"), puis cherche par correspondance exacte
-// puis par sous-chaîne (ex : "CARBOMERE INTERPOLYMERE" → "CARBOMER").
+// EU label format: "Common Name (INCI Name)" — parenthetical is the canonical INCI name.
+// Tries French dict on outer name first; if no match, uses the parenthetical content directly.
 function translateToInci(norm: string): string {
+  const parenMatch = norm.match(/\(([^)]+)\)/);
   const clean = norm.replace(/\([^)]*\)/g, "").replace(/\s+/g, " ").trim();
   if (FRENCH_TO_INCI[clean]) return FRENCH_TO_INCI[clean];
   // Substring match — retourne la traduction de la clé la plus longue trouvée dans clean
@@ -417,6 +418,10 @@ function translateToInci(norm: string): string {
     if (clean.includes(fr) && fr.length > best.length) { best = fr; result = inci; }
   }
   if (result) return result;
+  // If outer name didn't match the French dict, use the parenthetical as the INCI name
+  if (parenMatch) {
+    return parenMatch[1].trim().replace(/([A-Z])-([A-Z])/g, "$1 $2").replace(/\s+/g, " ").trim();
+  }
   // Dehyphenation: "CENTELLA-ASIATICA EXTRACT" → "CENTELLA ASIATICA EXTRACT"
   // Only replace letter-to-letter hyphens — never digit-to-letter (preserves "1,2-HEXANEDIOL")
   const dehyphen = clean.replace(/([A-Z])-([A-Z])/g, "$1 $2").replace(/\s+/g, " ").trim();
@@ -440,8 +445,8 @@ function matchesKey(norm: string, key: string): boolean {
 
 export function analyzeIngredients(raw: string): AnalysisResult {
   const tokens = raw
-    .split(/(?<!\d),(?!\d)|\n|\s\.\s/)
-    .map((t) => stripQuantity(t.trim()))
+    .split(/(?<!\d),(?!\d)|\n|(?<!\d)\.\s+/)
+    .map((t) => stripQuantity(t.trim().replace(/\.$/, "")))
     .filter(Boolean);
 
   const ingredients: AnalyzedIngredient[] = tokens.map((token) => {
@@ -1005,6 +1010,22 @@ export const COMMON_INGREDIENTS: Record<string, CommonEntry> = {
 
   // ─ Antibactériens ─
   "OCTENIDINE":                     { role: "Antibactérien",    description: "Octénidine HCl. Antiseptique très efficace contre bactéries et levures, utilisé en dermato médicale. Conservateur de plus en plus présent dans les soins clean. Peaux concernées : tous types." },
+  // Cires & texturants
+  "BEESWAX":                        { role: "Épaississant",     description: "Cire d'abeille jaune naturelle. Structurante, filmogène, légèrement émolliente. Peaux concernées : tous types." },
+  // Minéraux / sels
+  "COPPER SULFATE":                 { role: "Conservateur",     description: "Sulfate de cuivre. Trace minérale antibactérienne et antifongique, conservateur auxiliaire à faible concentration. Peaux concernées : tous types." },
+  "MAGNESIUM STEARATE":             { role: "Texturant",        description: "Sel de magnésium de l'acide stéarique. Lubrifiant et agent de glissement dans les formules poudrées. Peaux concernées : tous types." },
+  "MAGNESIUM SULFATE":              { role: "Régulateur pH",    description: "Sel d'Epsom (MgSO4). Électrolyte et régulateur osmotique dans les émulsions, améliore la stabilité. Bien toléré. Peaux concernées : tous types." },
+  "ZINC SULFATE":                   { role: "Sébo-régulateur",  description: "Sulfate de zinc. Astringent minéral léger, contribue à la régulation du sébum et aux propriétés apaisantes. Peaux concernées : peaux grasses, acnéiques." },
+  "ALUMINUM STEARATE":              { role: "Texturant",        description: "Sel d'aluminium de l'acide stéarique. Gélifiant et stabilisant d'émulsion lipophile, agent suspensif. Peaux concernées : tous types." },
+  // Émollients
+  "HYDROGENATED VEGETABLE OIL":     { role: "Émollient",        description: "Huile végétale hydrogénée (générique). Émollient riche à texture structurante. Adoucit et nourrit la peau. Peaux concernées : tous types, idéal peaux sèches." },
+  // Émulsifiants PEG
+  "PEG-22/DODECYL GLYCOL COPOLYMER": { role: "Émulsifiant",     description: "Copolymère PEG-22 / glycol dodécylique. Émulsifiant et stabilisant d'émulsions huile-dans-eau. Peaux concernées : tous types." },
+  "POLYGLYCERYL-2 SESQUIISOSTEARATE": { role: "Émulsifiant",    description: "Émulsifiant polyglycérol d'origine végétale. Doux, stabilise les émulsions eau-dans-huile. Peaux concernées : tous types, idéal peaux sensibles." },
+  // Actifs propriétaires
+  "AVENE AQUA":                     { role: "Apaisant",         description: "Eau thermale d'Avène. Riche en silicates et calcium, apaise les peaux réactives et réduisent les démangeaisons. Peaux concernées : peaux sensibles, réactives, atopiques." },
+  "AQUAPHILUS DOLOMIAE FERMENT FILTRATE": { role: "Apaisant",   description: "Filtrat de fermentation d'Aquaphilus dolomiae, micro-organisme isolé de l'eau thermale d'Avène. Renforce la barrière cutanée et apaise les peaux réactives. Peaux concernées : peaux sensibles, atopiques." },
 };
 
 // ─── V2 : Analyse multi-baromètres ────────────────────────────────────────────
@@ -1260,7 +1281,7 @@ function makeBarometer(score: number): Barometer {
 }
 
 export function analyzeIngredientsV2(raw: string, profile?: SkinProfile): AnalysisResultV2 {
-  const tokens = raw.split(/(?<!\d),(?!\d)|\n|\s\.\s/).map((t) => stripQuantity(t.trim())).filter(Boolean);
+  const tokens = raw.split(/(?<!\d),(?!\d)|\n|(?<!\d)\.\s+/).map((t) => stripQuantity(t.trim().replace(/\.$/, ""))).filter(Boolean);
 
   const ingredients: AnalyzedIngredient[] = tokens.map((token) => {
     const norm = translateToInci(normalize(token));
