@@ -454,6 +454,158 @@ export type AnalysisResultV2 = {
   irritantCount: number; petrochemCount: number; comedogenicCount: number;
 };
 
+// ─── Rôles fonctionnels des ingrédients signalés ─────────────────────────────
+// Maps normalized INCI key → functional role (for UI categorization)
+export const FUNCTIONAL_ROLES: Record<string, string> = {
+  // ─ Irritants ─
+  "SODIUM LAURYL SULFATE":        "Tensioactif",
+  "SODIUM DODECYL SULFATE":       "Tensioactif",
+  "SODIUM LAURETH SULFATE":       "Tensioactif",
+  "AMMONIUM LAURYL SULFATE":      "Tensioactif",
+  "AMMONIUM LAURETH SULFATE":     "Tensioactif",
+  "ALCOHOL DENAT":                "Solvant",
+  "SD ALCOHOL":                   "Solvant",
+  "ISOPROPYL ALCOHOL":            "Solvant",
+  "SODIUM CHLORIDE":              "Texturant",
+
+  // ─ Allergènes — molécules parfumantes ─
+  "PARFUM":                       "Parfum",
+  "FRAGRANCE":                    "Parfum",
+  "LIMONENE":                     "Parfum",
+  "LINALOOL":                     "Parfum",
+  "CITRAL":                       "Parfum",
+  "CITRONELLOL":                  "Parfum",
+  "GERANIOL":                     "Parfum",
+  "EUGENOL":                      "Parfum",
+  "FARNESOL":                     "Parfum",
+  "COUMARIN":                     "Parfum",
+  "CINNAMALDEHYDE":               "Parfum",
+  "CINNAMYL ALCOHOL":             "Parfum",
+  "HEXYL CINNAMAL":               "Parfum",
+  "AMYL CINNAMAL":                "Parfum",
+  "AMYLCINNAMYL ALCOHOL":         "Parfum",
+  "BENZYL SALICYLATE":            "Parfum",
+  "BENZYL CINNAMATE":             "Parfum",
+  "BENZYL BENZOATE":              "Parfum",
+  "ISOEUGENOL":                   "Parfum",
+  "HYDROXYCITRONELLAL":           "Parfum",
+  "METHYL 2-OCTYNOATE":           "Parfum",
+  "ANISE ALCOHOL":                "Parfum",
+  "ALPHA-ISOMETHYL IONONE":       "Parfum",
+  "BUTYLPHENYL METHYLPROPIONAL":  "Parfum",
+  "LILIAL":                       "Parfum",
+  "HYDROXYISOHEXYL 3-CYCLOHEXENE CARBOXALDEHYDE": "Parfum",
+  "HICC":                         "Parfum",
+  "BENZYL ALCOHOL":               "Conservateur",
+  "HYDROXYMETHYLPENTYLCYCLOHEXENECARBOXALDEHYDE": "Parfum",
+  "METHYL HEPTINE CARBONATE":     "Parfum",
+  "METHYL OCTINE CARBONATE":      "Parfum",
+  "TREEMOSS":                     "Parfum",
+  "OAKMOSS":                      "Parfum",
+  "SANTALOL":                     "Parfum",
+  "COSTUS ROOT":                  "Parfum",
+  "PERU BALSAM":                  "Parfum",
+  "MYROXYLON PEREIRAE":           "Parfum",
+  "YLANG YLANG OIL":              "Parfum",
+  "JASMINE":                      "Parfum",
+  "JASMIN ABSOLUTE":              "Parfum",
+  "ROSE FLOWER OIL":              "Parfum",
+  "CANANGA ODORATA":              "Parfum",
+  "NARCISSUS POETICUS":           "Parfum",
+  "ATRANORIN":                    "Parfum",
+  "CHLOROATRANORIN":              "Parfum",
+
+  // ─ Perturbateurs endocriniens ─
+  "BENZOPHENONE-3":               "Filtre UV",
+  "OXYBENZONE":                   "Filtre UV",
+  "HOMOSALATE":                   "Filtre UV",
+  "ETHYLHEXYL METHOXYCINNAMATE":  "Filtre UV",
+  "OCTINOXATE":                   "Filtre UV",
+  "OCTYL METHOXYCINNAMATE":       "Filtre UV",
+  "4-METHYLBENZYLIDENE CAMPHOR":  "Filtre UV",
+  "BENZOPHENONE-4":               "Filtre UV",
+  "SULISOBENZONE":                "Filtre UV",
+  "ETHYLHEXYL DIMETHYL PABA":     "Filtre UV",
+  "OCTYL DIMETHYL PABA":          "Filtre UV",
+  "DROMETRIZOLE TRISILOXANE":     "Filtre UV",
+  "BUTYLPARABEN":                 "Conservateur",
+  "ISOBUTYLPARABEN":              "Conservateur",
+  "PROPYLPARABEN":                "Conservateur",
+  "ISOPROPYLPARABEN":             "Conservateur",
+  "METHYLPARABEN":                "Conservateur",
+  "ETHYLPARABEN":                 "Conservateur",
+  "BENZYLPARABEN":                "Conservateur",
+  "TRICLOSAN":                    "Antibactérien",
+  "TRICLOCARBAN":                 "Antibactérien",
+  "DIETHYL PHTHALATE":            "Solvant",
+  "DIBUTYL PHTHALATE":            "Solvant",
+  "DIISOBUTYL PHTHALATE":         "Solvant",
+  "BHA":                          "Antioxydant",
+  "BUTYLATED HYDROXYANISOLE":     "Antioxydant",
+  "RESORCINOL":                   "Actif",
+  "KOJIC ACID":                   "Actif",
+  "P-PHENYLENEDIAMINE":           "Colorant",
+  "CYCLOTETRASILOXANE":           "Solvant",
+  "CYCLOPENTASILOXANE":           "Solvant",
+  "MUSK AMBRETTE":                "Parfum",
+  "MUSK TIBETENE":                "Parfum",
+  "MUSK MOSKENE":                 "Parfum",
+
+  // ─ Pétrochimiques ─
+  "PARAFFINUM LIQUIDUM":          "Émollient",
+  "PETROLATUM":                   "Émollient",
+  "MINERAL OIL":                  "Émollient",
+  "VASELINE":                     "Émollient",
+  "POLYISOBUTENE":                "Émollient",
+  "HYDROGENATED POLYISOBUTENE":   "Émollient",
+  "POLYBUTENE":                   "Émollient",
+  "POLYDECENE":                   "Émollient",
+  "HYDROGENATED POLYDECENE":      "Émollient",
+  "ISOEICOSANE":                  "Émollient",
+  "ISOHEXADECANE":                "Solvant",
+  "ISODODECANE":                  "Solvant",
+  "NAPHTHA":                      "Solvant",
+  "CERA MICROCRISTALLINA":        "Épaississant",
+  "MICROCRYSTALLINE WAX":         "Épaississant",
+  "OZOKERITE":                    "Épaississant",
+  "CERESIN":                      "Épaississant",
+  "PARAFFIN":                     "Épaississant",
+  "SYNTHETIC WAX":                "Épaississant",
+
+  // ─ Comédogènes (non couverts par COMMON_INGREDIENTS) ─
+  "ISOPROPYL MYRISTATE":          "Émollient",
+  "ISOPROPYL PALMITATE":          "Émollient",
+  "MYRISTYL MYRISTATE":           "Émollient",
+  "OCTYL STEARATE":               "Émollient",
+  "ETHYLHEXYL PALMITATE":         "Émollient",
+  "OCTYL PALMITATE":              "Émollient",
+  "DECYL OLEATE":                 "Émollient",
+  "ISOPROPYL ISOSTEARATE":        "Émollient",
+  "ISOSTEARYL NEOPENTANOATE":     "Émollient",
+  "BUTYL STEARATE":               "Émollient",
+  "CETYL ACETATE":                "Émollient",
+  "POLYGLYCERYL-3-DIISOSTEARATE": "Émollient",
+  "LAURIC ACID":                  "Émollient",
+  "MYRISTIC ACID":                "Émollient",
+  "LANOLIN ALCOHOL":              "Émollient",
+  "ACETYLATED LANOLIN ALCOHOL":   "Émollient",
+  "LAURETH-4":                    "Tensioactif",
+  "D&C RED NO. 17":               "Colorant",
+  "D&C RED NO. 21":               "Colorant",
+  "D&C RED NO. 27":               "Colorant",
+  "COCOS NUCIFERA OIL":           "Émollient",
+  "COCOS NUCIFERA FRUIT OIL":     "Émollient",
+  "THEOBROMA CACAO SEED BUTTER":  "Émollient",
+  "WHEAT GERM OIL":               "Émollient",
+  "TRITICUM VULGARE GERM OIL":    "Émollient",
+  "LINUM USITATISSIMUM SEED OIL": "Émollient",
+};
+
+function lookupFunctionalRole(norm: string): string | undefined {
+  const key = Object.keys(FUNCTIONAL_ROLES).find((k) => norm === k || norm.includes(k));
+  return key ? FUNCTIONAL_ROLES[key] : undefined;
+}
+
 const SURFACTANT_KEYS = new Set([
   "SODIUM LAURYL SULFATE", "SODIUM DODECYL SULFATE",
   "SODIUM LAURETH SULFATE", "AMMONIUM LAURYL SULFATE", "AMMONIUM LAURETH SULFATE",
@@ -479,34 +631,33 @@ export function analyzeIngredientsV2(raw: string, profile?: SkinProfile): Analys
     const edKey = Object.keys(ENDOCRINE_DISRUPTORS).find((k) => norm === k || norm.includes(k));
     if (edKey) {
       const entry = ENDOCRINE_DISRUPTORS[edKey];
-      return { raw: token, normalized: norm, flag: entry.severity === "high" ? "ed_high" : "ed_medium", reason: entry.reason, description: entry.description };
+      return { raw: token, normalized: norm, flag: entry.severity === "high" ? "ed_high" : "ed_medium", reason: entry.reason, description: entry.description, role: lookupFunctionalRole(norm) };
     }
 
     const allergenKey = Object.keys(ALLERGENS).find((k) => norm === k || norm.includes(k));
     if (allergenKey) {
       const entry = ALLERGENS[allergenKey];
-      return { raw: token, normalized: norm, flag: "allergen", euMandatory: entry.euMandatory, description: entry.description };
+      return { raw: token, normalized: norm, flag: "allergen", euMandatory: entry.euMandatory, description: entry.description, role: lookupFunctionalRole(norm) };
     }
 
     const irritantKey = Object.keys(IRRITANTS).find((k) => norm === k || norm.includes(k));
     if (irritantKey) {
       const entry = IRRITANTS[irritantKey];
-      return { raw: token, normalized: norm, flag: "irritant", reason: entry.reason, description: entry.description };
+      return { raw: token, normalized: norm, flag: "irritant", reason: entry.reason, description: entry.description, role: lookupFunctionalRole(norm) };
     }
 
     const petroKey = Object.keys(PETROCHEMICALS).find((k) => norm === k || norm.includes(k));
     if (petroKey) {
       const entry = PETROCHEMICALS[petroKey];
-      return { raw: token, normalized: norm, flag: "petrochem", description: entry.description };
+      return { raw: token, normalized: norm, flag: "petrochem", description: entry.description, role: lookupFunctionalRole(norm) };
     }
 
     const comedoKey = Object.keys(COMEDOGENIC_INGREDIENTS).find((k) => norm === k || norm.includes(k));
     if (comedoKey) {
       const entry = COMEDOGENIC_INGREDIENTS[comedoKey];
       if (entry.rating >= 3) {
-        // Fetch functional role from COMMON_INGREDIENTS so it's categorised correctly
         const commonKeyForComedo = Object.keys(COMMON_INGREDIENTS).find((k) => norm === k || norm.includes(k));
-        const role = commonKeyForComedo ? COMMON_INGREDIENTS[commonKeyForComedo].role : undefined;
+        const role = commonKeyForComedo ? COMMON_INGREDIENTS[commonKeyForComedo].role : lookupFunctionalRole(norm);
         return { raw: token, normalized: norm, flag: "comedogenic", reason: `Comédogène — indice ${entry.rating}/5`, description: entry.description, comedogenicRating: entry.rating, role };
       }
       // Rating 1–2 : not flagged, fall through to COMMON_INGREDIENTS for description

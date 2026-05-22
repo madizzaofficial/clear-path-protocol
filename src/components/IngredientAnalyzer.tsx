@@ -235,7 +235,7 @@ function IngredientRow({ ing }: { ing: Ing }) {
 function SignalSummaryCards({ result }: { result: AnalysisResultV2 }) {
   const comedogenic = result.ingredients.filter((i) => i.flag === "comedogenic");
   const petrochem   = result.ingredients.filter((i) => i.flag === "petrochem");
-  const allergens   = result.ingredients.filter((i) => i.flag === "allergen");
+  const allergens   = result.ingredients.filter((i) => i.flag === "allergen" && i.euMandatory === true);
   const irritants   = result.ingredients.filter((i) => i.flag === "irritant");
 
   if (!comedogenic.length && !petrochem.length && !allergens.length && !irritants.length) return null;
@@ -322,65 +322,54 @@ const ROLE_TO_CATEGORY: Record<string, string> = {
   "Antioxydant": "Antioxydants",
   "Apaisant": "Apaisants", "Protecteur": "Apaisants",
   "Barrière": "Barrière cutanée",
-  "Filtre UV minéral": "Filtres UV",
+  "Filtre UV minéral": "Filtres UV", "Filtre UV": "Filtres UV",
   "Humectant": "Hydratants",
   "Solvant": "Solvants",
   "Émollient": "Émollients",
   "Conservateur": "Conservateurs",
   "Épaississant": "Texturants", "Régulateur pH": "Texturants", "Chélateur": "Texturants",
+  "Parfum": "Parfums",
+  "Tensioactif": "Tensioactifs",
+  "Antibactérien": "Antibactériens",
+  "Colorant": "Colorants",
 };
 
-const FLAG_TO_CATEGORY: Partial<Record<IngFlag, string>> = {
-  ed_high:   "Perturbateurs endocriniens",
-  ed_medium: "Perturbateurs endocriniens",
-  allergen:  "Allergènes",
-  irritant:  "Irritants",
-  petrochem: "Pétrochimiques",
-  // comedogenic: intentionally absent — these use their functional role instead
-};
-
-const PRIORITY_CATS = ["Actifs", "Antioxydants", "Apaisants", "Barrière cutanée", "Filtres UV"];
-const SIGNAL_CATS   = ["Perturbateurs endocriniens", "Allergènes", "Irritants", "Pétrochimiques"];
-const FUNCTIONAL_CAT_ORDER = ["Hydratants", "Émollients", "Solvants", "Conservateurs", "Texturants", "Non classifié"];
+const ALL_CAT_ORDER = [
+  "Actifs", "Antioxydants", "Apaisants", "Barrière cutanée", "Filtres UV",
+  "Hydratants", "Émollients", "Solvants", "Conservateurs",
+  "Parfums", "Tensioactifs", "Antibactériens",
+  "Texturants", "Colorants", "Non classifié",
+];
 
 const CATEGORY_INFO: Record<string, string> = {
-  "Actifs":                       "Molécules à effet biologique démontré : exfoliants, vitamines, régulateurs de sébum, dépigmentants...",
-  "Antioxydants":                  "Protègent les cellules du stress oxydatif et freinent le vieillissement prématuré.",
-  "Apaisants":                     "Réduisent les rougeurs et inflammations. Idéaux pour les peaux réactives et sensibles.",
-  "Barrière cutanée":             "Céramides et lipides qui reconstituent le film hydrolipidique naturel de la peau.",
-  "Filtres UV":                    "Protègent des UVA/UVB. Les filtres minéraux (zinc, titane) sont les mieux tolérés.",
-  "Hydratants":                    "Humectants qui attirent et retiennent l'eau dans les couches superficielles de l'épiderme.",
-  "Solvants":                      "Base de la formule. Dissolvent les autres ingrédients et facilitent leur pénétration.",
-  "Émollients":                    "Adoucissent et assouplissent la peau en formant un film protecteur sur sa surface.",
-  "Conservateurs":                 "Empêchent la prolifération bactérienne pour préserver l'intégrité du produit.",
-  "Texturants":                    "Donnent la texture, l'épaisseur et la stabilité à la formule sans effet actif sur la peau.",
-  "Perturbateurs endocriniens":   "Molécules suspectées ou avérées d'interférer avec le système hormonal.",
-  "Allergènes":                    "Molécules pouvant provoquer des réactions de contact chez les peaux sensibles.",
-  "Irritants":                     "Peuvent altérer ou fragiliser la barrière cutanée, surtout en tête de liste.",
-  "Pétrochimiques":                "Dérivés du pétrole — inertes sur la peau mais d'origine non renouvelable.",
-  "Comédogènes":                   "Peuvent obstruer les pores et favoriser la formation de comédons.",
-  "Non classifié":                 "Ingrédients non encore répertoriés dans notre base de données.",
+  "Actifs":          "Molécules à effet biologique démontré : exfoliants, vitamines, régulateurs de sébum, dépigmentants...",
+  "Antioxydants":    "Protègent les cellules du stress oxydatif et freinent le vieillissement prématuré.",
+  "Apaisants":       "Réduisent les rougeurs et inflammations. Idéaux pour les peaux réactives et sensibles.",
+  "Barrière cutanée": "Céramides et lipides qui reconstituent le film hydrolipidique naturel de la peau.",
+  "Filtres UV":      "Protègent des UVA/UVB. Les filtres minéraux (zinc, titane) sont les mieux tolérés.",
+  "Hydratants":      "Humectants qui attirent et retiennent l'eau dans les couches superficielles de l'épiderme.",
+  "Solvants":        "Base de la formule. Dissolvent les autres ingrédients et facilitent leur pénétration.",
+  "Émollients":      "Adoucissent et assouplissent la peau en formant un film protecteur sur sa surface.",
+  "Conservateurs":   "Empêchent la prolifération bactérienne pour préserver l'intégrité du produit. Certains conservateurs sont des perturbateurs endocriniens suspectés.",
+  "Parfums":         "Molécules parfumantes — 26 allergènes EU à déclaration obligatoire. Peuvent provoquer des réactions de contact chez les peaux sensibles.",
+  "Tensioactifs":    "Agents lavants et moussants. Les tensioactifs forts (SLS, ALS) perturbent la barrière cutanée.",
+  "Antibactériens":  "Agents antimicrobiens — certains sont suspectés de perturber le microbiome cutané.",
+  "Texturants":      "Donnent la texture, l'épaisseur et la stabilité à la formule sans effet actif sur la peau.",
+  "Colorants":       "Pigments et colorants — certains peuvent être comédogènes pour les peaux acnéiques.",
+  "Non classifié":   "Ingrédients non encore répertoriés dans notre base de données.",
 };
 
 function GroupedIngredientList({ ingredients }: { ingredients: Ing[] }) {
-  const [showFunctional, setShowFunctional] = useState(false);
   const [openTip, setOpenTip] = useState<string | null>(null);
 
   const grouped = new Map<string, Ing[]>();
   for (const ing of ingredients) {
-    // comedogenic ingredients use their functional role (emollient, etc.) not a signal category
-    const cat =
-      ing.flag !== "ok" && ing.flag !== "comedogenic"
-        ? (FLAG_TO_CATEGORY[ing.flag] ?? "Non classifié")
-        : (ing.role ? (ROLE_TO_CATEGORY[ing.role] ?? "Non classifié") : "Non classifié");
+    const cat = ing.role ? (ROLE_TO_CATEGORY[ing.role] ?? "Non classifié") : "Non classifié";
     if (!grouped.has(cat)) grouped.set(cat, []);
     grouped.get(cat)!.push(ing);
   }
 
-  const priorityVisible = PRIORITY_CATS.filter((c) => grouped.has(c));
-  const signalVisible   = SIGNAL_CATS.filter((c) => grouped.has(c));
-  const functionalKeys  = FUNCTIONAL_CAT_ORDER.filter((c) => grouped.has(c));
-  const functionalCount = functionalKeys.reduce((n, c) => n + (grouped.get(c)?.length ?? 0), 0);
+  const visibleCats = ALL_CAT_ORDER.filter((c) => grouped.has(c));
 
   function renderCategory(cat: string) {
     const ings = grouped.get(cat)!;
@@ -422,21 +411,7 @@ function GroupedIngredientList({ ingredients }: { ingredients: Ing[] }) {
             {ingredients.length} analysés · cliquer sur un ingrédient pour le détail
           </p>
         </div>
-        {priorityVisible.map(renderCategory)}
-        {signalVisible.map(renderCategory)}
-        {functionalCount > 0 && (
-          <div className="px-6 py-4">
-            <button
-              type="button"
-              onClick={() => setShowFunctional((v) => !v)}
-              className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showFunctional ? "rotate-180" : ""}`} />
-              {showFunctional ? "Masquer" : "Voir"} les ingrédients fonctionnels ({functionalCount})
-            </button>
-            {showFunctional && <div className="mt-1">{functionalKeys.map(renderCategory)}</div>}
-          </div>
-        )}
+        {visibleCats.map(renderCategory)}
       </div>
     </TooltipProvider>
   );
