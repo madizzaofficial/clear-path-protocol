@@ -351,6 +351,50 @@ const FRENCH_TO_INCI: Record<string, string> = {
   // Pétrochimiques communs
   "CIRE MICROCRISTALLINE":                      "CERA MICROCRISTALLINA",
   "CIRE DE PARAFFINE":                          "PARAFFIN",
+
+  // Émollients / esters courants
+  "GLYCERYL MONOSTEAARTE":                      "GLYCERYL STEARATE",
+  "GLYCERYL MONOSTEARATE":                      "GLYCERYL STEARATE",
+  "MONOSTEARATE DE GLYCERYLE":                  "GLYCERYL STEARATE",
+  "MYRISTATE D ISOPROPYLE":                     "ISOPROPYL MYRISTATE",
+  "PALMITATE D ISOPROPYLE":                     "ISOPROPYL PALMITATE",
+
+  // Alcools gras
+  "ALCOOL CETOSTEARYLIQUE":                     "CETEARYL ALCOHOL",
+  "ALCOOL CETEARYLIQUE":                        "CETEARYL ALCOHOL",
+  "ALCOOL CETYLIQUE":                           "CETYL ALCOHOL",
+  "ALCOOL STEARYLIQUE":                         "STEARYL ALCOHOL",
+  "ALCOOL BEHENYLIQUE":                         "BEHENYL ALCOHOL",
+
+  // Antioxydants
+  "BUTYLHYDROXYTOLUENE":                        "BHT",
+  "HYDROXYTOLUENE BUTYLE":                      "BHT",
+  "BUTYLHYDROXYANISOLE":                        "BHA",
+
+  // Chélateurs
+  "EDETATE DISODIQUE":                          "DISODIUM EDTA",
+  "EDETATE DISODIQUE HYDRATE":                  "DISODIUM EDTA",
+  "EDTA DISODIQUE":                             "DISODIUM EDTA",
+  "TETRASODIUM EDTA":                           "TETRASODIUM EDTA",
+
+  // Émulsifiants PEG
+  "STEAARTE DE POLYOXY 40":                     "PEG-40 STEARATE",
+  "STEARATE DE POLYOXY 40":                     "PEG-40 STEARATE",
+  "STEARATE DE MACROGOL 40":                    "PEG-40 STEARATE",
+  "POLYSORBATE 20":                             "POLYSORBATE 20",
+  "POLYSORBATE 60":                             "POLYSORBATE 60",
+  "POLYSORBATE 80":                             "POLYSORBATE 80",
+
+  // Antiseptiques / actifs pharmaceutiques
+  "ISOPROPYLMETHYLPHENOL":                      "ISOPROPYLMETHYLPHENOL",
+  "ISOPROPYL METHYLPHENOL":                     "ISOPROPYLMETHYLPHENOL",
+  "IPMP":                                       "ISOPROPYLMETHYLPHENOL",
+  "IBUPROFEN PICONOL":                          "IBUPROFEN PICONOL",
+
+  // Divers
+  "DIMETHICONE":                                "DIMETHICONE",
+  "VASELINE BLANCHE":                           "PETROLATUM",
+  "PARAFFINE BLANCHE":                          "PETROLATUM",
 };
 
 // Traduit un nom normalisé (français ou INCI) vers son équivalent INCI.
@@ -368,10 +412,14 @@ function translateToInci(norm: string): string {
   return result || clean;
 }
 
+function stripQuantity(t: string): string {
+  return t.replace(/\s*\d+[,.]?\d*\s*(mg|g|ml|µg|mcg|%|mL|µL)\b/gi, "").trim();
+}
+
 export function analyzeIngredients(raw: string): AnalysisResult {
   const tokens = raw
     .split(/[,\n]|\s\.\s/)
-    .map((t) => t.trim())
+    .map((t) => stripQuantity(t.trim()))
     .filter(Boolean);
 
   const ingredients: AnalyzedIngredient[] = tokens.map((token) => {
@@ -805,6 +853,13 @@ export const COMMON_INGREDIENTS: Record<string, CommonEntry> = {
   "SODIUM ANISATE":                 { role: "Conservateur",     description: "Sel de l'acide anisique. Conservateur naturel antibactérien et antifongique. Peaux concernées : tous types." },
   "SORBIC ACID":                    { role: "Conservateur",     description: "Acide sorbique. Conservateur naturel actif contre levures et moisissures. Peaux concernées : tous types." },
 
+  // ─ Actifs pharmaceutiques / antiseptiques ─
+  "IBUPROFEN PICONOL":              { role: "Actif",            description: "Dérivé lipophile de l'ibuprofène. Anti-inflammatoire topique utilisé dans les crèmes OTC acné (Japon). Pénètre mieux dans la peau que l'ibuprofène seul. Peaux concernées : peaux acnéiques." },
+  "ISOPROPYLMETHYLPHENOL":          { role: "Antibactérien",    description: "IPMP (o-Cymen-5-ol). Antiseptique topique puissant, actif contre P. acnes. Très utilisé dans les soins anti-acné japonais. Bien toléré aux concentrations habituelles (0,1–0,3%). Peaux concernées : peaux acnéiques." },
+
+  // ─ Émulsifiants PEG supplémentaires ─
+  "PEG-40 STEARATE":                { role: "Émulsifiant",      description: "Émulsifiant non-ionique (stéarate polyéthoxylé). Stabilise les émulsions huile-dans-eau. Aussi solubilisateur d'huiles. Peaux concernées : tous types." },
+
   // ─ Régulateurs pH supplémentaires (INCIDecoder) ─
   "PHOSPHORIC ACID":                { role: "Régulateur pH",    description: "Acide phosphorique. Ajuste le pH des formules. Utilisé à très faibles doses. Peaux concernées : tous types." },
   "TROMETHAMINE":                   { role: "Régulateur pH",    description: "Trométhamine (TRIS). Base organique douce pour ajuster le pH, notamment des formules acides (carbomère, acide hyaluronique). Bien tolérée. Peaux concernées : tous types." },
@@ -1035,7 +1090,7 @@ function makeBarometer(score: number): Barometer {
 }
 
 export function analyzeIngredientsV2(raw: string, profile?: SkinProfile): AnalysisResultV2 {
-  const tokens = raw.split(/[,\n]|\s\.\s/).map((t) => t.trim()).filter(Boolean);
+  const tokens = raw.split(/[,\n]|\s\.\s/).map((t) => stripQuantity(t.trim())).filter(Boolean);
 
   const ingredients: AnalyzedIngredient[] = tokens.map((token) => {
     const norm = translateToInci(normalize(token));
