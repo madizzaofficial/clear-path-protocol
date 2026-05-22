@@ -420,6 +420,13 @@ function stripQuantity(t: string): string {
   return t.replace(/\s*\d+[,.]?\d*\s*(mg|g|ml|µg|mcg|%|mL|µL)\b/gi, "").trim();
 }
 
+// Word-boundary match: prevents "ETHANOL" from matching "PHENOXYETHANOL" or "TRIETHANOLAMINE"
+function matchesKey(norm: string, key: string): boolean {
+  if (norm === key) return true;
+  const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(^|[\\s/,])${escaped}($|[\\s/,])`).test(norm);
+}
+
 export function analyzeIngredients(raw: string): AnalysisResult {
   const tokens = raw
     .split(/(?<!\d),(?!\d)|\n|\s\.\s/)
@@ -430,7 +437,7 @@ export function analyzeIngredients(raw: string): AnalysisResult {
     const norm = translateToInci(normalize(token));
 
     const edKey = Object.keys(ENDOCRINE_DISRUPTORS).find(
-      (k) => norm === k || norm.includes(k)
+      (k) => matchesKey(norm, k)
     );
     if (edKey) {
       const entry = ENDOCRINE_DISRUPTORS[edKey];
@@ -443,7 +450,7 @@ export function analyzeIngredients(raw: string): AnalysisResult {
     }
 
     const allergenKey = Object.keys(ALLERGENS).find(
-      (k) => norm === k || norm.includes(k)
+      (k) => matchesKey(norm, k)
     );
     if (allergenKey) {
       const entry = ALLERGENS[allergenKey];
@@ -456,7 +463,7 @@ export function analyzeIngredients(raw: string): AnalysisResult {
     }
 
     const irritantKey = Object.keys(IRRITANTS).find(
-      (k) => norm === k || norm.includes(k)
+      (k) => matchesKey(norm, k)
     );
     if (irritantKey) {
       const entry = IRRITANTS[irritantKey];
@@ -469,7 +476,7 @@ export function analyzeIngredients(raw: string): AnalysisResult {
     }
 
     const petroKey = Object.keys(PETROCHEMICALS).find(
-      (k) => norm === k || norm.includes(k)
+      (k) => matchesKey(norm, k)
     );
     if (petroKey) {
       const entry = PETROCHEMICALS[petroKey];
@@ -481,7 +488,7 @@ export function analyzeIngredients(raw: string): AnalysisResult {
     }
 
     const comedoKey = Object.keys(COMEDOGENIC_INGREDIENTS).find(
-      (k) => norm === k || norm.includes(k)
+      (k) => matchesKey(norm, k)
     );
     if (comedoKey) {
       const entry = COMEDOGENIC_INGREDIENTS[comedoKey];
@@ -1133,7 +1140,7 @@ export const FUNCTIONAL_ROLES: Record<string, string> = {
 };
 
 function lookupFunctionalRole(norm: string): string | undefined {
-  const key = Object.keys(FUNCTIONAL_ROLES).find((k) => norm === k || norm.includes(k));
+  const key = Object.keys(FUNCTIONAL_ROLES).find((k) => matchesKey(norm, k));
   return key ? FUNCTIONAL_ROLES[key] : undefined;
 }
 
@@ -1208,42 +1215,42 @@ export function analyzeIngredientsV2(raw: string, profile?: SkinProfile): Analys
   const ingredients: AnalyzedIngredient[] = tokens.map((token) => {
     const norm = translateToInci(normalize(token));
 
-    const edKey = Object.keys(ENDOCRINE_DISRUPTORS).find((k) => norm === k || norm.includes(k));
+    const edKey = Object.keys(ENDOCRINE_DISRUPTORS).find((k) => matchesKey(norm, k));
     if (edKey) {
       const entry = ENDOCRINE_DISRUPTORS[edKey];
       return { raw: token, normalized: norm, flag: entry.severity === "high" ? "ed_high" : "ed_medium", reason: entry.reason, description: entry.description, role: lookupFunctionalRole(norm) ?? inferRoleFromName(norm)?.role };
     }
 
-    const allergenKey = Object.keys(ALLERGENS).find((k) => norm === k || norm.includes(k));
+    const allergenKey = Object.keys(ALLERGENS).find((k) => matchesKey(norm, k));
     if (allergenKey) {
       const entry = ALLERGENS[allergenKey];
       return { raw: token, normalized: norm, flag: "allergen", euMandatory: entry.euMandatory, description: entry.description, role: lookupFunctionalRole(norm) ?? inferRoleFromName(norm)?.role };
     }
 
-    const irritantKey = Object.keys(IRRITANTS).find((k) => norm === k || norm.includes(k));
+    const irritantKey = Object.keys(IRRITANTS).find((k) => matchesKey(norm, k));
     if (irritantKey) {
       const entry = IRRITANTS[irritantKey];
       return { raw: token, normalized: norm, flag: "irritant", reason: entry.reason, description: entry.description, role: lookupFunctionalRole(norm) ?? inferRoleFromName(norm)?.role };
     }
 
-    const petroKey = Object.keys(PETROCHEMICALS).find((k) => norm === k || norm.includes(k));
+    const petroKey = Object.keys(PETROCHEMICALS).find((k) => matchesKey(norm, k));
     if (petroKey) {
       const entry = PETROCHEMICALS[petroKey];
       return { raw: token, normalized: norm, flag: "petrochem", description: entry.description, role: lookupFunctionalRole(norm) ?? inferRoleFromName(norm)?.role };
     }
 
-    const comedoKey = Object.keys(COMEDOGENIC_INGREDIENTS).find((k) => norm === k || norm.includes(k));
+    const comedoKey = Object.keys(COMEDOGENIC_INGREDIENTS).find((k) => matchesKey(norm, k));
     if (comedoKey) {
       const entry = COMEDOGENIC_INGREDIENTS[comedoKey];
       if (entry.rating >= 3) {
-        const commonKeyForComedo = Object.keys(COMMON_INGREDIENTS).find((k) => norm === k || norm.includes(k));
+        const commonKeyForComedo = Object.keys(COMMON_INGREDIENTS).find((k) => matchesKey(norm, k));
         const role = commonKeyForComedo ? COMMON_INGREDIENTS[commonKeyForComedo].role : (lookupFunctionalRole(norm) ?? inferRoleFromName(norm)?.role);
         return { raw: token, normalized: norm, flag: "comedogenic", reason: `Comédogène — indice ${entry.rating}/5`, description: entry.description, comedogenicRating: entry.rating, role };
       }
       // Rating 1–2 : not flagged, fall through to COMMON_INGREDIENTS for description
     }
 
-    const commonKey = Object.keys(COMMON_INGREDIENTS).find((k) => norm === k || norm.includes(k));
+    const commonKey = Object.keys(COMMON_INGREDIENTS).find((k) => matchesKey(norm, k));
     if (commonKey) {
       const entry = COMMON_INGREDIENTS[commonKey];
       return { raw: token, normalized: norm, flag: "ok", description: `${entry.role} — ${entry.description}`, role: entry.role };
