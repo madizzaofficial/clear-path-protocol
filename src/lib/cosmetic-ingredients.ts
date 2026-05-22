@@ -931,6 +931,36 @@ export const COMMON_INGREDIENTS: Record<string, CommonEntry> = {
 
   // ─ Acide hyaluronique hydrolysé ─
   "HYDROLYZED HYALURONIC ACID":     { role: "Humectant",        description: "Acide hyaluronique fragmenté (faible poids moléculaire). Pénètre dans les couches suprabasales. Complément du HA standard pour une hydratation multi-niveaux. Peaux concernées : tous types." },
+
+  // ─ Agents conditionneurs cationiques ─
+  "BEHENTRIMONIUM CHLORIDE":        { role: "Émulsifiant",      description: "Tensioactif cationique (ammonium quaternaire C22). Conditionneur et émulsifiant, lisse et démêle. Très utilisé dans les soins capillaires et crèmes riches. Peaux concernées : tous types." },
+
+  // ─ Huiles végétales supplémentaires ─
+  "RICINUS COMMUNIS SEED OIL":      { role: "Émollient",        description: "Huile de ricin. Riche en acide ricinoléique (90%), très filmogène et occlusif. Épaissit les formules. Légèrement comédogène (1/5). Peaux concernées : tous types sauf peaux très acnéiques en formule épaisse." },
+  "MAURITIA FLEXUOSA FRUIT OIL":    { role: "Émollient",        description: "Huile de buriti (palmier amazonie). Exceptionnellement riche en bêta-carotène et acides oléique/palmitique. Antioxydante, régénérante et protectrice solaire naturelle. Peaux concernées : tous types, idéal peaux matures et sèches." },
+
+  // ─ Protéines hydrolysées ─
+  "HYDROLYZED VEGETABLE PROTEIN PG-PROPYL SILANETRIOL": { role: "Actif", description: "Protéine végétale hydrolysée greffée silicone. Filmogène, renforce la cohésion des fibres capillaires et la barrière cutanée. Peaux concernées : tous types, idéal peau fragilisée." },
+  "HYDROLYZED RICE PROTEIN":        { role: "Actif",            description: "Protéine de riz hydrolysée. Filmogène légère, lisse la surface et renforce la barrière. Volume et éclat. Peaux concernées : tous types." },
+
+  // ─ Extraits végétaux supplémentaires ─
+  "TRIFOLIUM PRATENSE FLOWER EXTRACT": { role: "Antioxydant",   description: "Extrait de fleurs de trèfle rouge. Riche en isoflavones (formonétine, biochaïnine A). Antioxydant et soutien à la densité cutanée. Peaux concernées : peaux matures." },
+  "MENTHA PIPERITA LEAF EXTRACT":   { role: "Actif",            description: "Extrait de feuilles de menthe poivrée. Rafraîchissant, antiseptique léger et stimulant de la microcirculation. Peut piquer sur peaux très sensibles. Peaux concernées : peaux grasses et acnéiques." },
+
+  // ─ Peptides capillaires / anti-chute ─
+  "ACETYL TETRAPEPTIDE-3":          { role: "Actif",            description: "Tétrapeptide acétylé. Stimule l'ancrage des follicules pileux en boostant les protéines de la matrice extracellulaire. Actif anti-chute et densifiant. Peaux concernées : cuir chevelu." },
+
+  // ─ Vitamines sous forme acide ─
+  "NIACIN":                         { role: "Actif",            description: "Niacine (vitamine B3, acide nicotinique). Précurseur du nicotinamide. À forte concentration, vasodilatateur local (flush). Distincts de la niacinamide — moins utilisé en topique. Peaux concernées : tous types." },
+
+  // ─ Polysaccharides filmogènes ─
+  "DEXTRAN":                        { role: "Humectant",        description: "Polysaccharide (glucose). Filmogène hydrophile, volumisant en capillaire. Hydratant de surface, améliore la texture. Peaux concernées : tous types." },
+
+  // ─ Colorants naturels ─
+  "CARAMEL":                        { role: "Colorant",         description: "Colorant alimentaire (sucre caramélisé, E150). Teinte brun/dorée dans les formules. Utilisé à très faibles doses. Peaux concernées : tous types." },
+
+  // ─ Régulateurs pH naturels ─
+  "VINEGAR":                        { role: "Régulateur pH",    description: "Vinaigre (acide acétique dilué). Acidifie légèrement les formules, propriétés antimicrobiennes douces. Peaux concernées : tous types." },
 };
 
 // ─── V2 : Analyse multi-baromètres ────────────────────────────────────────────
