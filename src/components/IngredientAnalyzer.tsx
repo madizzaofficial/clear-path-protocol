@@ -743,46 +743,51 @@ export function ProductComparator({ skinProfile }: { skinProfile: SkinProfile | 
 
 function LiveBarcodeScanner({ onDetect, onClose }: { onDetect: (code: string) => void; onClose: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [status, setStatus] = useState<"starting" | "scanning" | "unsupported" | "denied">("starting");
+  const [status, setStatus] = useState<"starting" | "scanning" | "denied">("starting");
+  const controlsRef = useRef<{ stop: () => void } | null>(null);
 
   useEffect(() => {
-    if (!("BarcodeDetector" in window)) { setStatus("unsupported"); return; }
+    let cancelled = false;
 
-    let stopped = false;
-    let stream: MediaStream | null = null;
-    let rafId: number | null = null;
+    async function start() {
+      const { BrowserMultiFormatReader } = await import("@zxing/browser");
+      const reader = new BrowserMultiFormatReader();
 
-    const bd = new (window as any).BarcodeDetector({
-      formats: ["ean_13", "ean_8", "upc_a", "upc_e", "code_128"],
-    });
+      const devices = await BrowserMultiFormatReader.listVideoInputDevices().catch(() => []);
+      // prefer back camera on mobile
+      const deviceId = devices.find((d) => /back|rear|environment/i.test(d.label))?.deviceId
+        ?? devices[devices.length - 1]?.deviceId;
 
-    function tick() {
-      if (stopped || !videoRef.current) return;
-      bd.detect(videoRef.current)
-        .then((results: any[]) => {
-          if (stopped) return;
-          if (results.length > 0) { onDetect(results[0].rawValue); }
-          else { rafId = requestAnimationFrame(tick); }
+      if (cancelled) return;
+
+      const controls = await reader
+        .decodeFromVideoDevice(deviceId ?? undefined, videoRef.current!, (result, err) => {
+          if (cancelled) return;
+          if (result) {
+            onDetect(result.getText());
+            return;
+          }
+          // NotFoundException fires every frame when no barcode visible — that's normal
+          if (err && (err as Error).name !== "NotFoundException") {
+            setStatus("denied");
+          } else if (err === undefined || (err as Error).name === "NotFoundException") {
+            setStatus((s) => s === "starting" ? "scanning" : s);
+          }
         })
-        .catch(() => { rafId = requestAnimationFrame(tick); });
+        .catch(() => null);
+
+      if (cancelled) { controls?.stop(); return; }
+      if (!controls) { setStatus("denied"); return; }
+      controlsRef.current = controls;
+      setStatus("scanning");
     }
 
-    navigator.mediaDevices
-      .getUserMedia({ video: { facingMode: "environment" } })
-      .then((s) => {
-        if (stopped) { s.getTracks().forEach((t) => t.stop()); return; }
-        stream = s;
-        const v = videoRef.current;
-        if (!v) return;
-        v.srcObject = s;
-        v.play().then(() => { setStatus("scanning"); tick(); });
-      })
-      .catch(() => setStatus("denied"));
+    start().catch(() => { if (!cancelled) setStatus("denied"); });
 
     return () => {
-      stopped = true;
-      if (rafId) cancelAnimationFrame(rafId);
-      if (stream) stream.getTracks().forEach((t) => t.stop());
+      cancelled = true;
+      controlsRef.current?.stop();
+      controlsRef.current = null;
     };
   }, [onDetect]);
 
@@ -796,8 +801,7 @@ function LiveBarcodeScanner({ onDetect, onClose }: { onDetect: (code: string) =>
     </div>
   );
 
-  if (status === "unsupported") return overlay("Scanner non disponible", "Fonctionne sur Chrome / Edge (Android ou desktop). Entre le code EAN ci-dessous.");
-  if (status === "denied")      return overlay("Accès caméra refusé", "Autorise la caméra dans les paramètres de ton navigateur.");
+  if (status === "denied") return overlay("Accès caméra refusé", "Autorise la caméra dans les paramètres de ton navigateur.");
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-black" style={{ aspectRatio: "4/3", maxHeight: 280 }}>
