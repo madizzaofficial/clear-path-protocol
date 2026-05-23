@@ -6,6 +6,7 @@ import { db } from "@/lib/firebase";
 import { collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
 import {
+  Camera,
   ChevronDown,
   ImageOff,
   Loader2,
@@ -39,6 +40,7 @@ import { uploadProductImageFn } from "@/lib/upload-image";
 import { lookupBarcodeFn, extractInciFromUrlFn } from "@/lib/product-ingestion";
 import { computeInciHash, normalizeInciText } from "@/lib/inci-hash";
 import type { CatalogProduct } from "@/lib/product-catalog";
+import { LiveBarcodeScanner } from "@/components/LiveBarcodeScanner";
 
 // Re-export so existing imports in RoutineStepEditor and admin routes keep working
 export type { CatalogProduct } from "@/lib/product-catalog";
@@ -414,6 +416,7 @@ function ProductDialog({
   const [purchaseUrl, setPurchaseUrl] = useState("");
   const [inciNormalized, setInciNormalized] = useState("");
   const [showInci, setShowInci] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
@@ -432,6 +435,7 @@ function ProductDialog({
       setPurchaseUrl(product.purchaseUrl ?? "");
       setInciNormalized(product.inciNormalized ?? "");
       setShowInci(!!product.inciNormalized);
+      setShowScanner(false);
       setUploadError(null);
       setUploading(false);
       setImporting(false);
@@ -501,6 +505,27 @@ function ProductDialog({
     }
   }
 
+  async function handleScanDetected(code: string) {
+    setShowScanner(false);
+    setBarcode(code);
+    // Auto-import immediately after scan
+    setImporting(true);
+    setImportError(null);
+    try {
+      const result = await lookupBarcodeFn({ data: { barcode: code } });
+      if (!result) { setImportError("Produit non trouvé pour ce code-barres."); return; }
+      if (result.productName) setName(result.productName);
+      if (result.brand) setBrand(result.brand);
+      if (result.imageUrl) setImageUrl(result.imageUrl);
+      if (result.inci) { setInciNormalized(result.inci); setShowInci(true); }
+      if (!result.inci) setImportError("Produit trouvé mais sans liste INCI.");
+    } catch {
+      setImportError("Erreur lors de la recherche.");
+    } finally {
+      setImporting(false);
+    }
+  }
+
   async function handleSubmit() {
     let hash: string | undefined;
     if (inciNormalized.trim()) {
@@ -556,30 +581,45 @@ function ProductDialog({
             />
           </div>
 
-          {/* Barcode + import */}
+          {/* Barcode + scan + import */}
           <div>
             <label className="mb-2 block text-sm font-medium text-foreground/80">
               Code-barres <span className="font-normal text-muted-foreground">(EAN/UPC)</span>
             </label>
-            <div className="flex gap-2">
-              <input
-                autoComplete="off"
-                inputMode="numeric"
-                value={barcode}
-                onChange={(e) => setBarcode(e.target.value)}
-                placeholder="3600523459858"
-                className="h-11 flex-1 rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+            {showScanner ? (
+              <LiveBarcodeScanner
+                onDetect={handleScanDetected}
+                onClose={() => setShowScanner(false)}
               />
-              <button
-                type="button"
-                onClick={handleImportBarcode}
-                disabled={!barcode.trim() || importing}
-                className="flex items-center gap-1.5 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted disabled:opacity-40"
-              >
-                {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-                Importer
-              </button>
-            </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  autoComplete="off"
+                  inputMode="numeric"
+                  value={barcode}
+                  onChange={(e) => setBarcode(e.target.value)}
+                  placeholder="3600523459858"
+                  className="h-11 flex-1 rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowScanner(true)}
+                  title="Scanner avec la caméra"
+                  className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-background text-muted-foreground transition-colors hover:bg-muted"
+                >
+                  <Camera className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleImportBarcode}
+                  disabled={!barcode.trim() || importing}
+                  className="flex items-center gap-1.5 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted disabled:opacity-40"
+                >
+                  {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                  Importer
+                </button>
+              </div>
+            )}
           </div>
 
           {/* URL import */}
