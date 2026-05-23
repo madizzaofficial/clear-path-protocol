@@ -6,6 +6,7 @@ export type BarcodeResult = {
   productName: string | null;
   brand: string | null;
   inci: string | null;
+  imageUrl: string | null;
 };
 
 async function lookupInciApi(barcode: string): Promise<BarcodeResult | null> {
@@ -32,12 +33,13 @@ async function lookupInciApi(barcode: string): Promise<BarcodeResult | null> {
     productName: (p.name as string) || null,
     brand: (p.brand as string) || null,
     inci,
+    imageUrl: (p.image ?? p.imageUrl ?? p.image_url ?? null) as string | null,
   };
 }
 
 async function lookupOpenBeautyFacts(barcode: string): Promise<BarcodeResult | null> {
   const res = await fetch(
-    `https://world.openbeautyfacts.org/api/v2/product/${encodeURIComponent(barcode)}.json?fields=product_name,brands,ingredients_text`,
+    `https://world.openbeautyfacts.org/api/v2/product/${encodeURIComponent(barcode)}.json?fields=product_name,brands,ingredients_text,image_url`,
     {
       headers: { "User-Agent": "ProtocoleClear/1.0 (contact@protocole-clear.com)" },
       signal: AbortSignal.timeout(7000),
@@ -51,6 +53,7 @@ async function lookupOpenBeautyFacts(barcode: string): Promise<BarcodeResult | n
     productName: (p.product_name as string) || null,
     brand: (p.brands as string) || null,
     inci: (p.ingredients_text as string) || null,
+    imageUrl: (p.image_url as string) || null,
   };
 }
 
@@ -69,6 +72,7 @@ export type UrlExtractResult = {
   inci: string;
   productName: string | null;
   brand: string | null;
+  imageUrl: string | null;
 };
 
 export const extractInciFromUrlFn = createServerFn({ method: "POST" })
@@ -87,6 +91,11 @@ export const extractInciFromUrlFn = createServerFn({ method: "POST" })
     if (!pageRes.ok) throw new Error("PAGE_INACCESSIBLE");
 
     const html = await pageRes.text();
+
+    // Extract og:image before stripping tags — most product pages have it
+    const ogImageMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+      ?? html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+    const ogImage = ogImageMatch?.[1] ?? null;
 
     // Strip scripts, styles, tags — keep text only, truncate to ~3k tokens
     const text = html
@@ -124,5 +133,6 @@ export const extractInciFromUrlFn = createServerFn({ method: "POST" })
       inci: parsed.inci as string,
       productName: (parsed.productName as string) || null,
       brand: (parsed.brand as string) || null,
+      imageUrl: ogImage,
     };
   });

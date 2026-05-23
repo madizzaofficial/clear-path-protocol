@@ -844,22 +844,22 @@ const INGEST_ERRORS: Record<string, string> = {
 };
 
 export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile | null }) {
-  const [method, setMethod] = useState<InputMethod>("text");
+  const [method, setMethod] = useState<InputMethod>("barcode");
   const [input, setInput] = useState("");
   const [barcodeVal, setBarcodeVal] = useState("");
   const [urlVal, setUrlVal] = useState("");
   const [result, setResult] = useState<AnalysisResultV2 | null>(null);
   const [currentHash, setCurrentHash] = useState<string | null>(null);
-  const [productMeta, setProductMeta] = useState<{ name: string | null; brand: string | null } | null>(null);
+  const [productMeta, setProductMeta] = useState<{ name: string | null; brand: string | null; imageUrl: string | null } | null>(null);
   const [ingesting, setIngesting] = useState(false);
   const [ingestError, setIngestError] = useState<string | null>(null);
   const [showScanner, setShowScanner] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
 
-  function applyInci(inci: string, meta?: { name: string | null; brand: string | null }) {
+  function applyInci(inci: string, meta?: { name: string | null; brand: string | null; imageUrl?: string | null }) {
     const analysis = analyzeIngredientsV2(inci, skinProfile ?? undefined);
     setResult(analysis);
-    setProductMeta(meta ?? null);
+    setProductMeta(meta ? { name: meta.name, brand: meta.brand, imageUrl: meta.imageUrl ?? null } : null);
     setIngestError(null);
     logUnclassifiedIngredients(analysis.ingredients);
     // Hash + cache in background
@@ -878,23 +878,30 @@ export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile |
     applyInci(input);
   }
 
-  async function handleBarcodeSearch() {
-    if (!barcodeVal.trim()) return;
+  async function searchBarcode(code: string) {
+    const trimmed = code.trim();
+    if (!trimmed) return;
+    setBarcodeVal(trimmed);
+    setShowScanner(false);
     setIngesting(true);
     setIngestError(null);
     try {
-      const product = await lookupBarcodeFn({ data: { barcode: barcodeVal.trim() } });
+      const product = await lookupBarcodeFn({ data: { barcode: trimmed } });
       if (!product?.inci) {
-        setIngestError("Produit non trouvé dans la base Open Beauty Facts. Colle la liste INCI manuellement.");
+        setIngestError("Produit non trouvé. Colle la liste INCI manuellement.");
         return;
       }
       setInput(product.inci);
-      applyInci(product.inci, { name: product.productName, brand: product.brand });
+      applyInci(product.inci, { name: product.productName, brand: product.brand, imageUrl: product.imageUrl });
     } catch {
       setIngestError("Erreur lors de la recherche. Réessaie.");
     } finally {
       setIngesting(false);
     }
+  }
+
+  function handleBarcodeSearch() {
+    searchBarcode(barcodeVal);
   }
 
   async function handleUrlExtract() {
@@ -904,7 +911,7 @@ export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile |
     try {
       const extracted = await extractInciFromUrlFn({ data: { url: urlVal.trim() } });
       setInput(extracted.inci);
-      applyInci(extracted.inci, { name: extracted.productName, brand: extracted.brand });
+      applyInci(extracted.inci, { name: extracted.productName, brand: extracted.brand, imageUrl: extracted.imageUrl });
     } catch (err: any) {
       setIngestError(INGEST_ERRORS[err?.message] ?? "Erreur lors de l'extraction.");
     } finally {
@@ -913,8 +920,7 @@ export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile |
   }
 
   function handleBarcodeDetected(code: string) {
-    setBarcodeVal(code);
-    setShowScanner(false);
+    searchBarcode(code);
   }
 
   const LEGEND = (
@@ -935,9 +941,9 @@ export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile |
         {/* Method selector */}
         <div className="flex gap-1 rounded-xl bg-muted/50 p-1">
           {([
-            { id: "text",    icon: FlaskConical, label: "INCI texte" },
             { id: "barcode", icon: Barcode,      label: "Code-barres" },
             { id: "url",     icon: Link,         label: "URL produit" },
+            { id: "text",    icon: FlaskConical, label: "INCI texte" },
           ] as { id: InputMethod; icon: React.ElementType; label: string }[]).map(({ id, icon: Icon, label }) => (
             <button
               key={id}
@@ -1053,8 +1059,16 @@ export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile |
         <>
           {/* Product metadata (barcode / URL source) */}
           {productMeta && (productMeta.name || productMeta.brand) && (
-            <div className="flex items-center gap-2 rounded-2xl border border-border/60 bg-card px-4 py-3">
-              <FlaskConical className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card px-4 py-3">
+              {productMeta.imageUrl ? (
+                <img
+                  src={productMeta.imageUrl}
+                  alt={productMeta.name ?? ""}
+                  className="h-14 w-14 shrink-0 rounded-xl object-contain bg-muted/30"
+                />
+              ) : (
+                <FlaskConical className="h-4 w-4 shrink-0 text-muted-foreground" />
+              )}
               <div>
                 {productMeta.name && <p className="text-sm font-semibold">{productMeta.name}</p>}
                 {productMeta.brand && <p className="text-xs text-muted-foreground">{productMeta.brand}</p>}
