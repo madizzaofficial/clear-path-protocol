@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 
-// ─── Barcode lookup (Open Beauty Facts — free, no key) ────────────────────────
+// ─── Barcode lookup (inciapi.com → fallback Open Beauty Facts) ────────────────
 
 export type BarcodeResult = {
   productName: string | null;
@@ -8,24 +8,59 @@ export type BarcodeResult = {
   inci: string | null;
 };
 
+async function lookupInciApi(barcode: string): Promise<BarcodeResult | null> {
+  const apiKey = process.env.INCI_API_KEY;
+  if (!apiKey) return null;
+
+  const res = await fetch(`https://inciapi.com/v1/products/${encodeURIComponent(barcode)}`, {
+    headers: { "X-API-Key": apiKey },
+    signal: AbortSignal.timeout(7000),
+  });
+
+  // 404 = not in their DB yet → signal to try fallback
+  if (res.status === 404) return null;
+  if (!res.ok) return null;
+
+  const json = await res.json().catch(() => null);
+  const p = json?.product;
+  if (!p) return null;
+
+  const inciArray: string[] = p?.details?.inci ?? [];
+  const inci = inciArray.length > 0 ? inciArray.join(", ") : null;
+
+  return {
+    productName: (p.name as string) || null,
+    brand: (p.brand as string) || null,
+    inci,
+  };
+}
+
+async function lookupOpenBeautyFacts(barcode: string): Promise<BarcodeResult | null> {
+  const res = await fetch(
+    `https://world.openbeautyfacts.org/api/v2/product/${encodeURIComponent(barcode)}.json?fields=product_name,brands,ingredients_text`,
+    {
+      headers: { "User-Agent": "ProtocoleClear/1.0 (contact@protocole-clear.com)" },
+      signal: AbortSignal.timeout(7000),
+    }
+  );
+  if (!res.ok) return null;
+  const json = await res.json().catch(() => null);
+  if (!json || json.status !== 1) return null;
+  const p = json.product ?? {};
+  return {
+    productName: (p.product_name as string) || null,
+    brand: (p.brands as string) || null,
+    inci: (p.ingredients_text as string) || null,
+  };
+}
+
 export const lookupBarcodeFn = createServerFn({ method: "POST" })
   .inputValidator((d: { barcode: string }) => d)
   .handler(async (ctx): Promise<BarcodeResult | null> => {
     const { barcode } = ctx.data;
-    const url = `https://world.openbeautyfacts.org/api/v2/product/${encodeURIComponent(barcode)}.json?fields=product_name,brands,ingredients_text`;
-    const res = await fetch(url, {
-      headers: { "User-Agent": "ProtocoleClear/1.0 (contact@protocole-clear.com)" },
-      signal: AbortSignal.timeout(7000),
-    });
-    if (!res.ok) return null;
-    const json = await res.json().catch(() => null);
-    if (!json || json.status !== 1) return null;
-    const p = json.product ?? {};
-    return {
-      productName: (p.product_name as string) || null,
-      brand: (p.brands as string) || null,
-      inci: (p.ingredients_text as string) || null,
-    };
+    const inciResult = await lookupInciApi(barcode).catch(() => null);
+    if (inciResult?.inci) return inciResult;
+    return lookupOpenBeautyFacts(barcode).catch(() => null);
   });
 
 // ─── URL ingestion (AI-assisted INCI extraction from HTML) ────────────────────
