@@ -760,24 +760,23 @@ function LiveBarcodeScanner({ onDetect, onClose }: { onDetect: (code: string) =>
 
       if (cancelled) return;
 
-      const controls = await reader
-        .decodeFromVideoDevice(deviceId ?? undefined, videoRef.current!, (result, err) => {
-          if (cancelled) return;
-          if (result) {
-            onDetect(result.getText());
-            return;
+      let controls: { stop: () => void } | null = null;
+      try {
+        controls = await reader.decodeFromVideoDevice(
+          deviceId ?? undefined,
+          videoRef.current!,
+          (result) => {
+            // All decode errors (NotFoundException, ChecksumException, FormatException)
+            // are normal — they mean no barcode found this frame. Only handle results.
+            if (!cancelled && result) onDetect(result.getText());
           }
-          // NotFoundException fires every frame when no barcode visible — that's normal
-          if (err && (err as Error).name !== "NotFoundException") {
-            setStatus("denied");
-          } else if (err === undefined || (err as Error).name === "NotFoundException") {
-            setStatus((s) => s === "starting" ? "scanning" : s);
-          }
-        })
-        .catch(() => null);
+        );
+      } catch {
+        if (!cancelled) setStatus("denied");
+        return;
+      }
 
       if (cancelled) { controls?.stop(); return; }
-      if (!controls) { setStatus("denied"); return; }
       controlsRef.current = controls;
       setStatus("scanning");
     }
