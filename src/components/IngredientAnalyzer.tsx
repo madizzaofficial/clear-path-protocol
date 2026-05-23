@@ -878,6 +878,17 @@ export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile |
     applyInci(input);
   }
 
+  function toInciDecoderSlug(brand: string | null, name: string | null): string {
+    return [brand, name]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase()
+      .normalize("NFD").replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-z0-9\s]/g, "")
+      .trim()
+      .replace(/\s+/g, "-");
+  }
+
   async function searchBarcode(code: string) {
     const trimmed = code.trim();
     if (!trimmed) return;
@@ -887,12 +898,42 @@ export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile |
     setIngestError(null);
     try {
       const product = await lookupBarcodeFn({ data: { barcode: trimmed } });
-      if (!product?.inci) {
-        setIngestError("Produit non trouvé. Colle la liste INCI manuellement.");
+
+      // ── Got INCI directly ──────────────────────────────────────────────────
+      if (product?.inci) {
+        setInput(product.inci);
+        applyInci(product.inci, { name: product.productName, brand: product.brand, imageUrl: product.imageUrl });
         return;
       }
-      setInput(product.inci);
-      applyInci(product.inci, { name: product.productName, brand: product.brand, imageUrl: product.imageUrl });
+
+      // ── Product found but no INCI → try InciDecoder auto-slug ─────────────
+      if (product?.productName) {
+        setIngestError("Composition introuvable — recherche sur InciDecoder…");
+        const slug = toInciDecoderSlug(product.brand, product.productName);
+        try {
+          const extracted = await extractInciFromUrlFn({
+            data: { url: `https://incidecoder.com/products/${slug}` },
+          });
+          setInput(extracted.inci);
+          setIngestError(null);
+          applyInci(extracted.inci, {
+            name: product.productName ?? extracted.productName,
+            brand: product.brand ?? extracted.brand,
+            imageUrl: product.imageUrl ?? extracted.imageUrl,
+          });
+          return;
+        } catch {
+          // slug guess failed — pre-fill URL tab with InciDecoder search
+        }
+        const q = encodeURIComponent([product.brand, product.productName].filter(Boolean).join(" "));
+        setUrlVal(`https://incidecoder.com/search?query=${q}`);
+        setMethod("url");
+        setIngestError(`"${product.productName}" trouvé sans composition. URL InciDecoder prête — clique sur "Extraire la liste INCI".`);
+        return;
+      }
+
+      // ── Product not found at all ───────────────────────────────────────────
+      setIngestError("Produit non reconnu. Essaie l'onglet URL produit ou colle la liste INCI.");
     } catch {
       setIngestError("Erreur lors de la recherche. Réessaie.");
     } finally {
