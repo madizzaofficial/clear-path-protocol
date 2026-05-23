@@ -755,30 +755,56 @@ function LiveBarcodeScanner({ onDetect, onClose }: { onDetect: (code: string) =>
 
       const devices = await BrowserMultiFormatReader.listVideoInputDevices().catch(() => []);
       // prefer back camera on mobile
-      const deviceId = devices.find((d) => /back|rear|environment/i.test(d.label))?.deviceId
-        ?? devices[devices.length - 1]?.deviceId;
+      const backDevice = devices.find((d) => /back|rear|environment/i.test(d.label));
+      const deviceId = backDevice?.deviceId ?? devices[devices.length - 1]?.deviceId;
 
       if (cancelled) return;
 
+      // Build video constraints — request continuous autofocus via `advanced`
+      // (silently ignored by browsers/devices that don't support it)
+      const videoConstraints: MediaTrackConstraints = deviceId
+        ? { deviceId: { exact: deviceId } }
+        : { facingMode: { ideal: "environment" } };
+      (videoConstraints as any).advanced = [{ focusMode: "continuous" }];
+
+      const callback = (result: any) => {
+        if (!cancelled && result) onDetect(result.getText());
+      };
+
       let controls: { stop: () => void } | null = null;
       try {
-        controls = await reader.decodeFromVideoDevice(
-          deviceId ?? undefined,
+        controls = await reader.decodeFromConstraints(
+          { video: videoConstraints },
           videoRef.current!,
-          (result) => {
-            // All decode errors (NotFoundException, ChecksumException, FormatException)
-            // are normal — they mean no barcode found this frame. Only handle results.
-            if (!cancelled && result) onDetect(result.getText());
-          }
+          callback
         );
       } catch {
-        if (!cancelled) setStatus("denied");
-        return;
+        // advanced constraints rejected — retry with minimal constraints
+        try {
+          controls = await reader.decodeFromVideoDevice(
+            deviceId ?? undefined,
+            videoRef.current!,
+            callback
+          );
+        } catch {
+          if (!cancelled) setStatus("denied");
+          return;
+        }
       }
 
       if (cancelled) { controls?.stop(); return; }
       controlsRef.current = controls;
       setStatus("scanning");
+
+      // After stream starts, also apply applyConstraints on the track directly
+      // (works on Android Chrome even when not supported in getUserMedia constraints)
+      const video = videoRef.current;
+      if (video?.srcObject) {
+        const track = (video.srcObject as MediaStream).getVideoTracks()[0];
+        if (track) {
+          track.applyConstraints({ advanced: [{ focusMode: "continuous" } as any] }).catch(() => {});
+        }
+      }
     }
 
     start().catch(() => { if (!cancelled) setStatus("denied"); });
