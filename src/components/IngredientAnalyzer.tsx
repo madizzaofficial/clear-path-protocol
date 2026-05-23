@@ -564,7 +564,6 @@ export function ProductComparator({ skinProfile }: { skinProfile: SkinProfile | 
   const [resultB, setResultB] = useState<AnalysisResultV2 | null>(null);
   const [compState, setCompState] = useState<"idle" | "loading" | "done" | "hidden">("idle");
   const [compText, setCompText] = useState("");
-  const [detailTab, setDetailTab] = useState<"A" | "B">("A");
 
   function handleAnalyze() {
     if (!inciA.trim() || !inciB.trim()) return;
@@ -572,7 +571,6 @@ export function ProductComparator({ skinProfile }: { skinProfile: SkinProfile | 
     setResultB(analyzeIngredientsV2(inciB, skinProfile ?? undefined));
     setCompState("idle");
     setCompText("");
-    setDetailTab("A");
   }
 
   async function handleCompare() {
@@ -697,34 +695,15 @@ export function ProductComparator({ skinProfile }: { skinProfile: SkinProfile | 
             </div>
           )}
 
-          {/* Ingredient detail section */}
-          <div className="space-y-3">
-            <div className="flex gap-1 rounded-2xl bg-muted/50 p-1">
-              {(["A", "B"] as const).map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setDetailTab(t)}
-                  className={`flex-1 rounded-xl px-4 py-2 text-sm font-medium transition-all ${
-                    detailTab === t
-                      ? "bg-background shadow-sm text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  Détail Produit {t}
-                </button>
-              ))}
-            </div>
-            {detailTab === "A" ? (
-              <div className="space-y-3">
-                <SignalSummaryCards result={resultA} />
-                <GroupedIngredientList ingredients={resultA.ingredients} />
+          {/* Ingredient detail — two columns */}
+          <div className="grid grid-cols-2 gap-3">
+            {([["Produit A", resultA], ["Produit B", resultB]] as const).map(([name, r]) => (
+              <div key={name} className="space-y-3">
+                <p className="px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{name}</p>
+                <SignalSummaryCards result={r} />
+                <GroupedIngredientList ingredients={r.ingredients} />
               </div>
-            ) : (
-              <div className="space-y-3">
-                <SignalSummaryCards result={resultB} />
-                <GroupedIngredientList ingredients={resultB.ingredients} />
-              </div>
-            )}
+            ))}
           </div>
         </>
       )}
