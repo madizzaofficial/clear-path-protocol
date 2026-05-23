@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { FlaskConical, AlertTriangle, CheckCircle, Info, Leaf, Zap, ChevronDown, Droplets, User, ShieldAlert, Sparkles, ArrowRight, Barcode, Link, Loader2, Camera } from "lucide-react";
+import { FlaskConical, AlertTriangle, CheckCircle, Info, Leaf, Zap, ChevronDown, Droplets, User, ShieldAlert, Sparkles, ArrowRight, Barcode, Link, Loader2, Camera, X } from "lucide-react";
 import { analyzeIngredientsV2, type AnalysisResultV2, type SkinProfile } from "@/lib/cosmetic-ingredients";
 import { generateExplanationFn, compareProductsFn, toSnapshot } from "@/lib/ai-analysis";
 import { computeInciHash, normalizeInciText } from "@/lib/inci-hash";
 import { getProductCache, saveProductCache, saveAiSummary, makeProfileKey } from "@/lib/product-cache";
 import { lookupBarcodeFn, extractInciFromUrlFn } from "@/lib/product-ingestion";
+import { logUnclassifiedIngredients } from "@/lib/unclassified-log";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -588,8 +589,12 @@ export function ProductComparator({ skinProfile }: { skinProfile: SkinProfile | 
 
   function handleAnalyze() {
     if (!inciA.trim() || !inciB.trim()) return;
-    setResultA(analyzeIngredientsV2(inciA, skinProfile ?? undefined));
-    setResultB(analyzeIngredientsV2(inciB, skinProfile ?? undefined));
+    const rA = analyzeIngredientsV2(inciA, skinProfile ?? undefined);
+    const rB = analyzeIngredientsV2(inciB, skinProfile ?? undefined);
+    setResultA(rA);
+    setResultB(rB);
+    logUnclassifiedIngredients(rA.ingredients);
+    logUnclassifiedIngredients(rB.ingredients);
     setCompState("idle");
     setCompText("");
   }
@@ -734,6 +739,99 @@ export function ProductComparator({ skinProfile }: { skinProfile: SkinProfile | 
 
 // ─── IngredientAnalyzer ───────────────────────────────────────────────────────
 
+// ─── LiveBarcodeScanner ───────────────────────────────────────────────────────
+
+function LiveBarcodeScanner({ onDetect, onClose }: { onDetect: (code: string) => void; onClose: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [status, setStatus] = useState<"starting" | "scanning" | "unsupported" | "denied">("starting");
+
+  useEffect(() => {
+    if (!("BarcodeDetector" in window)) { setStatus("unsupported"); return; }
+
+    let stopped = false;
+    let stream: MediaStream | null = null;
+    let rafId: number | null = null;
+
+    const bd = new (window as any).BarcodeDetector({
+      formats: ["ean_13", "ean_8", "upc_a", "upc_e", "code_128"],
+    });
+
+    function tick() {
+      if (stopped || !videoRef.current) return;
+      bd.detect(videoRef.current)
+        .then((results: any[]) => {
+          if (stopped) return;
+          if (results.length > 0) { onDetect(results[0].rawValue); }
+          else { rafId = requestAnimationFrame(tick); }
+        })
+        .catch(() => { rafId = requestAnimationFrame(tick); });
+    }
+
+    navigator.mediaDevices
+      .getUserMedia({ video: { facingMode: "environment" } })
+      .then((s) => {
+        if (stopped) { s.getTracks().forEach((t) => t.stop()); return; }
+        stream = s;
+        const v = videoRef.current;
+        if (!v) return;
+        v.srcObject = s;
+        v.play().then(() => { setStatus("scanning"); tick(); });
+      })
+      .catch(() => setStatus("denied"));
+
+    return () => {
+      stopped = true;
+      if (rafId) cancelAnimationFrame(rafId);
+      if (stream) stream.getTracks().forEach((t) => t.stop());
+    };
+  }, [onDetect]);
+
+  const overlay = (msg: string, sub?: string) => (
+    <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-border/60 bg-muted/40 px-6 py-8 text-center">
+      <p className="text-sm font-medium">{msg}</p>
+      {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
+      <button onClick={onClose} className="mt-1 text-xs text-muted-foreground underline underline-offset-2">
+        Entrer le code manuellement
+      </button>
+    </div>
+  );
+
+  if (status === "unsupported") return overlay("Scanner non disponible", "Fonctionne sur Chrome / Edge (Android ou desktop). Entre le code EAN ci-dessous.");
+  if (status === "denied")      return overlay("Accès caméra refusé", "Autorise la caméra dans les paramètres de ton navigateur.");
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl bg-black" style={{ aspectRatio: "4/3", maxHeight: 280 }}>
+      <video ref={videoRef} className="h-full w-full object-cover" playsInline muted />
+
+      {status === "starting" && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+          <Loader2 className="h-7 w-7 animate-spin text-white" />
+        </div>
+      )}
+
+      {status === "scanning" && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          {/* Dimmed edges + bright scan zone */}
+          <div className="h-20 w-56 rounded-xl border-2 border-white/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]" />
+        </div>
+      )}
+
+      <button
+        onClick={onClose}
+        className="absolute right-2 top-2 rounded-full bg-black/60 p-1.5 text-white hover:bg-black/80"
+      >
+        <X className="h-4 w-4" />
+      </button>
+
+      <p className="absolute bottom-2 left-0 right-0 text-center text-xs text-white/70">
+        Pointe vers le code-barres du produit
+      </p>
+    </div>
+  );
+}
+
+// ─── Input method types ───────────────────────────────────────────────────────
+
 type InputMethod = "text" | "barcode" | "url";
 
 const INGEST_ERRORS: Record<string, string> = {
@@ -752,14 +850,15 @@ export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile |
   const [productMeta, setProductMeta] = useState<{ name: string | null; brand: string | null } | null>(null);
   const [ingesting, setIngesting] = useState(false);
   const [ingestError, setIngestError] = useState<string | null>(null);
+  const [showScanner, setShowScanner] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
-  const cameraRef = useRef<HTMLInputElement>(null);
 
   function applyInci(inci: string, meta?: { name: string | null; brand: string | null }) {
     const analysis = analyzeIngredientsV2(inci, skinProfile ?? undefined);
     setResult(analysis);
     setProductMeta(meta ?? null);
     setIngestError(null);
+    logUnclassifiedIngredients(analysis.ingredients);
     // Hash + cache in background
     computeInciHash(inci).then((hash) => {
       setCurrentHash(hash);
@@ -810,17 +909,9 @@ export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile |
     }
   }
 
-  // Camera barcode detection (BarcodeDetector API — Chrome/Edge/Android)
-  async function handleCameraFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file || !("BarcodeDetector" in window)) return;
-    try {
-      const bd = new (window as any).BarcodeDetector({ formats: ["ean_13", "ean_8", "upc_a", "upc_e", "code_128"] });
-      const bitmap = await createImageBitmap(file);
-      const results = await bd.detect(bitmap);
-      if (results.length > 0) setBarcodeVal(results[0].rawValue);
-    } catch {}
-    if (cameraRef.current) cameraRef.current.value = "";
+  function handleBarcodeDetected(code: string) {
+    setBarcodeVal(code);
+    setShowScanner(false);
   }
 
   const LEGEND = (
@@ -885,33 +976,43 @@ export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile |
         {/* Barcode input */}
         {method === "barcode" && (
           <div className="space-y-3">
-            <p className="text-xs text-muted-foreground">Entre le code-barres EAN/UPC ou prends une photo du produit</p>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                inputMode="numeric"
-                value={barcodeVal}
-                onChange={(e) => setBarcodeVal(e.target.value)}
-                placeholder="3600523459858"
-                className="flex-1 rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-              />
-              <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleCameraFile} />
+            {showScanner ? (
+              <LiveBarcodeScanner onDetect={handleBarcodeDetected} onClose={() => setShowScanner(false)} />
+            ) : (
+              <>
+                <p className="text-xs text-muted-foreground">Scanne le code-barres EAN/UPC en live ou entre-le manuellement</p>
+                <button
+                  onClick={() => setShowScanner(true)}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-muted/50 px-4 py-3 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted"
+                >
+                  <Camera className="h-4 w-4" />
+                  Ouvrir le scanner
+                </button>
+                <div className="relative flex items-center gap-3">
+                  <div className="h-px flex-1 bg-border" />
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">ou</span>
+                  <div className="h-px flex-1 bg-border" />
+                </div>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={barcodeVal}
+                  onChange={(e) => setBarcodeVal(e.target.value)}
+                  placeholder="3600523459858"
+                  className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </>
+            )}
+            {!showScanner && (
               <button
-                onClick={() => cameraRef.current?.click()}
-                className="flex items-center gap-1.5 rounded-2xl border border-border bg-muted px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/70"
-                title="Scanner avec la caméra"
+                onClick={handleBarcodeSearch}
+                disabled={!barcodeVal.trim() || ingesting}
+                className="flex items-center gap-2 rounded-2xl bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
               >
-                <Camera className="h-4 w-4" />
+                {ingesting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Barcode className="h-4 w-4" />}
+                Rechercher le produit
               </button>
-            </div>
-            <button
-              onClick={handleBarcodeSearch}
-              disabled={!barcodeVal.trim() || ingesting}
-              className="flex items-center gap-2 rounded-2xl bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
-            >
-              {ingesting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Barcode className="h-4 w-4" />}
-              Rechercher le produit
-            </button>
+            )}
           </div>
         )}
 
