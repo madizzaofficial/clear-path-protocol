@@ -863,7 +863,7 @@ function RoutineBlock({
               </span>
               {s.imageUrl ? (
                 <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-border/60 bg-muted">
-                  <img src={s.imageUrl} alt={s.product} className="h-full w-full object-cover" />
+                  <img src={s.imageUrl} alt={s.product} className="h-full w-full rounded-xl object-cover" />
                 </div>
               ) : (
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted">

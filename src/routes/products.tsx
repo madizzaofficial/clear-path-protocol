@@ -479,7 +479,7 @@ function RoutineBlock({
                 {/* Product image */}
                 <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-muted md:h-28 md:w-28">
                   {step.imageUrl ? (
-                    <img src={step.imageUrl} alt="" className="h-full w-full object-contain p-1" />
+                    <img src={step.imageUrl} alt="" className="h-full w-full rounded-2xl object-contain p-1" />
                   ) : (
                     <ImageOff className="h-5 w-5 text-muted-foreground/40" />
                   )}
@@ -609,7 +609,7 @@ function BonusBlock({ blocks }: { blocks: ExtraBlock[] }) {
                 <div className="flex gap-4">
                   <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-yellow-200/60 bg-yellow-50/60 dark:border-yellow-900/30 dark:bg-yellow-950/20 md:h-28 md:w-28">
                     {step.imageUrl ? (
-                      <img src={step.imageUrl} alt="" className="h-full w-full object-contain p-1" />
+                      <img src={step.imageUrl} alt="" className="h-full w-full rounded-2xl object-contain p-1" />
                     ) : (
                       <Zap className="h-5 w-5 text-yellow-400/60" />
                     )}

@@ -432,7 +432,7 @@ function JournalContent({ uid }: { uid: string }) {
                               >
                                 <div className="relative h-32 w-24 overflow-hidden rounded-2xl bg-muted/30">
                                   {mainPhoto ? (
-                                    <img src={mainPhoto} alt={p.date} className="h-full w-full object-cover object-top" />
+                                    <img src={mainPhoto} alt={p.date} className="h-full w-full rounded-2xl object-cover object-top" />
                                   ) : (
                                     <div className="flex h-full items-center justify-center">
                                       <Camera className="h-5 w-5 text-muted-foreground/30" />
@@ -663,12 +663,12 @@ function HistoryCard({ entry, onClick }: { entry: PhotoEntry; onClick?: () => vo
       type="button"
       onClick={onClick}
       className="w-full text-left overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft cursor-pointer hover:ring-2 hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-shadow">
-      <div className="relative aspect-[3/4] bg-muted/30">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-t-2xl bg-muted/30">
         {mainPhoto ? (
           <img
             src={mainPhoto}
             alt={entry.date}
-            className="h-full w-full object-cover object-top"
+            className="h-full w-full rounded-t-2xl object-cover object-top"
           />
         ) : (
           <div className="flex h-full items-center justify-center">
@@ -793,7 +793,7 @@ function PhotoDetailDialog({
                   {entry?.[key as Angle] ? (
                     <img src={entry[key as Angle]!} alt={label}
                       onClick={() => onZoom(entry[key as Angle]!)}
-                      className="h-full w-full cursor-zoom-in object-cover object-top" />
+                      className="h-full w-full rounded-xl cursor-zoom-in object-cover object-top" />
                   ) : (
                     <div className="flex h-full items-center justify-center">
                       <Camera className="h-6 w-6 text-muted-foreground/30" />

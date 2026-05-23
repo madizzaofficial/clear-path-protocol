@@ -313,12 +313,12 @@ function ProductCard({
   return (
     <li onClick={onEdit} className="group relative flex cursor-pointer flex-col overflow-hidden rounded-3xl border border-border bg-card transition-shadow hover:shadow-md">
       {/* Image */}
-      <div className="relative aspect-square w-full overflow-hidden bg-muted">
+      <div className="relative aspect-square w-full overflow-hidden rounded-t-3xl bg-muted">
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="h-full w-full object-contain p-2"
+            className="h-full w-full rounded-t-3xl object-contain p-2"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
