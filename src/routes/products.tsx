@@ -54,7 +54,8 @@ const notifyAdminReportFn = createServerFn({ method: "POST" })
     const adminEmail = process.env.ADMIN_EMAIL;
     const apiKey = process.env.RESEND_API_KEY;
     if (!adminEmail || !apiKey) return;
-    const from = process.env.RESEND_FROM ?? "Protocole Clear <onboarding@resend.dev>";
+    const rawFrom = process.env.RESEND_FROM ?? "onboarding@resend.dev";
+    const from = rawFrom.includes("<") ? rawFrom : `Protocole Clear <${rawFrom}>`;
     const { uid, studentEmail, studentName, product, category, type } = ctx.data;
     const label = type === "irritant" ? "Irritant" : "Allergie";
     await fetch("https://api.resend.com/emails", {

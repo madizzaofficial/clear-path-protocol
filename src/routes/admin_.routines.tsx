@@ -177,7 +177,7 @@ const sendRoutineEmailFn = createServerFn({ method: "POST" })
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: process.env.RESEND_FROM ?? "Protocole Clear <onboarding@resend.dev>",
+        from: (() => { const r = process.env.RESEND_FROM ?? "onboarding@resend.dev"; return r.includes("<") ? r : `Protocole Clear <${r}>`; })(),
         to: data.email,
         subject: `${firstName}, ta routine personnalisée est prête ✨`,
         html,

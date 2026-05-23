@@ -3,7 +3,8 @@ import { inngest } from "./inngest";
 async function sendEmail(to: string, subject: string, html: string): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;
-  const from = process.env.RESEND_FROM ?? "Protocole Clear <onboarding@resend.dev>";
+  const rawFrom = process.env.RESEND_FROM ?? "onboarding@resend.dev";
+  const from = rawFrom.includes("<") ? rawFrom : `Protocole Clear <${rawFrom}>`;
   await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
