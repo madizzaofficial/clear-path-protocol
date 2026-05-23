@@ -5,6 +5,7 @@ import { generateExplanationFn, compareProductsFn, toSnapshot } from "@/lib/ai-a
 import { computeInciHash, normalizeInciText } from "@/lib/inci-hash";
 import { getProductCache, saveProductCache, saveAiSummary, makeProfileKey } from "@/lib/product-cache";
 import { lookupBarcodeFn, extractInciFromUrlFn } from "@/lib/product-ingestion";
+import { getCatalogProductByBarcode, autoSaveProductToCatalog } from "@/lib/product-catalog";
 import { logUnclassifiedIngredients } from "@/lib/unclassified-log";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
@@ -882,19 +883,33 @@ export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile |
   const [showScanner, setShowScanner] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
 
-  function applyInci(inci: string, meta?: { name: string | null; brand: string | null; imageUrl?: string | null }) {
+  function applyInci(
+    inci: string,
+    meta?: { name: string | null; brand: string | null; imageUrl?: string | null },
+    barcode?: string | null
+  ) {
     const analysis = analyzeIngredientsV2(inci, skinProfile ?? undefined);
     setResult(analysis);
     setProductMeta(meta ? { name: meta.name, brand: meta.brand, imageUrl: meta.imageUrl ?? null } : null);
     setIngestError(null);
     logUnclassifiedIngredients(analysis.ingredients);
-    // Hash + cache in background
+    // Hash + cache + catalog auto-save in background
     computeInciHash(inci).then((hash) => {
       setCurrentHash(hash);
       saveProductCache(hash, normalizeInciText(inci), {
         productName: meta?.name,
         brand: meta?.brand,
       }).catch(() => {});
+      if (meta?.name || meta?.brand) {
+        autoSaveProductToCatalog({
+          name: meta?.name ?? null,
+          brand: meta?.brand ?? null,
+          barcode: barcode ?? null,
+          inciNormalized: normalizeInciText(inci),
+          inciHash: hash,
+          imageUrl: meta?.imageUrl ?? null,
+        }).catch(() => {});
+      }
     });
   }
 
@@ -923,12 +938,25 @@ export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile |
     setIngesting(true);
     setIngestError(null);
     try {
+      // ── Catalog lookup first (0ms, no API) ────────────────────────────────
+      const catalogProduct = await getCatalogProductByBarcode(trimmed).catch(() => null);
+      if (catalogProduct?.inciNormalized) {
+        setInput(catalogProduct.inciNormalized);
+        applyInci(catalogProduct.inciNormalized, {
+          name: catalogProduct.name,
+          brand: catalogProduct.brand ?? null,
+          imageUrl: catalogProduct.imageUrl ?? null,
+        });
+        return;
+      }
+
+      // ── External API lookup ───────────────────────────────────────────────
       const product = await lookupBarcodeFn({ data: { barcode: trimmed } });
 
       // ── Got INCI directly ──────────────────────────────────────────────────
       if (product?.inci) {
         setInput(product.inci);
-        applyInci(product.inci, { name: product.productName, brand: product.brand, imageUrl: product.imageUrl });
+        applyInci(product.inci, { name: product.productName, brand: product.brand, imageUrl: product.imageUrl }, trimmed);
         return;
       }
 
@@ -942,11 +970,15 @@ export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile |
           });
           setInput(extracted.inci);
           setIngestError(null);
-          applyInci(extracted.inci, {
-            name: product.productName ?? extracted.productName,
-            brand: product.brand ?? extracted.brand,
-            imageUrl: product.imageUrl ?? extracted.imageUrl,
-          });
+          applyInci(
+            extracted.inci,
+            {
+              name: product.productName ?? extracted.productName,
+              brand: product.brand ?? extracted.brand,
+              imageUrl: product.imageUrl ?? extracted.imageUrl,
+            },
+            trimmed
+          );
           return;
         } catch {
           // slug guess failed — pre-fill URL tab with InciDecoder search

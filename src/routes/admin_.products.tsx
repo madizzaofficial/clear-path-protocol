@@ -6,12 +6,13 @@ import { db } from "@/lib/firebase";
 import { collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
 import {
+  ChevronDown,
   ImageOff,
   Loader2,
   Package,
   Pencil,
   Plus,
-  Search,
+  ShieldCheck,
   Trash2,
   Upload,
   X,
@@ -35,20 +36,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { CATEGORIES } from "@/lib/skincare-categories";
 import { uploadProductImageFn } from "@/lib/upload-image";
+import { lookupBarcodeFn, extractInciFromUrlFn } from "@/lib/product-ingestion";
+import { computeInciHash, normalizeInciText } from "@/lib/inci-hash";
+import type { CatalogProduct } from "@/lib/product-catalog";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export type CatalogProduct = {
-  id: string;
-  name: string;
-  category: string;
-  description?: string;
-  instructions: string;
-  imageUrl?: string;
-  purchaseUrl?: string;
-  createdAt: number;
-  updatedAt: number;
-};
+// Re-export so existing imports in RoutineStepEditor and admin routes keep working
+export type { CatalogProduct } from "@/lib/product-catalog";
 
 // ─── Route ────────────────────────────────────────────────────────────────────
 
@@ -81,6 +74,7 @@ function ProductsContent() {
   const [products, setProducts] = useState<CatalogProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [filterCategory, setFilterCategory] = useState("all");
+  const [filterUnverified, setFilterUnverified] = useState(false);
   const [search, setSearch] = useState("");
   const [editingProduct, setEditingProduct] = useState<CatalogProduct | null>(null);
   const [isNewProduct, setIsNewProduct] = useState(false);
@@ -93,15 +87,18 @@ function ProductsContent() {
       .finally(() => setLoadingProducts(false));
   }, []);
 
+  const unverifiedCount = useMemo(() => products.filter((p) => p.verified === false).length, [products]);
+
   const filtered = useMemo(() => {
     let result = products;
     if (filterCategory !== "all") result = result.filter((p) => p.category === filterCategory);
+    if (filterUnverified) result = result.filter((p) => p.verified === false);
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter((p) => p.name.toLowerCase().includes(q));
     }
     return [...result].sort((a, b) => a.name.localeCompare(b.name, "fr"));
-  }, [products, filterCategory, search]);
+  }, [products, filterCategory, filterUnverified, search]);
 
   function openNew() {
     setIsNewProduct(true);
@@ -110,9 +107,15 @@ function ProductsContent() {
       name: "",
       category: CATEGORIES[0],
       instructions: "",
+      verified: false,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
+  }
+
+  async function handleQuickVerify(id: string) {
+    await setDoc(doc(db, "admin_products", id), { verified: true, updatedAt: Date.now() }, { merge: true });
+    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, verified: true } : p)));
   }
 
   function openEdit(p: CatalogProduct) {
@@ -127,6 +130,7 @@ function ProductsContent() {
       const updated: CatalogProduct = {
         ...editingProduct,
         ...data,
+        verified: true, // always true when admin saves via form
         updatedAt: Date.now(),
       };
       await setDoc(doc(db, "admin_products", updated.id), updated);
@@ -201,6 +205,23 @@ function ProductsContent() {
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
+          <button
+            onClick={() => setFilterUnverified((v) => !v)}
+            className={`flex h-10 items-center gap-2 rounded-2xl border px-4 text-sm font-medium transition-colors ${
+              filterUnverified
+                ? "border-amber-400 bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400"
+                : "border-border bg-background text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            Non vérifiés
+            {unverifiedCount > 0 && (
+              <span className={`rounded-full px-1.5 py-0.5 text-xs font-bold ${
+                filterUnverified ? "bg-amber-200 text-amber-800 dark:bg-amber-800/40 dark:text-amber-300" : "bg-muted text-muted-foreground"
+              }`}>
+                {unverifiedCount}
+              </span>
+            )}
+          </button>
         </div>
 
         {/* Content */}
@@ -225,6 +246,7 @@ function ProductsContent() {
                 product={p}
                 onEdit={() => openEdit(p)}
                 onDelete={() => setDeletingId(p.id)}
+                onVerify={() => handleQuickVerify(p.id)}
               />
             ))}
           </ul>
@@ -270,10 +292,12 @@ function ProductCard({
   product,
   onEdit,
   onDelete,
+  onVerify,
 }: {
   product: CatalogProduct;
   onEdit: () => void;
   onDelete: () => void;
+  onVerify: () => void;
 }) {
   return (
     <li onClick={onEdit} className="group relative flex cursor-pointer flex-col overflow-hidden rounded-3xl border border-border bg-card transition-shadow hover:shadow-md">
@@ -290,6 +314,11 @@ function ProductCard({
             <ImageOff className="h-8 w-8 text-muted-foreground/30" />
           </div>
         )}
+        {product.verified === false && (
+          <span className="absolute left-2 top-2 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+            Non vérifié
+          </span>
+        )}
       </div>
 
       {/* Body */}
@@ -300,6 +329,9 @@ function ProductCard({
         <p className="text-sm font-semibold leading-snug text-foreground line-clamp-2">
           {product.name}
         </p>
+        {product.brand && (
+          <p className="text-xs text-muted-foreground font-medium">{product.brand}</p>
+        )}
         {product.description && (
           <p className="text-xs text-muted-foreground/70 italic line-clamp-2">{product.description}</p>
         )}
@@ -321,6 +353,19 @@ function ProductCard({
 
       {/* Actions */}
       <div className="flex border-t border-border">
+        {product.verified === false && (
+          <>
+            <button
+              onClick={(e) => { e.stopPropagation(); onVerify(); }}
+              title="Marquer comme vérifié"
+              className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-amber-600 transition-colors hover:bg-amber-50 hover:text-amber-700 dark:hover:bg-amber-950/20"
+            >
+              <ShieldCheck className="h-3 w-3" />
+              Vérifier
+            </button>
+            <div className="w-px bg-border" />
+          </>
+        )}
         <button
           onClick={onEdit}
           title="Modifier"
@@ -359,24 +404,38 @@ function ProductDialog({
   saving: boolean;
 }) {
   const [name, setName] = useState("");
+  const [brand, setBrand] = useState("");
+  const [barcode, setBarcode] = useState("");
+  const [importUrl, setImportUrl] = useState("");
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
   const [description, setDescription] = useState("");
   const [instructions, setInstructions] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [purchaseUrl, setPurchaseUrl] = useState("");
+  const [inciNormalized, setInciNormalized] = useState("");
+  const [showInci, setShowInci] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
 
   useEffect(() => {
     if (product) {
       setName(product.name);
+      setBrand(product.brand ?? "");
+      setBarcode(product.barcode ?? "");
+      setImportUrl("");
       setCategory(product.category || CATEGORIES[0]);
       setDescription(product.description ?? "");
       setInstructions(product.instructions);
       setImageUrl(product.imageUrl ?? "");
       setPurchaseUrl(product.purchaseUrl ?? "");
+      setInciNormalized(product.inciNormalized ?? "");
+      setShowInci(!!product.inciNormalized);
       setUploadError(null);
       setUploading(false);
+      setImporting(false);
+      setImportError(null);
     }
   }, [product]);
 
@@ -401,7 +460,52 @@ function ProductDialog({
     }
   }
 
-  function handleSubmit() {
+  async function handleImportBarcode() {
+    if (!barcode.trim()) return;
+    setImporting(true);
+    setImportError(null);
+    try {
+      const result = await lookupBarcodeFn({ data: { barcode: barcode.trim() } });
+      if (!result) { setImportError("Produit non trouvé pour ce code-barres."); return; }
+      if (result.productName) setName(result.productName);
+      if (result.brand) setBrand(result.brand);
+      if (result.imageUrl) setImageUrl(result.imageUrl);
+      if (result.inci) { setInciNormalized(result.inci); setShowInci(true); }
+      if (!result.inci) setImportError("Produit trouvé mais sans liste INCI.");
+    } catch {
+      setImportError("Erreur lors de la recherche.");
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  async function handleExtractUrl() {
+    if (!importUrl.trim()) return;
+    setImporting(true);
+    setImportError(null);
+    try {
+      const result = await extractInciFromUrlFn({ data: { url: importUrl.trim() } });
+      if (result.productName) setName(result.productName);
+      if (result.brand) setBrand(result.brand);
+      if (result.imageUrl) setImageUrl(result.imageUrl);
+      if (result.inci) { setInciNormalized(result.inci); setShowInci(true); }
+    } catch (err: any) {
+      const msg: Record<string, string> = {
+        INCI_NOT_FOUND: "Liste INCI introuvable sur cette page.",
+        PAGE_INACCESSIBLE: "Page inaccessible.",
+        SERVICE_UNAVAILABLE: "Service temporairement indisponible.",
+      };
+      setImportError(msg[err?.message] ?? "Erreur lors de l'extraction.");
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  async function handleSubmit() {
+    let hash: string | undefined;
+    if (inciNormalized.trim()) {
+      hash = await computeInciHash(normalizeInciText(inciNormalized.trim())).catch(() => undefined);
+    }
     onSave({
       name: name.trim(),
       category,
@@ -409,6 +513,11 @@ function ProductDialog({
       instructions,
       imageUrl: imageUrl.trim() || undefined,
       purchaseUrl: purchaseUrl.trim() || undefined,
+      brand: brand.trim() || undefined,
+      barcode: barcode.trim() || undefined,
+      inciNormalized: inciNormalized.trim() ? normalizeInciText(inciNormalized.trim()) : undefined,
+      inciHash: hash,
+      verified: true,
     });
   }
 
@@ -425,13 +534,85 @@ function ProductDialog({
           <div>
             <label className="mb-2 block text-sm font-medium text-foreground/80">Nom du produit</label>
             <input
-
-              autoComplete="off"              value={name}
+              autoComplete="off"
+              value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="ex. CeraVe Hydrating Cleanser"
               className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
+
+          {/* Brand */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-foreground/80">
+              Marque <span className="font-normal text-muted-foreground">(optionnelle)</span>
+            </label>
+            <input
+              autoComplete="off"
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
+              placeholder="ex. CeraVe, La Roche-Posay…"
+              className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+
+          {/* Barcode + import */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-foreground/80">
+              Code-barres <span className="font-normal text-muted-foreground">(EAN/UPC)</span>
+            </label>
+            <div className="flex gap-2">
+              <input
+                autoComplete="off"
+                inputMode="numeric"
+                value={barcode}
+                onChange={(e) => setBarcode(e.target.value)}
+                placeholder="3600523459858"
+                className="h-11 flex-1 rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+              <button
+                type="button"
+                onClick={handleImportBarcode}
+                disabled={!barcode.trim() || importing}
+                className="flex items-center gap-1.5 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted disabled:opacity-40"
+              >
+                {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                Importer
+              </button>
+            </div>
+          </div>
+
+          {/* URL import */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-foreground/80">
+              Importer depuis une URL <span className="font-normal text-muted-foreground">(page produit)</span>
+            </label>
+            <div className="flex gap-2">
+              <input
+                autoComplete="off"
+                type="url"
+                value={importUrl}
+                onChange={(e) => setImportUrl(e.target.value)}
+                placeholder="https://incidecoder.com/products/…"
+                className="h-11 flex-1 rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+              <button
+                type="button"
+                onClick={handleExtractUrl}
+                disabled={!importUrl.trim() || importing}
+                className="flex items-center gap-1.5 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted disabled:opacity-40"
+              >
+                {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                Extraire
+              </button>
+            </div>
+          </div>
+
+          {importError && (
+            <p className="rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+              {importError}
+            </p>
+          )}
 
           {/* Category */}
           <div>
@@ -453,8 +634,8 @@ function ProductDialog({
               Description <span className="font-normal text-muted-foreground">(ce que fait le produit)</span>
             </label>
             <textarea
-
-              autoComplete="off"              value={description}
+              autoComplete="off"
+              value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
               placeholder="ex. Nettoyant doux hydratant, idéal pour les peaux sensibles…"
@@ -466,8 +647,8 @@ function ProductDialog({
           <div>
             <label className="mb-2 block text-sm font-medium text-foreground/80">Instructions par défaut</label>
             <textarea
-
-              autoComplete="off"              value={instructions}
+              autoComplete="off"
+              value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
               rows={3}
               placeholder="Comment appliquer ce produit…"
@@ -506,8 +687,8 @@ function ProductDialog({
                   <Upload className="h-4 w-4 shrink-0" />
                   Choisir une image
                   <input
-
-                    autoComplete="off"                    type="file"
+                    autoComplete="off"
+                    type="file"
                     accept="image/*"
                     className="sr-only"
                     onChange={(e) => {
@@ -529,12 +710,43 @@ function ProductDialog({
               Lien d'achat <span className="font-normal text-muted-foreground">(URL optionnelle)</span>
             </label>
             <input
-
-              autoComplete="off"              value={purchaseUrl}
+              autoComplete="off"
+              value={purchaseUrl}
               onChange={(e) => setPurchaseUrl(e.target.value)}
               placeholder="https://..."
               className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
+          </div>
+
+          {/* Collapsible INCI section */}
+          <div className="rounded-2xl border border-border">
+            <button
+              type="button"
+              onClick={() => setShowInci((v) => !v)}
+              className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted/50 rounded-2xl"
+            >
+              <span className="flex items-center gap-2">
+                Composition INCI
+                {inciNormalized && (
+                  <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+                    renseignée
+                  </span>
+                )}
+              </span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${showInci ? "rotate-180" : ""}`} />
+            </button>
+            {showInci && (
+              <div className="border-t border-border px-4 pb-4 pt-3">
+                <textarea
+                  autoComplete="off"
+                  value={inciNormalized}
+                  onChange={(e) => setInciNormalized(e.target.value)}
+                  rows={5}
+                  placeholder="Water, Glycerin, Niacinamide, ..."
+                  className="w-full resize-y rounded-2xl border border-border bg-background px-4 py-3 text-xs leading-relaxed outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            )}
           </div>
         </div>
 

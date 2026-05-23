@@ -581,6 +581,7 @@ function RoutinesContent() {
         instructions: data.instructions,
         imageUrl: data.imageUrl,
         purchaseUrl: data.purchaseUrl,
+        verified: existing?.verified ?? true,
         createdAt: existing?.createdAt ?? Date.now(),
         updatedAt: Date.now(),
       };
