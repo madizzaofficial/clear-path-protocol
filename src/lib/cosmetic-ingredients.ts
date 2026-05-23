@@ -1,3 +1,13 @@
+import inciDbRaw from "./inci-db.json";
+
+// Build INCI_NAME → entry index once at module load
+type InciDbEntry = { role_fr?: string | null; inci_name?: string | null; found?: boolean };
+const INCI_DB: Map<string, InciDbEntry> = new Map(
+  Object.values(inciDbRaw as Record<string, InciDbEntry>)
+    .filter((e) => e.inci_name)
+    .map((e) => [e.inci_name as string, e])
+);
+
 export type EDSeverity = "high" | "medium";
 export type EDEntry = { severity: EDSeverity; reason: string; description: string };
 export type AllergenEntry = { euMandatory: boolean; description: string };
@@ -1261,6 +1271,48 @@ function inferRoleFromName(inci: string): { role: string; description: string } 
     return { role: "Humectant",       description: "Dérivé éthoxylé du glucose — humectant filmogène doux." };
   if (/BENZOATE$/.test(inci))
     return { role: "Émollient",       description: "Ester benzoate — émollient léger à texture sèche." };
+  if (/^GLYCERETH/.test(inci))
+    return { role: "Humectant",       description: "Éther PEG de glycérine — humectant et solubilisant doux." };
+  if (/CELL CULTURE|CALLUS CULTURE|STEM CELL|MERISTEM|LYSATE$/.test(inci))
+    return { role: "Actif",           description: "Biotechnologie végétale (cellules souches ou lysat de culture)." };
+  if (/FLOUR$|POWDER$/.test(inci))
+    return { role: "Texturant",       description: "Poudre végétale — texturant et agent de glissement." };
+  if (/GALLATE$/.test(inci))
+    return { role: "Antioxydant",     description: "Ester gallique — antioxydant et conservateur." };
+  if (/^ASCORBYL/.test(inci))
+    return { role: "Actif",           description: "Dérivé stable de la vitamine C — antioxydant et dépigmentant." };
+  if (/ESTERS$/.test(inci))
+    return { role: "Émollient",       description: "Esters cireux — émollients à texture sèche ou grasse." };
+  if (/ANHYDRO|XYLITOL$|SORBITOL$|MANNITOL$/.test(inci))
+    return { role: "Humectant",       description: "Sucre-alcool — humectant filmogène doux." };
+  if (/PROPANEDIOL$/.test(inci))
+    return { role: "Solvant",         description: "Propanediol — solvant et humectant léger, bonne tolérance." };
+  if (/^SODIUM LAUR|^POTASSIUM LAUR|^SODIUM MYRIST|LAURATE$|MYRISTATE$/.test(inci))
+    return { role: "Tensioactif",     description: "Sel de savon — tensioactif doux d'origine naturelle." };
+  if (/CYCLODEXTRIN/.test(inci))
+    return { role: "Texturant",       description: "Cyclodextrine — agent d'encapsulation et de solubilisation." };
+  if (/COPOLYMER$/.test(inci))
+    return { role: "Texturant",       description: "Copolymère filmogène — modificateur de texture et stabilisant." };
+  if (/GLYCOLIPID/.test(inci))
+    return { role: "Barrière",        description: "Glycolipide — lipide de barrière identique à la peau." };
+  if (/MALTODEXTRIN$/.test(inci))
+    return { role: "Texturant",       description: "Maltodextrine — texturant filmogène d'origine amidonnée." };
+  if (/COBALAMIN/.test(inci))
+    return { role: "Actif",           description: "Vitamine B12 — antioxydant et actif réparateur." };
+  if (/RESIN$/.test(inci))
+    return { role: "Émollient",       description: "Résine végétale — émolliente et filmogène." };
+  if (/^COPAIFERA/.test(inci))
+    return { role: "Émollient",       description: "Résine de copaïba — émolliente et anti-inflammatoire." };
+  if (/^CARNOSINE$/.test(inci))
+    return { role: "Antioxydant",     description: "Dipeptide naturel (beta-alanine + histidine) — antioxydant et anti-glycation." };
+  if (/SACCHARIDE|OLIGOSACCHARIDE/.test(inci))
+    return { role: "Humectant",       description: "Saccharide — humectant et prébiotique cutané." };
+  if (/CERAMIDE/.test(inci))
+    return { role: "Barrière",        description: "Céramide — lipide de barrière identique à la peau, hydratant profond." };
+  if (/PALMITOYL|ACETYL HEXAPEPTIDE|MATRIXYL/.test(inci))
+    return { role: "Actif",           description: "Peptide signal — stimule le collagène et la réparation cutanée." };
+  if (/\bESTER\b/.test(inci))
+    return { role: "Émollient",       description: "Ester — émollient ou solubilisant." };
   return null;
 }
 
@@ -1325,6 +1377,12 @@ export function analyzeIngredientsV2(raw: string, profile?: SkinProfile): Analys
     if (commonKey) {
       const entry = COMMON_INGREDIENTS[commonKey];
       return { raw: token, normalized: norm, flag: "ok", description: `${entry.role} — ${entry.description}`, role: entry.role };
+    }
+
+    // Fallback: scraped INCIDecoder DB (267 entries, role_fr only — no curated FR description)
+    const dbEntry = INCI_DB.get(norm);
+    if (dbEntry?.role_fr) {
+      return { raw: token, normalized: norm, flag: "ok", role: dbEntry.role_fr };
     }
 
     const inferred = inferRoleFromName(norm);
