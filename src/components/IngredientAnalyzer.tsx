@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { FlaskConical, AlertTriangle, CheckCircle, Info, Leaf, Zap, ChevronDown, Droplets, User, ShieldAlert } from "lucide-react";
+import { FlaskConical, AlertTriangle, CheckCircle, Info, Leaf, Zap, ChevronDown, Droplets, User, ShieldAlert, Sparkles, ArrowRight } from "lucide-react";
 import { analyzeIngredientsV2, type AnalysisResultV2, type SkinProfile } from "@/lib/cosmetic-ingredients";
+import { generateExplanationFn, compareProductsFn, toSnapshot } from "@/lib/ai-analysis";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -450,6 +451,226 @@ function GroupedIngredientList({ ingredients }: { ingredients: Ing[] }) {
   );
 }
 
+// ─── ExplanationCard ──────────────────────────────────────────────────────────
+
+function ExplanationCard({
+  result,
+  skinProfile,
+}: {
+  result: AnalysisResultV2;
+  skinProfile: SkinProfile | null;
+}) {
+  const [state, setState] = useState<"idle" | "loading" | "done" | "hidden">("idle");
+  const [text, setText] = useState<string>("");
+
+  async function handleGenerate() {
+    if (!skinProfile) return;
+    setState("loading");
+    try {
+      const res = await generateExplanationFn({
+        data: { product: toSnapshot(result), skinProfile },
+      });
+      setText(res.text);
+      setState("done");
+    } catch {
+      setState("hidden");
+    }
+  }
+
+  if (!skinProfile || state === "hidden") return null;
+
+  return (
+    <div className="rounded-2xl border border-border/60 bg-card px-5 py-4 shadow-soft">
+      {state === "idle" && (
+        <button
+          onClick={handleGenerate}
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-muted/60 px-4 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted"
+        >
+          <Sparkles className="h-4 w-4 text-primary" />
+          Obtenir une explication personnalisée
+        </button>
+      )}
+
+      {state === "loading" && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Sparkles className="h-3.5 w-3.5 animate-pulse text-primary" />
+            Génération en cours…
+          </div>
+          <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
+          <div className="h-3 w-full animate-pulse rounded bg-muted" />
+          <div className="h-3 w-5/6 animate-pulse rounded bg-muted" />
+        </div>
+      )}
+
+      {state === "done" && (
+        <div className="space-y-3">
+          <p className="text-sm leading-relaxed text-foreground/90">{text}</p>
+          <div className="flex items-center justify-between">
+            <span className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+              Généré par IA · GPT-4o mini
+            </span>
+            <button
+              onClick={() => setState("idle")}
+              className="text-[10px] text-muted-foreground/60 hover:text-muted-foreground underline underline-offset-2"
+            >
+              Regénérer
+            </button>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+// ─── ComparisonSection ────────────────────────────────────────────────────────
+
+function MiniBarometer({ label, score, barLabel }: { label: string; score: number; barLabel: string }) {
+  const tier = score <= 3 ? "low" : score <= 6 ? "medium" : "high";
+  const c = BAR_COLORS[tier];
+  const pct = Math.round((score / 10) * 100);
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+        <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${c.badge}`}>{barLabel}</span>
+      </div>
+      <div className="relative h-3 flex items-center">
+        <div className="absolute inset-x-0 h-1.5 rounded-full" style={{ background: "linear-gradient(to right, #10b981 0%, #f59e0b 50%, #ef4444 100%)" }} />
+        <div className="absolute h-3 w-3 rounded-full border-2 border-white shadow" style={{ left: `calc(${pct}% - 6px)`, backgroundColor: c.dot }} />
+      </div>
+      <span className={`text-xs font-bold tabular-nums ${c.text}`}>{score}<span className="text-[10px] font-normal text-muted-foreground">/10</span></span>
+    </div>
+  );
+}
+
+function ComparisonSection({
+  resultA,
+  skinProfile,
+}: {
+  resultA: AnalysisResultV2;
+  skinProfile: SkinProfile | null;
+}) {
+  const [inciB, setInciB] = useState("");
+  const [resultB, setResultB] = useState<AnalysisResultV2 | null>(null);
+  const [compState, setCompState] = useState<"idle" | "loading" | "done" | "hidden">("idle");
+  const [compText, setCompText] = useState("");
+
+  function handleAnalyzeB() {
+    if (!inciB.trim()) return;
+    setResultB(analyzeIngredientsV2(inciB, skinProfile ?? undefined));
+    setCompState("idle");
+    setCompText("");
+  }
+
+  async function handleCompare() {
+    if (!resultB) return;
+    setCompState("loading");
+    try {
+      const res = await compareProductsFn({
+        data: {
+          productA: toSnapshot(resultA),
+          productB: toSnapshot(resultB),
+          skinProfile: skinProfile ?? {},
+        },
+      });
+      setCompText(res.text);
+      setCompState("done");
+    } catch {
+      setCompState("hidden");
+    }
+  }
+
+  return (
+    <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft space-y-4">
+      <div>
+        <h2 className="font-display text-base font-semibold">Comparer avec un autre produit</h2>
+        <p className="mt-0.5 text-xs text-muted-foreground">Colle la composition INCI du second produit pour les comparer</p>
+      </div>
+
+      <div className="space-y-3">
+        <textarea
+          value={inciB}
+          onChange={(e) => { setInciB(e.target.value); setResultB(null); setCompState("idle"); }}
+          placeholder="Water, Glycerin, Niacinamide, ..."
+          rows={4}
+          className="w-full resize-y rounded-2xl border border-border bg-background p-4 text-sm leading-relaxed outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+        />
+        <button
+          onClick={handleAnalyzeB}
+          disabled={!inciB.trim()}
+          className="flex items-center gap-2 rounded-2xl bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
+        >
+          Analyser le produit B
+          <ArrowRight className="h-3.5 w-3.5" />
+        </button>
+      </div>
+
+      {resultB && (
+        <>
+          {/* Side-by-side mini barometers */}
+          <div className="grid grid-cols-2 gap-4 rounded-2xl border border-border/60 bg-muted/30 p-4">
+            <div className="space-y-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Produit A</p>
+              <MiniBarometer label="Irritation" score={resultA.barometers.irritation.score} barLabel={resultA.barometers.irritation.label} />
+              <MiniBarometer label="Comédogène" score={resultA.barometers.comedogenic.score} barLabel={resultA.barometers.comedogenic.label} />
+              <MiniBarometer label="PE" score={resultA.barometers.pe.score} barLabel={resultA.barometers.pe.label} />
+            </div>
+            <div className="space-y-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Produit B</p>
+              <MiniBarometer label="Irritation" score={resultB.barometers.irritation.score} barLabel={resultB.barometers.irritation.label} />
+              <MiniBarometer label="Comédogène" score={resultB.barometers.comedogenic.score} barLabel={resultB.barometers.comedogenic.label} />
+              <MiniBarometer label="PE" score={resultB.barometers.pe.score} barLabel={resultB.barometers.pe.label} />
+            </div>
+          </div>
+
+          {/* AI comparison */}
+          {skinProfile && compState !== "hidden" && compState === "idle" && (
+            <button
+              onClick={handleCompare}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-muted/60 px-4 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted"
+            >
+              <Sparkles className="h-4 w-4 text-primary" />
+              Comparer avec l'IA
+            </button>
+          )}
+
+          {compState === "loading" && (
+            <div className="space-y-2 rounded-xl bg-muted/40 px-4 py-3">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Sparkles className="h-3.5 w-3.5 animate-pulse text-primary" />
+                Comparaison en cours…
+              </div>
+              <div className="h-3 w-full animate-pulse rounded bg-muted" />
+              <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
+              <div className="h-3 w-5/6 animate-pulse rounded bg-muted" />
+            </div>
+          )}
+
+          {compState === "done" && (
+            <div className="rounded-2xl border border-border/60 bg-muted/30 px-4 py-4 space-y-3">
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{compText}</p>
+              <div className="flex items-center justify-between">
+                <span className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                  Généré par IA · GPT-4o mini
+                </span>
+                <button
+                  onClick={() => setCompState("idle")}
+                  className="text-[10px] text-muted-foreground/60 hover:text-muted-foreground underline underline-offset-2"
+                >
+                  Regénérer
+                </button>
+              </div>
+            </div>
+          )}
+
+        </>
+      )}
+    </div>
+  );
+}
+
 // ─── IngredientAnalyzer ───────────────────────────────────────────────────────
 
 export function IngredientAnalyzer() {
@@ -559,11 +780,17 @@ export function IngredientAnalyzer() {
             )}
           </div>
 
+          {/* AI explanation */}
+          <ExplanationCard result={result} skinProfile={skinProfile} />
+
           {/* Signal summary cards */}
           <SignalSummaryCards result={result} />
 
           {/* Grouped ingredient list (catégories + détail fusionnés) */}
           <GroupedIngredientList ingredients={result.ingredients} />
+
+          {/* Product comparator */}
+          <ComparisonSection resultA={result} skinProfile={skinProfile} />
         </>
       )}
     </div>
