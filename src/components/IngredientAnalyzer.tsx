@@ -545,35 +545,40 @@ function MiniBarometer({ label, score, barLabel }: { label: string; score: numbe
   );
 }
 
-function ComparisonSection({
-  resultA,
-  skinProfile,
-}: {
-  resultA: AnalysisResultV2;
-  skinProfile: SkinProfile | null;
-}) {
+// ─── ProductComparator ────────────────────────────────────────────────────────
+
+const RECO_BADGE: Record<string, string> = {
+  daily:      "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400",
+  occasional: "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400",
+  caution:    "bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400",
+  avoid:      "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400",
+};
+const RECO_SHORT: Record<string, string> = {
+  daily: "Quotidien", occasional: "Occasionnel", caution: "Avec prudence", avoid: "Déconseillé",
+};
+
+export function ProductComparator({ skinProfile }: { skinProfile: SkinProfile | null }) {
+  const [inciA, setInciA] = useState("");
   const [inciB, setInciB] = useState("");
+  const [resultA, setResultA] = useState<AnalysisResultV2 | null>(null);
   const [resultB, setResultB] = useState<AnalysisResultV2 | null>(null);
   const [compState, setCompState] = useState<"idle" | "loading" | "done" | "hidden">("idle");
   const [compText, setCompText] = useState("");
 
-  function handleAnalyzeB() {
-    if (!inciB.trim()) return;
+  function handleAnalyze() {
+    if (!inciA.trim() || !inciB.trim()) return;
+    setResultA(analyzeIngredientsV2(inciA, skinProfile ?? undefined));
     setResultB(analyzeIngredientsV2(inciB, skinProfile ?? undefined));
     setCompState("idle");
     setCompText("");
   }
 
   async function handleCompare() {
-    if (!resultB) return;
+    if (!resultA || !resultB) return;
     setCompState("loading");
     try {
       const res = await compareProductsFn({
-        data: {
-          productA: toSnapshot(resultA),
-          productB: toSnapshot(resultB),
-          skinProfile: skinProfile ?? {},
-        },
+        data: { productA: toSnapshot(resultA), productB: toSnapshot(resultB), skinProfile: skinProfile ?? {} },
       });
       setCompText(res.text);
       setCompState("done");
@@ -583,61 +588,75 @@ function ComparisonSection({
   }
 
   return (
-    <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft space-y-4">
-      <div>
-        <h2 className="font-display text-base font-semibold">Comparer avec un autre produit</h2>
-        <p className="mt-0.5 text-xs text-muted-foreground">Colle la composition INCI du second produit pour les comparer</p>
+    <div className="space-y-5">
+      {/* Two INCI inputs */}
+      <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft space-y-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Produit A</label>
+            <textarea
+              value={inciA}
+              onChange={(e) => { setInciA(e.target.value); setResultA(null); setCompState("idle"); }}
+              placeholder="Water, Glycerin, Niacinamide, ..."
+              rows={6}
+              className="w-full resize-y rounded-2xl border border-border bg-background p-4 text-sm leading-relaxed outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Produit B</label>
+            <textarea
+              value={inciB}
+              onChange={(e) => { setInciB(e.target.value); setResultB(null); setCompState("idle"); }}
+              placeholder="Water, Glycerin, Niacinamide, ..."
+              rows={6}
+              className="w-full resize-y rounded-2xl border border-border bg-background p-4 text-sm leading-relaxed outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+        </div>
+        <div className="flex justify-end">
+          <button
+            onClick={handleAnalyze}
+            disabled={!inciA.trim() || !inciB.trim()}
+            className="flex items-center gap-2 rounded-2xl bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
+          >
+            Analyser et comparer
+            <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
 
-      <div className="space-y-3">
-        <textarea
-          value={inciB}
-          onChange={(e) => { setInciB(e.target.value); setResultB(null); setCompState("idle"); }}
-          placeholder="Water, Glycerin, Niacinamide, ..."
-          rows={4}
-          className="w-full resize-y rounded-2xl border border-border bg-background p-4 text-sm leading-relaxed outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-        />
-        <button
-          onClick={handleAnalyzeB}
-          disabled={!inciB.trim()}
-          className="flex items-center gap-2 rounded-2xl bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
-        >
-          Analyser le produit B
-          <ArrowRight className="h-3.5 w-3.5" />
-        </button>
-      </div>
-
-      {resultB && (
+      {/* Side-by-side results */}
+      {resultA && resultB && (
         <>
-          {/* Side-by-side mini barometers */}
-          <div className="grid grid-cols-2 gap-4 rounded-2xl border border-border/60 bg-muted/30 p-4">
-            <div className="space-y-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Produit A</p>
-              <MiniBarometer label="Irritation" score={resultA.barometers.irritation.score} barLabel={resultA.barometers.irritation.label} />
-              <MiniBarometer label="Comédogène" score={resultA.barometers.comedogenic.score} barLabel={resultA.barometers.comedogenic.label} />
-              <MiniBarometer label="PE" score={resultA.barometers.pe.score} barLabel={resultA.barometers.pe.label} />
-            </div>
-            <div className="space-y-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Produit B</p>
-              <MiniBarometer label="Irritation" score={resultB.barometers.irritation.score} barLabel={resultB.barometers.irritation.label} />
-              <MiniBarometer label="Comédogène" score={resultB.barometers.comedogenic.score} barLabel={resultB.barometers.comedogenic.label} />
-              <MiniBarometer label="PE" score={resultB.barometers.pe.score} barLabel={resultB.barometers.pe.label} />
-            </div>
+          <div className="grid grid-cols-2 gap-3">
+            {([["Produit A", resultA], ["Produit B", resultB]] as const).map(([name, r]) => (
+              <div key={name} className="rounded-2xl border border-border/60 bg-card p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{name}</p>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${RECO_BADGE[r.usageReco]}`}>
+                    {RECO_SHORT[r.usageReco]}
+                  </span>
+                </div>
+                <MiniBarometer label="Irritation"  score={r.barometers.irritation.score}  barLabel={r.barometers.irritation.label} />
+                <MiniBarometer label="Comédogène"  score={r.barometers.comedogenic.score} barLabel={r.barometers.comedogenic.label} />
+                <MiniBarometer label="PE"           score={r.barometers.pe.score}          barLabel={r.barometers.pe.label} />
+              </div>
+            ))}
           </div>
 
           {/* AI comparison */}
           {skinProfile && compState !== "hidden" && compState === "idle" && (
             <button
               onClick={handleCompare}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-muted/60 px-4 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-muted/60 px-4 py-3 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted"
             >
               <Sparkles className="h-4 w-4 text-primary" />
-              Comparer avec l'IA
+              Comparer avec l'IA selon mon profil
             </button>
           )}
 
           {compState === "loading" && (
-            <div className="space-y-2 rounded-xl bg-muted/40 px-4 py-3">
+            <div className="space-y-2 rounded-2xl border border-border/60 bg-card px-5 py-4">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Sparkles className="h-3.5 w-3.5 animate-pulse text-primary" />
                 Comparaison en cours…
@@ -649,7 +668,7 @@ function ComparisonSection({
           )}
 
           {compState === "done" && (
-            <div className="rounded-2xl border border-border/60 bg-muted/30 px-4 py-4 space-y-3">
+            <div className="rounded-2xl border border-border/60 bg-card px-5 py-4 space-y-3">
               <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{compText}</p>
               <div className="flex items-center justify-between">
                 <span className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground">
@@ -664,7 +683,6 @@ function ComparisonSection({
               </div>
             </div>
           )}
-
         </>
       )}
     </div>
@@ -673,19 +691,10 @@ function ComparisonSection({
 
 // ─── IngredientAnalyzer ───────────────────────────────────────────────────────
 
-export function IngredientAnalyzer() {
-  const { user } = useAuth();
+export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile | null }) {
   const [input, setInput] = useState("");
   const [result, setResult] = useState<AnalysisResultV2 | null>(null);
-  const [skinProfile, setSkinProfile] = useState<SkinProfile | null>(null);
   const [showInfo, setShowInfo] = useState(false);
-
-  useEffect(() => {
-    if (!user) return;
-    getDoc(doc(db, "intake_answers", user.uid)).then((snap) => {
-      if (snap.exists()) setSkinProfile(snap.data() as SkinProfile);
-    });
-  }, [user]);
 
   function handleAnalyze() {
     if (!input.trim()) return;
@@ -788,9 +797,6 @@ export function IngredientAnalyzer() {
 
           {/* Grouped ingredient list (catégories + détail fusionnés) */}
           <GroupedIngredientList ingredients={result.ingredients} />
-
-          {/* Product comparator */}
-          <ComparisonSection resultA={result} skinProfile={skinProfile} />
         </>
       )}
     </div>
@@ -800,20 +806,58 @@ export function IngredientAnalyzer() {
 // ─── Page wrapper ─────────────────────────────────────────────────────────────
 
 export function IngredientAnalyzerPage() {
+  const { user } = useAuth();
+  const [tab, setTab] = useState<"analyzer" | "comparator">("analyzer");
+  const [skinProfile, setSkinProfile] = useState<SkinProfile | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    getDoc(doc(db, "intake_answers", user.uid)).then((snap) => {
+      if (snap.exists()) setSkinProfile(snap.data() as SkinProfile);
+    });
+  }, [user]);
+
   return (
     <main className="mx-auto max-w-4xl px-6 pb-28 pt-10">
-      <div className="mb-8">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-soft">
-            <FlaskConical className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="font-display text-2xl font-semibold">Analyseur d'ingrédients</h1>
-            <p className="text-sm text-muted-foreground">Colle une liste INCI pour identifier les ingrédients problématiques</p>
-          </div>
+      <div className="mb-6 flex items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary-soft">
+          <FlaskConical className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h1 className="font-display text-2xl font-semibold">Analyseur d'ingrédients</h1>
+          <p className="text-sm text-muted-foreground">Identifie les ingrédients problématiques dans une formule INCI</p>
         </div>
       </div>
-      <IngredientAnalyzer />
+
+      {/* Tabs */}
+      <div className="mb-6 flex gap-1 rounded-2xl bg-muted/50 p-1">
+        <button
+          onClick={() => setTab("analyzer")}
+          className={`flex-1 rounded-xl px-4 py-2 text-sm font-medium transition-all ${
+            tab === "analyzer"
+              ? "bg-background shadow-sm text-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Analyseur
+        </button>
+        <button
+          onClick={() => setTab("comparator")}
+          className={`flex-1 rounded-xl px-4 py-2 text-sm font-medium transition-all ${
+            tab === "comparator"
+              ? "bg-background shadow-sm text-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Comparateur
+        </button>
+      </div>
+
+      {tab === "analyzer" ? (
+        <IngredientAnalyzer skinProfile={skinProfile} />
+      ) : (
+        <ProductComparator skinProfile={skinProfile} />
+      )}
     </main>
   );
 }
