@@ -1,7 +1,10 @@
-import { useState, useEffect } from "react";
-import { FlaskConical, AlertTriangle, CheckCircle, Info, Leaf, Zap, ChevronDown, Droplets, User, ShieldAlert, Sparkles, ArrowRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { FlaskConical, AlertTriangle, CheckCircle, Info, Leaf, Zap, ChevronDown, Droplets, User, ShieldAlert, Sparkles, ArrowRight, Barcode, Link, Loader2, Camera } from "lucide-react";
 import { analyzeIngredientsV2, type AnalysisResultV2, type SkinProfile } from "@/lib/cosmetic-ingredients";
 import { generateExplanationFn, compareProductsFn, toSnapshot } from "@/lib/ai-analysis";
+import { computeInciHash, normalizeInciText } from "@/lib/inci-hash";
+import { getProductCache, saveProductCache, saveAiSummary, makeProfileKey } from "@/lib/product-cache";
+import { lookupBarcodeFn, extractInciFromUrlFn } from "@/lib/product-ingestion";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -456,9 +459,11 @@ function GroupedIngredientList({ ingredients }: { ingredients: Ing[] }) {
 function ExplanationCard({
   result,
   skinProfile,
+  hash,
 }: {
   result: AnalysisResultV2;
   skinProfile: SkinProfile | null;
+  hash: string | null;
 }) {
   const [state, setState] = useState<"idle" | "loading" | "done" | "hidden">("idle");
   const [text, setText] = useState<string>("");
@@ -466,12 +471,28 @@ function ExplanationCard({
   async function handleGenerate() {
     if (!skinProfile) return;
     setState("loading");
+
+    // Check cache first
+    if (hash) {
+      const key = makeProfileKey(skinProfile);
+      const cached = await getProductCache(hash);
+      if (cached?.aiSummaries?.[key]) {
+        setText(cached.aiSummaries[key]);
+        setState("done");
+        return;
+      }
+    }
+
     try {
-      const res = await generateExplanationFn({
-        data: { product: toSnapshot(result), skinProfile },
-      });
+      const res = await generateExplanationFn({ data: { product: toSnapshot(result), skinProfile } });
+      if (!res.text) { setState("hidden"); return; }
       setText(res.text);
       setState("done");
+      // Cache for next time
+      if (hash) {
+        const key = makeProfileKey(skinProfile);
+        saveAiSummary(hash, key, res.text).catch(() => {});
+      }
     } catch {
       setState("hidden");
     }
@@ -713,111 +734,269 @@ export function ProductComparator({ skinProfile }: { skinProfile: SkinProfile | 
 
 // ─── IngredientAnalyzer ───────────────────────────────────────────────────────
 
-export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile | null }) {
-  const [input, setInput] = useState("");
-  const [result, setResult] = useState<AnalysisResultV2 | null>(null);
-  const [showInfo, setShowInfo] = useState(false);
+type InputMethod = "text" | "barcode" | "url";
 
-  function handleAnalyze() {
-    if (!input.trim()) return;
-    setResult(analyzeIngredientsV2(input, skinProfile ?? undefined));
+const INGEST_ERRORS: Record<string, string> = {
+  INCI_NOT_FOUND: "Liste INCI introuvable sur cette page. Copie-la manuellement.",
+  PAGE_INACCESSIBLE: "Page inaccessible. Vérifie l'URL et réessaie.",
+  SERVICE_UNAVAILABLE: "Service temporairement indisponible.",
+};
+
+export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile | null }) {
+  const [method, setMethod] = useState<InputMethod>("text");
+  const [input, setInput] = useState("");
+  const [barcodeVal, setBarcodeVal] = useState("");
+  const [urlVal, setUrlVal] = useState("");
+  const [result, setResult] = useState<AnalysisResultV2 | null>(null);
+  const [currentHash, setCurrentHash] = useState<string | null>(null);
+  const [productMeta, setProductMeta] = useState<{ name: string | null; brand: string | null } | null>(null);
+  const [ingesting, setIngesting] = useState(false);
+  const [ingestError, setIngestError] = useState<string | null>(null);
+  const [showInfo, setShowInfo] = useState(false);
+  const cameraRef = useRef<HTMLInputElement>(null);
+
+  function applyInci(inci: string, meta?: { name: string | null; brand: string | null }) {
+    const analysis = analyzeIngredientsV2(inci, skinProfile ?? undefined);
+    setResult(analysis);
+    setProductMeta(meta ?? null);
+    setIngestError(null);
+    // Hash + cache in background
+    computeInciHash(inci).then((hash) => {
+      setCurrentHash(hash);
+      saveProductCache(hash, normalizeInciText(inci), {
+        productName: meta?.name,
+        brand: meta?.brand,
+      }).catch(() => {});
+    });
   }
+
+  function handleAnalyzeText() {
+    if (!input.trim()) return;
+    setCurrentHash(null);
+    applyInci(input);
+  }
+
+  async function handleBarcodeSearch() {
+    if (!barcodeVal.trim()) return;
+    setIngesting(true);
+    setIngestError(null);
+    try {
+      const product = await lookupBarcodeFn({ data: { barcode: barcodeVal.trim() } });
+      if (!product?.inci) {
+        setIngestError("Produit non trouvé dans la base Open Beauty Facts. Colle la liste INCI manuellement.");
+        return;
+      }
+      setInput(product.inci);
+      applyInci(product.inci, { name: product.productName, brand: product.brand });
+    } catch {
+      setIngestError("Erreur lors de la recherche. Réessaie.");
+    } finally {
+      setIngesting(false);
+    }
+  }
+
+  async function handleUrlExtract() {
+    if (!urlVal.trim()) return;
+    setIngesting(true);
+    setIngestError(null);
+    try {
+      const extracted = await extractInciFromUrlFn({ data: { url: urlVal.trim() } });
+      setInput(extracted.inci);
+      applyInci(extracted.inci, { name: extracted.productName, brand: extracted.brand });
+    } catch (err: any) {
+      setIngestError(INGEST_ERRORS[err?.message] ?? "Erreur lors de l'extraction.");
+    } finally {
+      setIngesting(false);
+    }
+  }
+
+  // Camera barcode detection (BarcodeDetector API — Chrome/Edge/Android)
+  async function handleCameraFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !("BarcodeDetector" in window)) return;
+    try {
+      const bd = new (window as any).BarcodeDetector({ formats: ["ean_13", "ean_8", "upc_a", "upc_e", "code_128"] });
+      const bitmap = await createImageBitmap(file);
+      const results = await bd.detect(bitmap);
+      if (results.length > 0) setBarcodeVal(results[0].rawValue);
+    } catch {}
+    if (cameraRef.current) cameraRef.current.value = "";
+  }
+
+  const LEGEND = (
+    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+      <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-red-500" />PE avéré</span>
+      <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-orange-400" />PE suspecté</span>
+      <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-amber-400" />Allergène</span>
+      <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-violet-400" />Irritant</span>
+      <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-pink-400" />Comédogène</span>
+      <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-yellow-400" />Pétrochimique</span>
+    </div>
+  );
 
   return (
     <div className="space-y-5">
-      {/* Input */}
-      <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-        <label className="mb-3 block text-sm font-medium">Liste INCI</label>
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Water, Glycerin, Niacinamide, Methylparaben, Limonene, Paraffinum Liquidum, ..."
-          rows={6}
-          className="w-full resize-y rounded-2xl border border-border bg-background p-4 text-sm leading-relaxed outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-        />
-        <p className="mt-2 text-xs text-muted-foreground">Séparés par des virgules, retours à la ligne ou points ( . )</p>
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-red-500" />PE avéré</span>
-            <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-orange-400" />PE suspecté</span>
-            <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-amber-400" />Allergène</span>
-            <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-violet-400" />Irritant</span>
-            <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-pink-400" />Comédogène</span>
-            <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-yellow-400" />Pétrochimique</span>
-          </div>
-          <button
-            onClick={handleAnalyze}
-            disabled={!input.trim()}
-            className="rounded-2xl bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
-          >
-            Analyser
-          </button>
+      {/* Input card */}
+      <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft space-y-4">
+        {/* Method selector */}
+        <div className="flex gap-1 rounded-xl bg-muted/50 p-1">
+          {([
+            { id: "text",    icon: FlaskConical, label: "INCI texte" },
+            { id: "barcode", icon: Barcode,      label: "Code-barres" },
+            { id: "url",     icon: Link,         label: "URL produit" },
+          ] as { id: InputMethod; icon: React.ElementType; label: string }[]).map(({ id, icon: Icon, label }) => (
+            <button
+              key={id}
+              onClick={() => { setMethod(id); setIngestError(null); }}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                method === id ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {label}
+            </button>
+          ))}
         </div>
+
+        {/* Text input */}
+        {method === "text" && (
+          <>
+            <textarea
+              value={input}
+              onChange={(e) => { setInput(e.target.value); setResult(null); setCurrentHash(null); }}
+              placeholder="Water, Glycerin, Niacinamide, Methylparaben, Limonene, ..."
+              rows={6}
+              className="w-full resize-y rounded-2xl border border-border bg-background p-4 text-sm leading-relaxed outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+            <p className="text-xs text-muted-foreground">Séparés par des virgules, retours à la ligne ou points ( . )</p>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              {LEGEND}
+              <button
+                onClick={handleAnalyzeText}
+                disabled={!input.trim()}
+                className="rounded-2xl bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
+              >
+                Analyser
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Barcode input */}
+        {method === "barcode" && (
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">Entre le code-barres EAN/UPC ou prends une photo du produit</p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                inputMode="numeric"
+                value={barcodeVal}
+                onChange={(e) => setBarcodeVal(e.target.value)}
+                placeholder="3600523459858"
+                className="flex-1 rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+              <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleCameraFile} />
+              <button
+                onClick={() => cameraRef.current?.click()}
+                className="flex items-center gap-1.5 rounded-2xl border border-border bg-muted px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/70"
+                title="Scanner avec la caméra"
+              >
+                <Camera className="h-4 w-4" />
+              </button>
+            </div>
+            <button
+              onClick={handleBarcodeSearch}
+              disabled={!barcodeVal.trim() || ingesting}
+              className="flex items-center gap-2 rounded-2xl bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
+            >
+              {ingesting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Barcode className="h-4 w-4" />}
+              Rechercher le produit
+            </button>
+          </div>
+        )}
+
+        {/* URL input */}
+        {method === "url" && (
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">Colle l'URL d'une page produit — la liste INCI sera extraite automatiquement</p>
+            <input
+              type="url"
+              value={urlVal}
+              onChange={(e) => setUrlVal(e.target.value)}
+              placeholder="https://www.incidecoder.com/products/..."
+              className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+            <button
+              onClick={handleUrlExtract}
+              disabled={!urlVal.trim() || ingesting}
+              className="flex items-center gap-2 rounded-2xl bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
+            >
+              {ingesting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link className="h-4 w-4" />}
+              Extraire la liste INCI
+            </button>
+          </div>
+        )}
+
+        {ingestError && (
+          <p className="rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/40 px-4 py-2.5 text-sm text-red-700 dark:text-red-400">
+            {ingestError}
+          </p>
+        )}
       </div>
 
       {/* Results */}
       {result && (
         <>
-          {/* Profile card */}
-          {skinProfile && (
-            <ProfileCard profile={skinProfile} usageReco={result.usageReco} />
+          {/* Product metadata (barcode / URL source) */}
+          {productMeta && (productMeta.name || productMeta.brand) && (
+            <div className="flex items-center gap-2 rounded-2xl border border-border/60 bg-card px-4 py-3">
+              <FlaskConical className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <div>
+                {productMeta.name && <p className="text-sm font-semibold">{productMeta.name}</p>}
+                {productMeta.brand && <p className="text-xs text-muted-foreground">{productMeta.brand}</p>}
+              </div>
+            </div>
           )}
+
+          {/* Profile card */}
+          {skinProfile && <ProfileCard profile={skinProfile} usageReco={result.usageReco} />}
 
           {/* 3 Barometers */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <BarometerCard
-              label="Irritation"
-              score={result.barometers.irritation.score}
-              barLabel={result.barometers.irritation.label}
-              icon={Zap}
-              description="Tensioactifs et alcools irritants"
-            />
-            <BarometerCard
-              label="Comédogénicité"
-              score={result.barometers.comedogenic.score}
-              barLabel={result.barometers.comedogenic.label}
-              icon={Droplets}
-              description="Huiles, esters, cires obstruants"
-            />
-            <BarometerCard
-              label="Perturbateurs endo."
-              score={result.barometers.pe.score}
-              barLabel={result.barometers.pe.label}
-              icon={ShieldAlert}
-              description="PE avérés et suspectés"
-            />
+            <BarometerCard label="Irritation" score={result.barometers.irritation.score} barLabel={result.barometers.irritation.label} icon={Zap} description="Tensioactifs et alcools irritants" />
+            <BarometerCard label="Comédogénicité" score={result.barometers.comedogenic.score} barLabel={result.barometers.comedogenic.label} icon={Droplets} description="Huiles, esters, cires obstruants" />
+            <BarometerCard label="Perturbateurs endo." score={result.barometers.pe.score} barLabel={result.barometers.pe.label} icon={ShieldAlert} description="PE avérés et suspectés" />
           </div>
 
           {/* Usage reco + score info */}
           <div className="space-y-2">
             <UsageReco reco={result.usageReco} productType={result.productType} />
-
             <button
               onClick={() => setShowInfo((v) => !v)}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-1"
+              className="flex items-center gap-1.5 px-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
             >
               <Info className="h-3.5 w-3.5" />
               Comment sont calculés ces scores ?
               <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showInfo ? "rotate-180" : ""}`} />
             </button>
             {showInfo && (
-              <div className="rounded-2xl bg-muted/60 px-4 py-3 text-xs text-muted-foreground space-y-1">
-                <p><span className="font-semibold text-foreground/80">Position weighting :</span> les 3 premiers ingrédients (plus concentrés) comptent ×2, les suivants ×1.2, les derniers ×0.8.</p>
-                <p><span className="font-semibold text-foreground/80">Irritation :</span> tensioactifs forts (+3), alcools (+2), allergènes (+1) · normalisé sur 12.</p>
-                <p><span className="font-semibold text-foreground/80">Comédogénicité :</span> indices INCIDecoder (5→+3 pts, 4→+2, 3→+1.5, ≤2→+0.5) · normalisé sur 9.</p>
+              <div className="space-y-1 rounded-2xl bg-muted/60 px-4 py-3 text-xs text-muted-foreground">
+                <p><span className="font-semibold text-foreground/80">Position weighting :</span> les 3 premiers ingrédients comptent ×2, les suivants ×1.2, les derniers ×0.8.</p>
+                <p><span className="font-semibold text-foreground/80">Irritation :</span> tensioactifs forts (+3), alcools (+2) · normalisé sur 12.</p>
+                <p><span className="font-semibold text-foreground/80">Comédogénicité :</span> indices INCIDecoder (5→+3 pts, 4→+2, 3→+1.5) · normalisé sur 9.</p>
                 <p><span className="font-semibold text-foreground/80">Perturbateurs endo. :</span> PE avéré (+3), PE suspecté (+1.5) · normalisé sur 9.</p>
-                {result.skinProfileUsed && <p><span className="font-semibold text-primary">Profil peau appliqué :</span> scores adaptés à votre type de peau et votre acné.</p>}
+                {result.skinProfileUsed && <p><span className="font-semibold text-primary">Profil peau appliqué :</span> scores adaptés à ton type de peau.</p>}
               </div>
             )}
           </div>
 
-          {/* AI explanation */}
-          <ExplanationCard result={result} skinProfile={skinProfile} />
+          {/* AI explanation (with cache) */}
+          <ExplanationCard result={result} skinProfile={skinProfile} hash={currentHash} />
 
           {/* Signal summary cards */}
           <SignalSummaryCards result={result} />
 
-          {/* Grouped ingredient list (catégories + détail fusionnés) */}
+          {/* Grouped ingredient list */}
           <GroupedIngredientList ingredients={result.ingredients} />
         </>
       )}
