@@ -564,6 +564,7 @@ export function ProductComparator({ skinProfile }: { skinProfile: SkinProfile | 
   const [resultB, setResultB] = useState<AnalysisResultV2 | null>(null);
   const [compState, setCompState] = useState<"idle" | "loading" | "done" | "hidden">("idle");
   const [compText, setCompText] = useState("");
+  const [detailTab, setDetailTab] = useState<"A" | "B">("A");
 
   function handleAnalyze() {
     if (!inciA.trim() || !inciB.trim()) return;
@@ -571,6 +572,7 @@ export function ProductComparator({ skinProfile }: { skinProfile: SkinProfile | 
     setResultB(analyzeIngredientsV2(inciB, skinProfile ?? undefined));
     setCompState("idle");
     setCompText("");
+    setDetailTab("A");
   }
 
   async function handleCompare() {
@@ -625,23 +627,34 @@ export function ProductComparator({ skinProfile }: { skinProfile: SkinProfile | 
         </div>
       </div>
 
-      {/* Side-by-side results */}
       {resultA && resultB && (
         <>
+          {/* Side-by-side scores */}
           <div className="grid grid-cols-2 gap-3">
-            {([["Produit A", resultA], ["Produit B", resultB]] as const).map(([name, r]) => (
-              <div key={name} className="rounded-2xl border border-border/60 bg-card p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{name}</p>
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${RECO_BADGE[r.usageReco]}`}>
-                    {RECO_SHORT[r.usageReco]}
-                  </span>
+            {([["Produit A", resultA], ["Produit B", resultB]] as const).map(([name, r]) => {
+              const allergens = r.ingredients.filter(i => i.flag === "allergen");
+              return (
+                <div key={name} className="rounded-2xl border border-border/60 bg-card p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{name}</p>
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${RECO_BADGE[r.usageReco]}`}>
+                      {RECO_SHORT[r.usageReco]}
+                    </span>
+                  </div>
+                  <MiniBarometer label="Irritation"  score={r.barometers.irritation.score}  barLabel={r.barometers.irritation.label} />
+                  <MiniBarometer label="Comédogène"  score={r.barometers.comedogenic.score} barLabel={r.barometers.comedogenic.label} />
+                  <MiniBarometer label="PE"           score={r.barometers.pe.score}          barLabel={r.barometers.pe.label} />
+                  {allergens.length > 0 && (
+                    <div className="flex items-center gap-1.5 rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/20 px-2.5 py-1.5">
+                      <Info className="h-3 w-3 shrink-0 text-amber-600 dark:text-amber-400" />
+                      <span className="text-[10px] font-medium text-amber-700 dark:text-amber-400">
+                        {allergens.length} allergène{allergens.length > 1 ? "s" : ""} potentiel{allergens.length > 1 ? "s" : ""}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <MiniBarometer label="Irritation"  score={r.barometers.irritation.score}  barLabel={r.barometers.irritation.label} />
-                <MiniBarometer label="Comédogène"  score={r.barometers.comedogenic.score} barLabel={r.barometers.comedogenic.label} />
-                <MiniBarometer label="PE"           score={r.barometers.pe.score}          barLabel={r.barometers.pe.label} />
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* AI comparison */}
@@ -683,6 +696,36 @@ export function ProductComparator({ skinProfile }: { skinProfile: SkinProfile | 
               </div>
             </div>
           )}
+
+          {/* Ingredient detail section */}
+          <div className="space-y-3">
+            <div className="flex gap-1 rounded-2xl bg-muted/50 p-1">
+              {(["A", "B"] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setDetailTab(t)}
+                  className={`flex-1 rounded-xl px-4 py-2 text-sm font-medium transition-all ${
+                    detailTab === t
+                      ? "bg-background shadow-sm text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Détail Produit {t}
+                </button>
+              ))}
+            </div>
+            {detailTab === "A" ? (
+              <div className="space-y-3">
+                <SignalSummaryCards result={resultA} />
+                <GroupedIngredientList ingredients={resultA.ingredients} />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <SignalSummaryCards result={resultB} />
+                <GroupedIngredientList ingredients={resultB.ingredients} />
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>
