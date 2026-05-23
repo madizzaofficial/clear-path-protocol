@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AdminShell } from "@/components/AdminShell";
 import { SearchInput } from "@/components/SearchInput";
 import { useAuth } from "@/hooks/use-auth";
@@ -73,6 +73,7 @@ function ProductsPage() {
 }
 
 function ProductsContent() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<CatalogProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [filterCategory, setFilterCategory] = useState("all");
@@ -167,13 +168,21 @@ function ProductsContent() {
                 Produits réutilisables pour la création des routines clients.
               </p>
             </div>
-            <button
-              onClick={openNew}
-              className="flex shrink-0 items-center gap-2 rounded-2xl bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
-            >
-              <Plus className="h-4 w-4" />
-              Nouveau produit
-            </button>
+            <div className="flex shrink-0 items-center gap-2">
+              <button
+                onClick={() => (navigate as any)({ to: "/admin/unclassified" })}
+                className="flex items-center gap-2 rounded-2xl border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                Ingrédients non classifiés
+              </button>
+              <button
+                onClick={openNew}
+                className="flex items-center gap-2 rounded-2xl bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
+              >
+                <Plus className="h-4 w-4" />
+                Nouveau produit
+              </button>
+            </div>
           </div>
         </div>
 
