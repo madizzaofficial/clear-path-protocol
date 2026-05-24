@@ -67,6 +67,7 @@ export const ENDOCRINE_DISRUPTORS: Record<string, EDEntry> = {
 
   // Autres
   "KOJIC ACID":                  { severity: "medium", reason: "PE suspecté (perturbateur thyroïdien)",     description: "Agent dépigmentant populaire contre les taches. Perturbateur thyroïdien suspecté à concentrations élevées. Limité à 1% en EU. Peaux concernées : toutes les peaux sous traitement dépigmentant prolongé." },
+  "METHOXYPROPYLAMINO CYCLOHEXENYLIDENE ETHOXYETHYLCYANOACETATE": { severity: "medium", reason: "Filtre UV organique, activité estrogénique suspectée in vitro", description: "Filtre UV organique (MCE). Des ��tudes in vitro suggèrent une activité estrogénique faible. Non encore classé par l'ECHA mais sous surveillance. Peaux concernées : toutes, en particulier peaux à acné hormonale." },
 };
 
 // ─── Allergènes (UE Règlement 1223/2009 Annexe III + SCCS extended) ──────────
@@ -130,6 +131,7 @@ export const ALLERGENS: Record<string, AllergenEntry> = {
   "TRIMETHYLBENZENEPROPANOL":                { euMandatory: false, description: "Majantol : molécule parfumante proposée sur la liste étendue EU. Sensitisant cutané documenté. Peaux concernées : peaux sensibles." },
   "LINALYL ACETATE":                         { euMandatory: false, description: "Ester lié au linalool (lavande, bergamote). Peut provoquer des réactions de contact chez les peaux sensibilisées. Peaux concernées : peaux sensibles et réactives." },
   "TERPINEOL":                               { euMandatory: false, description: "Terpène alcoolique (pin, arbre à thé, lavande). Parfum naturel, sensitisant potentiel pour les peaux réactives. Peaux concernées : peaux sensibles." },
+  "PINENE":                                  { euMandatory: false, description: "α-pinène, terpène naturel de résine de pin et d'eucalyptus. S'oxyde à l'air et devient plus allergisant. Présent sur la liste étendue SCCS. Peaux concernées : peaux sensibles et réactives." },
 };
 
 // ─── Irritants cutanés ────────────────────────────────────────────────────────
@@ -146,6 +148,7 @@ export const IRRITANTS: Record<string, IrritantEntry> = {
   "ETHANOL":                     { irritationLevel: 2, reason: "Alcool éthylique, assèche et peut irriter",              description: "Alcool éthylique. À fortes concentrations, assèche l'épiderme et peut déclencher un rebond sébacé. Peaux concernées : peaux sèches, sensibles et acnéiques." },
   "BENZOYL PEROXIDE":            { irritationLevel: 2, reason: "Actif anti-acné, peut provoquer sécheresse et desquamation", description: "Peroxyde de benzoyle. Irritant connu : provoque sécheresse, rougeurs et desquamation en début d'utilisation. Introduire progressivement (2,5% → 5%) et utiliser hydratant. Peaux concernées : peaux sensibles et sèches — à protéger." },
   "MELALEUCA ALTERNIFOLIA LEAF OIL": { irritationLevel: 1, reason: "Huile essentielle, irritante à forte concentration", description: "Huile essentielle d'arbre à thé. Bien tolérée aux concentrations cosmétiques (<5%) mais peut irriter les peaux sensibles non diluée. Peaux concernées : peaux sensibles et réactives." },
+  "HYDROXYPINACOLONE RETINOATE":     { irritationLevel: 1, reason: "Rétinoïde ester, peut provoquer une rétinisation l��gère", description: "HPR (ester de rétinoïde), alternative douce au rétinol. Peut provoquer desquamation, rougeur et sensibilité transitoire en début d'utilisation. Introduire progressivement (1-2x/sem) et associer à un hydratant. Peaux concernées : peaux sensibles et réactives — surveiller en début de traitement." },
 };
 
 // ─── Pétrochimiques ────────────────────────────────────────────────────────────
