@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { FlaskConical, AlertTriangle, CheckCircle, Info, Leaf, Zap, ChevronDown, Droplets, User, ShieldAlert, Sparkles, ArrowRight, Barcode, Link, Loader2, Camera } from "lucide-react";
+import { FlaskConical, AlertTriangle, CheckCircle, Info, Leaf, Zap, ChevronDown, Droplets, User, ShieldAlert, Sparkles, ArrowRight, Barcode, Link, Loader2, Camera, Check } from "lucide-react";
 import { analyzeIngredientsV2, type AnalysisResultV2, type SkinProfile } from "@/lib/cosmetic-ingredients";
 import { generateExplanationFn, compareProductsFn, toSnapshot } from "@/lib/ai-analysis";
 import { computeInciHash, normalizeInciText } from "@/lib/inci-hash";
@@ -569,6 +569,241 @@ function MiniBarometer({ label, score, barLabel }: { label: string; score: numbe
   );
 }
 
+// ─── ProductInputPanel ────────────────────────────────────────────────────────
+
+type ProductMeta = { name: string | null; brand: string | null; imageUrl: string | null };
+
+function ProductInputPanel({
+  label,
+  onResolved,
+  onClear,
+}: {
+  label: string;
+  onResolved: (inci: string, meta: ProductMeta | null) => void;
+  onClear: () => void;
+}) {
+  const [method, setMethod] = useState<InputMethod>("barcode");
+  const [textInput, setTextInput] = useState("");
+  const [barcodeVal, setBarcodeVal] = useState("");
+  const [urlVal, setUrlVal] = useState("");
+  const [ingesting, setIngesting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showScanner, setShowScanner] = useState(false);
+  const [resolved, setResolved] = useState<{ inci: string; meta: ProductMeta | null } | null>(null);
+
+  function resolve(inci: string, meta: ProductMeta | null) {
+    setResolved({ inci, meta });
+    setError(null);
+    onResolved(inci, meta);
+  }
+
+  function clear() {
+    setResolved(null);
+    onClear();
+  }
+
+  function toSlug(brand: string | null, name: string | null): string {
+    return [brand, name].filter(Boolean).join(" ")
+      .toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-z0-9\s]/g, "").trim().replace(/\s+/g, "-");
+  }
+
+  async function searchBarcode(code: string) {
+    const trimmed = code.trim();
+    if (!trimmed) return;
+    setIngesting(true);
+    setError(null);
+    try {
+      const catalogProduct = await getCatalogProductByBarcode(trimmed).catch(() => null);
+      if (catalogProduct?.inciNormalized) {
+        resolve(catalogProduct.inciNormalized, { name: catalogProduct.name, brand: catalogProduct.brand ?? null, imageUrl: catalogProduct.imageUrl ?? null });
+        return;
+      }
+      const product = await lookupBarcodeFn({ data: { barcode: trimmed } });
+      if (product?.inci) {
+        resolve(product.inci, { name: product.productName, brand: product.brand, imageUrl: product.imageUrl });
+        return;
+      }
+      if (product?.productName) {
+        setError("Composition introuvable — recherche sur InciDecoder…");
+        const slug = toSlug(product.brand, product.productName);
+        try {
+          const extracted = await extractInciFromUrlFn({ data: { url: `https://incidecoder.com/products/${slug}` } });
+          if (!extracted.inci) throw new Error("INCI_NOT_FOUND");
+          resolve(extracted.inci, { name: product.productName ?? extracted.productName, brand: product.brand ?? extracted.brand, imageUrl: product.imageUrl ?? extracted.imageUrl });
+          return;
+        } catch {}
+        const q = encodeURIComponent([product.brand, product.productName].filter(Boolean).join(" "));
+        setUrlVal(`https://incidecoder.com/search?query=${q}`);
+        setMethod("url");
+        setError(`"${product.productName}" trouvé sans composition. URL InciDecoder prête.`);
+        return;
+      }
+      setError("Produit non reconnu. Essaie l'onglet URL ou colle la liste INCI.");
+    } catch {
+      setError("Erreur lors de la recherche. Réessaie.");
+    } finally {
+      setIngesting(false);
+    }
+  }
+
+  async function handleUrlExtract() {
+    if (!urlVal.trim()) return;
+    setIngesting(true);
+    setError(null);
+    try {
+      const extracted = await extractInciFromUrlFn({ data: { url: urlVal.trim() } });
+      if (!extracted.inci) throw new Error("INCI_NOT_FOUND");
+      resolve(extracted.inci, { name: extracted.productName, brand: extracted.brand, imageUrl: extracted.imageUrl });
+    } catch (err: any) {
+      setError(INGEST_ERRORS[err?.message] ?? "Erreur lors de l'extraction.");
+    } finally {
+      setIngesting(false);
+    }
+  }
+
+  return (
+    <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-semibold">{label}</p>
+        {resolved && (
+          <button onClick={clear} className="text-xs text-muted-foreground/60 hover:text-muted-foreground underline underline-offset-2">
+            Modifier
+          </button>
+        )}
+      </div>
+
+      {resolved ? (
+        <div className="flex items-center gap-3 rounded-2xl bg-muted/40 px-4 py-3">
+          {resolved.meta?.imageUrl ? (
+            <img src={resolved.meta.imageUrl} alt="" className="h-10 w-10 shrink-0 rounded-xl object-contain bg-muted/30" />
+          ) : (
+            <FlaskConical className="h-4 w-4 shrink-0 text-muted-foreground" />
+          )}
+          <div className="min-w-0 flex-1">
+            {resolved.meta?.name
+              ? <p className="truncate text-sm font-medium">{resolved.meta.name}</p>
+              : <p className="text-sm text-muted-foreground">{resolved.inci.split(",").length} ingrédients</p>
+            }
+            {resolved.meta?.brand && <p className="text-xs text-muted-foreground">{resolved.meta.brand}</p>}
+          </div>
+          <Check className="h-4 w-4 shrink-0 text-emerald-500" />
+        </div>
+      ) : (
+        <>
+          {/* Method tabs */}
+          <div className="flex gap-1 rounded-xl bg-muted/50 p-1">
+            {([
+              { id: "barcode", icon: Barcode, label: "Code-barres" },
+              { id: "url",     icon: Link,    label: "URL produit" },
+              { id: "text",    icon: FlaskConical, label: "INCI" },
+            ] as { id: InputMethod; icon: React.ElementType; label: string }[]).map(({ id, icon: Icon, label: tabLabel }) => (
+              <button
+                key={id}
+                onClick={() => { setMethod(id); setError(null); }}
+                className={`flex flex-1 items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium transition-all ${
+                  method === id ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon className="h-3 w-3" />
+                {tabLabel}
+              </button>
+            ))}
+          </div>
+
+          {method === "text" && (
+            <>
+              <textarea
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                placeholder="Water, Glycerin, Niacinamide, ..."
+                rows={5}
+                className="w-full resize-y rounded-2xl border border-border bg-background p-3 text-sm leading-relaxed outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+              <button
+                onClick={() => { if (textInput.trim()) resolve(textInput.trim(), null); }}
+                disabled={!textInput.trim()}
+                className="flex items-center gap-2 rounded-2xl bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
+              >
+                Ajouter ce produit
+              </button>
+            </>
+          )}
+
+          {method === "barcode" && (
+            <div className="space-y-3">
+              {showScanner ? (
+                <LiveBarcodeScanner onDetect={(code) => { setShowScanner(false); searchBarcode(code); }} onClose={() => setShowScanner(false)} />
+              ) : (
+                <>
+                  <button
+                    onClick={() => setShowScanner(true)}
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-muted/50 px-4 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted"
+                  >
+                    <Camera className="h-4 w-4" />
+                    Ouvrir le scanner
+                  </button>
+                  <div className="relative flex items-center gap-3">
+                    <div className="h-px flex-1 bg-border" />
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">ou</span>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={barcodeVal}
+                    onChange={(e) => setBarcodeVal(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && searchBarcode(barcodeVal)}
+                    placeholder="3600523459858"
+                    className="w-full rounded-2xl border border-border bg-background px-4 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  />
+                </>
+              )}
+              {!showScanner && (
+                <button
+                  onClick={() => searchBarcode(barcodeVal)}
+                  disabled={!barcodeVal.trim() || ingesting}
+                  className="flex items-center gap-2 rounded-2xl bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
+                >
+                  {ingesting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Barcode className="h-3.5 w-3.5" />}
+                  Rechercher
+                </button>
+              )}
+            </div>
+          )}
+
+          {method === "url" && (
+            <div className="space-y-3">
+              <input
+                type="url"
+                value={urlVal}
+                onChange={(e) => setUrlVal(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleUrlExtract()}
+                placeholder="https://www.incidecoder.com/products/..."
+                className="w-full rounded-2xl border border-border bg-background px-4 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+              <button
+                onClick={handleUrlExtract}
+                disabled={!urlVal.trim() || ingesting}
+                className="flex items-center gap-2 rounded-2xl bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
+              >
+                {ingesting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Link className="h-3.5 w-3.5" />}
+                Extraire la liste INCI
+              </button>
+            </div>
+          )}
+
+          {error && (
+            <p className="rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/40 px-3 py-2 text-sm text-red-700 dark:text-red-400">
+              {error}
+            </p>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 // ─── ProductComparator ────────────────────────────────────────────────────────
 
 const RECO_BADGE: Record<string, string> = {
@@ -582,15 +817,17 @@ const RECO_SHORT: Record<string, string> = {
 };
 
 export function ProductComparator({ skinProfile, customIngredients }: { skinProfile: SkinProfile | null; customIngredients?: Map<string, string> }) {
-  const [inciA, setInciA] = useState("");
-  const [inciB, setInciB] = useState("");
+  const [inciA, setInciA] = useState<string | null>(null);
+  const [inciB, setInciB] = useState<string | null>(null);
+  const [metaA, setMetaA] = useState<ProductMeta | null>(null);
+  const [metaB, setMetaB] = useState<ProductMeta | null>(null);
   const [resultA, setResultA] = useState<AnalysisResultV2 | null>(null);
   const [resultB, setResultB] = useState<AnalysisResultV2 | null>(null);
   const [compState, setCompState] = useState<"idle" | "loading" | "done" | "hidden">("idle");
   const [compText, setCompText] = useState("");
 
-  function handleAnalyze() {
-    if (!inciA.trim() || !inciB.trim()) return;
+  useEffect(() => {
+    if (!inciA || !inciB) return;
     const rA = analyzeIngredientsV2(inciA, skinProfile ?? undefined, customIngredients);
     const rB = analyzeIngredientsV2(inciB, skinProfile ?? undefined, customIngredients);
     setResultA(rA);
@@ -599,7 +836,7 @@ export function ProductComparator({ skinProfile, customIngredients }: { skinProf
     logUnclassifiedIngredients(rB.ingredients);
     setCompState("idle");
     setCompText("");
-  }
+  }, [inciA, inciB, skinProfile, customIngredients]);
 
   async function handleCompare() {
     if (!resultA || !resultB) return;
@@ -617,53 +854,34 @@ export function ProductComparator({ skinProfile, customIngredients }: { skinProf
 
   return (
     <div className="space-y-5">
-      {/* Two INCI inputs */}
-      <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft space-y-4">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Produit A</label>
-            <textarea
-              value={inciA}
-              onChange={(e) => { setInciA(e.target.value); setResultA(null); setCompState("idle"); }}
-              placeholder="Water, Glycerin, Niacinamide, ..."
-              rows={6}
-              className="w-full resize-y rounded-2xl border border-border bg-background p-4 text-sm leading-relaxed outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Produit B</label>
-            <textarea
-              value={inciB}
-              onChange={(e) => { setInciB(e.target.value); setResultB(null); setCompState("idle"); }}
-              placeholder="Water, Glycerin, Niacinamide, ..."
-              rows={6}
-              className="w-full resize-y rounded-2xl border border-border bg-background p-4 text-sm leading-relaxed outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-        </div>
-        <div className="flex justify-end">
-          <button
-            onClick={handleAnalyze}
-            disabled={!inciA.trim() || !inciB.trim()}
-            className="flex items-center gap-2 rounded-2xl bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
-          >
-            Analyser et comparer
-            <ArrowRight className="h-3.5 w-3.5" />
-          </button>
-        </div>
+      {/* Two input panels */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <ProductInputPanel
+          label="Produit A"
+          onResolved={(inci, meta) => { setInciA(inci); setMetaA(meta); }}
+          onClear={() => { setInciA(null); setMetaA(null); setResultA(null); setCompState("idle"); }}
+        />
+        <ProductInputPanel
+          label="Produit B"
+          onResolved={(inci, meta) => { setInciB(inci); setMetaB(meta); }}
+          onClear={() => { setInciB(null); setMetaB(null); setResultB(null); setCompState("idle"); }}
+        />
       </div>
 
       {resultA && resultB && (
         <>
           {/* Side-by-side scores */}
           <div className="grid grid-cols-2 gap-3">
-            {([["Produit A", resultA], ["Produit B", resultB]] as const).map(([name, r]) => {
+            {([["A", resultA, metaA], ["B", resultB, metaB]] as [string, AnalysisResultV2, ProductMeta | null][]).map(([key, r, meta]) => {
               const allergens = r.ingredients.filter(i => i.flag === "allergen");
               return (
-                <div key={name} className="rounded-2xl border border-border/60 bg-card p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{name}</p>
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${RECO_BADGE[r.usageReco]}`}>
+                <div key={key} className="rounded-2xl border border-border/60 bg-card p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Produit {key}</p>
+                      {meta?.name && <p className="mt-0.5 truncate text-xs font-medium text-foreground">{meta.name}</p>}
+                    </div>
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${RECO_BADGE[r.usageReco]}`}>
                       {RECO_SHORT[r.usageReco]}
                     </span>
                   </div>
