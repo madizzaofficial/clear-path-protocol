@@ -726,9 +726,11 @@ function ProductDialog({
       if (result.brand) setBrand(result.brand);
       if (result.imageUrl) setImageUrl(result.imageUrl);
       if (result.inci) { setInciNormalized(result.inci); setShowInci(true); }
+      // Partial result: name/brand extracted but INCI in a JS-rendered tab
+      if (!result.inci) setImportError("Ingrédients non trouvés (onglet dynamique). Nom/marque pré-remplis — colle la composition manuellement.");
     } catch (err: any) {
       const msg: Record<string, string> = {
-        INCI_NOT_FOUND: "Liste INCI absente du HTML statique (chargement JS). Essaie la page InciDecoder du produit.",
+        INCI_NOT_FOUND: "Aucune donnée trouvée. Essaie une URL InciDecoder ou colle la liste manuellement.",
         PAGE_INACCESSIBLE: "Page inaccessible ou bloquée. Essaie une URL InciDecoder.",
         SERVICE_UNAVAILABLE: "Service temporairement indisponible.",
       };

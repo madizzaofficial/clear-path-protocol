@@ -849,6 +849,7 @@ export function IngredientAnalyzer({ skinProfile, customIngredients }: { skinPro
           const extracted = await extractInciFromUrlFn({
             data: { url: `https://incidecoder.com/products/${slug}` },
           });
+          if (!extracted.inci) throw new Error("INCI_NOT_FOUND");
           setInput(extracted.inci);
           setIngestError(null);
           applyInci(
@@ -890,6 +891,7 @@ export function IngredientAnalyzer({ skinProfile, customIngredients }: { skinPro
     setIngestError(null);
     try {
       const extracted = await extractInciFromUrlFn({ data: { url: urlVal.trim() } });
+      if (!extracted.inci) throw new Error("INCI_NOT_FOUND");
       setInput(extracted.inci);
       applyInci(extracted.inci, { name: extracted.productName, brand: extracted.brand, imageUrl: extracted.imageUrl });
     } catch (err: any) {

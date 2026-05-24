@@ -69,7 +69,7 @@ export const lookupBarcodeFn = createServerFn({ method: "POST" })
 // ─── URL ingestion (AI-assisted INCI extraction from HTML) ────────────────────
 
 export type UrlExtractResult = {
-  inci: string;
+  inci: string | null;
   productName: string | null;
   brand: string | null;
   imageUrl: string | null;
@@ -178,10 +178,13 @@ export const extractInciFromUrlFn = createServerFn({ method: "POST" })
       throw new Error("SERVICE_UNAVAILABLE");
     }
 
-    if (!parsed?.inci) throw new Error("INCI_NOT_FOUND");
+    // If nothing at all was extracted, throw so the caller shows a hard error
+    if (!parsed?.inci && !parsed?.productName && !parsed?.brand) {
+      throw new Error("INCI_NOT_FOUND");
+    }
 
     return {
-      inci: parsed.inci as string,
+      inci: (parsed.inci as string) || null,
       productName: (parsed.productName as string) || null,
       brand: (parsed.brand as string) || null,
       imageUrl: ogImage,
