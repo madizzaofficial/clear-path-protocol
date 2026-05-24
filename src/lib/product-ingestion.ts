@@ -81,44 +81,72 @@ export const extractInciFromUrlFn = createServerFn({ method: "POST" })
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) throw new Error("SERVICE_UNAVAILABLE");
 
-    // ── Fetch the page ────────────────────────────────────────────────────────
-    let html: string;
+    // ── Fetch the page (direct → Jina Reader fallback) ────────────────────────
+    let pageText: string;
     let ogImage: string | null = null;
-    try {
-      const pageRes = await fetch(ctx.data.url, {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
-          Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-          "Accept-Language": "fr-FR,fr;q=0.9",
-        },
-        redirect: "follow",
-        signal: AbortSignal.timeout(10000),
-      });
-      if (!pageRes.ok) throw new Error("PAGE_INACCESSIBLE");
-      html = await pageRes.text();
-    } catch (e: any) {
-      // Re-throw known codes; map everything else (timeout, network, etc.) to PAGE_INACCESSIBLE
-      if (e?.message === "PAGE_INACCESSIBLE" || e?.message === "SERVICE_UNAVAILABLE") throw e;
-      throw new Error("PAGE_INACCESSIBLE");
+
+    const BOT_CHALLENGE_SIGNALS = ["Just a moment", "Performing security verification", "Enable JavaScript", "cf-browser-verification"];
+
+    async function fetchDirect(url: string): Promise<string | null> {
+      try {
+        const res = await fetch(url, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+            Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "fr-FR,fr;q=0.9",
+          },
+          redirect: "follow",
+          signal: AbortSignal.timeout(10000),
+        });
+        if (!res.ok) return null;
+        const html = await res.text();
+        // Reject bot-challenge pages (too small or Cloudflare challenge)
+        if (html.length < 3000 || BOT_CHALLENGE_SIGNALS.some((s) => html.includes(s))) return null;
+        return html;
+      } catch {
+        return null;
+      }
     }
 
-    // og:image before tag stripping
-    const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
-      ?? html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
-    ogImage = ogMatch?.[1] ?? null;
+    async function fetchViaJina(url: string): Promise<string | null> {
+      try {
+        const res = await fetch(`https://r.jina.ai/${url}`, {
+          headers: { Accept: "text/plain", "X-Return-Format": "text" },
+          signal: AbortSignal.timeout(20000),
+        });
+        if (!res.ok) return null;
+        const text = await res.text();
+        if (BOT_CHALLENGE_SIGNALS.some((s) => text.includes(s)) || text.includes("requiring CAPTCHA")) return null;
+        return text;
+      } catch {
+        return null;
+      }
+    }
 
-    // Strip scripts/styles/tags, keep readable text — CeraVe-style pages often
-    // render the INCI only via JS; try to find it in JSON-LD or data attributes first
-    const jsonLdMatch = html.match(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
-    const jsonLdText = jsonLdMatch ? jsonLdMatch.join(" ") : "";
+    const rawHtml = await fetchDirect(ctx.data.url);
 
-    const text = (jsonLdText + " " + html)
-      .replace(/<script[\s\S]*?<\/script>/gi, "")
-      .replace(/<style[\s\S]*?<\/style>/gi, "")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/\s+/g, " ")
-      .trim()
-      .slice(0, 14000);
+    if (rawHtml) {
+      // Direct fetch succeeded — extract og:image then strip to plain text
+      const ogMatch = rawHtml.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+        ?? rawHtml.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+      ogImage = ogMatch?.[1] ?? null;
+
+      const jsonLdMatch = rawHtml.match(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
+      const jsonLdText = jsonLdMatch ? jsonLdMatch.join(" ") : "";
+
+      pageText = (jsonLdText + " " + rawHtml)
+        .replace(/<script[\s\S]*?<\/script>/gi, "")
+        .replace(/<style[\s\S]*?<\/style>/gi, "")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 14000);
+    } else {
+      // Fallback: Jina Reader (handles JS-rendered pages and bypasses most Cloudflare)
+      const jinaText = await fetchViaJina(ctx.data.url);
+      if (!jinaText) throw new Error("PAGE_INACCESSIBLE");
+      pageText = jinaText.slice(0, 14000);
+    }
 
     // ── GPT extraction ────────────────────────────────────────────────────────
     let parsed: any;
@@ -136,7 +164,7 @@ export const extractInciFromUrlFn = createServerFn({ method: "POST" })
               role: "system",
               content: `You are a cosmetic ingredient extractor. From the page text, find: (1) the full INCI ingredient list (ingredients listed after "INCI" or "Ingrédients" or "Ingredients" or "Composition"), (2) product name, (3) brand. Return ONLY valid JSON: {"inci": "WATER, GLYCERIN, ...", "productName": "...", "brand": "..."}. If the INCI list is absent from the text, set "inci" to null.`,
             },
-            { role: "user", content: text },
+            { role: "user", content: pageText },
           ],
         }),
         signal: AbortSignal.timeout(20000),
