@@ -81,52 +81,75 @@ export const extractInciFromUrlFn = createServerFn({ method: "POST" })
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) throw new Error("SERVICE_UNAVAILABLE");
 
-    const pageRes = await fetch(ctx.data.url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; ProtocoleClear/1.0)",
-        Accept: "text/html,application/xhtml+xml",
-      },
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!pageRes.ok) throw new Error("PAGE_INACCESSIBLE");
+    // ── Fetch the page ────────────────────────────────────────────────────────
+    let html: string;
+    let ogImage: string | null = null;
+    try {
+      const pageRes = await fetch(ctx.data.url, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+          Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept-Language": "fr-FR,fr;q=0.9",
+        },
+        redirect: "follow",
+        signal: AbortSignal.timeout(10000),
+      });
+      if (!pageRes.ok) throw new Error("PAGE_INACCESSIBLE");
+      html = await pageRes.text();
+    } catch (e: any) {
+      // Re-throw known codes; map everything else (timeout, network, etc.) to PAGE_INACCESSIBLE
+      if (e?.message === "PAGE_INACCESSIBLE" || e?.message === "SERVICE_UNAVAILABLE") throw e;
+      throw new Error("PAGE_INACCESSIBLE");
+    }
 
-    const html = await pageRes.text();
-
-    // Extract og:image before stripping tags — most product pages have it
-    const ogImageMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+    // og:image before tag stripping
+    const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
       ?? html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
-    const ogImage = ogImageMatch?.[1] ?? null;
+    ogImage = ogMatch?.[1] ?? null;
 
-    // Strip scripts, styles, tags — keep text only, truncate to ~3k tokens
-    const text = html
+    // Strip scripts/styles/tags, keep readable text — CeraVe-style pages often
+    // render the INCI only via JS; try to find it in JSON-LD or data attributes first
+    const jsonLdMatch = html.match(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
+    const jsonLdText = jsonLdMatch ? jsonLdMatch.join(" ") : "";
+
+    const text = (jsonLdText + " " + html)
       .replace(/<script[\s\S]*?<\/script>/gi, "")
       .replace(/<style[\s\S]*?<\/style>/gi, "")
       .replace(/<[^>]+>/g, " ")
       .replace(/\s+/g, " ")
       .trim()
-      .slice(0, 12000);
+      .slice(0, 14000);
 
-    const gptRes = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        temperature: 0,
-        max_tokens: 500,
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "system",
-            content: `Extract from this cosmetic product page text: (1) the full INCI ingredient list, (2) product name, (3) brand name. Return ONLY valid JSON: {"inci": "...", "productName": "...", "brand": "..."}. If the INCI list is not found, set "inci" to null.`,
-          },
-          { role: "user", content: text },
-        ],
-      }),
-    });
+    // ── GPT extraction ────────────────────────────────────────────────────────
+    let parsed: any;
+    try {
+      const gptRes = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          temperature: 0,
+          max_tokens: 600,
+          response_format: { type: "json_object" },
+          messages: [
+            {
+              role: "system",
+              content: `You are a cosmetic ingredient extractor. From the page text, find: (1) the full INCI ingredient list (ingredients listed after "INCI" or "Ingrédients" or "Ingredients" or "Composition"), (2) product name, (3) brand. Return ONLY valid JSON: {"inci": "WATER, GLYCERIN, ...", "productName": "...", "brand": "..."}. If the INCI list is absent from the text, set "inci" to null.`,
+            },
+            { role: "user", content: text },
+          ],
+        }),
+        signal: AbortSignal.timeout(20000),
+      });
+      if (!gptRes.ok) throw new Error("SERVICE_UNAVAILABLE");
+      const gptJson = await gptRes.json().catch(() => null);
+      const content = gptJson?.choices?.[0]?.message?.content ?? "{}";
+      parsed = JSON.parse(content);
+    } catch (e: any) {
+      if (e?.message === "SERVICE_UNAVAILABLE") throw e;
+      throw new Error("SERVICE_UNAVAILABLE");
+    }
 
-    if (!gptRes.ok) throw new Error("SERVICE_UNAVAILABLE");
-    const gptJson = await gptRes.json().catch(() => null);
-    const parsed = JSON.parse(gptJson?.choices?.[0]?.message?.content ?? "{}");
     if (!parsed?.inci) throw new Error("INCI_NOT_FOUND");
 
     return {

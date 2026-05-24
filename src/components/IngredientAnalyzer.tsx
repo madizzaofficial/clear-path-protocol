@@ -746,9 +746,9 @@ export function ProductComparator({ skinProfile }: { skinProfile: SkinProfile | 
 type InputMethod = "text" | "barcode" | "url";
 
 const INGEST_ERRORS: Record<string, string> = {
-  INCI_NOT_FOUND: "Liste INCI introuvable sur cette page. Copie-la manuellement.",
-  PAGE_INACCESSIBLE: "Page inaccessible. Vérifie l'URL et réessaie.",
-  SERVICE_UNAVAILABLE: "Service temporairement indisponible.",
+  INCI_NOT_FOUND: "Liste INCI introuvable sur cette page — elle est probablement chargée dynamiquement. Essaie la page InciDecoder du produit, ou colle la liste manuellement.",
+  PAGE_INACCESSIBLE: "Page inaccessible ou bloquée (anti-bot). Essaie une URL InciDecoder ou colle la liste manuellement.",
+  SERVICE_UNAVAILABLE: "Service temporairement indisponible. Réessaie dans quelques secondes.",
 };
 
 export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile | null }) {

@@ -728,8 +728,8 @@ function ProductDialog({
       if (result.inci) { setInciNormalized(result.inci); setShowInci(true); }
     } catch (err: any) {
       const msg: Record<string, string> = {
-        INCI_NOT_FOUND: "Liste INCI introuvable sur cette page.",
-        PAGE_INACCESSIBLE: "Page inaccessible.",
+        INCI_NOT_FOUND: "Liste INCI absente du HTML statique (chargement JS). Essaie la page InciDecoder du produit.",
+        PAGE_INACCESSIBLE: "Page inaccessible ou bloquée. Essaie une URL InciDecoder.",
         SERVICE_UNAVAILABLE: "Service temporairement indisponible.",
       };
       setImportError(msg[err?.message] ?? "Erreur lors de l'extraction.");
