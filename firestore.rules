@@ -137,6 +137,14 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    // ── Unclassified ingredients (fire-and-forget from INCI analyzer) ─────────
+    // Any authenticated user can write (analyzer is available to all users).
+    // Only admins can read (displayed on /admin/unclassified).
+    match /unclassified_ingredients/{ingredientId} {
+      allow read: if isAdmin();
+      allow write: if isAuth();
+    }
+
     // ── Routine templates (admin-managed reusable templates) ──────────────────
     match /routine_templates/{templateId} {
       allow read: if isAuth();

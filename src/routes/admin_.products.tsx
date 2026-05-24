@@ -9,6 +9,8 @@ import {
   Camera,
   ChevronDown,
   ImageOff,
+  LayoutGrid,
+  LayoutList,
   Loader2,
   Package,
   Pencil,
@@ -83,6 +85,7 @@ function ProductsContent() {
   const [isNewProduct, setIsNewProduct] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   useEffect(() => {
     getDocs(collection(db, "admin_products"))
@@ -159,7 +162,7 @@ function ProductsContent() {
       <div className="mx-auto max-w-7xl px-6 pb-24 pt-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
                 Catalogue produits
@@ -168,7 +171,7 @@ function ProductsContent() {
                 Produits réutilisables pour la création des routines clients.
               </p>
             </div>
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={() => (navigate as any)({ to: "/admin/unclassified" })}
                 className="flex items-center gap-2 rounded-2xl border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -233,6 +236,28 @@ function ProductsContent() {
               </span>
             )}
           </button>
+
+          {/* View toggle */}
+          <div className="ml-auto flex h-10 items-center gap-0.5 rounded-2xl border border-border bg-background p-1">
+            <button
+              onClick={() => setViewMode("grid")}
+              title="Vue grille"
+              className={`flex h-7 w-7 items-center justify-center rounded-xl transition-colors ${
+                viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <LayoutGrid className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              title="Vue liste"
+              className={`flex h-7 w-7 items-center justify-center rounded-xl transition-colors ${
+                viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <LayoutList className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
 
         {/* Content */}
@@ -249,7 +274,7 @@ function ProductsContent() {
                 : "Aucun résultat pour ces filtres."}
             </p>
           </div>
-        ) : (
+        ) : viewMode === "grid" ? (
           <ul className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             {filtered.map((p) => (
               <ProductCard
@@ -261,6 +286,23 @@ function ProductsContent() {
               />
             ))}
           </ul>
+        ) : (
+          <div className="rounded-3xl border border-border/60 bg-card shadow-soft overflow-hidden">
+            <div className="border-b border-border/60 px-5 py-3">
+              <p className="text-xs text-muted-foreground">{filtered.length} produit{filtered.length > 1 ? "s" : ""}</p>
+            </div>
+            <ul className="divide-y divide-border/40">
+              {filtered.map((p) => (
+                <ProductListItem
+                  key={p.id}
+                  product={p}
+                  onEdit={() => openEdit(p)}
+                  onDelete={() => setDeletingId(p.id)}
+                  onVerify={() => handleQuickVerify(p.id)}
+                />
+              ))}
+            </ul>
+          </div>
         )}
       </div>
 
@@ -393,6 +435,79 @@ function ProductCard({
         >
           <Trash2 className="h-3 w-3" />
           Supprimer
+        </button>
+      </div>
+    </li>
+  );
+}
+
+// ─── Product List Item (compact view) ────────────────────────────────────────
+
+function ProductListItem({
+  product,
+  onEdit,
+  onDelete,
+  onVerify,
+}: {
+  product: CatalogProduct;
+  onEdit: () => void;
+  onDelete: () => void;
+  onVerify: () => void;
+}) {
+  return (
+    <li className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/30 transition-colors">
+      {/* Thumbnail */}
+      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-border/60 bg-muted">
+        {product.imageUrl ? (
+          <img src={product.imageUrl} alt={product.name} className="h-full w-full rounded-xl object-contain p-0.5" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <ImageOff className="h-4 w-4 text-muted-foreground/30" />
+          </div>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <p className="truncate text-sm font-semibold text-foreground">{product.name}</p>
+          {product.verified === false && (
+            <span className="shrink-0 rounded-full bg-amber-500 px-1.5 py-0.5 text-[9px] font-bold text-white">
+              Non vérifié
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 mt-0.5">
+          {product.brand && <span className="text-xs text-muted-foreground font-medium">{product.brand}</span>}
+          {product.brand && <span className="text-muted-foreground/30 text-xs">·</span>}
+          <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground/70">{product.category}</span>
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex shrink-0 items-center gap-1">
+        {product.verified === false && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onVerify(); }}
+            title="Vérifier"
+            className="flex h-7 w-7 items-center justify-center rounded-xl text-amber-600 transition-colors hover:bg-amber-50 dark:hover:bg-amber-950/20"
+          >
+            <ShieldCheck className="h-3.5 w-3.5" />
+          </button>
+        )}
+        <button
+          onClick={onEdit}
+          title="Modifier"
+          className="flex h-7 w-7 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+        <button
+          onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          title="Supprimer"
+          className="flex h-7 w-7 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
         </button>
       </div>
     </li>
@@ -601,32 +716,34 @@ function ProductDialog({
                 onClose={() => setShowScanner(false)}
               />
             ) : (
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <input
                   autoComplete="off"
                   inputMode="numeric"
                   value={barcode}
                   onChange={(e) => setBarcode(e.target.value)}
                   placeholder="3600523459858"
-                  className="h-11 flex-1 rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  className="h-11 min-w-0 flex-1 rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowScanner(true)}
-                  title="Scanner avec la caméra"
-                  className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-background text-muted-foreground transition-colors hover:bg-muted"
-                >
-                  <Camera className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={handleImportBarcode}
-                  disabled={!barcode.trim() || importing}
-                  className="flex items-center gap-1.5 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted disabled:opacity-40"
-                >
-                  {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-                  Importer
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowScanner(true)}
+                    title="Scanner avec la caméra"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-border bg-background text-muted-foreground transition-colors hover:bg-muted"
+                  >
+                    <Camera className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleImportBarcode}
+                    disabled={!barcode.trim() || importing}
+                    className="flex flex-1 sm:flex-none items-center justify-center gap-1.5 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted disabled:opacity-40"
+                  >
+                    {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                    Importer
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -636,20 +753,20 @@ function ProductDialog({
             <label className="mb-2 block text-sm font-medium text-foreground/80">
               Importer depuis une URL <span className="font-normal text-muted-foreground">(page produit)</span>
             </label>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <input
                 autoComplete="off"
                 type="url"
                 value={importUrl}
                 onChange={(e) => setImportUrl(e.target.value)}
                 placeholder="https://incidecoder.com/products/…"
-                className="h-11 flex-1 rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="h-11 min-w-0 flex-1 rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
               <button
                 type="button"
                 onClick={handleExtractUrl}
                 disabled={!importUrl.trim() || importing}
-                className="flex items-center gap-1.5 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted disabled:opacity-40"
+                className="flex h-11 items-center justify-center gap-1.5 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted disabled:opacity-40"
               >
                 {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
                 Extraire
