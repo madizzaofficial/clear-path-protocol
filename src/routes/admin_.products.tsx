@@ -87,7 +87,14 @@ function ProductsContent() {
   const [isNewProduct, setIsNewProduct] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">(
+    () => (localStorage.getItem("catalog_view") as "grid" | "list") ?? "grid"
+  );
+
+  function setViewModePersisted(mode: "grid" | "list") {
+    localStorage.setItem("catalog_view", mode);
+    setViewMode(mode);
+  }
   const [page, setPage] = useState(0);
 
   const PAGE_SIZE = viewMode === "grid" ? 24 : 50;
@@ -255,7 +262,7 @@ function ProductsContent() {
           {/* View toggle */}
           <div className="ml-auto flex h-10 items-center gap-0.5 rounded-2xl border border-border bg-background p-1">
             <button
-              onClick={() => setViewMode("grid")}
+              onClick={() => setViewModePersisted("grid")}
               title="Vue grille"
               className={`flex h-7 w-7 items-center justify-center rounded-xl transition-colors ${
                 viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"
@@ -264,7 +271,7 @@ function ProductsContent() {
               <LayoutGrid className="h-3.5 w-3.5" />
             </button>
             <button
-              onClick={() => setViewMode("list")}
+              onClick={() => setViewModePersisted("list")}
               title="Vue liste"
               className={`flex h-7 w-7 items-center justify-center rounded-xl transition-colors ${
                 viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"
