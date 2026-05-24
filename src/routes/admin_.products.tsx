@@ -8,6 +8,8 @@ import { useEffect, useState, useMemo } from "react";
 import {
   Camera,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ImageOff,
   LayoutGrid,
   LayoutList,
@@ -86,12 +88,18 @@ function ProductsContent() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [page, setPage] = useState(0);
+
+  const PAGE_SIZE = viewMode === "grid" ? 24 : 50;
 
   useEffect(() => {
     getDocs(collection(db, "admin_products"))
       .then((snap) => setProducts(snap.docs.map((d) => d.data() as CatalogProduct)))
       .finally(() => setLoadingProducts(false));
   }, []);
+
+  // Reset to page 0 whenever filters or view mode change
+  useEffect(() => { setPage(0); }, [filterCategory, filterUnverified, search, viewMode]);
 
   const unverifiedCount = useMemo(() => products.filter((p) => p.verified === false).length, [products]);
 
@@ -105,6 +113,9 @@ function ProductsContent() {
     }
     return [...result].sort((a, b) => a.name.localeCompare(b.name, "fr"));
   }, [products, filterCategory, filterUnverified, search]);
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginated = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   function openNew() {
     setIsNewProduct(true);
@@ -275,25 +286,10 @@ function ProductsContent() {
             </p>
           </div>
         ) : viewMode === "grid" ? (
-          <ul className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {filtered.map((p) => (
-              <ProductCard
-                key={p.id}
-                product={p}
-                onEdit={() => openEdit(p)}
-                onDelete={() => setDeletingId(p.id)}
-                onVerify={() => handleQuickVerify(p.id)}
-              />
-            ))}
-          </ul>
-        ) : (
-          <div className="rounded-3xl border border-border/60 bg-card shadow-soft overflow-hidden">
-            <div className="border-b border-border/60 px-5 py-3">
-              <p className="text-xs text-muted-foreground">{filtered.length} produit{filtered.length > 1 ? "s" : ""}</p>
-            </div>
-            <ul className="divide-y divide-border/40">
-              {filtered.map((p) => (
-                <ProductListItem
+          <>
+            <ul className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+              {paginated.map((p) => (
+                <ProductCard
                   key={p.id}
                   product={p}
                   onEdit={() => openEdit(p)}
@@ -302,7 +298,35 @@ function ProductsContent() {
                 />
               ))}
             </ul>
-          </div>
+            <Pagination page={page} totalPages={totalPages} total={filtered.length} pageSize={PAGE_SIZE} onPage={setPage} />
+          </>
+        ) : (
+          <>
+            <div className="rounded-3xl border border-border/60 bg-card shadow-soft overflow-hidden">
+              <div className="border-b border-border/60 px-5 py-3">
+                <p className="text-xs text-muted-foreground">
+                  {filtered.length} produit{filtered.length > 1 ? "s" : ""}
+                  {filtered.length > PAGE_SIZE && (
+                    <span className="ml-1 text-muted-foreground/60">
+                      — affichage {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)}
+                    </span>
+                  )}
+                </p>
+              </div>
+              <ul className="divide-y divide-border/40">
+                {paginated.map((p) => (
+                  <ProductListItem
+                    key={p.id}
+                    product={p}
+                    onEdit={() => openEdit(p)}
+                    onDelete={() => setDeletingId(p.id)}
+                    onVerify={() => handleQuickVerify(p.id)}
+                  />
+                ))}
+              </ul>
+            </div>
+            <Pagination page={page} totalPages={totalPages} total={filtered.length} pageSize={PAGE_SIZE} onPage={setPage} />
+          </>
         )}
       </div>
 
@@ -336,6 +360,80 @@ function ProductsContent() {
         </AlertDialogContent>
       </AlertDialog>
     </AdminShell>
+  );
+}
+
+// ─── Pagination ───────────────────────────────────────────────────────────────
+
+function Pagination({
+  page,
+  totalPages,
+  total,
+  pageSize,
+  onPage,
+}: {
+  page: number;
+  totalPages: number;
+  total: number;
+  pageSize: number;
+  onPage: (p: number) => void;
+}) {
+  if (totalPages <= 1) return null;
+
+  const from = page * pageSize + 1;
+  const to = Math.min((page + 1) * pageSize, total);
+
+  // Build page number list: always show first, last, current ±1, with "…" gaps
+  const pages: (number | "…")[] = [];
+  for (let i = 0; i < totalPages; i++) {
+    if (i === 0 || i === totalPages - 1 || Math.abs(i - page) <= 1) {
+      pages.push(i);
+    } else if (pages[pages.length - 1] !== "…") {
+      pages.push("…");
+    }
+  }
+
+  return (
+    <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+      <p className="text-xs text-muted-foreground">
+        {from}–{to} sur {total} produit{total > 1 ? "s" : ""}
+      </p>
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => onPage(page - 1)}
+          disabled={page === 0}
+          className="flex h-8 w-8 items-center justify-center rounded-xl border border-border text-muted-foreground transition-colors hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+        </button>
+        {pages.map((p, i) =>
+          p === "…" ? (
+            <span key={`ellipsis-${i}`} className="flex h-8 w-8 items-center justify-center text-xs text-muted-foreground">
+              …
+            </span>
+          ) : (
+            <button
+              key={p}
+              onClick={() => onPage(p as number)}
+              className={`flex h-8 min-w-[2rem] items-center justify-center rounded-xl px-2 text-xs font-medium transition-colors ${
+                p === page
+                  ? "bg-foreground text-background"
+                  : "border border-border text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              {(p as number) + 1}
+            </button>
+          )
+        )}
+        <button
+          onClick={() => onPage(page + 1)}
+          disabled={page >= totalPages - 1}
+          className="flex h-8 w-8 items-center justify-center rounded-xl border border-border text-muted-foreground transition-colors hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <ChevronRight className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
   );
 }
 
