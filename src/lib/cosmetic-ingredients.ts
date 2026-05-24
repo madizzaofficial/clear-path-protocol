@@ -1332,7 +1332,14 @@ function makeBarometer(score: number): Barometer {
   return { score, label: score <= 3 ? "Faible" : score <= 6 ? "Modéré" : "Élevé" };
 }
 
-export function analyzeIngredientsV2(raw: string, profile?: SkinProfile): AnalysisResultV2 {
+export const INGREDIENT_ROLES = [
+  "Actif", "Humectant", "Émollient", "Solvant", "Tensioactif",
+  "Conservateur", "Texturant", "Apaisant", "Antioxydant",
+  "Filtre UV", "Barrière cutanée", "Exfoliant", "Colorant",
+  "Épaississant", "Émulsifiant", "Filmogène",
+] as const;
+
+export function analyzeIngredientsV2(raw: string, profile?: SkinProfile, customIngredients?: Map<string, string>): AnalysisResultV2 {
   const tokens = raw.split(/(?<!\d),(?!\d)|\n|(?<!\d)\.\s+/).map((t) => stripQuantity(t.trim().replace(/\.$/, ""))).filter(Boolean);
 
   const ingredients: AnalyzedIngredient[] = tokens.map((token) => {
@@ -1383,6 +1390,12 @@ export function analyzeIngredientsV2(raw: string, profile?: SkinProfile): Analys
     const dbEntry = INCI_DB.get(norm);
     if (dbEntry?.role_fr) {
       return { raw: token, normalized: norm, flag: "ok", role: dbEntry.role_fr };
+    }
+
+    // Custom admin-classified ingredients (stored in Firestore, no deploy needed)
+    const customRole = customIngredients?.get(norm);
+    if (customRole) {
+      return { raw: token, normalized: norm, flag: "ok", role: customRole };
     }
 
     const inferred = inferRoleFromName(norm);

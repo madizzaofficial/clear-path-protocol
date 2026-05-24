@@ -145,6 +145,14 @@ service cloud.firestore {
       allow write: if isAuth();
     }
 
+    // ── Custom ingredient classifications (admin-classified, no deploy needed) ──
+    // Any authenticated user can read (used by the INCI analyzer at runtime).
+    // Only admins can write (classifications are set from /admin/unclassified).
+    match /custom_ingredients/{ingredientId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
     // ── Routine templates (admin-managed reusable templates) ──────────────────
     match /routine_templates/{templateId} {
       allow read: if isAuth();

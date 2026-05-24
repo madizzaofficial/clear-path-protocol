@@ -10,7 +10,7 @@ import { LiveBarcodeScanner } from "@/components/LiveBarcodeScanner";
 import { logUnclassifiedIngredients } from "@/lib/unclassified-log";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // ─── Flag config ──────────────────────────────────────────────────────────────
@@ -581,7 +581,7 @@ const RECO_SHORT: Record<string, string> = {
   daily: "Quotidien", occasional: "Occasionnel", caution: "Avec prudence", avoid: "Déconseillé",
 };
 
-export function ProductComparator({ skinProfile }: { skinProfile: SkinProfile | null }) {
+export function ProductComparator({ skinProfile, customIngredients }: { skinProfile: SkinProfile | null; customIngredients?: Map<string, string> }) {
   const [inciA, setInciA] = useState("");
   const [inciB, setInciB] = useState("");
   const [resultA, setResultA] = useState<AnalysisResultV2 | null>(null);
@@ -591,8 +591,8 @@ export function ProductComparator({ skinProfile }: { skinProfile: SkinProfile | 
 
   function handleAnalyze() {
     if (!inciA.trim() || !inciB.trim()) return;
-    const rA = analyzeIngredientsV2(inciA, skinProfile ?? undefined);
-    const rB = analyzeIngredientsV2(inciB, skinProfile ?? undefined);
+    const rA = analyzeIngredientsV2(inciA, skinProfile ?? undefined, customIngredients);
+    const rB = analyzeIngredientsV2(inciB, skinProfile ?? undefined, customIngredients);
     setResultA(rA);
     setResultB(rB);
     logUnclassifiedIngredients(rA.ingredients);
@@ -751,7 +751,7 @@ const INGEST_ERRORS: Record<string, string> = {
   SERVICE_UNAVAILABLE: "Service temporairement indisponible. Réessaie dans quelques secondes.",
 };
 
-export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile | null }) {
+export function IngredientAnalyzer({ skinProfile, customIngredients }: { skinProfile: SkinProfile | null; customIngredients?: Map<string, string> }) {
   const [method, setMethod] = useState<InputMethod>("barcode");
   const [input, setInput] = useState("");
   const [barcodeVal, setBarcodeVal] = useState("");
@@ -769,7 +769,7 @@ export function IngredientAnalyzer({ skinProfile }: { skinProfile: SkinProfile |
     meta?: { name: string | null; brand: string | null; imageUrl?: string | null },
     barcode?: string | null
   ) {
-    const analysis = analyzeIngredientsV2(inci, skinProfile ?? undefined);
+    const analysis = analyzeIngredientsV2(inci, skinProfile ?? undefined, customIngredients);
     setResult(analysis);
     setProductMeta(meta ? { name: meta.name, brand: meta.brand, imageUrl: meta.imageUrl ?? null } : null);
     setIngestError(null);
@@ -1108,12 +1108,21 @@ export function IngredientAnalyzerPage() {
   const { user } = useAuth();
   const [tab, setTab] = useState<"analyzer" | "comparator">("analyzer");
   const [skinProfile, setSkinProfile] = useState<SkinProfile | null>(null);
+  const [customIngredients, setCustomIngredients] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     if (!user) return;
     getDoc(doc(db, "intake_answers", user.uid)).then((snap) => {
       if (snap.exists()) setSkinProfile(snap.data() as SkinProfile);
     });
+    getDocs(collection(db, "custom_ingredients")).then((snap) => {
+      const map = new Map<string, string>();
+      snap.docs.forEach((d) => {
+        const data = d.data();
+        if (data.normalized && data.role) map.set(data.normalized, data.role);
+      });
+      setCustomIngredients(map);
+    }).catch(() => {});
   }, [user]);
 
   return (
@@ -1153,9 +1162,9 @@ export function IngredientAnalyzerPage() {
       </div>
 
       {tab === "analyzer" ? (
-        <IngredientAnalyzer skinProfile={skinProfile} />
+        <IngredientAnalyzer skinProfile={skinProfile} customIngredients={customIngredients} />
       ) : (
-        <ProductComparator skinProfile={skinProfile} />
+        <ProductComparator skinProfile={skinProfile} customIngredients={customIngredients} />
       )}
     </main>
   );
