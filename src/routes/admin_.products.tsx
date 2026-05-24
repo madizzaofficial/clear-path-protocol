@@ -147,10 +147,14 @@ function ProductsContent() {
       const updated: CatalogProduct = {
         ...editingProduct,
         ...data,
-        verified: true, // always true when admin saves via form
+        verified: true,
         updatedAt: Date.now(),
       };
-      await setDoc(doc(db, "admin_products", updated.id), updated);
+      // Firestore rejects undefined values — strip them before writing
+      const clean = Object.fromEntries(
+        Object.entries(updated).filter(([, v]) => v !== undefined)
+      ) as CatalogProduct;
+      await setDoc(doc(db, "admin_products", updated.id), clean);
       setProducts((prev) =>
         isNewProduct
           ? [...prev, updated]
