@@ -114,7 +114,7 @@ const JOURNEY_PHASES = [
   { id: 6, shortLabel: "M3+", label: "Mois 3+", description: "Intègre un soin ciblé pour les marques.", dayStart: 85, dayEnd: Infinity },
 ];
 
-function CircleMetric({ label, emoji, pct, inverted }: { label: string; emoji: string; pct: number; inverted?: boolean }) {
+function CircleMetric({ label, emoji, pct, inverted, description }: { label: string; emoji: string; pct: number; inverted?: boolean; description?: string }) {
   const r = 30;
   const circ = 2 * Math.PI * r;
   const offset = circ - (pct / 100) * circ;
@@ -125,7 +125,7 @@ function CircleMetric({ label, emoji, pct, inverted }: { label: string; emoji: s
     ? pct >= 67 ? "text-red-500 dark:text-red-400" : pct >= 34 ? "text-amber-500 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
     : pct >= 67 ? "text-emerald-600 dark:text-emerald-400" : pct >= 34 ? "text-amber-500 dark:text-amber-400" : "text-red-500 dark:text-red-400";
   return (
-    <div className="flex flex-col items-center gap-1.5">
+    <div className="flex flex-col items-center gap-1">
       <div className="relative h-[88px] w-[88px]">
         <svg viewBox="0 0 80 80" className="-rotate-90 h-full w-full">
           <circle cx="40" cy="40" r={r} fill="none" stroke="currentColor" strokeWidth="7" className="text-muted" />
@@ -144,6 +144,9 @@ function CircleMetric({ label, emoji, pct, inverted }: { label: string; emoji: s
         </div>
       </div>
       <span className="text-center text-xs font-medium text-foreground/70">{label}</span>
+      {description && (
+        <span className={`text-center text-[10px] font-semibold ${numClass}`}>{description}</span>
+      )}
     </div>
   );
 }
@@ -312,47 +315,20 @@ function Suivi() {
     <AppShell>
       <main className="mx-auto max-w-7xl px-4 pb-28 pt-8 sm:px-6">
         {/*
-          DOM = mobile order: Hero · Coaching · Mon parcours · État peau · Feedback · Protocole · Journal
-          Desktop grid (3 cols, explicit row-start):
-            Left  (col 1-2): Hero(r1) · Mon parcours(r2) · Feedback(r3)
-            Right (col 3):   Coaching(r1) · État peau(r2) · Protocole(r3) · Journal(r4)
+          Desktop 3-col grid:
+            Col 1 row-1: Hero gradient  |  Col 2 row-1: Profil de peau  |  Col 3 rows 1-3: right sidebar wrapper
+            Col 1-2 row-2: Mon parcours
+            Col 1-2 row-3: Journal photo
         */}
         <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start">
 
-          {/* ── 1. Journey hero ─────────────────────── col-span-2 row-1 ── */}
-          <div className="overflow-hidden rounded-3xl bg-gradient-warm p-6 shadow-elegant lg:col-span-2 lg:row-start-1">
-            {/* Day count + skin profile */}
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-foreground/50">Mon parcours</p>
-                <h1 className="mt-1 font-display text-5xl font-semibold leading-none">Jour {dayCount}</h1>
-              </div>
-              {(skinType || (acneTypes && acneTypes.length > 0) || intensity) && (
-                <div className="flex flex-col items-end gap-1">
-                  <p className="text-[9px] font-semibold uppercase tracking-widest text-foreground/40">Mon profil</p>
-                  {skinType && (
-                    <span className="rounded-full bg-background/60 px-3 py-1 text-xs font-medium backdrop-blur-sm">
-                      Peau {(SKIN_TYPE_LABELS[skinType] ?? skinType).toLowerCase()}
-                    </span>
-                  )}
-                  {intensity && (
-                    <span className="rounded-full bg-background/60 px-3 py-1 text-xs font-medium backdrop-blur-sm">
-                      {INTENSITY_LABELS[intensity] ?? intensity}
-                    </span>
-                  )}
-                  {acneTypes?.map((t) => (
-                    <span key={t} className="rounded-full bg-background/60 px-3 py-1 text-xs font-medium backdrop-blur-sm">
-                      {ACNE_TYPE_LABELS[t] ?? t}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Current phase name + description */}
+          {/* ── 1a. Hero gradient ───────────────── col-1 row-1 ── */}
+          <div className="overflow-hidden rounded-3xl bg-gradient-warm p-6 shadow-elegant lg:col-start-1 lg:row-start-1">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-foreground/50">Mon parcours</p>
+            <h1 className="mt-1 font-display text-5xl font-semibold leading-none">Jour {dayCount}</h1>
             <div className="mt-4">
               <p className="text-base font-semibold">{currentPhase.label}</p>
-              <p className="mt-0.5 max-w-sm text-sm text-foreground/70">{currentPhase.description}</p>
+              <p className="mt-0.5 text-sm text-foreground/70">{currentPhase.description}</p>
               {skinState?.coachPhrase && (
                 <p className="mt-2 text-sm italic text-foreground/60">"{skinState.coachPhrase}"</p>
               )}
@@ -362,91 +338,165 @@ function Suivi() {
             </div>
           </div>
 
-          {/* ── 4. État de ta peau ─────────────── right col-3 row-2 ── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-3 lg:row-start-2">
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                État de ta peau
-              </p>
-              {skinState?.updatedAt && (
-                <p className="text-[10px] text-muted-foreground/50">
-                  mis à jour{" "}
-                  {new Date(skinState.updatedAt).toLocaleDateString("fr-FR", {
-                    day: "numeric",
-                    month: "short",
-                  })}
-                </p>
+          {/* ── 1b. Profil de peau ──────────────── col-2 row-1 ── */}
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-2 lg:row-start-1">
+            <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Profil de peau</p>
+            {(skinType || (acneTypes && acneTypes.length > 0) || intensity) ? (
+              <div className="space-y-3">
+                {skinType && (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs text-muted-foreground">Type</span>
+                    <span className="text-sm font-semibold">{SKIN_TYPE_LABELS[skinType] ?? skinType}</span>
+                  </div>
+                )}
+                {intensity && (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs text-muted-foreground">Intensité</span>
+                    <span className="text-sm font-semibold">{INTENSITY_LABELS[intensity] ?? intensity}</span>
+                  </div>
+                )}
+                {acneTypes && acneTypes.length > 0 && (
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="shrink-0 text-xs text-muted-foreground">Types d'acné</span>
+                    <div className="flex flex-wrap justify-end gap-1">
+                      {acneTypes.map((t) => (
+                        <span key={t} className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
+                          {ACNE_TYPE_LABELS[t] ?? t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">Ton profil sera renseigné après ton bilan d'intake.</p>
+            )}
+          </div>
+
+          {/* ── Right sidebar wrapper ── col-3, rows 1-3, flex-col packed ── */}
+          <div className="flex flex-col gap-4 lg:col-start-3 lg:row-start-1 lg:row-span-3 lg:gap-6">
+
+            {/* Coaching */}
+            <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
+              <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                <CalendarDays className="h-3.5 w-3.5" />
+                Prochain point coaching
+              </div>
+              {skinState?.nextCallDate ? (
+                <>
+                  <p className="text-base font-semibold capitalize">{formatCallDate(skinState.nextCallDate)}</p>
+                  {skinState.nextCallTime && (
+                    <p className="text-sm text-muted-foreground">à {skinState.nextCallTime}</p>
+                  )}
+                  {daysUntilCall !== null && (
+                    <p className={`mt-1 text-sm font-semibold ${
+                      daysUntilCall <= 0 ? "text-primary"
+                      : daysUntilCall <= 3 ? "text-amber-600 dark:text-amber-400"
+                      : "text-muted-foreground"
+                    }`}>
+                      {daysUntilCall < 0 ? "Passé"
+                        : daysUntilCall === 0 ? "Aujourd'hui !"
+                        : daysUntilCall === 1 ? "Demain"
+                        : `Dans ${daysUntilCall} jours`}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">Ton prochain point coaching sera bientôt fixé.</p>
+              )}
+              <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/20">
+                <Phone className="h-4 w-4" /> Contacter le coach
+              </button>
+            </div>
+
+            {/* État de ta peau */}
+            <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
+              <div className="mb-4 flex items-center justify-between">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">État de ta peau</p>
+                {skinState?.updatedAt && (
+                  <p className="text-[10px] text-muted-foreground/50">
+                    mis à jour{" "}
+                    {new Date(skinState.updatedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                  </p>
+                )}
+              </div>
+              {hasSkinMetrics ? (() => {
+                const infPct = skinState!.inflammationPct ?? 0;
+                const barPct = skinState!.barrierPct ?? 0;
+                const acnPct = skinState!.acnePct ?? 0;
+                const infDesc = infPct >= 67 ? "Active" : infPct >= 34 ? "Modérée" : "Sous contrôle";
+                const barDesc = barPct >= 67 ? "Excellente" : barPct >= 34 ? "En cours" : "Compromise";
+                const acnDesc = acnPct >= 67 ? "Active" : acnPct >= 34 ? "Modérée" : "Contrôlée";
+                return (
+                  <div className="grid grid-cols-3 gap-4">
+                    <CircleMetric label="Inflammation" emoji="🔥" pct={infPct} inverted description={infDesc} />
+                    <CircleMetric label="Barrière" emoji="🧱" pct={barPct} description={barDesc} />
+                    <CircleMetric label="Acné" emoji="🧴" pct={acnPct} inverted description={acnDesc} />
+                  </div>
+                );
+              })() : (
+                <div className="flex items-start gap-3 py-2">
+                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/40" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Ton coach met à jour ton bilan de peau.</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground/50">Il sera disponible après ta première consultation.</p>
+                  </div>
+                </div>
               )}
             </div>
 
-            {hasSkinMetrics ? (
-              <div>
-                <div className="grid grid-cols-3 gap-4">
-                  <CircleMetric label="Inflammation" emoji="🔥" pct={skinState!.inflammationPct ?? 0} inverted />
-                  <CircleMetric label="Barrière" emoji="🧱" pct={skinState!.barrierPct ?? 0} />
-                  <CircleMetric label="Acné" emoji="🧴" pct={skinState!.acnePct ?? 0} inverted />
-                </div>
+            {/* Message du coach */}
+            <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
+              <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                <MessageSquare className="h-3.5 w-3.5" />
+                Message du coach
               </div>
-            ) : (
-              <div className="flex items-start gap-3 py-2">
-                <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/40" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Ton coach met à jour ton bilan de peau.</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground/50">
-                    Il sera disponible après ta première consultation.
+              {latestNote ? (
+                <>
+                  <p className="text-sm italic leading-relaxed text-foreground/80">"{latestNote.note}"</p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    — {latestNote.authorName ?? "Coach"} ·{" "}
+                    {new Date(latestNote.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}
                   </p>
+                </>
+              ) : (
+                <div className="flex items-start gap-3 py-1">
+                  <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/40" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Ton coach ne t'a pas encore envoyé de message.</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground/50">Ses retours et observations apparaîtront ici.</p>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-
-          {/* ── 2. Coaching ─────────────────── right col-3 row-1 ── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-3 lg:row-start-1">
-            <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              <CalendarDays className="h-3.5 w-3.5" />
-              Prochain point coaching
+              )}
             </div>
 
-            {skinState?.nextCallDate ? (
-              <>
-                <p className="text-base font-semibold capitalize">
-                  {formatCallDate(skinState.nextCallDate)}
-                </p>
-                {skinState.nextCallTime && (
-                  <p className="text-sm text-muted-foreground">à {skinState.nextCallTime}</p>
-                )}
-                {daysUntilCall !== null && (
-                  <p
-                    className={`mt-1 text-sm font-semibold ${
-                      daysUntilCall <= 0
-                        ? "text-primary"
-                        : daysUntilCall <= 3
-                        ? "text-amber-600 dark:text-amber-400"
-                        : "text-muted-foreground"
-                    }`}
-                  >
-                    {daysUntilCall < 0
-                      ? "Passé"
-                      : daysUntilCall === 0
-                      ? "Aujourd'hui !"
-                      : daysUntilCall === 1
-                      ? "Demain"
-                      : `Dans ${daysUntilCall} jours`}
-                  </p>
-                )}
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Ton prochain point coaching sera bientôt fixé.
-              </p>
-            )}
+            {/* Protocole */}
+            <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Protocole</p>
+                <span className="text-xs font-semibold text-primary">{done}/{total} · {protocolPct}%</span>
+              </div>
+              <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-muted">
+                <div className="h-full rounded-full bg-primary transition-all duration-700" style={{ width: `${protocolPct}%` }} />
+              </div>
+              {nextLesson && (
+                <Link
+                  to="/lesson/$lessonId"
+                  params={{ lessonId: nextLesson.id }}
+                  className="flex items-center gap-2 rounded-2xl border border-border/60 bg-muted/20 px-3 py-2.5 transition-colors hover:bg-muted/40"
+                >
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-soft">
+                    <BookOpen className="h-3.5 w-3.5 text-primary" />
+                  </div>
+                  <p className="min-w-0 flex-1 truncate text-xs font-medium">{nextLesson.title}</p>
+                  <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40" />
+                </Link>
+              )}
+            </div>
 
-            <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/20">
-              <Phone className="h-4 w-4" /> Contacter le coach
-            </button>
-          </div>
+          </div>{/* end right sidebar wrapper */}
 
-          {/* ── 3. Mon parcours ──────────────── left col-span-2 row-2 ── */}
+          {/* ── 3. Mon parcours ──────────────── col-span-2 row-2 ── */}
           <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-span-2 lg:row-start-2">
             <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Mon parcours</p>
             <div className="space-y-1">
@@ -456,27 +506,17 @@ function Suivi() {
                 return (
                   <div
                     key={phase.id}
-                    className={`flex items-start gap-3 rounded-2xl px-3 py-2.5 transition-colors ${
-                      isCurrent ? "bg-primary-soft" : ""
-                    }`}
+                    className={`flex items-start gap-3 rounded-2xl px-3 py-2.5 transition-colors ${isCurrent ? "bg-primary-soft" : ""}`}
                   >
-                    {/* State icon */}
                     <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
-                      isCurrent
-                        ? "bg-primary text-primary-foreground"
-                        : isPast
-                        ? "bg-emerald-100 dark:bg-emerald-950/40"
-                        : "border border-border/60 bg-transparent"
+                      isCurrent ? "bg-primary text-primary-foreground"
+                      : isPast ? "bg-emerald-100 dark:bg-emerald-950/40"
+                      : "border border-border/60 bg-transparent"
                     }`}>
-                      {isPast ? (
-                        <Check className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                      ) : isCurrent ? (
-                        phase.id
-                      ) : (
-                        <span className="text-foreground/25">{phase.id}</span>
-                      )}
+                      {isPast ? <Check className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                        : isCurrent ? phase.id
+                        : <span className="text-foreground/25">{phase.id}</span>}
                     </div>
-                    {/* Text */}
                     <div className={`min-w-0 flex-1 ${isPast ? "opacity-50" : !isCurrent ? "opacity-35" : ""}`}>
                       <div className="flex items-center gap-2">
                         <p className={`text-sm font-medium ${isCurrent ? "text-foreground" : ""}`}>{phase.label}</p>
@@ -496,101 +536,25 @@ function Suivi() {
             </div>
           </div>
 
-          {/* ── 5. Feedback du coach ──────── right col-3 row-3 ── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-3 lg:row-start-3">
-            <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              <MessageSquare className="h-3.5 w-3.5" />
-              Message du coach
-            </div>
-
-            {latestNote ? (
-              <>
-                <p className="text-sm italic leading-relaxed text-foreground/80">"{latestNote.note}"</p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  — {latestNote.authorName ?? "Coach"} ·{" "}
-                  {new Date(latestNote.createdAt).toLocaleDateString("fr-FR", {
-                    day: "numeric",
-                    month: "long",
-                  })}
-                </p>
-              </>
-            ) : (
-              <div className="flex items-start gap-3 py-1">
-                <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/40" />
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    Ton coach ne t'a pas encore envoyé de message.
-                  </p>
-                  <p className="mt-0.5 text-xs text-muted-foreground/50">
-                    Ses retours et observations apparaîtront ici.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* ── 6. Protocole ────────────────── right col-3 row-4 ── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-3 lg:row-start-4">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Protocole
-              </p>
-              <span className="text-xs font-semibold text-primary">
-                {done}/{total} · {protocolPct}%
-              </span>
-            </div>
-            <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary transition-all duration-700"
-                style={{ width: `${protocolPct}%` }}
-              />
-            </div>
-            {nextLesson && (
-              <Link
-                to="/lesson/$lessonId"
-                params={{ lessonId: nextLesson.id }}
-                className="flex items-center gap-2 rounded-2xl border border-border/60 bg-muted/20 px-3 py-2.5 transition-colors hover:bg-muted/40"
-              >
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-soft">
-                  <BookOpen className="h-3.5 w-3.5 text-primary" />
-                </div>
-                <p className="min-w-0 flex-1 truncate text-xs font-medium">{nextLesson.title}</p>
-                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40" />
-              </Link>
-            )}
-          </div>
-
-          {/* ── 7. Journal photo ─────────────── left col-span-2 row-3 ── */}
+          {/* ── 7. Journal photo ─────────────── col-span-2 row-3 ── */}
           <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-span-2 lg:row-start-3">
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Journal photo
-              </p>
-              <Link
-                to="/journal"
-                className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-              >
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Journal photo</p>
+              <Link to="/journal" className="flex items-center gap-1 text-xs font-medium text-primary hover:underline">
                 Voir tout <ChevronRight className="h-3 w-3" />
               </Link>
             </div>
-
             {photos.length > 0 ? (
               <div className="grid grid-cols-2 gap-2">
                 {photos.slice(0, 2).map((photo, i) => {
                   const url = photo.front ?? photo.left ?? photo.right;
                   if (!url) return null;
                   return (
-                    <div
-                      key={i}
-                      className="relative aspect-square overflow-hidden rounded-2xl border border-border"
-                    >
+                    <div key={i} className="relative aspect-square overflow-hidden rounded-2xl border border-border">
                       <img src={url} alt="" className="h-full w-full object-cover" />
                       {photo.date && (
                         <p className="absolute bottom-1.5 left-1.5 rounded-md bg-black/50 px-1.5 py-0.5 text-[10px] text-white">
-                          {new Date(photo.date).toLocaleDateString("fr-FR", {
-                            day: "numeric",
-                            month: "short",
-                          })}
+                          {new Date(photo.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
                         </p>
                       )}
                     </div>
