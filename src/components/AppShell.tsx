@@ -85,7 +85,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { isAdmin } = useAuth();
 
   const nav = [
-    { to: "/suivi", label: "Accueil", icon: Home },
+    { to: "/suivi", label: "Suivi", icon: Home },
     { to: "/products", label: "Routine", icon: Sparkles },
     { to: "/journal", label: "Journal", icon: Camera },
     { to: "/course", label: "Protocole", icon: BookOpen },

@@ -93,16 +93,11 @@ type CoachNote = { id: string; note: string; authorName: string; authorUid: stri
 
 type AdminSkinState = {
   uid: string;
-  // 4 skin metrics (0–100, set by coach)
   inflammationPct?: number;
-  sensibilityPct?: number;
-  comedonsPct?: number;
-  hydrationPct?: number;
-  // Phase
+  barrierPct?: number;
+  acnePct?: number;
   currentPhase?: "reset" | "stabilisation" | "purge" | "amélioration";
-  // Coach message for hero
   coachPhrase?: string;
-  // Next call
   nextCallDate?: string;
   nextCallTime?: string;
   updatedAt: number;
@@ -128,9 +123,8 @@ function StudentPage() {
   const [skinState, setSkinState] = useState<AdminSkinState | null>(null);
   const [skinStateDraft, setSkinStateDraft] = useState<Partial<AdminSkinState>>({
     inflammationPct: 50,
-    sensibilityPct: 50,
-    comedonsPct: 50,
-    hydrationPct: 50,
+    barrierPct: 50,
+    acnePct: 50,
   });
   const [savingSkinState, setSavingSkinState] = useState(false);
   const [resolvingReport, setResolvingReport] = useState<string | null>(null);
@@ -291,9 +285,8 @@ function StudentPage() {
       const data: Partial<AdminSkinState> & { uid: string; updatedAt: number } = {
         uid,
         inflammationPct: skinStateDraft.inflammationPct,
-        sensibilityPct: skinStateDraft.sensibilityPct,
-        comedonsPct: skinStateDraft.comedonsPct,
-        hydrationPct: skinStateDraft.hydrationPct,
+        barrierPct: skinStateDraft.barrierPct,
+        acnePct: skinStateDraft.acnePct,
         currentPhase: skinStateDraft.currentPhase,
         coachPhrase: skinStateDraft.coachPhrase,
         nextCallDate: skinStateDraft.nextCallDate,
@@ -800,15 +793,14 @@ function StudentPage() {
                 )}
               </div>
 
-              {/* 4 skin metrics */}
+              {/* 3 skin metrics */}
               <div className="mb-5 space-y-4">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Indicateurs peau (0 – 100%)</p>
                 {(
                   [
-                    { key: "inflammationPct" as const, label: "Inflammation", hint: "0 = absente → 100 = sévère" },
-                    { key: "sensibilityPct" as const, label: "Sensibilité", hint: "0 = faible → 100 = élevée" },
-                    { key: "comedonsPct" as const, label: "Comédons", hint: "0 = absent → 100 = nombreux" },
-                    { key: "hydrationPct" as const, label: "Hydratation", hint: "0 = très sèche → 100 = bien hydratée" },
+                    { key: "inflammationPct" as const, label: "🔥 Inflammation", hint: "0 = absente → 100 = sévère" },
+                    { key: "barrierPct" as const, label: "🧱 Barrière cutanée", hint: "0 = compromise → 100 = excellente" },
+                    { key: "acnePct" as const, label: "🧴 Acné", hint: "0 = contrôlée → 100 = sévère" },
                   ]
                 ).map(({ key, label, hint }) => (
                   <div key={key}>

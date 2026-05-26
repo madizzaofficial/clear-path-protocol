@@ -3,7 +3,7 @@ import { AppShell } from "@/components/AppShell";
 import { allLessons } from "@/lib/course-data";
 import {
   BookOpen, Camera, CalendarDays, MessageSquare, ChevronRight, Loader2,
-  Flame, Sparkles, Phone,
+  Flame, Sparkles, Phone, Check,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
@@ -25,9 +25,8 @@ export const Route = createFileRoute("/suivi")({
 type AdminSkinState = {
   uid: string;
   inflammationPct?: number;
-  sensibilityPct?: number;
-  comedonsPct?: number;
-  hydrationPct?: number;
+  barrierPct?: number;
+  acnePct?: number;
   currentPhase?: "reset" | "stabilisation" | "purge" | "amélioration";
   coachPhrase?: string;
   nextCallDate?: string;
@@ -96,19 +95,45 @@ function computeAdherence(
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function MetricBar({ label, pct, inverted }: { label: string; pct: number; inverted?: boolean }) {
-  const color = inverted
-    ? pct >= 70 ? "bg-red-400" : pct >= 40 ? "bg-amber-400" : "bg-emerald-500"
-    : pct >= 70 ? "bg-emerald-500" : pct >= 40 ? "bg-amber-400" : "bg-red-400";
+const JOURNEY_PHASES = [
+  { id: 1, shortLabel: "S.1", label: "Semaine 1", description: "Tu démarres ta nouvelle routine.", dayStart: 1, dayEnd: 7 },
+  { id: 2, shortLabel: "S.2", label: "Semaine 2", description: "Ta peau s'adapte. Tu trouves le rythme.", dayStart: 8, dayEnd: 14 },
+  { id: 3, shortLabel: "S3-4", label: "Semaines 3–4", description: "La purge peut commencer — c'est bon signe.", dayStart: 15, dayEnd: 28 },
+  { id: 4, shortLabel: "S4-6", label: "Semaines 4–6", description: "La purge se calme. Les premières améliorations arrivent.", dayStart: 29, dayEnd: 42 },
+  { id: 5, shortLabel: "S6-12", label: "Semaines 6–12", description: "La peau s'éclaircit progressivement.", dayStart: 43, dayEnd: 84 },
+  { id: 6, shortLabel: "M3+", label: "Mois 3+", description: "Intègre un soin ciblé pour les marques.", dayStart: 85, dayEnd: Infinity },
+];
+
+function CircleMetric({ label, emoji, pct, inverted }: { label: string; emoji: string; pct: number; inverted?: boolean }) {
+  const r = 30;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (pct / 100) * circ;
+  const arcClass = inverted
+    ? pct >= 67 ? "text-red-400" : pct >= 34 ? "text-amber-400" : "text-emerald-500"
+    : pct >= 67 ? "text-emerald-500" : pct >= 34 ? "text-amber-400" : "text-red-400";
+  const numClass = inverted
+    ? pct >= 67 ? "text-red-500 dark:text-red-400" : pct >= 34 ? "text-amber-500 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
+    : pct >= 67 ? "text-emerald-600 dark:text-emerald-400" : pct >= 34 ? "text-amber-500 dark:text-amber-400" : "text-red-500 dark:text-red-400";
   return (
-    <div>
-      <div className="mb-1 flex items-center justify-between">
-        <span className="text-sm text-foreground/80">{label}</span>
-        <span className="text-sm font-semibold tabular-nums">{pct}%</span>
+    <div className="flex flex-col items-center gap-1.5">
+      <div className="relative h-[88px] w-[88px]">
+        <svg viewBox="0 0 80 80" className="-rotate-90 h-full w-full">
+          <circle cx="40" cy="40" r={r} fill="none" stroke="currentColor" strokeWidth="7" className="text-muted" />
+          <circle
+            cx="40" cy="40" r={r}
+            fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round"
+            className={arcClass}
+            strokeDasharray={circ}
+            strokeDashoffset={offset}
+            style={{ transition: "stroke-dashoffset 0.7s ease" }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
+          <span className="text-xl leading-none">{emoji}</span>
+          <span className={`text-sm font-bold tabular-nums leading-tight ${numClass}`}>{pct}</span>
+        </div>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-muted">
-        <div className={`h-full rounded-full transition-all duration-700 ${color}`} style={{ width: `${pct}%` }} />
-      </div>
+      <span className="text-center text-xs font-medium text-foreground/70">{label}</span>
     </div>
   );
 }
@@ -248,16 +273,16 @@ function Suivi() {
   const done = completedLessons.length;
   const total = lessons.length;
   const protocolPct = total > 0 ? Math.round((done / total) * 100) : 0;
-  const week = enrolledAt ? getSkincareWeek(enrolledAt) : 1;
+  const dayCount = enrolledAt ? Math.max(1, Math.floor((Date.now() - enrolledAt) / 86_400_000) + 1) : 1;
+  const currentPhase = JOURNEY_PHASES.find((p) => dayCount >= p.dayStart && dayCount <= p.dayEnd) ?? JOURNEY_PHASES[JOURNEY_PHASES.length - 1];
   const nextLesson = lessons.find((l) => !completedLessons.includes(l.id));
   const daysUntilCall = skinState?.nextCallDate ? getDaysUntil(skinState.nextCallDate) : null;
 
   const hasSkinMetrics =
     skinState &&
     (skinState.inflammationPct !== undefined ||
-      skinState.sensibilityPct !== undefined ||
-      skinState.comedonsPct !== undefined ||
-      skinState.hydrationPct !== undefined);
+      skinState.barrierPct !== undefined ||
+      skinState.acnePct !== undefined);
 
   if (loading) {
     return (
@@ -280,30 +305,62 @@ function Suivi() {
         */}
         <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-8 lg:items-start">
 
-          {/* ── 1. Header ────────────────────────── col-span-2 row-1 ── */}
+          {/* ── 1. Journey hero ─────────────────────── col-span-2 row-1 ── */}
           <div className="overflow-hidden rounded-3xl bg-gradient-warm p-6 shadow-elegant lg:col-span-2 lg:row-start-1">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-foreground/50">Mon Suivi</p>
-            <div className="mt-2 flex flex-wrap items-end gap-3">
-              <h1 className="font-display text-4xl font-semibold leading-none">Semaine {week}</h1>
+            {/* Day count + skin type */}
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-foreground/50">Mon parcours</p>
+                <h1 className="mt-1 font-display text-5xl font-semibold leading-none">Jour {dayCount}</h1>
+              </div>
               {skinType && (
-                <span className="mb-0.5 rounded-full bg-background/60 px-3 py-1 text-xs font-medium backdrop-blur-sm">
+                <span className="mt-1 rounded-full bg-background/60 px-3 py-1 text-xs font-medium backdrop-blur-sm">
                   Peau {(SKIN_TYPE_LABELS[skinType] ?? skinType).toLowerCase()}
                 </span>
               )}
             </div>
-            {skinState?.coachPhrase ? (
-              <p className="mt-3 max-w-lg text-sm italic leading-relaxed text-foreground/70">
-                "{skinState.coachPhrase}"
-              </p>
-            ) : skinState?.currentPhase ? (
-              <p className="mt-2 text-sm text-foreground/60 capitalize">
-                Phase {skinState.currentPhase}
-              </p>
-            ) : (
-              <p className="mt-2 text-sm text-foreground/50">
-                Ton coach met à jour ton suivi après chaque consultation.
-              </p>
-            )}
+
+            {/* Current phase name + description */}
+            <div className="mt-4">
+              <p className="text-base font-semibold">{currentPhase.label}</p>
+              <p className="mt-0.5 max-w-sm text-sm text-foreground/70">{currentPhase.description}</p>
+              {skinState?.coachPhrase && (
+                <p className="mt-2 text-sm italic text-foreground/60">"{skinState.coachPhrase}"</p>
+              )}
+            </div>
+
+            {/* Phase timeline */}
+            <div className="relative mt-6">
+              <div className="absolute left-3 right-3 top-3 h-px bg-foreground/15" />
+              <div className="flex items-start justify-between">
+                {JOURNEY_PHASES.map((phase) => {
+                  const isPast = dayCount > phase.dayEnd;
+                  const isCurrent = dayCount >= phase.dayStart && dayCount <= phase.dayEnd;
+                  return (
+                    <div key={phase.id} className="relative flex flex-1 flex-col items-center gap-1.5">
+                      <div
+                        className={`relative z-10 flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold transition-all ${
+                          isCurrent
+                            ? "scale-110 bg-foreground text-background shadow-md"
+                            : isPast
+                            ? "bg-foreground/30 text-foreground/80"
+                            : "bg-foreground/10 text-foreground/25"
+                        }`}
+                      >
+                        {isPast ? <Check className="h-3 w-3" /> : phase.id}
+                      </div>
+                      <p
+                        className={`max-w-[44px] text-center text-[8px] font-medium leading-tight ${
+                          isCurrent ? "text-foreground/80" : isPast ? "text-foreground/40" : "text-foreground/20"
+                        }`}
+                      >
+                        {phase.shortLabel}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
           {/* ── 2. État de ta peau ─────────────── col-span-2 row-2 ── */}
@@ -324,22 +381,15 @@ function Suivi() {
             </div>
 
             {hasSkinMetrics ? (
-              <div className="space-y-3.5">
-                {skinState!.inflammationPct !== undefined && (
-                  <MetricBar label="Inflammation" pct={skinState!.inflammationPct} inverted />
-                )}
-                {skinState!.sensibilityPct !== undefined && (
-                  <MetricBar label="Sensibilité" pct={skinState!.sensibilityPct} inverted />
-                )}
-                {skinState!.comedonsPct !== undefined && (
-                  <MetricBar label="Comédons" pct={skinState!.comedonsPct} inverted />
-                )}
-                {skinState!.hydrationPct !== undefined && (
-                  <MetricBar label="Hydratation" pct={skinState!.hydrationPct} />
-                )}
+              <div>
+                <div className="grid grid-cols-3 gap-4">
+                  <CircleMetric label="Inflammation" emoji="🔥" pct={skinState!.inflammationPct ?? 0} inverted />
+                  <CircleMetric label="Barrière" emoji="🧱" pct={skinState!.barrierPct ?? 0} />
+                  <CircleMetric label="Acné" emoji="🧴" pct={skinState!.acnePct ?? 0} inverted />
+                </div>
                 {skinState!.currentPhase && (
-                  <div className="mt-3 flex items-center gap-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Phase</span>
+                  <div className="mt-4 flex items-center gap-2 border-t border-border/40 pt-3">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Phase coach</span>
                     <span className="rounded-full bg-primary-soft px-3 py-0.5 text-xs font-semibold capitalize text-primary">
                       {skinState!.currentPhase}
                     </span>
