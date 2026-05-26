@@ -319,9 +319,16 @@ function Suivi() {
     );
   }
 
+  const firstName = user?.displayName?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "";
+
   return (
     <AppShell>
       <main className="mx-auto max-w-7xl px-4 pb-28 pt-8 sm:px-6">
+        {firstName && (
+          <p className="mb-5 font-display text-2xl font-semibold tracking-tight">
+            Bonjour, {firstName} 👋
+          </p>
+        )}
         {/*
           Desktop 3-col grid:
             Col 1 row-1: Hero gradient  |  Col 2 row-1: État de ta peau  |  Col 3 rows 1-4: right sidebar wrapper
