@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Home, BookOpen, Sparkles, ShieldCheck, User, LogOut, UserCircle, Camera, Moon, Sun, HelpCircle, FlaskConical, TrendingUp } from "lucide-react";
+import { Home, BookOpen, Sparkles, ShieldCheck, User, LogOut, UserCircle, Camera, Moon, Sun, HelpCircle, FlaskConical } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 import { ReactNode } from "react";
 import {
@@ -85,8 +85,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { isAdmin } = useAuth();
 
   const nav = [
-    { to: "/", label: "Accueil", icon: Home },
-    { to: "/suivi", label: "Suivi", icon: TrendingUp },
+    { to: "/suivi", label: "Accueil", icon: Home },
     { to: "/products", label: "Routine", icon: Sparkles },
     { to: "/journal", label: "Journal", icon: Camera },
     { to: "/course", label: "Protocole", icon: BookOpen },
@@ -102,13 +101,13 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/suivi" className="flex items-center gap-2">
             <img src="/logo_clear.png" alt="" className="h-20 w-20 rounded-full object-cover" />
             <span className="font-display text-xl font-semibold tracking-tight">Protocole Clear</span>
           </Link>
           <nav className="hidden items-center gap-1 md:flex">
             {nav.map((n) => {
-              const active = n.to === "/" ? path === "/" : path.startsWith(n.to);
+              const active = path.startsWith(n.to);
               return (
                 <Link
                   key={n.to}
@@ -132,7 +131,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/60 bg-background/95 backdrop-blur-xl md:hidden">
           <div className="flex items-center justify-around px-2 py-2">
             {nav.map((n) => {
-              const active = n.to === "/" ? path === "/" : path.startsWith(n.to);
+              const active = path.startsWith(n.to);
               const Icon = n.icon;
               return (
                 <Link key={n.to} to={n.to} className={`flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-xs ${active ? "text-primary" : "text-muted-foreground"}`}>

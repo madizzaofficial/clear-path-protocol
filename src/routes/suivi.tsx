@@ -24,13 +24,12 @@ export const Route = createFileRoute("/suivi")({
 
 type AdminSkinState = {
   uid: string;
-  acnePct?: number;
+  inflammationPct?: number;
   sensibilityPct?: number;
-  barrierPct?: number;
-  coachObservation?: string;
-  currentObjective?: string;
-  currentStrategy?: string;
-  nextEvolution?: string;
+  comedonsPct?: number;
+  hydrationPct?: number;
+  currentPhase?: "reset" | "stabilisation" | "purge" | "amélioration";
+  coachPhrase?: string;
   nextCallDate?: string;
   nextCallTime?: string;
   updatedAt: number;
@@ -255,9 +254,10 @@ function Suivi() {
 
   const hasSkinMetrics =
     skinState &&
-    (skinState.acnePct !== undefined ||
+    (skinState.inflammationPct !== undefined ||
       skinState.sensibilityPct !== undefined ||
-      skinState.barrierPct !== undefined);
+      skinState.comedonsPct !== undefined ||
+      skinState.hydrationPct !== undefined);
 
   if (loading) {
     return (
@@ -291,13 +291,17 @@ function Suivi() {
                 </span>
               )}
             </div>
-            {skinState?.currentObjective ? (
+            {skinState?.coachPhrase ? (
               <p className="mt-3 max-w-lg text-sm italic leading-relaxed text-foreground/70">
-                "{skinState.currentObjective}"
+                "{skinState.coachPhrase}"
+              </p>
+            ) : skinState?.currentPhase ? (
+              <p className="mt-2 text-sm text-foreground/60 capitalize">
+                Phase {skinState.currentPhase}
               </p>
             ) : (
               <p className="mt-2 text-sm text-foreground/50">
-                Ton objectif de transformation sera défini avec ton coach.
+                Ton coach met à jour ton suivi après chaque consultation.
               </p>
             )}
           </div>
@@ -321,23 +325,24 @@ function Suivi() {
 
             {hasSkinMetrics ? (
               <div className="space-y-3.5">
-                {skinState!.acnePct !== undefined && (
-                  <MetricBar label="Acné" pct={skinState!.acnePct} inverted />
+                {skinState!.inflammationPct !== undefined && (
+                  <MetricBar label="Inflammation" pct={skinState!.inflammationPct} inverted />
                 )}
                 {skinState!.sensibilityPct !== undefined && (
                   <MetricBar label="Sensibilité" pct={skinState!.sensibilityPct} inverted />
                 )}
-                {skinState!.barrierPct !== undefined && (
-                  <MetricBar label="Barrière cutanée" pct={skinState!.barrierPct} />
+                {skinState!.comedonsPct !== undefined && (
+                  <MetricBar label="Comédons" pct={skinState!.comedonsPct} inverted />
                 )}
-                {skinState!.coachObservation && (
-                  <div className="mt-4 rounded-2xl bg-muted/40 px-4 py-3.5">
-                    <p className="mb-1.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      <MessageSquare className="h-3 w-3" /> Observation du coach
-                    </p>
-                    <p className="text-sm italic leading-relaxed text-foreground/80">
-                      "{skinState!.coachObservation}"
-                    </p>
+                {skinState!.hydrationPct !== undefined && (
+                  <MetricBar label="Hydratation" pct={skinState!.hydrationPct} />
+                )}
+                {skinState!.currentPhase && (
+                  <div className="mt-3 flex items-center gap-2">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Phase</span>
+                    <span className="rounded-full bg-primary-soft px-3 py-0.5 text-xs font-semibold capitalize text-primary">
+                      {skinState!.currentPhase}
+                    </span>
                   </div>
                 )}
               </div>
@@ -522,30 +527,6 @@ function Suivi() {
               </div>
             )}
 
-            {(skinState?.currentStrategy || skinState?.nextEvolution) && (
-              <div className="mt-4 space-y-3 border-t border-border/60 pt-3">
-                {skinState.currentStrategy && (
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      Stratégie actuelle
-                    </p>
-                    <p className="mt-1 text-sm leading-relaxed text-foreground/80">
-                      {skinState.currentStrategy}
-                    </p>
-                  </div>
-                )}
-                {skinState.nextEvolution && (
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      Prochaine évolution
-                    </p>
-                    <p className="mt-1 text-sm leading-relaxed text-foreground/80">
-                      {skinState.nextEvolution}
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
 
           {/* ── 6. Journal photo ─── col-start-1 col-span-2 row-4 ── */}

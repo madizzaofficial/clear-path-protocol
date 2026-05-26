@@ -35,7 +35,6 @@ export type RoutineStep = {
   category: string;
   product: string;
   instructions: string;
-  description?: string;
   imageUrl?: string;
   purchaseUrl?: string;
   startWeek?: number;
@@ -52,7 +51,6 @@ export type ExtraBlock = {
 export type StepSaveData = {
   category: string;
   product: string;
-  description?: string;
   instructions: string;
   imageUrl?: string;
   purchaseUrl?: string;
@@ -159,7 +157,6 @@ export function StepDialog({
 }) {
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
   const [product, setProduct] = useState("");
-  const [description, setDescription] = useState("");
   const [instructions, setInstructions] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [purchaseUrl, setPurchaseUrl] = useState("");
@@ -183,7 +180,6 @@ export function StepDialog({
     if (step) {
       setCategory(step.category || CATEGORIES[0]);
       setProduct(step.product);
-      setDescription(step.description ?? "");
       setInstructions(step.instructions);
       setImageUrl(step.imageUrl ?? "");
       setPurchaseUrl(step.purchaseUrl ?? "");
@@ -200,7 +196,6 @@ export function StepDialog({
   function fillFromCatalog(p: CatalogProduct) {
     setCategory(p.category);
     setProduct(p.name);
-    setDescription(p.description ?? "");
     setInstructions(p.instructions);
     setImageUrl(p.imageUrl ?? "");
     setPurchaseUrl(p.purchaseUrl ?? "");
@@ -324,20 +319,6 @@ export function StepDialog({
                 onChange={(e) => setProduct(e.target.value)}
                 placeholder="ex. CeraVe Hydrating Cleanser"
                 className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-foreground/80">
-                Description{" "}
-                <span className="font-normal text-muted-foreground">(ce que fait le produit, optionnelle)</span>
-              </label>
-              <textarea
-
-                autoComplete="off"                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={2}
-                placeholder="ex. Nettoyant doux hydratant, idéal pour les peaux sensibles…"
-                className="w-full resize-none rounded-2xl border border-border bg-background p-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
             <div>
@@ -467,7 +448,6 @@ export function StepDialog({
               onSaveToCatalog({
                 category,
                 product,
-                description: description.trim() || undefined,
                 instructions,
                 imageUrl: imageUrl.trim() || undefined,
                 purchaseUrl: purchaseUrl.trim() || undefined,
@@ -491,7 +471,6 @@ export function StepDialog({
               onSave({
                 category,
                 product,
-                description: description.trim() || undefined,
                 instructions,
                 imageUrl: imageUrl.trim() || undefined,
                 purchaseUrl: purchaseUrl.trim() || undefined,

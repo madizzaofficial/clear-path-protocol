@@ -93,29 +93,19 @@ type CoachNote = { id: string; note: string; authorName: string; authorUid: stri
 
 type AdminSkinState = {
   uid: string;
-  acneLevel: number;
-  barrierLevel: number;
-  sensitivityLevel: number;
-  currentObjective: string;
-  currentStrategy: string;
-  nextEvolution: string;
-  nextCallDate?: string;
-  updatedAt: number;
-  // % metrics (0–100, set by coach)
-  acnePct?: number;
+  // 4 skin metrics (0–100, set by coach)
+  inflammationPct?: number;
   sensibilityPct?: number;
-  barrierPct?: number;
-  coachObservation?: string;
-  objectives?: string;
-  // Direction
+  comedonsPct?: number;
+  hydrationPct?: number;
+  // Phase
+  currentPhase?: "reset" | "stabilisation" | "purge" | "amélioration";
+  // Coach message for hero
   coachPhrase?: string;
-  currentPhase?: string;
-  priority?: string;
-  thingsToAvoid?: string;
-  toleranceLevel?: "faible" | "moyenne" | "bonne";
-  roadmapPhases?: string;
-  roadmapCurrentIndex?: number;
+  // Next call
+  nextCallDate?: string;
   nextCallTime?: string;
+  updatedAt: number;
 };
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -136,7 +126,12 @@ function StudentPage() {
   const [noteInput, setNoteInput] = useState("");
   const [sendingNote, setSendingNote] = useState(false);
   const [skinState, setSkinState] = useState<AdminSkinState | null>(null);
-  const [skinStateDraft, setSkinStateDraft] = useState<Partial<AdminSkinState>>({ acneLevel: 3, barrierLevel: 3, sensitivityLevel: 3 });
+  const [skinStateDraft, setSkinStateDraft] = useState<Partial<AdminSkinState>>({
+    inflammationPct: 50,
+    sensibilityPct: 50,
+    comedonsPct: 50,
+    hydrationPct: 50,
+  });
   const [savingSkinState, setSavingSkinState] = useState(false);
   const [resolvingReport, setResolvingReport] = useState<string | null>(null);
   const [isDisabling, setIsDisabling] = useState(false);
@@ -293,32 +288,21 @@ function StudentPage() {
     if (savingSkinState) return;
     setSavingSkinState(true);
     try {
-      const data: AdminSkinState = {
+      const data: Partial<AdminSkinState> & { uid: string; updatedAt: number } = {
         uid,
-        acneLevel: skinStateDraft.acneLevel ?? 3,
-        barrierLevel: skinStateDraft.barrierLevel ?? 3,
-        sensitivityLevel: skinStateDraft.sensitivityLevel ?? 3,
-        currentObjective: skinStateDraft.currentObjective ?? "",
-        currentStrategy: skinStateDraft.currentStrategy ?? "",
-        nextEvolution: skinStateDraft.nextEvolution ?? "",
-        nextCallDate: skinStateDraft.nextCallDate,
-        updatedAt: Date.now(),
-        acnePct: skinStateDraft.acnePct,
+        inflammationPct: skinStateDraft.inflammationPct,
         sensibilityPct: skinStateDraft.sensibilityPct,
-        barrierPct: skinStateDraft.barrierPct,
-        coachObservation: skinStateDraft.coachObservation,
-        objectives: skinStateDraft.objectives,
-        coachPhrase: skinStateDraft.coachPhrase,
+        comedonsPct: skinStateDraft.comedonsPct,
+        hydrationPct: skinStateDraft.hydrationPct,
         currentPhase: skinStateDraft.currentPhase,
-        priority: skinStateDraft.priority,
-        thingsToAvoid: skinStateDraft.thingsToAvoid,
-        toleranceLevel: skinStateDraft.toleranceLevel,
-        roadmapPhases: skinStateDraft.roadmapPhases,
-        roadmapCurrentIndex: skinStateDraft.roadmapCurrentIndex,
+        coachPhrase: skinStateDraft.coachPhrase,
+        nextCallDate: skinStateDraft.nextCallDate,
         nextCallTime: skinStateDraft.nextCallTime,
+        updatedAt: Date.now(),
       };
-      await setDoc(doc(db, "admin_skin_state", uid), data, { merge: true });
-      setSkinState(data);
+      const clean = JSON.parse(JSON.stringify(data));
+      await setDoc(doc(db, "admin_skin_state", uid), clean, { merge: true });
+      setSkinState(clean as AdminSkinState);
       toast.success("État & direction sauvegardés.");
     } catch {
       toast.error("Impossible de sauvegarder.");
@@ -816,36 +800,15 @@ function StudentPage() {
                 )}
               </div>
 
-              {/* Level selectors */}
+              {/* 4 skin metrics */}
               <div className="mb-5 space-y-4">
-                <LevelSelector
-                  label="Acné"
-                  help="1 = contrôlée → 5 = sévère"
-                  value={skinStateDraft.acneLevel ?? 3}
-                  onChange={(v) => setSkinStateDraft((d) => ({ ...d, acneLevel: v }))}
-                />
-                <LevelSelector
-                  label="Barrière cutanée"
-                  help="1 = compromise → 5 = excellente"
-                  value={skinStateDraft.barrierLevel ?? 3}
-                  onChange={(v) => setSkinStateDraft((d) => ({ ...d, barrierLevel: v }))}
-                />
-                <LevelSelector
-                  label="Sensibilité"
-                  help="1 = élevée → 5 = très faible"
-                  value={skinStateDraft.sensitivityLevel ?? 3}
-                  onChange={(v) => setSkinStateDraft((d) => ({ ...d, sensitivityLevel: v }))}
-                />
-              </div>
-
-              {/* Skin metrics (%) — 3 barometres */}
-              <div className="mb-5 space-y-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Baromètres peau (0 – 100%)</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Indicateurs peau (0 – 100%)</p>
                 {(
                   [
-                    { key: "acnePct" as const, label: "Acné", hint: "0 = contrôlée → 100 = sévère" },
-                    { key: "sensibilityPct" as const, label: "Sensibilité", hint: "0 = faible → 100 = élevée/réactive" },
-                    { key: "barrierPct" as const, label: "Barrière cutanée", hint: "0 = compromise → 100 = excellente" },
+                    { key: "inflammationPct" as const, label: "Inflammation", hint: "0 = absente → 100 = sévère" },
+                    { key: "sensibilityPct" as const, label: "Sensibilité", hint: "0 = faible → 100 = élevée" },
+                    { key: "comedonsPct" as const, label: "Comédons", hint: "0 = absent → 100 = nombreux" },
+                    { key: "hydrationPct" as const, label: "Hydratation", hint: "0 = très sèche → 100 = bien hydratée" },
                   ]
                 ).map(({ key, label, hint }) => (
                   <div key={key}>
@@ -869,170 +832,59 @@ function StudentPage() {
                 ))}
               </div>
 
-              {/* Coach observation */}
+              {/* Phase actuelle */}
               <div className="mb-5">
-                <label className="mb-1.5 block text-sm font-medium">Observation du coach</label>
+                <label className="mb-1.5 block text-sm font-medium">Phase actuelle</label>
+                <div className="flex flex-wrap gap-2">
+                  {(["reset", "stabilisation", "purge", "amélioration"] as const).map((v) => (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => setSkinStateDraft((d) => ({ ...d, currentPhase: v }))}
+                      className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors capitalize ${
+                        skinStateDraft.currentPhase === v
+                          ? "bg-primary text-primary-foreground"
+                          : "border border-border bg-muted/30 text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      {v}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Phrase du coach */}
+              <div className="mb-5">
+                <label className="mb-1.5 block text-sm font-medium">Phrase du coach</label>
                 <textarea
                   autoComplete="off"
-                  value={skinStateDraft.coachObservation ?? ""}
-                  onChange={(e) => setSkinStateDraft((d) => ({ ...d, coachObservation: e.target.value }))}
-                  placeholder="Ex. La peau tolère mieux les actifs. L'inflammation reste sur la zone T mais les rougeurs diminuent."
-                  rows={3}
+                  value={skinStateDraft.coachPhrase ?? ""}
+                  onChange={(e) => setSkinStateDraft((d) => ({ ...d, coachPhrase: e.target.value }))}
+                  placeholder="Ex. Continue dans cette direction, ta peau se stabilise bien…"
+                  rows={2}
                   className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
               </div>
 
-              {/* Objectives */}
-              <div className="mb-5">
-                <label className="mb-1 block text-sm font-medium">Objectifs actuels</label>
-                <p className="mb-1.5 text-[10px] text-muted-foreground/60">Une ligne par objectif · ✓ = accompli · ○ = en cours</p>
-                <textarea
-                  autoComplete="off"
-                  value={skinStateDraft.objectives ?? ""}
-                  onChange={(e) => setSkinStateDraft((d) => ({ ...d, objectives: e.target.value }))}
-                  placeholder={"✓ Calmer l'inflammation\n✓ Améliorer la tolérance\n○ Réduire les comédons\n○ Lisser la texture"}
-                  rows={4}
-                  className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 font-mono text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-
-              {/* Text fields */}
-              <div className="mb-5 space-y-4">
-                {(
-                  [
-                    { key: "currentObjective", label: "Objectif actuel (texte libre)", placeholder: "Ex. Stabiliser la barrière cutanée avant d'introduire les actifs…" },
-                    { key: "currentStrategy", label: "Stratégie en cours", placeholder: "Ex. Routine minimaliste + SPF quotidien + Niacinamide 2x/sem…" },
-                    { key: "nextEvolution", label: "Prochaine évolution", placeholder: "Ex. Dans ~2 sem. : azélaïque 2x/sem…" },
-                  ] as const
-                ).map(({ key, label, placeholder }) => (
-                  <div key={key}>
-                    <label className="mb-1.5 block text-sm font-medium">{label}</label>
-                    <textarea
-                      autoComplete="off"
-                      value={(skinStateDraft[key] as string) ?? ""}
-                      onChange={(e) => setSkinStateDraft((d) => ({ ...d, [key]: e.target.value }))}
-                      placeholder={placeholder}
-                      rows={2}
-                      className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
-                    />
-                  </div>
-                ))}
-
-                <div className="flex gap-3">
-                  <div className="flex-1">
-                    <label className="mb-1.5 block text-sm font-medium">Prochain appel — date</label>
-                    <input
-                      type="date"
-                      value={skinStateDraft.nextCallDate ?? ""}
-                      onChange={(e) => setSkinStateDraft((d) => ({ ...d, nextCallDate: e.target.value }))}
-                      className="w-full rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-sm font-medium">Heure</label>
-                    <input
-                      type="text"
-                      placeholder="18h"
-                      value={skinStateDraft.nextCallTime ?? ""}
-                      onChange={(e) => setSkinStateDraft((d) => ({ ...d, nextCallTime: e.target.value }))}
-                      className="w-24 rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                    />
-                  </div>
-                </div>
-
-                {/* Separator */}
-                <div className="border-t border-border/60 pt-1">
-                  <p className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Direction & Contexte</p>
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium">Phrase du coach (hero)</label>
-                  <textarea
-                    autoComplete="off"
-                    value={skinStateDraft.coachPhrase ?? ""}
-                    onChange={(e) => setSkinStateDraft((d) => ({ ...d, coachPhrase: e.target.value }))}
-                    placeholder="Ex. Continue dans cette direction, ta peau se stabilise bien…"
-                    rows={2}
-                    className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
+              {/* Prochain appel */}
+              <div className="mb-5 flex gap-3">
+                <div className="flex-1">
+                  <label className="mb-1.5 block text-sm font-medium">Prochain appel — date</label>
+                  <input
+                    type="date"
+                    value={skinStateDraft.nextCallDate ?? ""}
+                    onChange={(e) => setSkinStateDraft((d) => ({ ...d, nextCallDate: e.target.value }))}
+                    className="w-full rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
-
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium">Phase actuelle</label>
+                  <label className="mb-1.5 block text-sm font-medium">Heure</label>
                   <input
                     type="text"
-                    autoComplete="off"
-                    value={skinStateDraft.currentPhase ?? ""}
-                    onChange={(e) => setSkinStateDraft((d) => ({ ...d, currentPhase: e.target.value }))}
-                    placeholder="Ex. Réparation de la barrière cutanée"
-                    className="w-full rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium">Priorité</label>
-                  <textarea
-                    autoComplete="off"
-                    value={skinStateDraft.priority ?? ""}
-                    onChange={(e) => setSkinStateDraft((d) => ({ ...d, priority: e.target.value }))}
-                    placeholder="Ex. SPF quotidien + hydratation renforcée"
-                    rows={2}
-                    className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium">À éviter</label>
-                  <textarea
-                    autoComplete="off"
-                    value={skinStateDraft.thingsToAvoid ?? ""}
-                    onChange={(e) => setSkinStateDraft((d) => ({ ...d, thingsToAvoid: e.target.value }))}
-                    placeholder="Ex. Actifs exfoliants, eau trop chaude"
-                    rows={2}
-                    className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium">Tolérance cutanée</label>
-                  <div className="flex gap-2">
-                    {(["faible", "moyenne", "bonne"] as const).map((v) => (
-                      <button
-                        key={v}
-                        type="button"
-                        onClick={() => setSkinStateDraft((d) => ({ ...d, toleranceLevel: v }))}
-                        className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors capitalize ${
-                          skinStateDraft.toleranceLevel === v
-                            ? "bg-primary text-primary-foreground"
-                            : "border border-border bg-muted/30 text-foreground hover:bg-muted"
-                        }`}
-                      >
-                        {v}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium">Roadmap (une phase par ligne)</label>
-                  <textarea
-                    autoComplete="off"
-                    value={skinStateDraft.roadmapPhases ?? ""}
-                    onChange={(e) => setSkinStateDraft((d) => ({ ...d, roadmapPhases: e.target.value }))}
-                    placeholder={"Phase 1 : Nettoyage\nPhase 2 : Réparation barrière\nPhase 3 : Introduction actifs"}
-                    rows={4}
-                    className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm font-mono outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium">Index phase actuelle (0 = première)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={skinStateDraft.roadmapCurrentIndex ?? 0}
-                    onChange={(e) => setSkinStateDraft((d) => ({ ...d, roadmapCurrentIndex: parseInt(e.target.value) || 0 }))}
-                    className="w-32 rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    placeholder="18h"
+                    value={skinStateDraft.nextCallTime ?? ""}
+                    onChange={(e) => setSkinStateDraft((d) => ({ ...d, nextCallTime: e.target.value }))}
+                    className="w-24 rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>

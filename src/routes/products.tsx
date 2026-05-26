@@ -19,7 +19,6 @@ type RoutineStep = {
   order: number;
   category: string;
   product: string;
-  description?: string;
   instructions: string;
   imageUrl?: string;
   purchaseUrl?: string;
@@ -510,15 +509,6 @@ function RoutineBlock({
                       <h3 className={`mt-1.5 font-display text-base font-semibold ${isChecked ? "text-muted-foreground line-through" : ""}`}>
                         {step.product}
                       </h3>
-                      {step.description && (
-                        <p className="mt-0.5 text-xs italic text-muted-foreground/70">
-                          {step.description.length > 120 ? (
-                            <ExpandableText text={step.description} />
-                          ) : (
-                            step.description
-                          )}
-                        </p>
-                      )}
                       {step.introNote && (
                         <div className="mt-1.5 flex items-start gap-1.5 rounded-xl bg-violet-50 px-3 py-2 dark:bg-violet-950/20">
                           <Clock className="mt-0.5 h-3 w-3 shrink-0 text-violet-500" />
@@ -629,7 +619,6 @@ function BonusBlock({ blocks }: { blocks: ExtraBlock[] }) {
                       <span className="text-[11px] font-medium text-muted-foreground/60">#{i + 1}</span>
                     </div>
                     <h4 className="mt-1.5 font-display text-base font-semibold">{step.product}</h4>
-                    {step.description && <p className="mt-0.5 text-xs italic text-muted-foreground/70">{step.description}</p>}
                     {step.instructions && (
                       <div className="mt-2">
                         <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">Instructions</p>

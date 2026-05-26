@@ -229,7 +229,7 @@ function buildEmailHtml(firstName: string, am: RoutineStep[], pm: RoutineStep[])
     <td style="vertical-align:top;">
       <span style="display:inline-block;background:#fff3ec;color:#c4724b;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:2px 10px;border-radius:100px;margin-bottom:6px;">${escapeHtml(s.category)}</span>
       <p style="color:#1a1a1a;font-weight:600;margin:0 0 3px;font-size:14px;">${escapeHtml(s.product)}</p>
-      ${s.description ? `<p style="color:#888;margin:0 0 3px;font-size:13px;font-style:italic;line-height:1.5;">${escapeHtml(s.description)}</p>` : ""}
+      ${s.whyThisProduct ? `<p style="color:#c4724b;background:#fff3ec;border-radius:8px;padding:6px 10px;margin:4px 0 6px;font-size:12px;line-height:1.55;">${escapeHtml(s.whyThisProduct)}</p>` : ""}
       <p style="color:#aaa;margin:0;font-size:13px;line-height:1.55;">${escapeHtml(s.instructions)}</p>
       ${s.introNote ? `<p style="color:#7c5fa8;background:#f5f0ff;border-radius:8px;padding:6px 10px;margin:6px 0 0;font-size:12px;font-style:italic;line-height:1.5;">⏱ ${escapeHtml(s.introNote)}</p>` : ""}
       ${s.purchaseUrl ? `<a href="${escapeHtml(s.purchaseUrl)}" style="display:inline-block;margin-top:8px;color:#c4724b;font-size:12px;font-weight:600;text-decoration:none;">Acheter →</a>` : ""}
@@ -560,7 +560,6 @@ function RoutinesContent() {
   async function handleSaveToCatalog(data: {
     category: string;
     product: string;
-    description?: string;
     instructions: string;
     imageUrl?: string;
     purchaseUrl?: string;
@@ -577,7 +576,6 @@ function RoutinesContent() {
         id,
         name: data.product.trim(),
         category: data.category,
-        description: data.description,
         instructions: data.instructions,
         imageUrl: data.imageUrl,
         purchaseUrl: data.purchaseUrl,
@@ -585,7 +583,7 @@ function RoutinesContent() {
         createdAt: existing?.createdAt ?? Date.now(),
         updatedAt: Date.now(),
       };
-      await setDoc(doc(db, "admin_products", id), entry);
+      await setDoc(doc(db, "admin_products", id), JSON.parse(JSON.stringify(entry)));
       setCatalogProducts((prev) =>
         existing ? prev.map((p) => (p.id === id ? entry : p)) : [...prev, entry],
       );
