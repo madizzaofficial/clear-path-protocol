@@ -133,6 +133,8 @@ function StudentPage() {
   const [intakeDraft, setIntakeDraft] = useState<IntakeAnswers>({});
   const [savingIntake, setSavingIntake] = useState(false);
   const [checkins28Admin, setCheckins28Admin] = useState<Record<string, { am: string[]; pm: string[] }>>({});
+  const [editingAdminSkinState, setEditingAdminSkinState] = useState(false);
+  const [editingAdminCallDate, setEditingAdminCallDate] = useState(false);
   const { tab: initialTab } = Route.useSearch();
   const [tab, setTab] = useState<Tab>(initialTab ?? "profil");
   const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
@@ -410,8 +412,7 @@ function StudentPage() {
           const amStepsAdmin = routine?.am?.length ?? 0;
           const pmStepsAdmin = routine?.pm?.length ?? 0;
 
-          let adherenceDays = 0, adminStreak = 0;
-          let streakBroken = false;
+          let adherenceDays = 0, adminStreak = 0, streakBroken = false;
           const todayAdm = new Date();
           for (let i = 0; i < 28; i++) {
             const d = new Date(todayAdm); d.setDate(todayAdm.getDate() - i);
@@ -423,13 +424,16 @@ function StudentPage() {
           }
           const adherencePct = totalSteps > 0 ? Math.round((adherenceDays / 28) * 100) : 0;
 
-          const PHASE_LABELS: Record<string, string> = {
-            reset: "Reset", stabilisation: "Stabilisation", purge: "Purge", "amélioration": "Amélioration",
-          };
+          const infPct = skinState?.inflammationPct ?? 0;
+          const barPct = skinState?.barrierPct ?? 0;
+          const acnPct = skinState?.acnePct ?? 0;
+          const infDesc = infPct >= 67 ? "Active" : infPct >= 34 ? "Modérée" : "Sous contrôle";
+          const barDesc = barPct >= 67 ? "Excellente" : barPct >= 34 ? "En cours" : "Compromise";
+          const acnDesc = acnPct >= 67 ? "Active" : acnPct >= 34 ? "Modérée" : "Contrôlée";
 
           return (
             <div className="space-y-6">
-              {/* Overview chips */}
+              {/* KPI chips */}
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 {[
                   { label: "Jour", value: `J+${dayCount}` },
@@ -444,65 +448,209 @@ function StudentPage() {
                 ))}
               </div>
 
-              {/* 28-day adherence grid */}
-              <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-                <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Adherence — 28 derniers jours</p>
-                <div className="grid grid-cols-7 gap-1.5">
-                  {Array.from({ length: 28 }, (_, i) => {
-                    const d = new Date(todayAdm); d.setDate(todayAdm.getDate() - (27 - i));
-                    const isFuture = d > todayAdm;
-                    const key = d.toISOString().slice(0, 10);
-                    const c = checkins28Admin[key];
-                    const sum = c ? (c.am?.length ?? 0) + (c.pm?.length ?? 0) : 0;
-                    const isDone = totalSteps > 0 && sum >= totalSteps;
-                    const isPartial = !isDone && sum > 0;
-                    return (
-                      <div
-                        key={i}
-                        title={key}
-                        className={`h-4 rounded-sm ${
-                          isFuture ? "bg-muted/20"
-                          : isDone ? "bg-primary"
-                          : isPartial ? "bg-primary/30"
-                          : "bg-muted"
-                        }`}
-                      />
-                    );
-                  })}
+              {/* Row 2: Prochain coaching + État de peau */}
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Prochain point coaching */}
+                <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                  <div className="mb-4 flex items-center justify-between">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Prochain point coaching</p>
+                    <button
+                      onClick={() => { setEditingAdminCallDate((v) => !v); }}
+                      className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
+                    >
+                      {editingAdminCallDate ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  {editingAdminCallDate ? (
+                    <div className="space-y-3">
+                      <div className="flex gap-3">
+                        <input
+                          type="date"
+                          value={skinStateDraft.nextCallDate ?? ""}
+                          onChange={(e) => setSkinStateDraft((d) => ({ ...d, nextCallDate: e.target.value }))}
+                          className="flex-1 rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none focus:border-primary"
+                        />
+                        <input
+                          type="text"
+                          placeholder="18h"
+                          value={skinStateDraft.nextCallTime ?? ""}
+                          onChange={(e) => setSkinStateDraft((d) => ({ ...d, nextCallTime: e.target.value }))}
+                          className="w-20 rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none focus:border-primary"
+                        />
+                      </div>
+                      <button
+                        onClick={() => { saveSkinState(); setEditingAdminCallDate(false); }}
+                        disabled={savingSkinState}
+                        className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+                      >
+                        {savingSkinState ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                        Enregistrer
+                      </button>
+                    </div>
+                  ) : skinStateDraft.nextCallDate ? (
+                    <div>
+                      <p className="font-semibold capitalize">
+                        {new Date(skinStateDraft.nextCallDate).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
+                      </p>
+                      {skinStateDraft.nextCallTime && (
+                        <p className="text-sm text-muted-foreground">à {skinStateDraft.nextCallTime}</p>
+                      )}
+                      {(() => {
+                        const now = new Date(); now.setHours(0,0,0,0);
+                        const t = new Date(skinStateDraft.nextCallDate); t.setHours(0,0,0,0);
+                        const diff = Math.round((t.getTime() - now.getTime()) / 86_400_000);
+                        return (
+                          <p className={`mt-1 text-sm font-semibold ${diff <= 0 ? "text-primary" : diff <= 3 ? "text-amber-600" : "text-muted-foreground"}`}>
+                            {diff < 0 ? "Passé" : diff === 0 ? "Aujourd'hui !" : diff === 1 ? "Demain" : `Dans ${diff} jours`}
+                          </p>
+                        );
+                      })()}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Aucun appel planifié.</p>
+                  )}
                 </div>
-                <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-primary inline-block" /> Complète</span>
-                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-primary/30 inline-block" /> Partielle</span>
-                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-muted inline-block" /> Manquée</span>
+
+                {/* État de peau — CircleMetric + inline edit */}
+                <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">État de peau</p>
+                      {skinState?.updatedAt && (
+                        <p className="text-[10px] text-muted-foreground/50 mt-0.5">
+                          mis à jour {new Date(skinState.updatedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => setEditingAdminSkinState((v) => !v)}
+                      className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
+                    >
+                      {editingAdminSkinState ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  {editingAdminSkinState ? (
+                    <div className="space-y-4">
+                      {([
+                        { key: "inflammationPct" as const, label: "🔥 Inflammation", hint: "0 = absente → 100 = sévère" },
+                        { key: "barrierPct" as const, label: "🧱 Barrière cutanée", hint: "0 = compromise → 100 = excellente" },
+                        { key: "acnePct" as const, label: "🧴 Acné", hint: "0 = contrôlée → 100 = sévère" },
+                      ]).map(({ key, label, hint }) => (
+                        <div key={key}>
+                          <div className="mb-1 flex items-center justify-between">
+                            <label className="text-sm font-medium">{label}</label>
+                            <span className="text-xs font-semibold tabular-nums text-muted-foreground">{skinStateDraft[key] ?? 50}%</span>
+                          </div>
+                          <input
+                            type="range" min={0} max={100} step={5}
+                            value={skinStateDraft[key] ?? 50}
+                            onChange={(e) => setSkinStateDraft((d) => ({ ...d, [key]: parseInt(e.target.value) }))}
+                            className="w-full cursor-pointer accent-primary"
+                          />
+                          <p className="mt-0.5 text-[10px] text-muted-foreground/60">{hint}</p>
+                        </div>
+                      ))}
+                      <div>
+                        <label className="mb-1.5 block text-sm font-medium">Phase</label>
+                        <div className="flex flex-wrap gap-2">
+                          {(["reset", "stabilisation", "purge", "amélioration"] as const).map((v) => (
+                            <button key={v} type="button"
+                              onClick={() => setSkinStateDraft((d) => ({ ...d, currentPhase: v }))}
+                              className={`rounded-xl px-3 py-1.5 text-xs font-medium capitalize transition-colors ${skinStateDraft.currentPhase === v ? "bg-primary text-primary-foreground" : "border border-border bg-muted/30 hover:bg-muted"}`}
+                            >{v}</button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="mb-1.5 block text-sm font-medium">Phrase du coach</label>
+                        <textarea
+                          autoComplete="off"
+                          value={skinStateDraft.coachPhrase ?? ""}
+                          onChange={(e) => setSkinStateDraft((d) => ({ ...d, coachPhrase: e.target.value }))}
+                          rows={2}
+                          className="w-full resize-none rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none focus:border-primary"
+                        />
+                      </div>
+                      <div className="flex justify-end">
+                        <button
+                          onClick={() => { saveSkinState(); setEditingAdminSkinState(false); }}
+                          disabled={savingSkinState}
+                          className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+                        >
+                          {savingSkinState ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                          Sauvegarder
+                        </button>
+                      </div>
+                    </div>
+                  ) : skinState ? (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-3 gap-2">
+                        <AdminCircleMetric label="Inflammation" emoji="🔥" pct={infPct} inverted description={infDesc} />
+                        <AdminCircleMetric label="Barrière" emoji="🧱" pct={barPct} description={barDesc} />
+                        <AdminCircleMetric label="Acné" emoji="🧴" pct={acnPct} inverted description={acnDesc} />
+                      </div>
+                      {skinState.currentPhase && (
+                        <div className="flex items-center gap-2 pt-1">
+                          <span className="text-xs text-muted-foreground">Phase :</span>
+                          <span className="rounded-full bg-primary-soft px-3 py-0.5 text-xs font-semibold text-primary capitalize">{skinState.currentPhase}</span>
+                        </div>
+                      )}
+                      {skinState.coachPhrase && (
+                        <p className="text-xs italic text-muted-foreground">"{skinState.coachPhrase}"</p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Aucun bilan enregistré. Clique sur Modifier pour en créer un.</p>
+                  )}
                 </div>
               </div>
 
+              {/* Row 3: Adhérence + Routine du jour */}
               <div className="grid gap-6 md:grid-cols-2">
-                {/* Today's routine */}
+                {/* Adhérence 28j */}
                 <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-                  <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Routine du jour (aujourd'hui)</p>
+                  <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Adhérence — 28 derniers jours</p>
+                  <div className="grid grid-cols-7 gap-1.5">
+                    {Array.from({ length: 28 }, (_, i) => {
+                      const d = new Date(todayAdm); d.setDate(todayAdm.getDate() - (27 - i));
+                      const isFuture = d > todayAdm;
+                      const key = d.toISOString().slice(0, 10);
+                      const c = checkins28Admin[key];
+                      const sum = c ? (c.am?.length ?? 0) + (c.pm?.length ?? 0) : 0;
+                      const isDone = totalSteps > 0 && sum >= totalSteps;
+                      const isPartial = !isDone && sum > 0;
+                      return (
+                        <div key={i} title={key} className={`h-4 rounded-sm ${isFuture ? "bg-muted/20" : isDone ? "bg-primary" : isPartial ? "bg-primary/30" : "bg-muted"}`} />
+                      );
+                    })}
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-sm bg-primary" /> Complète</span>
+                    <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-sm bg-primary/30" /> Partielle</span>
+                    <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-sm bg-muted" /> Manquée</span>
+                  </div>
+                </div>
+
+                {/* Routine du jour */}
+                <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                  <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Routine du jour</p>
                   {totalSteps > 0 ? (
                     <div className="space-y-4">
                       {[
-                        { label: "Matin", icon: Sun, done: amDoneAdmin, total: amStepsAdmin, color: "bg-amber-50 dark:bg-amber-950/30", iconColor: "text-amber-500" },
-                        { label: "Soir", icon: Moon, done: pmDoneAdmin, total: pmStepsAdmin, color: "bg-indigo-50 dark:bg-indigo-950/30", iconColor: "text-indigo-400" },
-                      ].map(({ label, icon: Icon, done, total, color, iconColor }) => (
+                        { label: "Matin", icon: Sun, done: amDoneAdmin, total: amStepsAdmin, bg: "bg-amber-50 dark:bg-amber-950/30", ic: "text-amber-500" },
+                        { label: "Soir", icon: Moon, done: pmDoneAdmin, total: pmStepsAdmin, bg: "bg-indigo-50 dark:bg-indigo-950/30", ic: "text-indigo-400" },
+                      ].map(({ label, icon: Icon, done, total, bg, ic }) => (
                         <div key={label} className="flex items-center gap-3">
-                          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${color}`}>
-                            <Icon className={`h-4 w-4 ${iconColor}`} />
+                          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${bg}`}>
+                            <Icon className={`h-4 w-4 ${ic}`} />
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between gap-2">
                               <span className="text-sm font-medium">{label}</span>
-                              <span className={`text-xs font-semibold tabular-nums ${done >= total && total > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
-                                {done}/{total}
-                              </span>
+                              <span className={`text-xs font-semibold tabular-nums ${done >= total && total > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>{done}/{total}</span>
                             </div>
                             <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
-                              <div
-                                className={`h-full rounded-full transition-all ${done >= total && total > 0 ? "bg-emerald-500" : "bg-primary"}`}
-                                style={{ width: total > 0 ? `${Math.min((done / total) * 100, 100)}%` : "0%" }}
-                              />
+                              <div className={`h-full rounded-full transition-all ${done >= total && total > 0 ? "bg-emerald-500" : "bg-primary"}`} style={{ width: total > 0 ? `${Math.min((done / total) * 100, 100)}%` : "0%" }} />
                             </div>
                           </div>
                         </div>
@@ -512,69 +660,30 @@ function StudentPage() {
                     <p className="text-sm text-muted-foreground">Aucune routine assignée.</p>
                   )}
                 </div>
-
-                {/* Skin state */}
-                <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-                  <div className="mb-4 flex items-center justify-between">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">État de peau</p>
-                    {skinState && (
-                      <span className="text-[10px] text-muted-foreground">
-                        {new Date(skinState.updatedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
-                      </span>
-                    )}
-                  </div>
-                  {skinState ? (
-                    <div className="space-y-3">
-                      {[
-                        { label: "🔥 Inflammation", value: skinState.inflammationPct ?? 0, inverted: true },
-                        { label: "🧱 Barrière", value: skinState.barrierPct ?? 0, inverted: false },
-                        { label: "🧴 Acné", value: skinState.acnePct ?? 0, inverted: true },
-                      ].map(({ label, value, inverted }) => {
-                        const colorClass = inverted
-                          ? value >= 67 ? "bg-red-400" : value >= 34 ? "bg-amber-400" : "bg-emerald-500"
-                          : value >= 67 ? "bg-emerald-500" : value >= 34 ? "bg-amber-400" : "bg-red-400";
-                        return (
-                          <div key={label}>
-                            <div className="mb-1 flex items-center justify-between">
-                              <span className="text-sm">{label}</span>
-                              <span className="text-xs font-semibold tabular-nums text-muted-foreground">{value}%</span>
-                            </div>
-                            <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                              <div className={`h-full rounded-full transition-all ${colorClass}`} style={{ width: `${value}%` }} />
-                            </div>
-                          </div>
-                        );
-                      })}
-                      {skinState.currentPhase && (
-                        <div className="mt-2 flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">Phase :</span>
-                          <span className="rounded-full bg-primary-soft px-3 py-0.5 text-xs font-semibold text-primary capitalize">
-                            {PHASE_LABELS[skinState.currentPhase] ?? skinState.currentPhase}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Aucun bilan de peau enregistré.</p>
-                  )}
-                </div>
               </div>
 
-              {/* Next coaching call */}
-              {skinState?.nextCallDate && (
-                <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-                  <div className="flex items-center gap-3">
-                    <CalendarDays className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="text-sm font-semibold capitalize">
-                        {new Date(skinState.nextCallDate).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
-                        {skinState.nextCallTime && ` à ${skinState.nextCallTime}`}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Prochain point coaching</p>
-                    </div>
-                  </div>
+              {/* Envoyer une note */}
+              <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Envoyer une note</p>
+                <textarea
+                  autoComplete="off"
+                  value={noteInput}
+                  onChange={(e) => setNoteInput(e.target.value)}
+                  placeholder="Écris ton message pour l'élève…"
+                  rows={3}
+                  className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+                <div className="mt-3 flex justify-end">
+                  <button
+                    onClick={sendNote}
+                    disabled={sendingNote || !noteInput.trim()}
+                    className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+                  >
+                    {sendingNote ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    Envoyer
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
           );
         })()}
@@ -975,143 +1084,6 @@ function StudentPage() {
         {/* ── Notes ──────────────────────────────────────────────────────────── */}
         {tab === "notes" && (
           <div className="space-y-6">
-            {/* État & Direction */}
-            <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-              <div className="mb-5 flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  État & Direction
-                </p>
-                {skinState && (
-                  <span className="text-[10px] text-muted-foreground">
-                    Mis à jour {new Date(skinState.updatedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
-                  </span>
-                )}
-              </div>
-
-              {/* 3 skin metrics */}
-              <div className="mb-5 space-y-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Indicateurs peau (0 – 100%)</p>
-                {(
-                  [
-                    { key: "inflammationPct" as const, label: "🔥 Inflammation", hint: "0 = absente → 100 = sévère" },
-                    { key: "barrierPct" as const, label: "🧱 Barrière cutanée", hint: "0 = compromise → 100 = excellente" },
-                    { key: "acnePct" as const, label: "🧴 Acné", hint: "0 = contrôlée → 100 = sévère" },
-                  ]
-                ).map(({ key, label, hint }) => (
-                  <div key={key}>
-                    <div className="mb-1 flex items-center justify-between">
-                      <label className="text-sm font-medium">{label}</label>
-                      <span className="text-xs font-semibold tabular-nums text-muted-foreground">
-                        {skinStateDraft[key] ?? "—"}%
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      step={5}
-                      value={skinStateDraft[key] ?? 50}
-                      onChange={(e) => setSkinStateDraft((d) => ({ ...d, [key]: parseInt(e.target.value) }))}
-                      className="w-full cursor-pointer accent-primary"
-                    />
-                    <p className="mt-0.5 text-[10px] text-muted-foreground/60">{hint}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Phase actuelle */}
-              <div className="mb-5">
-                <label className="mb-1.5 block text-sm font-medium">Phase actuelle</label>
-                <div className="flex flex-wrap gap-2">
-                  {(["reset", "stabilisation", "purge", "amélioration"] as const).map((v) => (
-                    <button
-                      key={v}
-                      type="button"
-                      onClick={() => setSkinStateDraft((d) => ({ ...d, currentPhase: v }))}
-                      className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors capitalize ${
-                        skinStateDraft.currentPhase === v
-                          ? "bg-primary text-primary-foreground"
-                          : "border border-border bg-muted/30 text-foreground hover:bg-muted"
-                      }`}
-                    >
-                      {v}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Phrase du coach */}
-              <div className="mb-5">
-                <label className="mb-1.5 block text-sm font-medium">Phrase du coach</label>
-                <textarea
-                  autoComplete="off"
-                  value={skinStateDraft.coachPhrase ?? ""}
-                  onChange={(e) => setSkinStateDraft((d) => ({ ...d, coachPhrase: e.target.value }))}
-                  placeholder="Ex. Continue dans cette direction, ta peau se stabilise bien…"
-                  rows={2}
-                  className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-
-              {/* Prochain appel */}
-              <div className="mb-5 flex gap-3">
-                <div className="flex-1">
-                  <label className="mb-1.5 block text-sm font-medium">Prochain appel — date</label>
-                  <input
-                    type="date"
-                    value={skinStateDraft.nextCallDate ?? ""}
-                    onChange={(e) => setSkinStateDraft((d) => ({ ...d, nextCallDate: e.target.value }))}
-                    className="w-full rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium">Heure</label>
-                  <input
-                    type="text"
-                    placeholder="18h"
-                    value={skinStateDraft.nextCallTime ?? ""}
-                    onChange={(e) => setSkinStateDraft((d) => ({ ...d, nextCallTime: e.target.value }))}
-                    className="w-24 rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end">
-                <button
-                  onClick={saveSkinState}
-                  disabled={savingSkinState}
-                  className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
-                >
-                  {savingSkinState ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                  Sauvegarder l'état
-                </button>
-              </div>
-            </div>
-
-            {/* Send new note */}
-            <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Envoyer une note
-              </p>
-              <textarea
-
-                autoComplete="off"                value={noteInput}
-                onChange={(e) => setNoteInput(e.target.value)}
-                placeholder="Écris ton message pour l'élève…"
-                rows={3}
-                className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
-              />
-              <div className="mt-3 flex justify-end">
-                <button
-                  onClick={sendNote}
-                  disabled={sendingNote || !noteInput.trim()}
-                  className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
-                >
-                  {sendingNote ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                  Envoyer
-                </button>
-              </div>
-            </div>
 
             {/* Notes history */}
             {notes.length === 0 ? (
@@ -1227,6 +1199,37 @@ function LevelSelector({
           </button>
         ))}
       </div>
+    </div>
+  );
+}
+
+function AdminCircleMetric({ label, emoji, pct, inverted, description }: { label: string; emoji: string; pct: number; inverted?: boolean; description?: string }) {
+  const r = 30;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (pct / 100) * circ;
+  const arcClass = inverted
+    ? pct >= 67 ? "text-red-400" : pct >= 34 ? "text-amber-400" : "text-emerald-500"
+    : pct >= 67 ? "text-emerald-500" : pct >= 34 ? "text-amber-400" : "text-red-400";
+  const numClass = inverted
+    ? pct >= 67 ? "text-red-500 dark:text-red-400" : pct >= 34 ? "text-amber-500 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
+    : pct >= 67 ? "text-emerald-600 dark:text-emerald-400" : pct >= 34 ? "text-amber-500 dark:text-amber-400" : "text-red-500 dark:text-red-400";
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div className="relative h-[80px] w-[80px]">
+        <svg viewBox="0 0 80 80" className="-rotate-90 h-full w-full">
+          <circle cx="40" cy="40" r={r} fill="none" stroke="currentColor" strokeWidth="7" className="text-muted" />
+          <circle cx="40" cy="40" r={r} fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round"
+            className={arcClass} strokeDasharray={circ} strokeDashoffset={offset}
+            style={{ transition: "stroke-dashoffset 0.7s ease" }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
+          <span className="text-lg leading-none">{emoji}</span>
+          <span className={`text-xs font-bold tabular-nums leading-tight ${numClass}`}>{pct}</span>
+        </div>
+      </div>
+      <span className="text-center text-[10px] font-medium text-foreground/70">{label}</span>
+      {description && <span className={`text-center text-[10px] font-semibold ${numClass}`}>{description}</span>}
     </div>
   );
 }

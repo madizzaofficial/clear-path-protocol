@@ -471,6 +471,31 @@ function Suivi() {
               </Link>
             </div>
 
+            {/* Message du coach */}
+            <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
+              <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                <MessageSquare className="h-3.5 w-3.5" />
+                Message du coach
+              </div>
+              {latestNote ? (
+                <>
+                  <p className="text-sm italic leading-relaxed text-foreground/80">"{latestNote.note}"</p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    — {latestNote.authorName ?? "Coach"} ·{" "}
+                    {new Date(latestNote.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}
+                  </p>
+                </>
+              ) : (
+                <div className="flex items-start gap-3 py-1">
+                  <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/40" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Ton coach ne t'a pas encore envoyé de message.</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground/50">Ses retours et observations apparaîtront ici.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Routine du jour */}
             <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
               <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Routine du jour</p>
@@ -527,31 +552,6 @@ function Suivi() {
                   <div>
                     <p className="text-sm text-muted-foreground">Ta routine personnalisée sera bientôt disponible.</p>
                     <p className="mt-0.5 text-xs text-muted-foreground/50">Ton coach la prépare pour toi.</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Message du coach */}
-            <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
-              <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                <MessageSquare className="h-3.5 w-3.5" />
-                Message du coach
-              </div>
-              {latestNote ? (
-                <>
-                  <p className="text-sm italic leading-relaxed text-foreground/80">"{latestNote.note}"</p>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    — {latestNote.authorName ?? "Coach"} ·{" "}
-                    {new Date(latestNote.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}
-                  </p>
-                </>
-              ) : (
-                <div className="flex items-start gap-3 py-1">
-                  <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/40" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Ton coach ne t'a pas encore envoyé de message.</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground/50">Ses retours et observations apparaîtront ici.</p>
                   </div>
                 </div>
               )}
