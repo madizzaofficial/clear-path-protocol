@@ -137,7 +137,7 @@ function Suivi() {
         getDoc(doc(db, "users", user!.uid)),
         getDoc(doc(db, "routines", user!.uid)),
         getDocs(query(collection(db, "users", user!.uid, "notes"), orderBy("createdAt", "desc"), limit(3))),
-        getDocs(query(collection(db, "progress_photos"), where("uid", "==", user!.uid), orderBy("createdAt", "desc"), limit(1))),
+        getDocs(query(collection(db, "progress_photos"), where("uid", "==", user!.uid))),
       ]);
 
       // Month checkins
@@ -160,11 +160,14 @@ function Suivi() {
       const allNotes: CoachNote[] = notesSnap.docs.map((d) => ({ id: d.id, ...d.data() } as CoachNote));
       const latestNote = allNotes.find((n) => !n.isFromStudent) ?? null;
 
-      // Latest photo
+      // Latest photo — sort client-side (avoids composite index on uid+createdAt)
       let latestPhotoUrl: string | null = null;
       let latestPhotoDate: string | null = null;
       if (!photosSnap.empty) {
-        const p = photosSnap.docs[0].data();
+        const sorted = photosSnap.docs
+          .map((d) => d.data())
+          .sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
+        const p = sorted[0];
         latestPhotoUrl = p.front ?? p.left ?? p.right ?? null;
         latestPhotoDate = p.date ?? null;
       }
