@@ -50,12 +50,22 @@ type SuiviData = {
   latestNote: CoachNote | null;
   photos: PhotoEntry[];
   skinType: string | null;
+  acneTypes: string[] | null;
+  intensity: string | null;
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const SKIN_TYPE_LABELS: Record<string, string> = {
   normale: "Normale", grasse: "Grasse", seche: "Sèche", mixte: "Mixte", sensible: "Sensible",
+};
+
+const ACNE_TYPE_LABELS: Record<string, string> = {
+  comedons: "Comédons", papules: "Papules", microkystes: "Microkystes", kystes: "Kystes",
+};
+
+const INTENSITY_LABELS: Record<string, string> = {
+  legere: "Légère", moderee: "Modérée", severe: "Sévère",
 };
 
 function getSkincareWeek(enrolledAt: number): number {
@@ -187,6 +197,8 @@ function Suivi() {
     latestNote: null,
     photos: [],
     skinType: null,
+    acneTypes: null,
+    intensity: null,
   });
 
   useEffect(() => {
@@ -259,6 +271,8 @@ function Suivi() {
         latestNote,
         photos,
         skinType: intakeSnap?.exists() ? (intakeSnap.data().skinType ?? null) : null,
+        acneTypes: intakeSnap?.exists() ? (intakeSnap.data().acneTypes ?? null) : null,
+        intensity: intakeSnap?.exists() ? (intakeSnap.data().intensity ?? null) : null,
       });
     }
     load().catch(() => setData((d) => ({ ...d, loading: false })));
@@ -266,7 +280,7 @@ function Suivi() {
 
   const {
     loading, skinState, completedLessons, enrolledAt, totalRoutineSteps,
-    checkins28, adherencePct, adherenceDays, streak, latestNote, photos, skinType,
+    checkins28, adherencePct, adherenceDays, streak, latestNote, photos, skinType, acneTypes, intensity,
   } = data;
 
   const lessons = allLessons();
@@ -307,16 +321,31 @@ function Suivi() {
 
           {/* ── 1. Journey hero ─────────────────────── col-span-2 row-1 ── */}
           <div className="overflow-hidden rounded-3xl bg-gradient-warm p-6 shadow-elegant lg:col-span-2 lg:row-start-1">
-            {/* Day count + skin type */}
+            {/* Day count + skin profile */}
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-foreground/50">Mon parcours</p>
                 <h1 className="mt-1 font-display text-5xl font-semibold leading-none">Jour {dayCount}</h1>
               </div>
-              {skinType && (
-                <span className="mt-1 rounded-full bg-background/60 px-3 py-1 text-xs font-medium backdrop-blur-sm">
-                  Peau {(SKIN_TYPE_LABELS[skinType] ?? skinType).toLowerCase()}
-                </span>
+              {(skinType || (acneTypes && acneTypes.length > 0) || intensity) && (
+                <div className="flex flex-col items-end gap-1">
+                  <p className="text-[9px] font-semibold uppercase tracking-widest text-foreground/40">Mon profil</p>
+                  {skinType && (
+                    <span className="rounded-full bg-background/60 px-3 py-1 text-xs font-medium backdrop-blur-sm">
+                      Peau {(SKIN_TYPE_LABELS[skinType] ?? skinType).toLowerCase()}
+                    </span>
+                  )}
+                  {intensity && (
+                    <span className="rounded-full bg-background/60 px-3 py-1 text-xs font-medium backdrop-blur-sm">
+                      {INTENSITY_LABELS[intensity] ?? intensity}
+                    </span>
+                  )}
+                  {acneTypes?.map((t) => (
+                    <span key={t} className="rounded-full bg-background/60 px-3 py-1 text-xs font-medium backdrop-blur-sm">
+                      {ACNE_TYPE_LABELS[t] ?? t}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
 
@@ -357,14 +386,6 @@ function Suivi() {
                   <CircleMetric label="Barrière" emoji="🧱" pct={skinState!.barrierPct ?? 0} />
                   <CircleMetric label="Acné" emoji="🧴" pct={skinState!.acnePct ?? 0} inverted />
                 </div>
-                {skinState!.currentPhase && (
-                  <div className="mt-4 flex items-center gap-2 border-t border-border/40 pt-3">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Phase coach</span>
-                    <span className="rounded-full bg-primary-soft px-3 py-0.5 text-xs font-semibold capitalize text-primary">
-                      {skinState!.currentPhase}
-                    </span>
-                  </div>
-                )}
               </div>
             ) : (
               <div className="flex items-start gap-3 py-2">
@@ -475,8 +496,8 @@ function Suivi() {
             </div>
           </div>
 
-          {/* ── 5. Feedback du coach ──────── left col-span-2 row-3 ── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-span-2 lg:row-start-3">
+          {/* ── 5. Feedback du coach ──────── right col-3 row-3 ── */}
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-3 lg:row-start-3">
             <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
               <MessageSquare className="h-3.5 w-3.5" />
               Message du coach
@@ -508,8 +529,8 @@ function Suivi() {
             )}
           </div>
 
-          {/* ── 6. Protocole ────────────────── right col-3 row-3 ── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-3 lg:row-start-3">
+          {/* ── 6. Protocole ────────────────── right col-3 row-4 ── */}
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-3 lg:row-start-4">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                 Protocole
@@ -539,8 +560,8 @@ function Suivi() {
             )}
           </div>
 
-          {/* ── 7. Journal photo ────────────── right col-3 row-4 ── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-3 lg:row-start-4">
+          {/* ── 7. Journal photo ─────────────── left col-span-2 row-3 ── */}
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-span-2 lg:row-start-3">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                 Journal photo
