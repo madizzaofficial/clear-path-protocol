@@ -101,6 +101,15 @@ type AdminSkinState = {
   nextEvolution: string;
   nextCallDate?: string;
   updatedAt: number;
+  // % metrics (0–100, set by coach)
+  inflammationPct?: number;
+  sensibilityPct?: number;
+  comedonsPct?: number;
+  toleranceRoutinePct?: number;
+  hydrationPct?: number;
+  coachObservation?: string;
+  objectives?: string;
+  // Direction
   coachPhrase?: string;
   currentPhase?: string;
   priority?: string;
@@ -296,6 +305,13 @@ function StudentPage() {
         nextEvolution: skinStateDraft.nextEvolution ?? "",
         nextCallDate: skinStateDraft.nextCallDate,
         updatedAt: Date.now(),
+        inflammationPct: skinStateDraft.inflammationPct,
+        sensibilityPct: skinStateDraft.sensibilityPct,
+        comedonsPct: skinStateDraft.comedonsPct,
+        toleranceRoutinePct: skinStateDraft.toleranceRoutinePct,
+        hydrationPct: skinStateDraft.hydrationPct,
+        coachObservation: skinStateDraft.coachObservation,
+        objectives: skinStateDraft.objectives,
         coachPhrase: skinStateDraft.coachPhrase,
         currentPhase: skinStateDraft.currentPhase,
         priority: skinStateDraft.priority,
@@ -826,11 +842,71 @@ function StudentPage() {
                 />
               </div>
 
+              {/* Skin metrics (%) */}
+              <div className="mb-5 space-y-4">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Baromètres peau (0 – 100%)</p>
+                {(
+                  [
+                    { key: "inflammationPct", label: "Inflammation", hint: "0 = aucune → 100 = intense" },
+                    { key: "sensibilityPct", label: "Sensibilité", hint: "0 = faible → 100 = élevée" },
+                    { key: "comedonsPct", label: "Comédons", hint: "0 = aucun → 100 = nombreux" },
+                    { key: "toleranceRoutinePct", label: "Tolérance routine", hint: "0 = mauvaise → 100 = excellente" },
+                    { key: "hydrationPct", label: "Hydratation", hint: "0 = déshydratée → 100 = optimale" },
+                  ] as const
+                ).map(({ key, label, hint }) => (
+                  <div key={key}>
+                    <div className="mb-1 flex items-center justify-between">
+                      <label className="text-sm font-medium">{label}</label>
+                      <span className="text-xs font-semibold tabular-nums text-muted-foreground">
+                        {skinStateDraft[key] ?? "—"}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={skinStateDraft[key] ?? 50}
+                      onChange={(e) => setSkinStateDraft((d) => ({ ...d, [key]: parseInt(e.target.value) }))}
+                      className="w-full accent-primary cursor-pointer"
+                    />
+                    <p className="mt-0.5 text-[10px] text-muted-foreground/60">{hint}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Coach observation */}
+              <div className="mb-5">
+                <label className="mb-1.5 block text-sm font-medium">Observation du coach</label>
+                <textarea
+                  autoComplete="off"
+                  value={skinStateDraft.coachObservation ?? ""}
+                  onChange={(e) => setSkinStateDraft((d) => ({ ...d, coachObservation: e.target.value }))}
+                  placeholder="Ex. La peau tolère mieux les actifs. L'inflammation reste sur la zone T mais les rougeurs diminuent."
+                  rows={3}
+                  className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              {/* Objectives */}
+              <div className="mb-5">
+                <label className="mb-1 block text-sm font-medium">Objectifs actuels</label>
+                <p className="mb-1.5 text-[10px] text-muted-foreground/60">Une ligne par objectif · ✓ = accompli · ○ = en cours</p>
+                <textarea
+                  autoComplete="off"
+                  value={skinStateDraft.objectives ?? ""}
+                  onChange={(e) => setSkinStateDraft((d) => ({ ...d, objectives: e.target.value }))}
+                  placeholder={"✓ Calmer l'inflammation\n✓ Améliorer la tolérance\n○ Réduire les comédons\n○ Lisser la texture"}
+                  rows={4}
+                  className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 font-mono text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
               {/* Text fields */}
               <div className="mb-5 space-y-4">
                 {(
                   [
-                    { key: "currentObjective", label: "Objectif actuel", placeholder: "Ex. Stabiliser la barrière cutanée avant d'introduire les actifs…" },
+                    { key: "currentObjective", label: "Objectif actuel (texte libre)", placeholder: "Ex. Stabiliser la barrière cutanée avant d'introduire les actifs…" },
                     { key: "currentStrategy", label: "Stratégie en cours", placeholder: "Ex. Routine minimaliste + SPF quotidien + Niacinamide 2x/sem…" },
                     { key: "nextEvolution", label: "Prochaine évolution", placeholder: "Ex. Dans ~2 sem. : azélaïque 2x/sem…" },
                   ] as const
