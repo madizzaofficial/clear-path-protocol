@@ -329,26 +329,26 @@ function Suivi() {
             Col 1-2 row-3: Routine du jour
             Col 1-2 row-4: Journal photo
         */}
-        <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start">
+        <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6">
 
           {/* ── 1a. Hero gradient ───────────────── col-1 row-1 ── */}
-          <div className="overflow-hidden rounded-3xl bg-gradient-warm p-6 shadow-elegant lg:col-start-1 lg:row-start-1">
+          <div className="overflow-hidden rounded-3xl bg-gradient-warm p-6 shadow-elegant lg:col-start-1 lg:row-start-1 lg:flex lg:flex-col">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-foreground/50">Mon parcours</p>
             <h1 className="mt-1 font-display text-5xl font-semibold leading-none">Jour {dayCount}</h1>
-            <div className="mt-4">
+            <div className="mt-4 flex-1">
               <p className="text-base font-semibold">{currentPhase.label}</p>
               <p className="mt-0.5 text-sm text-foreground/70">{currentPhase.description}</p>
               {skinState?.coachPhrase && (
                 <p className="mt-2 text-sm italic text-foreground/60">"{skinState.coachPhrase}"</p>
               )}
-              <span className="mt-3 inline-flex items-center rounded-full bg-background/50 px-3 py-1 text-xs font-semibold backdrop-blur-sm">
-                Phase {currentPhase.id}/6
-              </span>
             </div>
+            <span className="mt-3 inline-flex items-center rounded-full bg-background/50 px-3 py-1 text-xs font-semibold backdrop-blur-sm">
+              Phase {currentPhase.id}/6
+            </span>
           </div>
 
           {/* ── 1b. État de ta peau ─────────────── col-2 row-1 ── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-2 lg:row-start-1">
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-2 lg:row-start-1 lg:flex lg:flex-col">
             <div className="mb-4 flex items-center justify-between">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">État de ta peau</p>
               {skinState?.updatedAt && (
@@ -358,40 +358,40 @@ function Suivi() {
                 </p>
               )}
             </div>
-            {hasSkinMetrics ? (() => {
-              const infPct = skinState!.inflammationPct ?? 0;
-              const barPct = skinState!.barrierPct ?? 0;
-              const acnPct = skinState!.acnePct ?? 0;
-              const infDesc = infPct >= 67 ? "Active" : infPct >= 34 ? "Modérée" : "Sous contrôle";
-              const barDesc = barPct >= 67 ? "Excellente" : barPct >= 34 ? "En cours" : "Compromise";
-              const acnDesc = acnPct >= 67 ? "Active" : acnPct >= 34 ? "Modérée" : "Contrôlée";
-              return (
-                <div className="grid grid-cols-3 gap-4">
-                  <CircleMetric label="Inflammation" emoji="🔥" pct={infPct} inverted description={infDesc} />
-                  <CircleMetric label="Barrière" emoji="🧱" pct={barPct} description={barDesc} />
-                  <CircleMetric label="Acné" emoji="🧴" pct={acnPct} inverted description={acnDesc} />
+            <div className="flex flex-1 items-center">
+              {hasSkinMetrics ? (() => {
+                const infPct = skinState!.inflammationPct ?? 0;
+                const barPct = skinState!.barrierPct ?? 0;
+                const acnPct = skinState!.acnePct ?? 0;
+                const infDesc = infPct >= 67 ? "Active" : infPct >= 34 ? "Modérée" : "Sous contrôle";
+                const barDesc = barPct >= 67 ? "Excellente" : barPct >= 34 ? "En cours" : "Compromise";
+                const acnDesc = acnPct >= 67 ? "Active" : acnPct >= 34 ? "Modérée" : "Contrôlée";
+                return (
+                  <div className="grid w-full grid-cols-3 gap-4">
+                    <CircleMetric label="Inflammation" emoji="🔥" pct={infPct} inverted description={infDesc} />
+                    <CircleMetric label="Barrière" emoji="🧱" pct={barPct} description={barDesc} />
+                    <CircleMetric label="Acné" emoji="🧴" pct={acnPct} inverted description={acnDesc} />
+                  </div>
+                );
+              })() : (
+                <div className="flex items-start gap-3 py-2">
+                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/40" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Ton coach met à jour ton bilan de peau.</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground/50">Il sera disponible après ta première consultation.</p>
+                  </div>
                 </div>
-              );
-            })() : (
-              <div className="flex items-start gap-3 py-2">
-                <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/40" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Ton coach met à jour ton bilan de peau.</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground/50">Il sera disponible après ta première consultation.</p>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
-          {/* ── Right sidebar wrapper ── col-3, rows 1-4, flex-col packed ── */}
-          <div className="flex flex-col gap-4 lg:col-start-3 lg:row-start-1 lg:row-span-4 lg:gap-6">
-
-            {/* Coaching */}
-            <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
-              <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                <CalendarDays className="h-3.5 w-3.5" />
-                Prochain point coaching
-              </div>
+          {/* ── Prochain point coaching ─────────── col-3 row-1 ── */}
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-3 lg:row-start-1 lg:flex lg:flex-col">
+            <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              <CalendarDays className="h-3.5 w-3.5" />
+              Prochain point coaching
+            </div>
+            <div className="flex-1">
               {skinState?.nextCallDate ? (
                 <>
                   <p className="text-base font-semibold capitalize">{formatCallDate(skinState.nextCallDate)}</p>
@@ -414,10 +414,14 @@ function Suivi() {
               ) : (
                 <p className="text-sm text-muted-foreground">Ton prochain point coaching sera bientôt fixé.</p>
               )}
-              <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/20">
-                <Phone className="h-4 w-4" /> Contacter le coach
-              </button>
             </div>
+            <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/20">
+              <Phone className="h-4 w-4" /> Contacter le coach
+            </button>
+          </div>
+
+          {/* ── Right sidebar wrapper ── col-3, rows 2-4, flex-col packed ── */}
+          <div className="flex flex-col gap-4 lg:col-start-3 lg:row-start-2 lg:row-span-3 lg:gap-6">
 
             {/* Profil de peau */}
             <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
@@ -458,6 +462,67 @@ function Suivi() {
               >
                 <UserCircle className="h-4 w-4" /> Modifier mon profil
               </Link>
+            </div>
+
+            {/* Routine du jour */}
+            <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
+              <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Routine du jour</p>
+              {totalRoutineSteps > 0 ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-950/30">
+                      <Sun className="h-4 w-4 text-amber-500" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-sm font-medium">Matin</span>
+                        <span className={`text-xs font-semibold tabular-nums ${amDone >= amSteps ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
+                          {amDone}/{amSteps}
+                        </span>
+                      </div>
+                      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${amDone >= amSteps ? "bg-emerald-500" : "bg-primary"}`}
+                          style={{ width: amSteps > 0 ? `${Math.min((amDone / amSteps) * 100, 100)}%` : "0%" }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-950/30">
+                      <Moon className="h-4 w-4 text-indigo-400" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-sm font-medium">Soir</span>
+                        <span className={`text-xs font-semibold tabular-nums ${pmDone >= pmSteps ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
+                          {pmDone}/{pmSteps}
+                        </span>
+                      </div>
+                      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${pmDone >= pmSteps ? "bg-emerald-500" : "bg-primary"}`}
+                          style={{ width: pmSteps > 0 ? `${Math.min((pmDone / pmSteps) * 100, 100)}%` : "0%" }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <Link
+                    to="/products"
+                    className="mt-1 flex items-center justify-center gap-1.5 rounded-2xl border border-border/60 px-4 py-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
+                  >
+                    Voir la routine complète <ChevronRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex items-start gap-3 py-1">
+                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/40" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Ta routine personnalisée sera bientôt disponible.</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground/50">Ton coach la prépare pour toi.</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Message du coach */}
@@ -513,8 +578,8 @@ function Suivi() {
 
           </div>{/* end right sidebar wrapper */}
 
-          {/* ── 3. Mon parcours ──────────────── col-span-2 row-2 ── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-span-2 lg:row-start-2">
+          {/* ── Mon parcours ─────────────────── col-span-2 row-2 ── */}
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-span-2 lg:row-start-2 lg:self-start">
             <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Mon parcours</p>
             <div className="space-y-1">
               {JOURNEY_PHASES.map((phase) => {
@@ -553,71 +618,8 @@ function Suivi() {
             </div>
           </div>
 
-          {/* ── Routine du jour ──────────────── col-span-2 row-3 ── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-span-2 lg:row-start-3">
-            <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Routine du jour</p>
-            {totalRoutineSteps > 0 ? (
-              <div className="space-y-3">
-                {/* AM row */}
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-950/30">
-                    <Sun className="h-4 w-4 text-amber-500" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-medium">Matin</span>
-                      <span className={`text-xs font-semibold tabular-nums ${amDone >= amSteps ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
-                        {amDone}/{amSteps}
-                      </span>
-                    </div>
-                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
-                      <div
-                        className={`h-full rounded-full transition-all duration-500 ${amDone >= amSteps ? "bg-emerald-500" : "bg-primary"}`}
-                        style={{ width: amSteps > 0 ? `${Math.min((amDone / amSteps) * 100, 100)}%` : "0%" }}
-                      />
-                    </div>
-                  </div>
-                </div>
-                {/* PM row */}
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-950/30">
-                    <Moon className="h-4 w-4 text-indigo-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-medium">Soir</span>
-                      <span className={`text-xs font-semibold tabular-nums ${pmDone >= pmSteps ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
-                        {pmDone}/{pmSteps}
-                      </span>
-                    </div>
-                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
-                      <div
-                        className={`h-full rounded-full transition-all duration-500 ${pmDone >= pmSteps ? "bg-emerald-500" : "bg-primary"}`}
-                        style={{ width: pmSteps > 0 ? `${Math.min((pmDone / pmSteps) * 100, 100)}%` : "0%" }}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <Link
-                  to="/products"
-                  className="mt-1 flex items-center justify-center gap-1.5 rounded-2xl border border-border/60 px-4 py-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
-                >
-                  Voir la routine complète <ChevronRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            ) : (
-              <div className="flex items-start gap-3 py-1">
-                <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/40" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Ta routine personnalisée sera bientôt disponible.</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground/50">Ton coach la prépare pour toi.</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* ── Journal photo ─────────────── col-span-2 row-4 ── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-span-2 lg:row-start-4">
+          {/* ── Journal photo ─────────────── col-span-2 row-3 ── */}
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-span-2 lg:row-start-3 lg:self-start">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Journal photo</p>
               <Link to="/journal" className="flex items-center gap-1 text-xs font-medium text-primary hover:underline">

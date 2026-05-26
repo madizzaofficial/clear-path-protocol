@@ -8,11 +8,11 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Loader2, Check, Sun, Moon, ClipboardList,
   BookOpen, ChevronDown, Lock, Play, ImageOff, MessageSquare, Send, AlertTriangle,
-  Ban, UserCheck, Pencil, X, ShoppingCart, Package,
+  Ban, UserCheck, Pencil, X, ShoppingCart, Package, Activity, Flame, CalendarDays,
 } from "lucide-react";
 import { course } from "@/lib/course-data";
 
-type Tab = "profil" | "routine" | "photos" | "progression" | "notes";
+type Tab = "profil" | "routine" | "photos" | "progression" | "notes" | "suivi";
 
 export const Route = createFileRoute("/admin_/student/$uid")({
   head: () => ({ meta: [{ title: "Fiche élève — Protocole Clear" }] }),
@@ -132,6 +132,7 @@ function StudentPage() {
   const [editingIntake, setEditingIntake] = useState(false);
   const [intakeDraft, setIntakeDraft] = useState<IntakeAnswers>({});
   const [savingIntake, setSavingIntake] = useState(false);
+  const [checkins28Admin, setCheckins28Admin] = useState<Record<string, { am: string[]; pm: string[] }>>({});
   const { tab: initialTab } = Route.useSearch();
   const [tab, setTab] = useState<Tab>(initialTab ?? "profil");
   const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
@@ -174,6 +175,17 @@ function StudentPage() {
         setSkinState(ss);
         setSkinStateDraft(ss);
       }
+      const today = new Date();
+      const todayKey = today.toISOString().slice(0, 10);
+      const start28 = new Date(today); start28.setDate(today.getDate() - 27);
+      const start28Key = start28.toISOString().slice(0, 10);
+      const checkinsSnap = await getDocs(
+        query(collection(db, "routine_checkins", uid, "days"), where("__name__", ">=", start28Key), where("__name__", "<=", todayKey)),
+      ).catch(() => null);
+      const checkins28map: Record<string, { am: string[]; pm: string[] }> = {};
+      checkinsSnap?.forEach((d: any) => { checkins28map[d.id] = d.data() as { am: string[]; pm: string[] }; });
+      setCheckins28Admin(checkins28map);
+
       const initial = Object.fromEntries(course.chapters.map((c) => [c.id, true]));
       setOpenChapters(initial);
       setLoading(false);
@@ -202,6 +214,7 @@ function StudentPage() {
   const pct = Math.round((done / TOTAL_LESSONS) * 100);
 
   const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
+    { id: "suivi", label: "Suivi", icon: Activity },
     { id: "profil", label: "Profil peau", icon: BookOpen },
     { id: "routine", label: "Routine", icon: Sun },
     { id: "photos", label: "Photos", icon: ClipboardList },
@@ -383,6 +396,188 @@ function StudentPage() {
             );
           })}
         </div>
+
+        {/* ── Suivi ──────────────────────────────────────────────────────────── */}
+        {tab === "suivi" && (() => {
+          const enrolledAt = profile?.enrolledAt ?? null;
+          const dayCount = enrolledAt ? Math.max(1, Math.floor((Date.now() - enrolledAt) / 86_400_000) + 1) : 1;
+          const week = Math.min(12, Math.ceil(dayCount / 7));
+          const totalSteps = (routine?.am?.length ?? 0) + (routine?.pm?.length ?? 0);
+          const todayKey2 = new Date().toISOString().slice(0, 10);
+          const todayCheckins = checkins28Admin[todayKey2];
+          const amDoneAdmin = todayCheckins?.am?.length ?? 0;
+          const pmDoneAdmin = todayCheckins?.pm?.length ?? 0;
+          const amStepsAdmin = routine?.am?.length ?? 0;
+          const pmStepsAdmin = routine?.pm?.length ?? 0;
+
+          let adherenceDays = 0, adminStreak = 0;
+          let streakBroken = false;
+          const todayAdm = new Date();
+          for (let i = 0; i < 28; i++) {
+            const d = new Date(todayAdm); d.setDate(todayAdm.getDate() - i);
+            const key = d.toISOString().slice(0, 10);
+            const c = checkins28Admin[key];
+            const isDone = totalSteps > 0 && c && (c.am?.length ?? 0) + (c.pm?.length ?? 0) >= totalSteps;
+            if (isDone) { adherenceDays++; if (!streakBroken) adminStreak++; }
+            else if (i > 0) { streakBroken = true; }
+          }
+          const adherencePct = totalSteps > 0 ? Math.round((adherenceDays / 28) * 100) : 0;
+
+          const PHASE_LABELS: Record<string, string> = {
+            reset: "Reset", stabilisation: "Stabilisation", purge: "Purge", "amélioration": "Amélioration",
+          };
+
+          return (
+            <div className="space-y-6">
+              {/* Overview chips */}
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {[
+                  { label: "Jour", value: `J+${dayCount}` },
+                  { label: "Semaine", value: `S${week}/12` },
+                  { label: "Adhérence 28j", value: `${adherencePct}%` },
+                  { label: "Streak", value: adminStreak > 0 ? `🔥 ${adminStreak}j` : "—" },
+                ].map(({ label, value }) => (
+                  <div key={label} className="rounded-2xl border border-border/60 bg-card p-4 text-center shadow-soft">
+                    <p className="font-display text-2xl font-semibold">{value}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{label}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* 28-day adherence grid */}
+              <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Adherence — 28 derniers jours</p>
+                <div className="grid grid-cols-7 gap-1.5">
+                  {Array.from({ length: 28 }, (_, i) => {
+                    const d = new Date(todayAdm); d.setDate(todayAdm.getDate() - (27 - i));
+                    const isFuture = d > todayAdm;
+                    const key = d.toISOString().slice(0, 10);
+                    const c = checkins28Admin[key];
+                    const sum = c ? (c.am?.length ?? 0) + (c.pm?.length ?? 0) : 0;
+                    const isDone = totalSteps > 0 && sum >= totalSteps;
+                    const isPartial = !isDone && sum > 0;
+                    return (
+                      <div
+                        key={i}
+                        title={key}
+                        className={`h-4 rounded-sm ${
+                          isFuture ? "bg-muted/20"
+                          : isDone ? "bg-primary"
+                          : isPartial ? "bg-primary/30"
+                          : "bg-muted"
+                        }`}
+                      />
+                    );
+                  })}
+                </div>
+                <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-primary inline-block" /> Complète</span>
+                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-primary/30 inline-block" /> Partielle</span>
+                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-muted inline-block" /> Manquée</span>
+                </div>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Today's routine */}
+                <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                  <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Routine du jour (aujourd'hui)</p>
+                  {totalSteps > 0 ? (
+                    <div className="space-y-4">
+                      {[
+                        { label: "Matin", icon: Sun, done: amDoneAdmin, total: amStepsAdmin, color: "bg-amber-50 dark:bg-amber-950/30", iconColor: "text-amber-500" },
+                        { label: "Soir", icon: Moon, done: pmDoneAdmin, total: pmStepsAdmin, color: "bg-indigo-50 dark:bg-indigo-950/30", iconColor: "text-indigo-400" },
+                      ].map(({ label, icon: Icon, done, total, color, iconColor }) => (
+                        <div key={label} className="flex items-center gap-3">
+                          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${color}`}>
+                            <Icon className={`h-4 w-4 ${iconColor}`} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-sm font-medium">{label}</span>
+                              <span className={`text-xs font-semibold tabular-nums ${done >= total && total > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
+                                {done}/{total}
+                              </span>
+                            </div>
+                            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
+                              <div
+                                className={`h-full rounded-full transition-all ${done >= total && total > 0 ? "bg-emerald-500" : "bg-primary"}`}
+                                style={{ width: total > 0 ? `${Math.min((done / total) * 100, 100)}%` : "0%" }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Aucune routine assignée.</p>
+                  )}
+                </div>
+
+                {/* Skin state */}
+                <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                  <div className="mb-4 flex items-center justify-between">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">État de peau</p>
+                    {skinState && (
+                      <span className="text-[10px] text-muted-foreground">
+                        {new Date(skinState.updatedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                      </span>
+                    )}
+                  </div>
+                  {skinState ? (
+                    <div className="space-y-3">
+                      {[
+                        { label: "🔥 Inflammation", value: skinState.inflammationPct ?? 0, inverted: true },
+                        { label: "🧱 Barrière", value: skinState.barrierPct ?? 0, inverted: false },
+                        { label: "🧴 Acné", value: skinState.acnePct ?? 0, inverted: true },
+                      ].map(({ label, value, inverted }) => {
+                        const colorClass = inverted
+                          ? value >= 67 ? "bg-red-400" : value >= 34 ? "bg-amber-400" : "bg-emerald-500"
+                          : value >= 67 ? "bg-emerald-500" : value >= 34 ? "bg-amber-400" : "bg-red-400";
+                        return (
+                          <div key={label}>
+                            <div className="mb-1 flex items-center justify-between">
+                              <span className="text-sm">{label}</span>
+                              <span className="text-xs font-semibold tabular-nums text-muted-foreground">{value}%</span>
+                            </div>
+                            <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                              <div className={`h-full rounded-full transition-all ${colorClass}`} style={{ width: `${value}%` }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {skinState.currentPhase && (
+                        <div className="mt-2 flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">Phase :</span>
+                          <span className="rounded-full bg-primary-soft px-3 py-0.5 text-xs font-semibold text-primary capitalize">
+                            {PHASE_LABELS[skinState.currentPhase] ?? skinState.currentPhase}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Aucun bilan de peau enregistré.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Next coaching call */}
+              {skinState?.nextCallDate && (
+                <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                  <div className="flex items-center gap-3">
+                    <CalendarDays className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="text-sm font-semibold capitalize">
+                        {new Date(skinState.nextCallDate).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
+                        {skinState.nextCallTime && ` à ${skinState.nextCallTime}`}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Prochain point coaching</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* ── Profil peau ─────────────────────────────────────────────────────── */}
         {tab === "profil" && (
