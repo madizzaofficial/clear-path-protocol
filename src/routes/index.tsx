@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { course, allLessons } from "@/lib/course-data";
-import { Play, Check, Sparkles, Sun, Moon, ArrowRight, TrendingUp, BookOpen, Flame, Send, Loader2, MessageSquare, Trophy, ChevronRight } from "lucide-react";
+import { Play, Check, Sparkles, Sun, Moon, ArrowRight, TrendingUp, BookOpen, Flame, Send, Loader2, MessageSquare, Trophy, ChevronRight, CalendarDays } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import { useAuth } from "@/hooks/use-auth";
@@ -41,8 +41,12 @@ type CoachNote = { id: string; note: string; authorName: string; createdAt: stri
 type AdminSkinState = {
   acneLevel: number; barrierLevel: number; sensitivityLevel: number;
   currentObjective?: string; updatedAt?: number;
+  coachPhrase?: string; currentPhase?: string; priority?: string;
+  thingsToAvoid?: string; toleranceLevel?: "faible" | "moyenne" | "bonne";
+  roadmapPhases?: string; roadmapCurrentIndex?: number;
+  nextCallDate?: string; nextCallTime?: string;
 };
-type SkinCheckStatus = "ok" | "problem" | "reaction" | null;
+type SkinCheckStatus = "stable" | "irrite" | "amelioration" | null;
 
 type HomeData = {
   loading: boolean;
@@ -113,7 +117,7 @@ async function computeStreak(uid: string, totalSteps: number): Promise<number> {
 function DashboardSkeleton() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-lg px-4 pb-28 pt-6 space-y-4 animate-pulse">
+      <div className="mx-auto max-w-5xl px-4 pb-28 pt-6 space-y-4 animate-pulse">
         <div className="h-7 w-40 rounded-lg bg-muted" />
         <div className="h-4 w-56 rounded-md bg-muted" />
         <div className="h-32 rounded-2xl bg-muted" />
@@ -342,10 +346,17 @@ function Dashboard() {
   }
 
   const SKIN_CHECK_OPTIONS: { status: SkinCheckStatus; label: string; icon: string; active: string; inactive: string }[] = [
-    { status: "ok", label: "Ça va", icon: "✅", active: "bg-emerald-500 text-white border-emerald-500", inactive: "border-border bg-card hover:bg-muted/60" },
-    { status: "problem", label: "Léger pb", icon: "⚡", active: "bg-amber-400 text-white border-amber-400", inactive: "border-border bg-card hover:bg-muted/60" },
-    { status: "reaction", label: "Réaction", icon: "⚠️", active: "bg-red-400 text-white border-red-400", inactive: "border-border bg-card hover:bg-muted/60" },
+    { status: "stable", label: "Stable", icon: "✨", active: "bg-emerald-500 text-white border-emerald-500", inactive: "border-border bg-card hover:bg-muted/60" },
+    { status: "irrite", label: "Irritée", icon: "⚡", active: "bg-amber-400 text-white border-amber-400", inactive: "border-border bg-card hover:bg-muted/60" },
+    { status: "amelioration", label: "Amélioration", icon: "📈", active: "bg-primary text-primary-foreground border-primary", inactive: "border-border bg-card hover:bg-muted/60" },
   ];
+
+  // Days until next call
+  const daysUntilCall = skinState?.nextCallDate ? (() => {
+    const now = new Date(); now.setHours(0, 0, 0, 0);
+    const t = new Date(skinState.nextCallDate!); t.setHours(0, 0, 0, 0);
+    return Math.round((t.getTime() - now.getTime()) / 86_400_000);
+  })() : null;
 
   return (
     <AppShell>
@@ -363,10 +374,10 @@ function Dashboard() {
         )}
       </AnimatePresence>
 
-      <main className="mx-auto max-w-lg px-4 pb-28 pt-8 space-y-4">
+      <main className="mx-auto max-w-5xl px-4 pb-28 pt-8">
 
         {/* ── Header ─────────────────────────────────────────────────── */}
-        <section className="space-y-1">
+        <section className="mb-6 space-y-1">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">
             Semaine {position.week} · Jour {position.day}
           </p>
@@ -374,184 +385,292 @@ function Dashboard() {
             {getGreeting()}, {firstName}.
           </h1>
 
-          {/* Skin state pill */}
-          {skinState?.currentObjective && (
+          {/* Phase / objectif pill */}
+          {(skinState?.currentPhase || skinState?.currentObjective) && (
             <p className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1 text-xs text-muted-foreground shadow-soft">
-              🌿 {skinState.currentObjective.length > 60 ? skinState.currentObjective.slice(0, 57) + "…" : skinState.currentObjective}
+              🌿 {(skinState.currentPhase ?? skinState.currentObjective ?? "").slice(0, 70)}
             </p>
-          )}
-
-          {/* Protocol progress card */}
-          {(next || allDone) && (
-            <div className="mt-1 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft">
-              <div className="flex items-center justify-between px-4 py-3">
-                <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
-                    Protocole · {progress}% complété
-                  </p>
-                  {currentChapter && (
-                    <p className="mt-0.5 truncate text-sm font-semibold">
-                      {currentChapter.title}
-                    </p>
-                  )}
-                  {next && (
-                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                      → {next.title}
-                    </p>
-                  )}
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary transition-all duration-700"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                </div>
-                <div className="ml-4 shrink-0">
-                  {next ? (
-                    <Link
-                      to="/lesson/$lessonId"
-                      params={{ lessonId: next.id }}
-                      className="flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground shadow-sm hover:opacity-90"
-                    >
-                      <Play className="h-3 w-3 fill-primary-foreground" /> Reprendre
-                    </Link>
-                  ) : (
-                    <Link
-                      to="/finish"
-                      className="flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground shadow-sm hover:opacity-90"
-                    >
-                      <Trophy className="h-3 w-3" /> Récap
-                    </Link>
-                  )}
-                </div>
-              </div>
-            </div>
           )}
         </section>
 
-        {/* ── Routine du jour ────────────────────────────────────────── */}
-        <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
-          <div className="flex items-center justify-between px-5 pt-5 pb-4">
-            <h2 className="font-display text-lg font-semibold">Routine du jour</h2>
-            {streak > 0 && (
-              <div className="flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-500 dark:bg-orange-950/40">
-                <Flame className="h-3.5 w-3.5" /> {streak}j
+        {/* ── Main grid ──────────────────────────────────────────────── */}
+        <div className="lg:grid lg:grid-cols-3 lg:gap-6">
+
+          {/* ── Main column ────────────────────────────────────────── */}
+          <div className="space-y-4 lg:col-span-2">
+
+            {/* Protocol progress card */}
+            {(next || allDone) && (
+              <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft">
+                <div className="flex items-center justify-between px-4 py-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+                      Protocole · {progress}% complété
+                    </p>
+                    {currentChapter && (
+                      <p className="mt-0.5 truncate text-sm font-semibold">
+                        {currentChapter.title}
+                      </p>
+                    )}
+                    {next && (
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        → {next.title}
+                      </p>
+                    )}
+                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full bg-primary transition-all duration-700"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="ml-4 shrink-0">
+                    {next ? (
+                      <Link
+                        to="/lesson/$lessonId"
+                        params={{ lessonId: next.id }}
+                        className="flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground shadow-sm hover:opacity-90"
+                      >
+                        <Play className="h-3 w-3 fill-primary-foreground" /> Reprendre
+                      </Link>
+                    ) : (
+                      <Link
+                        to="/finish"
+                        className="flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground shadow-sm hover:opacity-90"
+                      >
+                        <Trophy className="h-3 w-3" /> Récap
+                      </Link>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
-          </div>
 
-          {!routine || (routine.am.length === 0 && routine.pm.length === 0) ? (
-            <div className="px-5 pb-5">
-              <div className="rounded-2xl bg-muted/50 p-4 text-center">
-                <p className="text-sm text-muted-foreground">Ton coach prépare ta routine personnalisée.</p>
+            {/* Routine phase context banner */}
+            {skinState?.currentPhase && hasRoutine && (
+              <div className="flex items-center gap-2 rounded-2xl bg-primary-soft/40 px-4 py-2.5">
+                <TrendingUp className="h-4 w-4 shrink-0 text-primary" />
+                <p className="text-xs text-foreground/70">
+                  <span className="font-semibold text-foreground">{skinState.currentPhase}</span>
+                  {skinState.toleranceLevel && (
+                    <span className="ml-2 text-muted-foreground">· Tolérance {skinState.toleranceLevel}</span>
+                  )}
+                </p>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-4 px-5 pb-5">
-              {routine.am.length > 0 && (
-                <>
-                  <div className="flex items-center gap-2 border-t border-border/40 pt-1">
-                    <Sun className="h-3.5 w-3.5 text-amber-400" />
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Matin</span>
-                    <span className="ml-auto text-xs tabular-nums text-muted-foreground">{checkedAm.length}/{routine.am.length}</span>
+            )}
+
+            {/* Routine du jour */}
+            <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
+              <div className="flex items-center justify-between px-5 pt-5 pb-4">
+                <h2 className="font-display text-lg font-semibold">Routine du jour</h2>
+                {streak > 0 && (
+                  <div className="flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-500 dark:bg-orange-950/40">
+                    <Flame className="h-3.5 w-3.5" /> {streak}j
                   </div>
-                  <HomeRoutineBlock icon={Sun} label="Matin" steps={routine.am} checked={checkedAm} onToggle={(id) => toggleStep("am", id)} />
-                </>
-              )}
-              {routine.pm.length > 0 && (
-                <>
-                  <div className="flex items-center gap-2 border-t border-border/40 pt-1">
-                    <Moon className="h-3.5 w-3.5 text-indigo-400" />
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Soir</span>
-                    <span className="ml-auto text-xs tabular-nums text-muted-foreground">{checkedPm.length}/{routine.pm.length}</span>
+                )}
+              </div>
+
+              {!routine || (routine.am.length === 0 && routine.pm.length === 0) ? (
+                <div className="px-5 pb-5">
+                  <div className="rounded-2xl bg-muted/50 p-4 text-center">
+                    <p className="text-sm text-muted-foreground">Ton coach prépare ta routine personnalisée.</p>
                   </div>
-                  <HomeRoutineBlock icon={Moon} label="Soir" steps={routine.pm} checked={checkedPm} onToggle={(id) => toggleStep("pm", id)} />
-                </>
-              )}
-              {routineAllDone && (
-                <div className="flex items-center justify-center gap-2 rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium text-foreground">
-                  <Check className="h-4 w-4 text-primary" /> Routine complète pour aujourd'hui 🎉
+                </div>
+              ) : (
+                <div className="space-y-4 px-5 pb-5">
+                  {routine.am.length > 0 && (
+                    <>
+                      <div className="flex items-center gap-2 border-t border-border/40 pt-1">
+                        <Sun className="h-3.5 w-3.5 text-amber-400" />
+                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Matin</span>
+                        <span className="ml-auto text-xs tabular-nums text-muted-foreground">{checkedAm.length}/{routine.am.length}</span>
+                      </div>
+                      <HomeRoutineBlock icon={Sun} label="Matin" steps={routine.am} checked={checkedAm} onToggle={(id) => toggleStep("am", id)} />
+                    </>
+                  )}
+                  {routine.pm.length > 0 && (
+                    <>
+                      <div className="flex items-center gap-2 border-t border-border/40 pt-1">
+                        <Moon className="h-3.5 w-3.5 text-indigo-400" />
+                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Soir</span>
+                        <span className="ml-auto text-xs tabular-nums text-muted-foreground">{checkedPm.length}/{routine.pm.length}</span>
+                      </div>
+                      <HomeRoutineBlock icon={Moon} label="Soir" steps={routine.pm} checked={checkedPm} onToggle={(id) => toggleStep("pm", id)} />
+                    </>
+                  )}
+                  {routineAllDone && (
+                    <div className="flex items-center justify-center gap-2 rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium text-foreground">
+                      <Check className="h-4 w-4 text-primary" /> Routine complète pour aujourd'hui 🎉
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
-        </div>
 
-        {/* ── Quick check ────────────────────────────────────────────── */}
-        {hasRoutine && (
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
-            <p className="mb-3 text-sm font-semibold">Comment va ta peau aujourd'hui ?</p>
-            <div className="grid grid-cols-3 gap-2">
-              {SKIN_CHECK_OPTIONS.map((opt) => (
-                <button
-                  key={opt.status}
-                  onClick={() => saveSkinCheck(opt.status)}
-                  className={`flex flex-col items-center gap-1.5 rounded-2xl border px-3 py-3 text-xs font-medium transition-all ${
-                    skinCheck === opt.status ? opt.active : opt.inactive
-                  }`}
-                >
-                  <span className="text-xl">{opt.icon}</span>
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+            {/* Quick check */}
+            {hasRoutine && (
+              <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
+                <p className="mb-3 text-sm font-semibold">Comment va ta peau aujourd'hui ?</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {SKIN_CHECK_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.status}
+                      onClick={() => saveSkinCheck(opt.status)}
+                      className={`flex flex-col items-center gap-1.5 rounded-2xl border px-3 py-3 text-xs font-medium transition-all ${
+                        skinCheck === opt.status ? opt.active : opt.inactive
+                      }`}
+                    >
+                      <span className="text-xl">{opt.icon}</span>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
-        {/* ── Latest coach note ───────────────────────────────────────── */}
-        {latestCoachNote && (
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
-            <div className="mb-3 flex items-center gap-2">
-              <MessageSquare className="h-3.5 w-3.5 text-primary" />
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Ton coach dit…</p>
-            </div>
-            <p className="text-sm leading-relaxed text-foreground line-clamp-4">{latestCoachNote.note}</p>
-            <div className="mt-3 flex items-center justify-between gap-3">
-              <p className="text-xs text-muted-foreground">
-                {new Date(latestCoachNote.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}
-              </p>
-              <div className="flex items-center gap-3">
-                {replyingTo !== latestCoachNote.id && (
-                  <button
-                    onClick={() => { setReplyingTo(latestCoachNote!.id); setReplyText(""); }}
-                    className="flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
-                  >
-                    <MessageSquare className="h-3 w-3" /> Répondre
-                  </button>
+            {/* Prochain RDV — mobile only (shown in sidebar on desktop) */}
+            {skinState?.nextCallDate && (
+              <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card px-5 py-4 shadow-soft lg:hidden">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-soft">
+                  <CalendarDays className="h-4 w-4 text-primary" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Prochain point coach</p>
+                  <p className="mt-0.5 text-sm font-medium capitalize">
+                    {new Date(skinState.nextCallDate).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
+                    {skinState.nextCallTime && <span className="text-muted-foreground"> · {skinState.nextCallTime}</span>}
+                  </p>
+                </div>
+                {daysUntilCall !== null && (
+                  <span className={`shrink-0 text-xs font-semibold ${daysUntilCall <= 0 ? "text-primary" : daysUntilCall <= 3 ? "text-amber-600" : "text-muted-foreground"}`}>
+                    {daysUntilCall < 0 ? "Passé" : daysUntilCall === 0 ? "Auj." : `J-${daysUntilCall}`}
+                  </span>
                 )}
-                <Link to="/suivi" className="flex items-center gap-1 text-xs font-medium text-primary hover:underline">
-                  Voir tout <ChevronRight className="h-3 w-3" />
+              </div>
+            )}
+
+            {/* Latest coach note — mobile only */}
+            {latestCoachNote && (
+              <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:hidden">
+                <div className="mb-3 flex items-center gap-2">
+                  <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Ton coach dit…</p>
+                </div>
+                <p className="text-sm leading-relaxed text-foreground line-clamp-4">{latestCoachNote.note}</p>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(latestCoachNote.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}
+                  </p>
+                  <Link to="/suivi" className="flex items-center gap-1 text-xs font-medium text-primary hover:underline">
+                    Voir tout <ChevronRight className="h-3 w-3" />
+                  </Link>
+                </div>
+              </div>
+            )}
+
+          </div>
+
+          {/* ── Sidebar (desktop) ────────────────────────────────────── */}
+          <div className="mt-4 hidden space-y-4 lg:mt-0 lg:block lg:col-span-1">
+
+            {/* Progression globale */}
+            <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
+              <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Progression</p>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="relative flex-1 h-2 overflow-hidden rounded-full bg-muted">
+                  <div className="absolute inset-y-0 left-0 rounded-full bg-primary transition-all duration-700" style={{ width: `${progress}%` }} />
+                </div>
+                <span className="text-sm font-semibold tabular-nums shrink-0">{progress}%</span>
+              </div>
+              <p className="text-xs text-muted-foreground mb-4">Semaine {position.week}/12 · {done}/{lessons.length} leçons</p>
+              {streak > 0 && (
+                <div className="flex items-center gap-2 rounded-xl bg-orange-50 px-3 py-2 dark:bg-orange-950/30">
+                  <Flame className="h-4 w-4 text-orange-500" />
+                  <span className="text-sm font-semibold text-orange-600 dark:text-orange-400">{streak} jours de suite</span>
+                </div>
+              )}
+            </div>
+
+            {/* Prochain RDV — desktop sidebar */}
+            {skinState?.nextCallDate && (
+              <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
+                <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Prochain point coach</p>
+                <p className="text-sm font-semibold capitalize">
+                  {new Date(skinState.nextCallDate).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
+                </p>
+                {skinState.nextCallTime && (
+                  <p className="mt-0.5 text-xs text-muted-foreground">{skinState.nextCallTime}</p>
+                )}
+                {daysUntilCall !== null && (
+                  <p className={`mt-1.5 text-sm font-semibold ${daysUntilCall <= 0 ? "text-primary" : daysUntilCall <= 3 ? "text-amber-600" : "text-muted-foreground"}`}>
+                    {daysUntilCall < 0 ? "Passé" : daysUntilCall === 0 ? "Aujourd'hui" : daysUntilCall === 1 ? "Demain" : `Dans ${daysUntilCall} jours`}
+                  </p>
+                )}
+                <Link to="/suivi" className="mt-3 flex items-center gap-1 text-xs font-medium text-primary hover:underline">
+                  Voir le suivi <ChevronRight className="h-3 w-3" />
                 </Link>
               </div>
-            </div>
-            {replyingTo === latestCoachNote.id && (
-              <div className="mt-3 flex items-end gap-2">
-                <textarea
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  placeholder="Ta réponse…"
-                  rows={2}
-                  className="flex-1 resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground/50 focus:border-primary focus:ring-1 focus:ring-primary/20"
-                />
-                <div className="flex flex-col gap-1">
-                  <button
-                    onClick={() => sendReply(latestCoachNote!.id)}
-                    disabled={sendingReply || !replyText.trim()}
-                    className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
-                  >
-                    {sendingReply ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-                  </button>
-                  <button
-                    onClick={() => setReplyingTo(null)}
-                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-xs text-muted-foreground transition-colors hover:bg-muted"
-                  >✕</button>
+            )}
+
+            {/* Coach note — desktop sidebar */}
+            {latestCoachNote && (
+              <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
+                <div className="mb-3 flex items-center gap-2">
+                  <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Ton coach dit…</p>
                 </div>
+                <p className="text-sm italic leading-relaxed text-foreground/80 line-clamp-5">"{latestCoachNote.note}"</p>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(latestCoachNote.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}
+                  </p>
+                  <div className="flex items-center gap-3">
+                    {replyingTo !== latestCoachNote.id && (
+                      <button
+                        onClick={() => { setReplyingTo(latestCoachNote!.id); setReplyText(""); }}
+                        className="flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+                      >
+                        <MessageSquare className="h-3 w-3" /> Répondre
+                      </button>
+                    )}
+                    <Link to="/suivi" className="flex items-center gap-1 text-xs font-medium text-primary hover:underline">
+                      Voir tout <ChevronRight className="h-3 w-3" />
+                    </Link>
+                  </div>
+                </div>
+                {replyingTo === latestCoachNote.id && (
+                  <div className="mt-3 flex items-end gap-2">
+                    <textarea
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder="Ta réponse…"
+                      rows={2}
+                      className="flex-1 resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground/50 focus:border-primary focus:ring-1 focus:ring-primary/20"
+                    />
+                    <div className="flex flex-col gap-1">
+                      <button
+                        onClick={() => sendReply(latestCoachNote!.id)}
+                        disabled={sendingReply || !replyText.trim()}
+                        className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+                      >
+                        {sendingReply ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                      </button>
+                      <button
+                        onClick={() => setReplyingTo(null)}
+                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-xs text-muted-foreground transition-colors hover:bg-muted"
+                      >✕</button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        )}
 
-        <PwaInstallBanner />
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <PwaInstallBanner />
+        </div>
       </main>
     </AppShell>
   );
