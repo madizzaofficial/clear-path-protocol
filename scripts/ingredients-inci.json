@@ -1,0 +1,1505 @@
+{
+  "benzophenone-3": {
+    "slug": "benzophenone-3",
+    "found": true,
+    "name": "Benzophenone-3",
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": "controversial",
+    "what_it_does": [
+      "sunscreen"
+    ],
+    "description_en": "Achemical sunscreen agentthat absorbs UVB and short UVA rays (280-350nm) with its peak protection at 288 nm. Unlike many other chemical sunscreens, it ishighly stablebutits UV absorbing abilities areweakso it always has to be combined with other sunscreen agents for proper protection. More often than not, it'sused as a photostabilizerrather than a proper sunscreen agent as it can protect formulas nicely from UV damage.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/benzophenone-3",
+    "inci_name": "BENZOPHENONE-3"
+  },
+  "oxybenzone": {
+    "slug": "oxybenzone",
+    "found": true,
+    "name": "Benzophenone-3",
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": "controversial",
+    "what_it_does": [
+      "sunscreen"
+    ],
+    "description_en": "Achemical sunscreen agentthat absorbs UVB and short UVA rays (280-350nm) with its peak protection at 288 nm. Unlike many other chemical sunscreens, it ishighly stablebutits UV absorbing abilities areweakso it always has to be combined with other sunscreen agents for proper protection. More often than not, it'sused as a photostabilizerrather than a proper sunscreen agent as it can protect formulas nicely from UV damage.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/oxybenzone",
+    "inci_name": "OXYBENZONE"
+  },
+  "homosalate": {
+    "slug": "homosalate",
+    "found": true,
+    "name": "Homosalate",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "sunscreen"
+    ],
+    "description_en": "An oil-solublechemical sunscreenagent thatprotects the skin from UVB(295-315 nm) with a peak protection at 306 nm. Homosalate isnot a strong UV filterin and of itself (gives only SPF 4.3 protection at max. allowed 10% concentration) and it isnot photostable(looses 10% of its SPF protection in 45 mins) so it always has to be combined with other sunscreens for proper protection. Its big advantage, though, is that it is a liquid and is excellent for dissolving other hard to solubilize powder sunscreen agents, like the famousAvobenzone.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/homosalate",
+    "inci_name": "HOMOSALATE"
+  },
+  "ethylhexyl-methoxycinnamate": {
+    "slug": "ethylhexyl-methoxycinnamate",
+    "found": true,
+    "name": "Ethylhexyl Methoxycinnamate",
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": "avoid",
+    "what_it_does": [
+      "sunscreen"
+    ],
+    "description_en": "A clear, oil-soluble, \"cosmetically-elegant\" liquid that is the most commonly usedchemical sunscreen.Itabsorbs UVB radiation(at wavelengths: 280-320 nm) with a peak protection at 310nm.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/ethylhexyl-methoxycinnamate",
+    "inci_name": "ETHYLHEXYL METHOXYCINNAMATE"
+  },
+  "octinoxate": {
+    "slug": "octinoxate",
+    "found": true,
+    "name": "Ethylhexyl Methoxycinnamate",
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": "avoid",
+    "what_it_does": [
+      "sunscreen"
+    ],
+    "description_en": "A clear, oil-soluble, \"cosmetically-elegant\" liquid that is the most commonly usedchemical sunscreen.Itabsorbs UVB radiation(at wavelengths: 280-320 nm) with a peak protection at 310nm.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/octinoxate",
+    "inci_name": "OCTINOXATE"
+  },
+  "4-methylbenzylidene-camphor": {
+    "slug": "4-methylbenzylidene-camphor",
+    "found": true,
+    "name": "4-Methylbenzylidene Camphor",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "sunscreen"
+    ],
+    "description_en": "4-Methylbenzylidene Camphor is achemical sunscreen agentthat protects in theUVB range(290-320 nm) with a peak absorbance at 301 nm. It is an oil-soluble powder that is slightly photo-unstable (it takes 65 minutes to lose 10% of its protecting power and 345 minutes to lose half of it), but it can still help to stabilize the famously unstable UVA filter,avobenzone.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/4-methylbenzylidene-camphor",
+    "inci_name": "4-METHYLBENZYLIDENE CAMPHOR"
+  },
+  "benzophenone-4": {
+    "slug": "benzophenone-4",
+    "found": true,
+    "name": "Benzophenone-4",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "sunscreen"
+    ],
+    "description_en": "Awater-soluble, chemical sunscreen agentthat is asecondary UVB absorberwith some activity in the short UVA range as well. Being a secondary UV absorber means that its protection is weak and it has to be combined with other sunscreen filters for proper sun protection.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/benzophenone-4",
+    "inci_name": "BENZOPHENONE-4"
+  },
+  "sulisobenzone": {
+    "slug": "sulisobenzone",
+    "found": false,
+    "url": "https://incidecoder.com/ingredients/sulisobenzone",
+    "http_status": 404,
+    "inci_name": "SULISOBENZONE"
+  },
+  "ethylhexyl-dimethyl-paba": {
+    "slug": "ethylhexyl-dimethyl-paba",
+    "found": true,
+    "name": "Ethylhexyl Dimethyl PABA",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "sunscreen"
+    ],
+    "description_en": "Ethylhexyl Dimethyl PABA is achemical sunscreen agentthat protects in theUVBrange (290-320 nm) with a peak absorbance at 312nm. Other than that, we struggle to write anything positive about this guy, as it is photo unstable (looses 10% efficacy in 20 mins and 50% in 85 mins), not an unfrequent allergen in sunscreens and shows some endocrine effect in animal studies.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/ethylhexyl-dimethyl-paba",
+    "inci_name": "ETHYLHEXYL DIMETHYL PABA"
+  },
+  "drometrizole-trisiloxane": {
+    "slug": "drometrizole-trisiloxane",
+    "found": true,
+    "name": "Drometrizole Trisiloxane",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "sunscreen"
+    ],
+    "description_en": "AL'Oréal-group exclusive sunscreen agentthat was invented in 1999 and is commonly called Mexoryl XL. It is anoil-soluble, photostable chemical sunscreenwith both UVB and UVA protection with peak absorbance at 303 nm (UVB) and at 344 nm (UVA).",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/drometrizole-trisiloxane",
+    "inci_name": "DROMETRIZOLE TRISILOXANE"
+  },
+  "butylparaben": {
+    "slug": "butylparaben",
+    "found": true,
+    "name": "Butylparaben",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "preservative"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/butylparaben",
+    "inci_name": "BUTYLPARABEN"
+  },
+  "isobutylparaben": {
+    "slug": "isobutylparaben",
+    "found": true,
+    "name": "Isobutylparaben",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "preservative",
+      "antimicrobial/antibacterial"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/isobutylparaben",
+    "inci_name": "ISOBUTYLPARABEN"
+  },
+  "propylparaben": {
+    "slug": "propylparaben",
+    "found": true,
+    "name": "Propylparaben",
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": "superstar",
+    "what_it_does": [
+      "preservative",
+      "perfuming"
+    ],
+    "description_en": "A very common type of feared-by-everyone-mostly-without-scientific-reasonparabens. It's a cheap, effective and well-tolerated ingredient tomake sure the cosmetic formula does not go wrong too soon.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/propylparaben",
+    "inci_name": "PROPYLPARABEN"
+  },
+  "isopropylparaben": {
+    "slug": "isopropylparaben",
+    "found": true,
+    "name": "Isopropylparaben",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "preservative"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/isopropylparaben",
+    "inci_name": "ISOPROPYLPARABEN"
+  },
+  "methylparaben": {
+    "slug": "methylparaben",
+    "found": true,
+    "name": "Methylparaben",
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": "superstar",
+    "what_it_does": [
+      "preservative"
+    ],
+    "description_en": "The most common type of feared-by-everyone-mostly-without-scientific-reasonparabens. It's a cheap, effective and well-tolerated ingredient tomake sure the cosmetic formula does not go wrong too soon.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/methylparaben",
+    "inci_name": "METHYLPARABEN"
+  },
+  "ethylparaben": {
+    "slug": "ethylparaben",
+    "found": true,
+    "name": "Ethylparaben",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "preservative"
+    ],
+    "description_en": "A very common type of feared-by-everyone-mostly-without-scientific-reason paraben. It's a cheap, effective and well-tolerated ingredient tomake sure the cosmetic formula does not go wrong too soon.Read more about parabens here >>",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/ethylparaben",
+    "inci_name": "ETHYLPARABEN"
+  },
+  "benzylparaben": {
+    "slug": "benzylparaben",
+    "found": true,
+    "name": "Benzylparaben",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antimicrobial/antibacterial"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/benzylparaben",
+    "inci_name": "BENZYLPARABEN"
+  },
+  "triclosan": {
+    "slug": "triclosan",
+    "found": true,
+    "name": "Triclosan",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "preservative",
+      "deodorant"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/triclosan",
+    "inci_name": "TRICLOSAN"
+  },
+  "triclocarban": {
+    "slug": "triclocarban",
+    "found": true,
+    "name": "Triclocarban",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "preservative",
+      "deodorant"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/triclocarban",
+    "inci_name": "TRICLOCARBAN"
+  },
+  "diethyl-phthalate": {
+    "slug": "diethyl-phthalate",
+    "found": true,
+    "name": "Diethyl Phthalate",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "solvent"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/diethyl-phthalate",
+    "inci_name": "DIETHYL PHTHALATE"
+  },
+  "dibutyl-phthalate": {
+    "slug": "dibutyl-phthalate",
+    "found": true,
+    "name": "Dibutyl Phthalate",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/dibutyl-phthalate",
+    "inci_name": "DIBUTYL PHTHALATE"
+  },
+  "diisobutyl-phthalate": {
+    "slug": "diisobutyl-phthalate",
+    "found": false,
+    "url": "https://incidecoder.com/ingredients/diisobutyl-phthalate",
+    "http_status": 404,
+    "inci_name": "DIISOBUTYL PHTHALATE"
+  },
+  "bha": {
+    "slug": "bha",
+    "found": true,
+    "name": "BHA",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "controversial",
+    "what_it_does": [
+      "antioxidant",
+      "preservative"
+    ],
+    "description_en": "It's the acronym for Butylated Hydroxy Anisole. It's a synthetic antioxidant that's used as apreservative.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/bha",
+    "inci_name": "BHA"
+  },
+  "resorcinol": {
+    "slug": "resorcinol",
+    "found": true,
+    "name": "Resorcinol",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant",
+      "perfuming"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/resorcinol",
+    "inci_name": "RESORCINOL"
+  },
+  "p-phenylenediamine": {
+    "slug": "p-phenylenediamine",
+    "found": true,
+    "name": "P-Phenylenediamine",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/p-phenylenediamine",
+    "inci_name": "P-PHENYLENEDIAMINE"
+  },
+  "kojic-acid": {
+    "slug": "kojic-acid",
+    "found": true,
+    "name": "Kojic Acid",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant",
+      "skin brightening"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/kojic-acid",
+    "inci_name": "KOJIC ACID"
+  },
+  "cyclotetrasiloxane": {
+    "slug": "cyclotetrasiloxane",
+    "found": true,
+    "name": "Cyclotetrasiloxane",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "solvent"
+    ],
+    "description_en": "A four-unit long, cyclic structured,super light siliconethat is the small sister of the more commonly used 5-unit long cyclic structuredCyclopentasiloxane. It is a so-calledvolatilesilicone that evaporates off the skin and hair rather than staying on it.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/cyclotetrasiloxane",
+    "inci_name": "CYCLOTETRASILOXANE"
+  },
+  "cyclopentasiloxane": {
+    "slug": "cyclopentasiloxane",
+    "found": true,
+    "name": "Cyclopentasiloxane",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "solvent"
+    ],
+    "description_en": "A super commonly used 5 unit long, cyclic structuredsiliconethat is water-thin and does not stay on the skin but evaporates from it (called volatile silicone). Similar to other silicones, it gives skin and hair asilky, smooth feel.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/cyclopentasiloxane",
+    "inci_name": "CYCLOPENTASILOXANE"
+  },
+  "musk-ambrette": {
+    "slug": "musk-ambrette",
+    "found": false,
+    "url": "https://incidecoder.com/ingredients/musk-ambrette",
+    "http_status": 404,
+    "inci_name": "MUSK AMBRETTE"
+  },
+  "musk-tibetene": {
+    "slug": "musk-tibetene",
+    "found": false,
+    "url": "https://incidecoder.com/ingredients/musk-tibetene",
+    "http_status": 404,
+    "inci_name": "MUSK TIBETENE"
+  },
+  "musk-moskene": {
+    "slug": "musk-moskene",
+    "found": false,
+    "url": "https://incidecoder.com/ingredients/musk-moskene",
+    "http_status": 404,
+    "inci_name": "MUSK MOSKENE"
+  },
+  "parfum": {
+    "slug": "parfum",
+    "found": true,
+    "name": "Parfum/​Fragrance",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": "Exactly what it sounds:nice smelling stuffput into cosmetic products so that the end product also smells nice.Fragrance in the US andparfumin the EUis ageneric termon the ingredient list that ismade up of 30 to 50 chemicalson average (but it can have as much as 200 components!).",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/parfum",
+    "inci_name": "PARFUM"
+  },
+  "fragrance": {
+    "slug": "fragrance",
+    "found": true,
+    "name": "Parfum/​Fragrance",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": "Exactly what it sounds:nice smelling stuffput into cosmetic products so that the end product also smells nice.Fragrance in the US andparfumin the EUis ageneric termon the ingredient list that ismade up of 30 to 50 chemicalson average (but it can have as much as 200 components!).",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/fragrance",
+    "inci_name": "FRAGRANCE"
+  },
+  "limonene": {
+    "slug": "limonene",
+    "found": true,
+    "name": "Limonene",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "perfuming",
+      "solvent",
+      "deodorant"
+    ],
+    "description_en": "A supercommon and cheap fragrance ingredient. It's in many plants, e.g. rosemary, eucalyptus, lavender, lemongrass, peppermint and it's the main component (about 50-90%) of the peel oil of citrus fruits.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/limonene",
+    "inci_name": "LIMONENE"
+  },
+  "linalool": {
+    "slug": "linalool",
+    "found": true,
+    "name": "Linalool",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "perfuming",
+      "deodorant"
+    ],
+    "description_en": "Linalool is asuper common fragranceingredient. It’s kind of everywhere - both in plants and in cosmetic products. It’s part of 200 natural oils including lavender, ylang-ylang, bergamot, jasmine, geranium and it can be found in 90-95% of prestige perfumes on the market.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/linalool",
+    "inci_name": "LINALOOL"
+  },
+  "eugenol": {
+    "slug": "eugenol",
+    "found": true,
+    "name": "Eugenol",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": "A colorless or yellowish oil that's used as afragrance. It has aspicy scentand can be found for example in basil, clove or cinnamon oil.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/eugenol",
+    "inci_name": "EUGENOL"
+  },
+  "geraniol": {
+    "slug": "geraniol",
+    "found": true,
+    "name": "Geraniol",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": "Geraniol is a commonfragrance ingredient. Itsmells like roseand can be found in rose oil or in small quantities in geranium, lemon and many other essential oils.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/geraniol",
+    "inci_name": "GERANIOL"
+  },
+  "citronellol": {
+    "slug": "citronellol",
+    "found": true,
+    "name": "Citronellol",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": "Citronellol is a very commonfragranceingredient with a nicerose-like odor. In the UK, it’s actually the third most often listed perfume on the ingredient lists.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/citronellol",
+    "inci_name": "CITRONELLOL"
+  },
+  "benzyl-alcohol": {
+    "slug": "benzyl-alcohol",
+    "found": true,
+    "name": "Benzyl Alcohol",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "preservative",
+      "perfuming",
+      "solvent",
+      "viscosity controlling"
+    ],
+    "description_en": "It's one of those things that help your cosmetics not to go wrong too soon, aka apreservative. It can be naturally found in fruits and teas but can also be made synthetically.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/benzyl-alcohol",
+    "inci_name": "BENZYL ALCOHOL"
+  },
+  "cinnamaldehyde": {
+    "slug": "cinnamaldehyde",
+    "found": true,
+    "name": "Cinnamaldehyde",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/cinnamaldehyde",
+    "inci_name": "CINNAMALDEHYDE"
+  },
+  "citral": {
+    "slug": "citral",
+    "found": true,
+    "name": "Citral",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": "It’s a common fragrance ingredient thatsmells like lemonand has a bittersweet taste.  It can be found in many plant oils, e.g. lemon, orange, lime or lemongrass.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/citral",
+    "inci_name": "CITRAL"
+  },
+  "coumarin": {
+    "slug": "coumarin",
+    "found": true,
+    "name": "Coumarin",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": "A common fragrance ingredient that has asweet, vanilla, nutty scent. When diluted it smells like freshly-mown hay.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/coumarin",
+    "inci_name": "COUMARIN"
+  },
+  "farnesol": {
+    "slug": "farnesol",
+    "found": true,
+    "name": "Farnesol",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "perfuming",
+      "deodorant"
+    ],
+    "description_en": "With asweet, light and floralscent, Farnesol is apopular fragrancing ingredientto make your cosmetics that bit nicer to use. It starts its life as a colorless liquid that can either be synthetically created or extracted from loads of plants like citronella, neroli, ylang-ylang, and tuberose.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/farnesol",
+    "inci_name": "FARNESOL"
+  },
+  "hexyl-cinnamal": {
+    "slug": "hexyl-cinnamal",
+    "found": true,
+    "name": "Hexyl Cinnamal",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": "A common fragrance ingredient thatsmells like jasmine. It is one of the “EU 26 fragrances” that has to be labelled separately because ofallergen potential. Best to avoid if your skin is sensitive.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/hexyl-cinnamal",
+    "inci_name": "HEXYL CINNAMAL"
+  },
+  "hydroxycitronellal": {
+    "slug": "hydroxycitronellal",
+    "found": true,
+    "name": "Hydroxycitronellal",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": "A commonfragranceingredient that has a sweet scent somewhere between lily and fruity melon. Can be found in essential oils, such as lavender oil, orange flower oil or ylang-ylang.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/hydroxycitronellal",
+    "inci_name": "HYDROXYCITRONELLAL"
+  },
+  "isoeugenol": {
+    "slug": "isoeugenol",
+    "found": true,
+    "name": "Isoeugenol",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/isoeugenol",
+    "inci_name": "ISOEUGENOL"
+  },
+  "amyl-cinnamal": {
+    "slug": "amyl-cinnamal",
+    "found": true,
+    "name": "Amyl Cinnamal",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/amyl-cinnamal",
+    "inci_name": "AMYL CINNAMAL"
+  },
+  "benzyl-salicylate": {
+    "slug": "benzyl-salicylate",
+    "found": true,
+    "name": "Benzyl Salicylate",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": "It’s a common fragrance ingredient that has alight floral smell.  It’s one of the “EU 26 fragrances” that has to be labelled separately (and cannot be simply included in the term “fragrance/perfume” on the label) because of allergen potential. Best to avoid if your skin is sensitive.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/benzyl-salicylate",
+    "inci_name": "BENZYL SALICYLATE"
+  },
+  "cinnamyl-alcohol": {
+    "slug": "cinnamyl-alcohol",
+    "found": true,
+    "name": "Cinnamyl Alcohol",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/cinnamyl-alcohol",
+    "inci_name": "CINNAMYL ALCOHOL"
+  },
+  "alpha-isomethyl-ionone": {
+    "slug": "alpha-isomethyl-ionone",
+    "found": true,
+    "name": "Alpha-Isomethyl Ionone",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": "It’s acommon fragrance ingredientthat is one of the “EU 26 fragrances” that has to be labelled separately (and cannot be simply included in the term “fragrance/perfume” on the label) because of allergen potential. Best to avoid if your skin is sensitive.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/alpha-isomethyl-ionone",
+    "inci_name": "ALPHA-ISOMETHYL IONONE"
+  },
+  "evernia-prunastri": {
+    "slug": "evernia-prunastri",
+    "found": true,
+    "name": "Evernia Prunastri Extract",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/evernia-prunastri",
+    "inci_name": "EVERNIA PRUNASTRI"
+  },
+  "evernia-furfuracea": {
+    "slug": "evernia-furfuracea",
+    "found": false,
+    "url": "https://incidecoder.com/ingredients/evernia-furfuracea",
+    "http_status": 404,
+    "inci_name": "EVERNIA FURFURACEA"
+  },
+  "butylphenyl-methylpropional": {
+    "slug": "butylphenyl-methylpropional",
+    "found": true,
+    "name": "Butylphenyl Methylpropional",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": "A common fragrance ingredient that has anice floral scentand also goes by the name Lilial. It is a known fragrance allergen and as of 1st of March 2022, it has been banned in the EU due to animal studies showing a possible link to infertility (in rats - so no need to panic even if you used a product before with Butylphenyl Methylpropional).",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/butylphenyl-methylpropional",
+    "inci_name": "BUTYLPHENYL METHYLPROPIONAL"
+  },
+  "amylcinnamyl-alcohol": {
+    "slug": "amylcinnamyl-alcohol",
+    "found": true,
+    "name": "Amylcinnamyl Alcohol",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/amylcinnamyl-alcohol",
+    "inci_name": "AMYLCINNAMYL ALCOHOL"
+  },
+  "benzyl-benzoate": {
+    "slug": "benzyl-benzoate",
+    "found": true,
+    "name": "Benzyl Benzoate",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "solvent",
+      "perfuming",
+      "antimicrobial/antibacterial"
+    ],
+    "description_en": "A commonfragranceingredient that has afaint sweet balsamic smell. It can also be asolventand canfight against microbesand insects very well.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/benzyl-benzoate",
+    "inci_name": "BENZYL BENZOATE"
+  },
+  "benzyl-cinnamate": {
+    "slug": "benzyl-cinnamate",
+    "found": true,
+    "name": "Benzyl Cinnamate",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/benzyl-cinnamate",
+    "inci_name": "BENZYL CINNAMATE"
+  },
+  "methyl-2-octynoate": {
+    "slug": "methyl-2-octynoate",
+    "found": true,
+    "name": "Methyl 2-Octynoate",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "perfuming"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/methyl-2-octynoate",
+    "inci_name": "METHYL 2-OCTYNOATE"
+  },
+  "sodium-lauryl-sulfate": {
+    "slug": "sodium-lauryl-sulfate",
+    "found": true,
+    "name": "Sodium Lauryl Sulfate",
+    "irritancy": null,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": "icky",
+    "what_it_does": [
+      "surfactant/cleansing",
+      "emulsifying"
+    ],
+    "description_en": "The famous or rather infamous SLS (not to be confused withSLES). It is acleansing agentknown for being too good at the job and potentiallyirritatingthe skin. But, on the positive side,  it can producecopious, creamy and luxurious foamcompared to the more gentle and thus nowadays much more commonly usedSodium Laureth Sulfate.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/sodium-lauryl-sulfate",
+    "inci_name": "SODIUM LAURYL SULFATE"
+  },
+  "sodium-laureth-sulfate": {
+    "slug": "sodium-laureth-sulfate",
+    "found": true,
+    "name": "Sodium Laureth Sulfate",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "surfactant/cleansing",
+      "emulsifying"
+    ],
+    "description_en": "It’s probably themost common cleansing ingredient of all. It’s usually theChief Bubble Officerresponsible for big bubbles in cleansing products through the foam it creates is a bit airy and loose and not as dense and luxurious as the foam created byinfamous SLS.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/sodium-laureth-sulfate",
+    "inci_name": "SODIUM LAURETH SULFATE"
+  },
+  "ammonium-lauryl-sulfate": {
+    "slug": "ammonium-lauryl-sulfate",
+    "found": true,
+    "name": "Ammonium Lauryl Sulfate",
+    "irritancy": null,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "surfactant/cleansing"
+    ],
+    "description_en": "A pretty commoncleansing agentthat can be derived from coconut or palm kernel oil. It's liked for itsgreat foaming abilitiesand can help to create a creamy and luxurious lather in bath products. It is chemically closely related toknown-for-its -harshness SLS, but the Ammonium part makes it milder.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/ammonium-lauryl-sulfate",
+    "inci_name": "AMMONIUM LAURYL SULFATE"
+  },
+  "ammonium-laureth-sulfate": {
+    "slug": "ammonium-laureth-sulfate",
+    "found": true,
+    "name": "Ammonium Laureth Sulfate",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "surfactant/cleansing"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/ammonium-laureth-sulfate",
+    "inci_name": "AMMONIUM LAURETH SULFATE"
+  },
+  "alcohol-denat": {
+    "slug": "alcohol-denat",
+    "found": true,
+    "name": "Alcohol Denat.",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "controversial",
+    "what_it_does": [
+      "antimicrobial/antibacterial",
+      "solvent",
+      "viscosity controlling",
+      "astringent"
+    ],
+    "description_en": "If you want to start a debate between skincare experts, mentioning alcohol will probably be a good way to do that (Btw, denat means denaturated and it's normal alcohol with some additives that make it poisonous and bad tasting so that people do not drink it.). It's acontroversial ingredientthat has definitely many immediate skincare benefits and some potential longer-term drawbacks.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/alcohol-denat",
+    "inci_name": "ALCOHOL DENAT"
+  },
+  "isopropyl-alcohol": {
+    "slug": "isopropyl-alcohol",
+    "found": true,
+    "name": "Isopropyl Alcohol",
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": "icky",
+    "what_it_does": [
+      "solvent",
+      "viscosity controlling",
+      "perfuming"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/isopropyl-alcohol",
+    "inci_name": "ISOPROPYL ALCOHOL"
+  },
+  "sodium-chloride": {
+    "slug": "sodium-chloride",
+    "found": true,
+    "name": "Sodium Chloride",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling"
+    ],
+    "description_en": "If (similar to us) you are in the weird habit of reading the label on your shower gel while taking a shower, you might have noticed that sodium chloride is almost always on the ingredient list. The reason for this is that salt acts as a fantasticthickener in cleansing formulas created with ionic cleansing agents(aka surfactants) such asSodiumLaurethSulfate. A couple of percents (typically 1-3%) turns a runny surfactant solution into a nice gel texture.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/sodium-chloride",
+    "inci_name": "SODIUM CHLORIDE"
+  },
+  "isopropyl-myristate": {
+    "slug": "isopropyl-myristate",
+    "found": true,
+    "name": "Isopropyl Myristate",
+    "irritancy": 3,
+    "comedogenicity_raw": "3-5",
+    "comedogenicity": 5,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "perfuming"
+    ],
+    "description_en": "A  clear, colorless oil-like liquid thatmakes the skin feel smooth and nice(aka emollient) and it does so without it being greasy.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/isopropyl-myristate",
+    "inci_name": "ISOPROPYL MYRISTATE"
+  },
+  "isopropyl-palmitate": {
+    "slug": "isopropyl-palmitate",
+    "found": true,
+    "name": "Isopropyl Palmitate",
+    "irritancy": 1,
+    "comedogenicity_raw": "3-4",
+    "comedogenicity": 4,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "description_en": "A clear, colorlessemollient ester(oily liquid from isopropyl alcohol + palmitic acid) that makes the skin nice and smooth. It has very good spreading properties and gives a silky touch to the products.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/isopropyl-palmitate",
+    "inci_name": "ISOPROPYL PALMITATE"
+  },
+  "myristyl-myristate": {
+    "slug": "myristyl-myristate",
+    "found": true,
+    "name": "Myristyl Myristate",
+    "irritancy": 2,
+    "comedogenicity_raw": "0-5",
+    "comedogenicity": 5,
+    "verdict": "avoid",
+    "what_it_does": [
+      "emollient"
+    ],
+    "description_en": "It's awaxy emollientwith a melting point near to skin temperature. It gives body and consistency to the formula and leaves a velvety feel on the skin.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/myristyl-myristate",
+    "inci_name": "MYRISTYL MYRISTATE"
+  },
+  "ethylhexyl-palmitate": {
+    "slug": "ethylhexyl-palmitate",
+    "found": true,
+    "name": "Ethylhexyl Palmitate",
+    "irritancy": 0,
+    "comedogenicity_raw": "2-4",
+    "comedogenicity": 4,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "description_en": "A super common, medium-spreadingemollientester thatgives richness to the formulaand a mild feel during rubout. It can be a replacement for mineral oil and is often combined with other emollients to achieve different sensorial properties.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/ethylhexyl-palmitate",
+    "inci_name": "ETHYLHEXYL PALMITATE"
+  },
+  "octyl-stearate": {
+    "slug": "octyl-stearate",
+    "found": true,
+    "name": "Ethylhexyl Stearate",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "description_en": "A clear, almost colorless (or slightly yellowish) oily liquid (an ester to be precise) that's used as amedium spreading emollient. It gives skin a nice and smooth after-feel and it's very good at reducing oiliness or greasiness coming from other heavier oils in the formula.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/octyl-stearate",
+    "inci_name": "OCTYL STEARATE"
+  },
+  "octyl-palmitate": {
+    "slug": "octyl-palmitate",
+    "found": true,
+    "name": "Ethylhexyl Palmitate",
+    "irritancy": 0,
+    "comedogenicity_raw": "2-4",
+    "comedogenicity": 4,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "description_en": "A super common, medium-spreadingemollientester thatgives richness to the formulaand a mild feel during rubout. It can be a replacement for mineral oil and is often combined with other emollients to achieve different sensorial properties.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/octyl-palmitate",
+    "inci_name": "OCTYL PALMITATE"
+  },
+  "cocos-nucifera-oil": {
+    "slug": "cocos-nucifera-oil",
+    "found": true,
+    "name": "Cocos Nucifera Oil",
+    "irritancy": 0,
+    "comedogenicity_raw": "4",
+    "comedogenicity": 4,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "perfuming"
+    ],
+    "description_en": "There is definitely some craze going on for coconut oil both in the healthy eating space (often claimed to be the healthiest oil to cook with but this is a topic for another site) and in the skin and hair care space.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/cocos-nucifera-oil",
+    "inci_name": "COCOS NUCIFERA OIL"
+  },
+  "theobroma-cacao-seed-butter": {
+    "slug": "theobroma-cacao-seed-butter",
+    "found": true,
+    "name": "Theobroma Cacao Seed Butter",
+    "irritancy": 0,
+    "comedogenicity_raw": "4",
+    "comedogenicity": 4,
+    "verdict": "superstar",
+    "what_it_does": [
+      "emollient"
+    ],
+    "description_en": "Theobroma means \"food of the gods\" in Greek though probably \"treat of the people\" would be more spot on. The cacao fruits and especially the seeds in it need no introduction as everyone knows them as the magical raw material of the magical sweet treat, chocolate (the flavour is composed of more than 1200(!) substances, and the exact chemical nature of it is not really understood, so it's indeed magic. :)).",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/theobroma-cacao-seed-butter",
+    "inci_name": "THEOBROMA CACAO SEED BUTTER"
+  },
+  "lanolin-alcohol": {
+    "slug": "lanolin-alcohol",
+    "found": true,
+    "name": "Lanolin Alcohol",
+    "irritancy": 0,
+    "comedogenicity_raw": "0-2",
+    "comedogenicity": 2,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "emulsifying",
+      "viscosity controlling"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/lanolin-alcohol",
+    "inci_name": "LANOLIN ALCOHOL"
+  },
+  "acetylated-lanolin": {
+    "slug": "acetylated-lanolin",
+    "found": true,
+    "name": "Acetylated Lanolin",
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "emulsifying"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/acetylated-lanolin",
+    "inci_name": "ACETYLATED LANOLIN"
+  },
+  "acetylated-lanolin-alcohol": {
+    "slug": "acetylated-lanolin-alcohol",
+    "found": true,
+    "name": "Acetylated Lanolin Alcohol",
+    "irritancy": 2,
+    "comedogenicity_raw": "4-5",
+    "comedogenicity": 5,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "emulsifying"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/acetylated-lanolin-alcohol",
+    "inci_name": "ACETYLATED LANOLIN ALCOHOL"
+  },
+  "decyl-oleate": {
+    "slug": "decyl-oleate",
+    "found": true,
+    "name": "Decyl Oleate",
+    "irritancy": 0,
+    "comedogenicity_raw": "3",
+    "comedogenicity": 3,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/decyl-oleate",
+    "inci_name": "DECYL OLEATE"
+  },
+  "isopropyl-isostearate": {
+    "slug": "isopropyl-isostearate",
+    "found": true,
+    "name": "Isopropyl Isostearate",
+    "irritancy": 0,
+    "comedogenicity_raw": "4-5",
+    "comedogenicity": 5,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "description_en": "An oily liquid (ester) that makes your skin nice and smooth, akaemollient. It is described as highly emollient or substantive, but with a light and easy spreading and nonoily skin feel.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/isopropyl-isostearate",
+    "inci_name": "ISOPROPYL ISOSTEARATE"
+  },
+  "linum-usitatissimum-seed-oil": {
+    "slug": "linum-usitatissimum-seed-oil",
+    "found": true,
+    "name": "Linum Usitatissimum Seed Oil",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "perfuming"
+    ],
+    "description_en": "Theoil coming fromthe plantLinum Usitatissimumor commonly calledFlax. If you are into healthy eating, you probably know flaxseeds as a rich source of hard-to-eat-enoughomega-3 fatty acids, or if you are into fashion, you probably have some light summer cloth made fromlinen.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/linum-usitatissimum-seed-oil",
+    "inci_name": "LINUM USITATISSIMUM SEED OIL"
+  },
+  "wheat-germ-oil": {
+    "slug": "wheat-germ-oil",
+    "found": true,
+    "name": "Triticum Vulgare Germ Oil",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "moisturizer/humectant"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/wheat-germ-oil",
+    "inci_name": "WHEAT GERM OIL"
+  },
+  "triticum-vulgare-germ-oil": {
+    "slug": "triticum-vulgare-germ-oil",
+    "found": true,
+    "name": "Triticum Vulgare Germ Oil",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "moisturizer/humectant"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/triticum-vulgare-germ-oil",
+    "inci_name": "TRITICUM VULGARE GERM OIL"
+  },
+  "laureth-4": {
+    "slug": "laureth-4",
+    "found": true,
+    "name": "Laureth-4",
+    "irritancy": 4,
+    "comedogenicity_raw": "5",
+    "comedogenicity": 5,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying",
+      "surfactant/cleansing"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/laureth-4",
+    "inci_name": "LAURETH-4"
+  },
+  "myristic-acid": {
+    "slug": "myristic-acid",
+    "found": true,
+    "name": "Myristic Acid",
+    "irritancy": 0,
+    "comedogenicity_raw": "3",
+    "comedogenicity": 3,
+    "verdict": null,
+    "what_it_does": [
+      "surfactant/cleansing",
+      "emulsifying",
+      "perfuming"
+    ],
+    "description_en": "A 14 carbon length fatty acid that can be naturally found in nutmeg, palm kernel oil, coconut oil and butter fat. It's used as afoam building cleansing agent.Paula Begoun writesthat it can be a bit drying to the skin.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/myristic-acid",
+    "inci_name": "MYRISTIC ACID"
+  },
+  "lauric-acid": {
+    "slug": "lauric-acid",
+    "found": true,
+    "name": "Lauric Acid",
+    "irritancy": 1,
+    "comedogenicity_raw": "4",
+    "comedogenicity": 4,
+    "verdict": null,
+    "what_it_does": [
+      "anti-acne",
+      "surfactant/cleansing",
+      "emulsifying"
+    ],
+    "description_en": "A 12 carbon lengthfatty acidthat can be found naturally in coconut milk, coconut oil, laurel oil, and palm kernel oil. It's also in breast milk. As a skincare ingredient, it can be used as anemulsifier or as a cleansing agent.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/lauric-acid",
+    "inci_name": "LAURIC ACID"
+  },
+  "butyl-stearate": {
+    "slug": "butyl-stearate",
+    "found": true,
+    "name": "Butyl Stearate",
+    "irritancy": 0,
+    "comedogenicity_raw": "3",
+    "comedogenicity": 3,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/butyl-stearate",
+    "inci_name": "BUTYL STEARATE"
+  },
+  "cetyl-acetate": {
+    "slug": "cetyl-acetate",
+    "found": true,
+    "name": "Cetyl Acetate",
+    "irritancy": 2,
+    "comedogenicity_raw": "4",
+    "comedogenicity": 4,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/cetyl-acetate",
+    "inci_name": "CETYL ACETATE"
+  },
+  "isostearyl-neopentanoate": {
+    "slug": "isostearyl-neopentanoate",
+    "found": true,
+    "name": "Isostearyl Neopentanoate",
+    "irritancy": 3,
+    "comedogenicity_raw": "3",
+    "comedogenicity": 3,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "description_en": "A mild, emollient liquid that can improve product spreadability and gives a silky and non-oily feel to the cosmetic products.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/isostearyl-neopentanoate",
+    "inci_name": "ISOSTEARYL NEOPENTANOATE"
+  },
+  "paraffinum-liquidum": {
+    "slug": "paraffinum-liquidum",
+    "found": true,
+    "name": "Paraffinum Liquidum",
+    "irritancy": 0,
+    "comedogenicity_raw": "0-2",
+    "comedogenicity": 2,
+    "verdict": "superstar",
+    "what_it_does": [
+      "emollient",
+      "solvent"
+    ],
+    "description_en": "The famous or maybe rather infamous mineral oil. The clear oily liquid that is the \"cheap by-product\" of refining crude oil and the one that gets a lot of heat for its poor provenance. It is a very controversial ingredient with pros and cons and plenty of myths around it. So let us see them:",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/paraffinum-liquidum",
+    "inci_name": "PARAFFINUM LIQUIDUM"
+  },
+  "petrolatum": {
+    "slug": "petrolatum",
+    "found": true,
+    "name": "Petrolatum",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "avoid",
+    "what_it_does": [
+      "emollient"
+    ],
+    "description_en": "The famous Vaseline or Petroleum Jelly. Just likemineral oil, it is also a by-product of refining crude oil, aka petroleum, and it is also a mixture of hydrocarbons but with bigger (C18-90+) carbon chain length.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/petrolatum",
+    "inci_name": "PETROLATUM"
+  },
+  "mineral-oil": {
+    "slug": "mineral-oil",
+    "found": true,
+    "name": "Paraffinum Liquidum",
+    "irritancy": 0,
+    "comedogenicity_raw": "0-2",
+    "comedogenicity": 2,
+    "verdict": "superstar",
+    "what_it_does": [
+      "emollient",
+      "solvent"
+    ],
+    "description_en": "The famous or maybe rather infamous mineral oil. The clear oily liquid that is the \"cheap by-product\" of refining crude oil and the one that gets a lot of heat for its poor provenance. It is a very controversial ingredient with pros and cons and plenty of myths around it. So let us see them:",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/mineral-oil",
+    "inci_name": "MINERAL OIL"
+  },
+  "cera-microcristallina": {
+    "slug": "cera-microcristallina",
+    "found": true,
+    "name": "Microcrystalline Wax",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling",
+      "emulsion stabilising"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/cera-microcristallina",
+    "inci_name": "CERA MICROCRISTALLINA"
+  },
+  "microcrystalline-wax": {
+    "slug": "microcrystalline-wax",
+    "found": true,
+    "name": "Microcrystalline Wax",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling",
+      "emulsion stabilising"
+    ],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/microcrystalline-wax",
+    "inci_name": "MICROCRYSTALLINE WAX"
+  },
+  "isohexadecane": {
+    "slug": "isohexadecane",
+    "found": true,
+    "name": "Isohexadecane",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "solvent"
+    ],
+    "description_en": "A light, velvety, unique skin feel liquid that is agood solventand also makes the skin feel nice and smooth (akaemollient). It's often used in makeup products mixed with silicones togive shine and slipto the product. It's alsogreat for cleansingdirt and oil from the skin as well as for taking off make-up.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/isohexadecane",
+    "inci_name": "ISOHEXADECANE"
+  },
+  "isododecane": {
+    "slug": "isododecane",
+    "found": true,
+    "name": "Isododecane",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "solvent"
+    ],
+    "description_en": "A  clear, colorless and odorless, highly volatile (meaning it does not absorb into the skin but evaporates from it) liquid that's used as anemollient.It gives a nicenon-oily light skin feeland it can improve the slip of the formula without leaving a tacky residue behind.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/isododecane",
+    "inci_name": "ISODODECANE"
+  },
+  "polydecene": {
+    "slug": "polydecene",
+    "found": true,
+    "name": "Polydecene",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [],
+    "description_en": null,
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/polydecene",
+    "inci_name": "POLYDECENE"
+  },
+  "polyisobutene": {
+    "slug": "polyisobutene",
+    "found": true,
+    "name": "Polyisobutene",
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling"
+    ],
+    "description_en": "A polymer (big molecule from repeated subunits) that's used as a gloss improver for lipsticks and lipglosses. Its stickiness also helps lip products to stay on longer.",
+    "aliases": [],
+    "url": "https://incidecoder.com/ingredients/polyisobutene",
+    "inci_name": "POLYISOBUTENE"
+  }
+}

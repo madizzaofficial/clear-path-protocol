@@ -1,0 +1,595 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]:
+      - link "INCI API INCI API" [ref=e7] [cursor=pointer]:
+        - /url: /fr
+        - img "INCI API" [ref=e8]
+        - generic [ref=e9]: INCI API
+      - navigation [ref=e10]:
+        - link "Vérificateur de sécurité" [ref=e11] [cursor=pointer]:
+          - /url: /fr/checker
+        - link "Tarifs" [ref=e12] [cursor=pointer]:
+          - /url: /fr/pricing
+        - link "Docs" [ref=e13] [cursor=pointer]:
+          - /url: /fr/docs
+        - link "À propos" [ref=e14] [cursor=pointer]:
+          - /url: /fr/about
+        - link "Blog" [ref=e15] [cursor=pointer]:
+          - /url: /fr/blog
+      - generic [ref=e16]:
+        - button "Changer de langue" [ref=e18] [cursor=pointer]:
+          - img [ref=e19]
+          - generic [ref=e22]: 🇫🇷
+          - generic [ref=e23]: Français
+          - generic [ref=e24]: "Langue actuelle : Français"
+        - link "Se connecter" [ref=e25] [cursor=pointer]:
+          - /url: /login
+        - link "Commencer" [ref=e26] [cursor=pointer]:
+          - /url: /register
+  - main [ref=e27]:
+    - article [ref=e28]:
+      - region "En-tête de la documentation INCI API" [ref=e29]:
+        - generic [ref=e31]:
+          - generic [ref=e32]:
+            - img [ref=e33]
+            - text: Référence API
+          - heading "Documentation de l'API d'ingrédients cosmétiques" [level=1] [ref=e35]
+          - paragraph [ref=e36]: Référence API complète pour les endpoints d'analyse INCI, scoring de sécurité, détection d'allergènes et compatibilité cutanée.
+      - generic [ref=e38]:
+        - navigation [ref=e39]:
+          - paragraph [ref=e40]: Documentation
+          - list [ref=e41]:
+            - listitem [ref=e42]:
+              - button "Authentification" [ref=e43] [cursor=pointer]:
+                - img [ref=e44]
+                - text: Authentification
+            - listitem [ref=e48]:
+              - button "Avertissement sur les données" [ref=e49] [cursor=pointer]:
+                - img [ref=e50]
+                - text: Avertissement sur les données
+            - listitem [ref=e52]:
+              - button "Evidence-based intelligence" [ref=e53] [cursor=pointer]:
+                - img [ref=e54]
+                - text: Evidence-based intelligence
+              - list [ref=e56]:
+                - listitem [ref=e57]:
+                  - button "Overview" [ref=e58] [cursor=pointer]
+                - listitem [ref=e59]:
+                  - button "GET /ingredients/:inciName/efficacy" [ref=e60] [cursor=pointer]
+                - listitem [ref=e61]:
+                  - button "GET /ingredients/:inciName/skin-type-profiles" [ref=e62] [cursor=pointer]
+                - listitem [ref=e63]:
+                  - button "GET /ingredients/:inciName/incompatibilities" [ref=e64] [cursor=pointer]
+                - listitem [ref=e65]:
+                  - button "Augmented analysis response" [ref=e66] [cursor=pointer]
+            - listitem [ref=e67]:
+              - button "Endpoints" [ref=e68] [cursor=pointer]:
+                - img [ref=e69]
+                - text: Endpoints
+              - list [ref=e72]:
+                - listitem [ref=e73]:
+                  - button "GET /products/:barcode" [ref=e74] [cursor=pointer]
+                - listitem [ref=e75]:
+                  - button "GET /products/:barcode/safety" [ref=e76] [cursor=pointer]
+                - listitem [ref=e77]:
+                  - button "GET /products/:barcode/allergens" [ref=e78] [cursor=pointer]
+                - listitem [ref=e79]:
+                  - button "GET /products/:barcode/compatibility" [ref=e80] [cursor=pointer]
+                - listitem [ref=e81]:
+                  - button "GET /products/:barcode/pregnancy" [ref=e82] [cursor=pointer]
+                - listitem [ref=e83]:
+                  - button "POST /analyze" [ref=e84] [cursor=pointer]
+                - listitem [ref=e85]:
+                  - button "GET /ingredients/:inciName" [ref=e86] [cursor=pointer]
+                - listitem [ref=e87]:
+                  - button "GET /ingredients/search" [ref=e88] [cursor=pointer]
+                - listitem [ref=e89]:
+                  - button "POST /products/submit" [ref=e90] [cursor=pointer]
+            - listitem [ref=e91]:
+              - button "Limitation de débit" [ref=e92] [cursor=pointer]:
+                - img [ref=e93]
+                - text: Limitation de débit
+            - listitem [ref=e95]:
+              - button "Codes d'erreur" [ref=e96] [cursor=pointer]:
+                - img [ref=e97]
+                - text: Codes d'erreur
+        - generic [ref=e99]:
+          - generic [ref=e100]:
+            - heading "Authentification de l'API cosmétique" [level=2] [ref=e101]:
+              - img [ref=e102]
+              - text: Authentification de l'API cosmétique
+            - paragraph [ref=e106]:
+              - text: Toutes les requêtes à INCI API nécessitent une clé API envoyée via l'en-tête X-API-Key. Obtenez votre clé API gratuite depuis le
+              - link "Tableau de bord" [ref=e107] [cursor=pointer]:
+                - /url: /dashboard/api-keys
+              - text: .
+            - generic [ref=e108]:
+              - generic [ref=e109]:
+                - generic [ref=e110]: bash
+                - button "Copy code" [ref=e111] [cursor=pointer]:
+                  - img [ref=e112]
+              - code [ref=e116]: "curl -X GET \"https://inciapi.com/v1/products/0085275710434\" \\ -H \"X-API-Key: sk_live_your_api_key\""
+          - generic [ref=e117]:
+            - heading "Avertissement sur les données" [level=2] [ref=e118]:
+              - img [ref=e119]
+              - text: Avertissement sur les données
+            - generic [ref=e121]:
+              - generic [ref=e122]:
+                - img [ref=e123]
+                - heading "Important Disclaimer" [level=3] [ref=e125]
+              - generic [ref=e126]:
+                - paragraph [ref=e127]: The ingredient safety data, scores, and ratings provided by INCI API are for informational and educational purposes only. This information is compiled from public databases and scientific literature, and may contain errors, omissions, or outdated information. INCI API does not guarantee the accuracy, completeness, or reliability of any data presented.
+                - paragraph [ref=e128]: This service does not provide medical, dermatological, or health advice. Safety scores and ratings are algorithmic assessments based on available data and should not be used as a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional or dermatologist before making decisions about cosmetic products, especially regarding pregnancy safety, allergies, or skin conditions.
+                - paragraph [ref=e129]: INCI API assumes no liability for any decisions made based on the information provided.
+            - paragraph [ref=e130]:
+              - text: Toutes les réponses de l'API contiennent des données d'ingrédients compilées à partir de sources publiques telles que EU CosIng, les rapports CIR et la littérature scientifique publiée. L'exactitude n'est pas garantie. Les scores de sécurité sont des estimations algorithmiques basées sur les données disponibles, pas des évaluations cliniques. Les utilisateurs doivent vérifier de manière indépendante toutes les informations sur les ingrédients. Voir nos Conditions d'utilisation et l'
+              - link "Accord de licence API" [ref=e131] [cursor=pointer]:
+                - /url: /api-license
+              - text: pour les conditions complètes.
+          - generic [ref=e132]:
+            - heading "Evidence-based intelligence Pro+" [level=2] [ref=e133]:
+              - img [ref=e134]
+              - text: Evidence-based intelligence
+              - generic [ref=e136]: Pro+
+            - generic [ref=e137]:
+              - paragraph [ref=e138]:
+                - text: RCT-backed ingredient effects, per skin-type fit, ingredient pair incompatibilities, and a roll-up that augments
+                - code [ref=e139]: POST /v1/analyze
+                - text: and
+                - code [ref=e140]: GET /v1/products/:barcode
+                - text: for Pro+ accounts.
+              - paragraph [ref=e141]: These fields are silently omitted on Free/Starter responses, so existing integrations keep working unchanged. To unlock them, upgrade to the Pro or Business tier.
+            - generic [ref=e142]:
+              - generic [ref=e143]:
+                - generic [ref=e144]:
+                  - generic [ref=e145]:
+                    - generic [ref=e146]: GET
+                    - code [ref=e147]: /v1/ingredients/:inciName/efficacy
+                  - paragraph [ref=e148]: "Return the evidence-backed biological effects for an ingredient: target, mechanism, biomarker, magnitude, effect strength, evidence level, clinical concentration, and a list of references. Pro+ tier."
+                  - generic [ref=e149]:
+                    - generic [ref=e150]:
+                      - paragraph [ref=e151]: Requête
+                      - generic [ref=e152]:
+                        - generic [ref=e153]:
+                          - generic [ref=e154]: bash
+                          - button "Copy code" [ref=e155] [cursor=pointer]:
+                            - img [ref=e156]
+                        - code [ref=e160]: "curl -X GET \"https://inciapi.com/v1/ingredients/Niacinamide/efficacy\" \\ -H \"X-API-Key: sk_live_your_api_key\""
+                    - generic [ref=e161]:
+                      - paragraph [ref=e162]: Réponse
+                      - generic [ref=e163]:
+                        - generic [ref=e164]:
+                          - generic [ref=e165]: json
+                          - button "Copy code" [ref=e166] [cursor=pointer]:
+                            - img [ref=e167]
+                        - code [ref=e171]: "[ { \"target\": \"barrier_repair\", \"mechanism\": \"Boosts ceramide biosynthesis; increases stratum corneum lipid content.\", \"direction\": \"upregulates\", \"biomarker\": \"Ceramides (NS, NP, AP)\", \"magnitude\": \"+25% ceramides in 4 weeks\", \"effectStrength\": \"strong\", \"evidenceLevel\": \"rct\", \"clinicalConcentration\": \"2-5%\", \"notes\": \"Synergistic with cholesterol and fatty-acid analogs.\", \"references\": [\"PubMed:15724843\", \"DOI:10.1111/j.1473-2165.2004.00081.x\"], \"targetSkinTypes\": [\"dry\", \"sensitive\", \"normal\"] }, { \"target\": \"anti_hyperpigmentation\", \"mechanism\": \"Inhibits melanosome transfer from melanocytes to keratinocytes.\", \"direction\": \"inhibits\", \"biomarker\": \"Melanosome transfer rate\", \"magnitude\": \"-35-68% transfer\", \"effectStrength\": \"moderate\", \"evidenceLevel\": \"rct\", \"clinicalConcentration\": \"5%\", \"notes\": null, \"references\": [\"PubMed:12100180\"], \"targetSkinTypes\": [\"normal\", \"combination\", \"oily\"] } ]"
+                - separator [ref=e172]
+              - generic [ref=e173]:
+                - generic [ref=e174]:
+                  - generic [ref=e175]:
+                    - generic [ref=e176]: GET
+                    - code [ref=e177]: /v1/ingredients/:inciName/skin-type-profiles
+                  - paragraph [ref=e178]: Per skin-type fit grade with reasoning and references. Useful for routine builders and decision support. Pro+ tier.
+                  - generic [ref=e179]:
+                    - generic [ref=e180]:
+                      - paragraph [ref=e181]: Requête
+                      - generic [ref=e182]:
+                        - generic [ref=e183]:
+                          - generic [ref=e184]: bash
+                          - button "Copy code" [ref=e185] [cursor=pointer]:
+                            - img [ref=e186]
+                        - code [ref=e190]: "curl -X GET \"https://inciapi.com/v1/ingredients/Retinol/skin-type-profiles\" \\ -H \"X-API-Key: sk_live_your_api_key\""
+                    - generic [ref=e191]:
+                      - paragraph [ref=e192]: Réponse
+                      - generic [ref=e193]:
+                        - generic [ref=e194]:
+                          - generic [ref=e195]: json
+                          - button "Copy code" [ref=e196] [cursor=pointer]:
+                            - img [ref=e197]
+                        - code [ref=e201]: "[ { \"skinType\": \"normal\", \"fit\": \"good\", \"reason\": \"Well-tolerated; titrate from 0.025% to 0.1% over 4-6 weeks.\", \"references\": [\"PubMed:18086276\"] }, { \"skinType\": \"dry\", \"fit\": \"caution\", \"reason\": \"May worsen xerosis; pair with ceramide-based moisturizer and lower concentration.\", \"references\": [\"PubMed:18086276\"] }, { \"skinType\": \"sensitive\", \"fit\": \"avoid\", \"reason\": \"High irritancy potential; consider retinaldehyde or bakuchiol alternatives.\", \"references\": [] } ]"
+                - separator [ref=e202]
+              - generic [ref=e203]:
+                - generic [ref=e204]:
+                  - generic [ref=e205]:
+                    - generic [ref=e206]: GET
+                    - code [ref=e207]: /v1/ingredients/:inciName/incompatibilities
+                  - paragraph [ref=e208]: Known ingredient pair incompatibilities with severity, reason, and mitigation hints. Returns an empty array when the ingredient has no recorded conflicts. Pro+ tier.
+                  - generic [ref=e209]:
+                    - generic [ref=e210]:
+                      - paragraph [ref=e211]: Requête
+                      - generic [ref=e212]:
+                        - generic [ref=e213]:
+                          - generic [ref=e214]: bash
+                          - button "Copy code" [ref=e215] [cursor=pointer]:
+                            - img [ref=e216]
+                        - code [ref=e220]: "curl -X GET \"https://inciapi.com/v1/ingredients/Retinol/incompatibilities\" \\ -H \"X-API-Key: sk_live_your_api_key\""
+                    - generic [ref=e221]:
+                      - paragraph [ref=e222]: Réponse
+                      - generic [ref=e223]:
+                        - generic [ref=e224]:
+                          - generic [ref=e225]: json
+                          - button "Copy code" [ref=e226] [cursor=pointer]:
+                            - img [ref=e227]
+                        - code [ref=e231]: "[ { \"withInci\": \"ASCORBIC ACID\", \"severity\": \"moderate\", \"reason\": \"Different optimal pH; combined use may reduce stability and increase irritation.\", \"mitigation\": \"Alternate AM (Ascorbic Acid) / PM (Retinol).\", \"references\": [\"PubMed:9756145\"] }, { \"withInci\": \"GLYCOLIC ACID\", \"severity\": \"high\", \"reason\": \"Compounded barrier disruption; high risk of erythema and peeling.\", \"mitigation\": \"Separate by at least 12 hours or use on alternate nights.\", \"references\": [] } ]"
+                - separator [ref=e232]
+            - generic [ref=e233]:
+              - heading "Augmented analysis response (Pro+)" [level=3] [ref=e234]
+              - paragraph [ref=e235]:
+                - text: On Pro+ accounts,
+                - code [ref=e236]: POST /v1/analyze
+                - text: and
+                - code [ref=e237]: GET /v1/products/:barcode
+                - text: return three additional top-level fields. Free and Starter tiers omit them entirely — your clients should treat them as optional.
+              - generic [ref=e238]:
+                - generic [ref=e239]:
+                  - generic [ref=e240]: json
+                  - button "Copy code" [ref=e241] [cursor=pointer]:
+                    - img [ref=e242]
+                - code [ref=e246]: "{ \"analysis\": { \"overallSafetyScore\": 6.9, \"cleanBeautyScore\": 100, \"pregnancySafe\": false, \"...\": \"...\", \"efficacySummary\": { \"topEffects\": [ { \"target\": \"barrier_repair\", \"contributingIngredientCount\": 3, \"contributingIngredients\": [\"NIACINAMIDE\", \"GLYCERIN\", \"CHOLESTEROL\"], \"compositeStrength\": \"strong\", \"bestEvidenceLevel\": \"rct\" }, { \"target\": \"anti_hyperpigmentation\", \"contributingIngredientCount\": 1, \"contributingIngredients\": [\"NIACINAMIDE\"], \"compositeStrength\": \"moderate\", \"bestEvidenceLevel\": \"rct\" } ], \"evidencedIngredientCount\": 4, \"evidenceScore\": 72 }, \"compatibilityConflicts\": [ { \"ingredientA\": \"RETINOL\", \"ingredientB\": \"ASCORBIC ACID\", \"severity\": \"moderate\", \"reason\": \"Different optimal pH; combined use may reduce stability and increase irritation.\", \"mitigation\": \"Alternate AM (Ascorbic Acid) / PM (Retinol).\", \"references\": [\"PubMed:9756145\"] } ], \"skinTypeRecommendations\": [ { \"skinType\": \"sensitive\", \"netFit\": \"caution\", \"distribution\": { \"excellent\": 1, \"good\": 2, \"neutral\": 3, \"caution\": 1, \"avoid\": 0 }, \"flaggedIngredients\": [\"LINALOOL\"] } ] } }"
+          - generic [ref=e247]:
+            - heading "Endpoints de l'API d'analyse INCI" [level=2] [ref=e248]:
+              - img [ref=e249]
+              - text: Endpoints de l'API d'analyse INCI
+            - generic [ref=e252]:
+              - generic [ref=e253]:
+                - generic [ref=e254]:
+                  - generic [ref=e255]:
+                    - generic [ref=e256]: GET
+                    - code [ref=e257]: /v1/products/:barcode
+                  - paragraph [ref=e258]: Recherchez un produit de beauté par code-barres. Renvoie les infos produit, la marque, la liste INCI et les images.
+                  - generic [ref=e259]:
+                    - generic [ref=e260]:
+                      - paragraph [ref=e261]: Requête
+                      - generic [ref=e262]:
+                        - generic [ref=e263]:
+                          - generic [ref=e264]: bash
+                          - button "Copy code" [ref=e265] [cursor=pointer]:
+                            - img [ref=e266]
+                        - code [ref=e270]: "curl -X GET \"https://inciapi.com/v1/products/0085275710434\" \\ -H \"X-API-Key: sk_live_your_api_key\""
+                    - generic [ref=e271]:
+                      - paragraph [ref=e272]: Réponse
+                      - generic [ref=e273]:
+                        - generic [ref=e274]:
+                          - generic [ref=e275]: json
+                          - button "Copy code" [ref=e276] [cursor=pointer]:
+                            - img [ref=e277]
+                        - code [ref=e281]: "{ \"product\": { \"barcode\": \"0085275710434\", \"name\": \"CeraVe Foaming Facial Cleanser\", \"brand\": \"CeraVe\", \"category\": [\"cuidados-com-a-pele\", \"produtos-para-banho\"], \"country\": \"brazil\", \"qualityScore\": 79, \"vertical\": \"skincare\", \"imageUrls\": [], \"manufacturer\": \"EUA\", \"weight\": \"180ml\", \"volume\": null, \"packaging\": \"plastico\", \"ingredients\": \"Aqua/Water, Cocamidopropyl Hydroxysultaine, Glycerin, Sodium Lauroyl Sarcosinate, PEG-150 Pentaerythrityl Tetrastearate, Niacinamide, Sodium Methyl Cocoyl Taurate, Ceramide NP, Ceramide AP, Ceramide EOP, Sodium Chloride, Carbomer, Sodium Hydroxide, Sodium Laureth Sulfate, Phytosphingosine, Cholesterol, Xanthan Gum, Tocopherol, Ethylhexylglycerin, Phenoxyethanol.\", \"details\": { \"barcode\": \"0085275710434\", \"inci\": [ \"Aqua/Water\", \"Cocamidopropyl Hydroxysultaine\", \"Glycerin\", \"Sodium Lauroyl Sarcosinate\", \"PEG-150 Pentaerythrityl Tetrastearate\", \"Niacinamide\", \"Sodium Methyl Cocoyl Taurate\", \"Ceramide NP\", \"Ceramide AP\", \"Ceramide EOP\", \"Sodium Chloride\", \"Carbomer\", \"Sodium Hydroxide\", \"Sodium Laureth Sulfate\", \"Phytosphingosine\", \"Cholesterol\", \"Xanthan Gum\", \"Tocopherol\", \"Ethylhexylglycerin\", \"Phenoxyethanol.\" ], \"skinType\": [], \"spf\": null, \"certifications\": [\"dermatologicamente-testado\", \"nao-comedogenico\"], \"usage\": \"Produtos para banho,Cuidados com a pele.\", \"warnings\": null, \"periodAfterOpening\": null, \"analysis\": { \"barcode\": null, \"overallSafetyScore\": 7, \"safetyLevel\": \"low_risk\", \"cleanBeautyScore\": 87, \"comedogenicityScore\": 0.3, \"coverage\": 0.9, \"allergenFlags\": [\"COCAMIDOPROPYL HYDROXYSULTAINE\"], \"pregnancySafe\": true, \"pregnancyUnsafeIngredients\": [], \"pfasIngredients\": [], \"skinTypeCompatibility\": { \"oily\": \"neutral\", \"dry\": \"good\", \"sensitive\": \"neutral\", \"combination\": \"good\", \"normal\": \"good\", \"acneProne\": \"neutral\" }, \"flags\": { \"containsPFAS\": false, \"lowConfidence\": false }, \"rawInci\": [\"AQUA/WATER\", \"COCAMIDOPROPYL HYDROXYSULTAINE\", \"...\"], \"parsedIngredients\": [ { \"inciName\": \"AQUA/WATER\", \"safetyScore\": 5, \"safetyLevel\": \"moderate\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": null, \"irritancyPotential\": null, \"pregnancySafe\": null, \"found\": false } ], \"analyzedAt\": \"2026-05-18T18:56:46.967Z\" } } } }"
+                - separator [ref=e282]
+              - generic [ref=e283]:
+                - generic [ref=e284]:
+                  - generic [ref=e285]:
+                    - generic [ref=e286]: GET
+                    - code [ref=e287]: /v1/products/:barcode/safety
+                  - paragraph [ref=e288]: Obtenez l'analyse complète de sécurité d'un produit. Comprend le score global et les notes par ingrédient.
+                  - generic [ref=e289]:
+                    - generic [ref=e290]:
+                      - paragraph [ref=e291]: Requête
+                      - generic [ref=e292]:
+                        - generic [ref=e293]:
+                          - generic [ref=e294]: bash
+                          - button "Copy code" [ref=e295] [cursor=pointer]:
+                            - img [ref=e296]
+                        - code [ref=e300]: "curl -X GET \"https://inciapi.com/v1/products/0085275710434/safety\" \\ -H \"X-API-Key: sk_live_your_api_key\""
+                    - generic [ref=e301]:
+                      - paragraph [ref=e302]: Réponse
+                      - generic [ref=e303]:
+                        - generic [ref=e304]:
+                          - generic [ref=e305]: json
+                          - button "Copy code" [ref=e306] [cursor=pointer]:
+                            - img [ref=e307]
+                        - code [ref=e311]: "{ \"barcode\": \"0085275710434\", \"safety\": { \"barcode\": \"0085275710434\", \"rawInci\": [ \"AQUA/WATER\", \"COCAMIDOPROPYL HYDROXYSULTAINE\", \"GLYCERIN\", \"SODIUM LAUROYL SARCOSINATE\", \"PEG-150 PENTAERYTHRITYL TETRASTEARATE\", \"NIACINAMIDE\", \"SODIUM METHYL COCOYL TAURATE\", \"CERAMIDE NP\", \"CERAMIDE AP\", \"CERAMIDE EOP\", \"SODIUM CHLORIDE\", \"CARBOMER\", \"SODIUM HYDROXIDE\", \"SODIUM LAURETH SULFATE\", \"PHYTOSPHINGOSINE\", \"CHOLESTEROL\", \"XANTHAN GUM\", \"TOCOPHEROL\", \"ETHYLHEXYLGLYCERIN\", \"PHENOXYETHANOL.\" ], \"parsedIngredients\": [ { \"inciName\": \"AQUA/WATER\", \"safetyScore\": 5, \"safetyLevel\": \"moderate\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": null, \"irritancyPotential\": null, \"pregnancySafe\": null, \"found\": false }, { \"inciName\": \"COCAMIDOPROPYL HYDROXYSULTAINE\", \"safetyScore\": 6, \"safetyLevel\": \"safe\", \"isAllergen\": true, \"allergenTypes\": [\"contact\"], \"comedogenicityRating\": null, \"irritancyPotential\": null, \"pregnancySafe\": null, \"found\": true }, { \"inciName\": \"GLYCERIN\", \"safetyScore\": 9, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"none\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"SODIUM LAUROYL SARCOSINATE\", \"safetyScore\": 7, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"low\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"PEG-150 PENTAERYTHRITYL TETRASTEARATE\", \"safetyScore\": 3, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": null, \"irritancyPotential\": null, \"pregnancySafe\": null, \"found\": true }, { \"inciName\": \"NIACINAMIDE\", \"safetyScore\": 9, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"none\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"SODIUM METHYL COCOYL TAURATE\", \"safetyScore\": 7, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": null, \"irritancyPotential\": null, \"pregnancySafe\": null, \"found\": true }, { \"inciName\": \"CERAMIDE NP\", \"safetyScore\": 9, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"none\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"CERAMIDE AP\", \"safetyScore\": 3, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"none\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"CERAMIDE EOP\", \"safetyScore\": 9, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"none\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"SODIUM CHLORIDE\", \"safetyScore\": 7, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": null, \"irritancyPotential\": null, \"pregnancySafe\": null, \"found\": true }, { \"inciName\": \"CARBOMER\", \"safetyScore\": 7, \"safetyLevel\": \"moderate\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 1, \"irritancyPotential\": \"none\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"SODIUM HYDROXIDE\", \"safetyScore\": 7, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"low\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"SODIUM LAURETH SULFATE\", \"safetyScore\": 7, \"safetyLevel\": \"moderate\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 3, \"irritancyPotential\": \"moderate\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"PHYTOSPHINGOSINE\", \"safetyScore\": 9, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"none\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"CHOLESTEROL\", \"safetyScore\": 7, \"safetyLevel\": \"low_risk\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"none\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"XANTHAN GUM\", \"safetyScore\": 7, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"none\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"TOCOPHEROL\", \"safetyScore\": 9, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"none\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"ETHYLHEXYLGLYCERIN\", \"safetyScore\": 7, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"none\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"PHENOXYETHANOL.\", \"safetyScore\": 5, \"safetyLevel\": \"moderate\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": null, \"irritancyPotential\": null, \"pregnancySafe\": null, \"found\": false } ], \"overallSafetyScore\": 7, \"safetyLevel\": \"low_risk\", \"allergenFlags\": [\"COCAMIDOPROPYL HYDROXYSULTAINE\"], \"skinTypeCompatibility\": { \"oily\": \"neutral\", \"dry\": \"good\", \"sensitive\": \"neutral\", \"combination\": \"good\", \"normal\": \"good\", \"acneProne\": \"neutral\" }, \"pregnancySafe\": true, \"pregnancyUnsafeIngredients\": [], \"cleanBeautyScore\": 87, \"comedogenicityScore\": 0.3, \"pfasIngredients\": [], \"coverage\": 0.9, \"flags\": { \"containsPFAS\": false, \"lowConfidence\": false }, \"analyzedAt\": \"2026-05-18T18:56:46.967Z\" } }"
+                - separator [ref=e312]
+              - generic [ref=e313]:
+                - generic [ref=e314]:
+                  - generic [ref=e315]:
+                    - generic [ref=e316]: GET
+                    - code [ref=e317]: /v1/products/:barcode/allergens
+                  - paragraph [ref=e318]: Obtenez les avertissements allergènes d'un produit. Vérifie les 80 allergènes UE obligatoires, les sensibilisants de contact et les allergènes conservateurs.
+                  - generic [ref=e319]:
+                    - generic [ref=e320]:
+                      - paragraph [ref=e321]: Requête
+                      - generic [ref=e322]:
+                        - generic [ref=e323]:
+                          - generic [ref=e324]: bash
+                          - button "Copy code" [ref=e325] [cursor=pointer]:
+                            - img [ref=e326]
+                        - code [ref=e330]: "curl -X GET \"https://inciapi.com/v1/products/0085275710434/allergens\" \\ -H \"X-API-Key: sk_live_your_api_key\""
+                    - generic [ref=e331]:
+                      - paragraph [ref=e332]: Réponse
+                      - generic [ref=e333]:
+                        - generic [ref=e334]:
+                          - generic [ref=e335]: json
+                          - button "Copy code" [ref=e336] [cursor=pointer]:
+                            - img [ref=e337]
+                        - code [ref=e341]: "{ \"barcode\": \"0085275710434\", \"allergens\": { \"detectedAllergens\": [ { \"inciName\": \"COCAMIDOPROPYL HYDROXYSULTAINE\", \"allergenTypes\": [\"contact\"], \"isEuMandatory\": true } ], \"totalAllergens\": 1, \"hasFragranceAllergens\": false, \"hasContactAllergens\": true, \"hasPreservativeAllergens\": false } }"
+                - separator [ref=e342]
+              - generic [ref=e343]:
+                - generic [ref=e344]:
+                  - generic [ref=e345]:
+                    - generic [ref=e346]: GET
+                    - code [ref=e347]: /v1/products/:barcode/compatibility?skinType=sensitive
+                  - paragraph [ref=e348]: "Vérifiez la compatibilité avec un type de peau. Types pris en charge : grasse, sèche, sensible, mixte, à tendance acnéique, normale."
+                  - generic [ref=e349]:
+                    - generic [ref=e350]:
+                      - paragraph [ref=e351]: Requête
+                      - generic [ref=e352]:
+                        - generic [ref=e353]:
+                          - generic [ref=e354]: bash
+                          - button "Copy code" [ref=e355] [cursor=pointer]:
+                            - img [ref=e356]
+                        - code [ref=e360]: "curl -X GET \"https://inciapi.com/v1/products/0085275710434/compatibility?skinType=sensitive\" \\ -H \"X-API-Key: sk_live_your_api_key\""
+                    - generic [ref=e361]:
+                      - paragraph [ref=e362]: Réponse
+                      - generic [ref=e363]:
+                        - generic [ref=e364]:
+                          - generic [ref=e365]: json
+                          - button "Copy code" [ref=e366] [cursor=pointer]:
+                            - img [ref=e367]
+                        - code [ref=e371]: "{ \"barcode\": \"0085275710434\", \"skinType\": \"sensitive\", \"compatibility\": { \"oily\": \"neutral\", \"dry\": \"good\", \"sensitive\": \"neutral\", \"combination\": \"good\", \"normal\": \"good\", \"acneProne\": \"neutral\" } }"
+                - separator [ref=e372]
+              - generic [ref=e373]:
+                - generic [ref=e374]:
+                  - generic [ref=e375]:
+                    - generic [ref=e376]: GET
+                    - code [ref=e377]: /v1/products/:barcode/pregnancy
+                  - paragraph [ref=e378]: Vérifiez la sécurité pendant la grossesse. Signale les rétinoïdes, l'acide salicylique (BHA), l'hydroquinone et autres ingrédients déconseillés.
+                  - generic [ref=e379]:
+                    - generic [ref=e380]:
+                      - paragraph [ref=e381]: Requête
+                      - generic [ref=e382]:
+                        - generic [ref=e383]:
+                          - generic [ref=e384]: bash
+                          - button "Copy code" [ref=e385] [cursor=pointer]:
+                            - img [ref=e386]
+                        - code [ref=e390]: "curl -X GET \"https://inciapi.com/v1/products/0085275710434/pregnancy\" \\ -H \"X-API-Key: sk_live_your_api_key\""
+                    - generic [ref=e391]:
+                      - paragraph [ref=e392]: Réponse
+                      - generic [ref=e393]:
+                        - generic [ref=e394]:
+                          - generic [ref=e395]: json
+                          - button "Copy code" [ref=e396] [cursor=pointer]:
+                            - img [ref=e397]
+                        - code [ref=e401]: "{ \"barcode\": \"0085275710434\", \"pregnancySafety\": { \"safe\": true, \"unsafeIngredients\": [], \"cautionIngredients\": [] } }"
+                - separator [ref=e402]
+              - generic [ref=e403]:
+                - generic [ref=e404]:
+                  - generic [ref=e405]:
+                    - generic [ref=e406]: POST
+                    - code [ref=e407]: /v1/analyze
+                  - paragraph [ref=e408]: Analysez une liste INCI brute sans code-barres. Envoyez les noms d'ingrédients et obtenez une analyse de sécurité complète.
+                  - generic [ref=e409]:
+                    - generic [ref=e410]:
+                      - paragraph [ref=e411]: Requête
+                      - generic [ref=e412]:
+                        - generic [ref=e413]:
+                          - generic [ref=e414]: bash
+                          - button "Copy code" [ref=e415] [cursor=pointer]:
+                            - img [ref=e416]
+                        - code [ref=e420]: "curl -X POST \"https://inciapi.com/v1/analyze\" \\ -H \"X-API-Key: sk_live_your_api_key\" \\ -H \"Content-Type: application/json\" \\ -d '{ \"inci\": [ \"Aqua\", \"Glycerin\", \"Niacinamide\", \"Cetearyl Alcohol\", \"Phenoxyethanol\", \"Retinol\", \"Linalool\" ] }'"
+                    - generic [ref=e421]:
+                      - paragraph [ref=e422]: Réponse
+                      - generic [ref=e423]:
+                        - generic [ref=e424]:
+                          - generic [ref=e425]: json
+                          - button "Copy code" [ref=e426] [cursor=pointer]:
+                            - img [ref=e427]
+                        - code [ref=e431]: "{ \"analysis\": { \"barcode\": null, \"rawInci\": [\"AQUA\", \"GLYCERIN\", \"NIACINAMIDE\", \"CETEARYL ALCOHOL\", \"PHENOXYETHANOL\", \"RETINOL\", \"LINALOOL\"], \"parsedIngredients\": [ { \"inciName\": \"AQUA\", \"safetyScore\": 5, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"none\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"GLYCERIN\", \"safetyScore\": 9, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"none\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"NIACINAMIDE\", \"safetyScore\": 9, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"none\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"CETEARYL ALCOHOL\", \"safetyScore\": 6, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 2, \"irritancyPotential\": \"low\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"PHENOXYETHANOL\", \"safetyScore\": 7, \"safetyLevel\": \"safe\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"low\", \"pregnancySafe\": true, \"found\": true }, { \"inciName\": \"RETINOL\", \"safetyScore\": 8, \"safetyLevel\": \"moderate\", \"isAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"high\", \"pregnancySafe\": false, \"found\": true }, { \"inciName\": \"LINALOOL\", \"safetyScore\": 3, \"safetyLevel\": \"moderate\", \"isAllergen\": true, \"allergenTypes\": [\"fragrance\"], \"comedogenicityRating\": null, \"irritancyPotential\": \"low\", \"pregnancySafe\": null, \"found\": true } ], \"overallSafetyScore\": 6.9, \"safetyLevel\": \"low_risk\", \"allergenFlags\": [\"LINALOOL\"], \"skinTypeCompatibility\": { \"oily\": \"good\", \"dry\": \"neutral\", \"sensitive\": \"neutral\", \"combination\": \"good\", \"normal\": \"good\", \"acneProne\": \"good\" }, \"pregnancySafe\": false, \"pregnancyUnsafeIngredients\": [\"RETINOL\"], \"cleanBeautyScore\": 100, \"comedogenicityScore\": 0.4, \"pfasIngredients\": [], \"coverage\": 1, \"flags\": { \"containsPFAS\": false, \"lowConfidence\": false }, \"analyzedAt\": \"2026-05-18T18:56:49.425Z\" } }"
+                - separator [ref=e432]
+              - generic [ref=e433]:
+                - generic [ref=e434]:
+                  - generic [ref=e435]:
+                    - generic [ref=e436]: GET
+                    - code [ref=e437]: /v1/ingredients/:inciName
+                  - paragraph [ref=e438]: Obtenez des informations détaillées sur un ingrédient spécifique par son nom INCI.
+                  - generic [ref=e439]:
+                    - generic [ref=e440]:
+                      - paragraph [ref=e441]: Requête
+                      - generic [ref=e442]:
+                        - generic [ref=e443]:
+                          - generic [ref=e444]: bash
+                          - button "Copy code" [ref=e445] [cursor=pointer]:
+                            - img [ref=e446]
+                        - code [ref=e450]: "curl -X GET \"https://inciapi.com/v1/ingredients/Niacinamide\" \\ -H \"X-API-Key: sk_live_your_api_key\""
+                    - generic [ref=e451]:
+                      - paragraph [ref=e452]: Réponse
+                      - generic [ref=e453]:
+                        - generic [ref=e454]:
+                          - generic [ref=e455]: json
+                          - button "Copy code" [ref=e456] [cursor=pointer]:
+                            - img [ref=e457]
+                        - code [ref=e461]: "{ \"ingredient\": { \"inciName\": \"NIACINAMIDE\", \"aliases\": [\"VITAMIN B3\", \"NICOTINAMIDE\", \"Nicotinamide\"], \"casNumber\": \"98-92-0\", \"ecNumber\": null, \"description\": \"NIACINAMIDE. Formula: C6H6N2O. MW: 122.12. IUPAC: pyridine-3-carboxamide\", \"functions\": [ \"SKIN CONDITIONING\", \"ANTIOXIDANT\", \"Smoothing\", \"cell-communicating ingredient\", \"skin brightening\", \"anti-acne\", \"moisturizer/humectant\" ], \"safetyScore\": 9, \"safetyLevel\": \"safe\", \"isEuAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"none\", \"suitableForSkinTypes\": [\"oily\", \"acne_prone\", \"sensitive\", \"normal\", \"dry\", \"combination\"], \"avoidForSkinTypes\": [], \"pregnancySafe\": true, \"pregnancyNotes\": null, \"euStatus\": \"allowed\", \"euMaxConcentration\": null, \"regulations\": [], \"breastfeedingSafe\": true, \"breastfeedingNotes\": null, \"photosensitivityRisk\": \"none\", \"environmentalImpact\": \"safe\", \"biodegradable\": true, \"bioaccumulative\": false, \"endocrineDisruptionRisk\": \"none\", \"carcinogenicityClass\": \"not_classified\", \"cleanBeautyCompatible\": true, \"vegan\": true, \"naturalOriginPercent\": 0, \"reefSafe\": true, \"fungalAcneSafe\": true, \"phSensitivity\": \"low\", \"optimalPhRange\": \"5.0-7.0\", \"stability\": \"stable\", \"evidenceQuality\": 5, \"pubmedCitationCount\": null, \"lastResearchUpdate\": null } }"
+                - separator [ref=e462]
+              - generic [ref=e463]:
+                - generic [ref=e464]:
+                  - generic [ref=e465]:
+                    - generic [ref=e466]: GET
+                    - code [ref=e467]: /v1/ingredients/search?q=retinol
+                  - paragraph [ref=e468]: Recherchez des ingrédients par nom ou fonction. Renvoie les ingrédients correspondants avec leurs données de sécurité.
+                  - generic [ref=e469]:
+                    - generic [ref=e470]:
+                      - paragraph [ref=e471]: Requête
+                      - generic [ref=e472]:
+                        - generic [ref=e473]:
+                          - generic [ref=e474]: bash
+                          - button "Copy code" [ref=e475] [cursor=pointer]:
+                            - img [ref=e476]
+                        - code [ref=e480]: "curl -X GET \"https://inciapi.com/v1/ingredients/search?q=retinol&limit=2\" \\ -H \"X-API-Key: sk_live_your_api_key\""
+                    - generic [ref=e481]:
+                      - paragraph [ref=e482]: Réponse
+                      - generic [ref=e483]:
+                        - generic [ref=e484]:
+                          - generic [ref=e485]: json
+                          - button "Copy code" [ref=e486] [cursor=pointer]:
+                            - img [ref=e487]
+                        - code [ref=e491]: "{ \"results\": [ { \"inciName\": \"RETINOL\", \"aliases\": [\"VITAMIN A\", \"VITAMIN A ALCOHOL\", \"Retinool\", \"Retinolo\", \"Rétinol.\", \"Retinolis\", \"Retinoli\", \"Ρετινόλη\", \"Retinols\"], \"casNumber\": \"68-26-8\", \"ecNumber\": null, \"description\": \"RETINOL. Formula: C20H30O. MW: 286.5. IUPAC: (2E,4E,6E,8E)-3,7-dimethyl-9-(2,6,6-trimethylcyclohexen-1-yl)nona-2,4,6,8-tetraen-1-ol\", \"functions\": [\"SKIN CONDITIONING\", \"ANTIOXIDANT\", \"Skin conditioning\", \"cell-communicating ingredient\"], \"safetyScore\": 8, \"safetyLevel\": \"moderate\", \"isEuAllergen\": false, \"allergenTypes\": [], \"comedogenicityRating\": 0, \"irritancyPotential\": \"high\", \"suitableForSkinTypes\": [], \"avoidForSkinTypes\": [\"sensitive\"], \"pregnancySafe\": false, \"pregnancyNotes\": \"Listed in California Safe Cosmetics Program as carcinogen or reproductive toxicant\", \"euStatus\": \"allowed\", \"euMaxConcentration\": null, \"regulations\": [ { \"country\": \"US\", \"status\": \"restricted\", \"maxConcentration\": null, \"notes\": \"California CSCP: reported in 270 cosmetic product(s)\", \"regulation\": \"California Safe Cosmetics Act (AB 1700)\", \"updatedAt\": \"2026-05-16T13:06:34.122Z\" } ], \"breastfeedingSafe\": false, \"breastfeedingNotes\": \"Retinoids should be avoided during breastfeeding. Teratogenic risk.\", \"photosensitivityRisk\": \"moderate\", \"environmentalImpact\": \"safe\", \"biodegradable\": true, \"bioaccumulative\": false, \"endocrineDisruptionRisk\": \"none\", \"carcinogenicityClass\": \"not_classified\", \"cleanBeautyCompatible\": true, \"vegan\": true, \"naturalOriginPercent\": 0, \"reefSafe\": true, \"fungalAcneSafe\": true, \"phSensitivity\": \"moderate\", \"optimalPhRange\": \"5.0-6.0\", \"stability\": \"unstable\", \"evidenceQuality\": 5 } ], \"total\": 2 }"
+                - separator [ref=e492]
+              - generic [ref=e493]:
+                - generic [ref=e494]:
+                  - generic [ref=e495]:
+                    - generic [ref=e496]: POST
+                    - code [ref=e497]: /v1/products/submit
+                  - paragraph [ref=e498]: Soumettez un produit de beauté manquant avec sa liste INCI. Les produits soumis sont disponibles après modération.
+                  - generic [ref=e499]:
+                    - generic [ref=e500]:
+                      - paragraph [ref=e501]: Requête
+                      - generic [ref=e502]:
+                        - generic [ref=e503]:
+                          - generic [ref=e504]: bash
+                          - button "Copy code" [ref=e505] [cursor=pointer]:
+                            - img [ref=e506]
+                        - code [ref=e510]: "curl -X POST \"https://inciapi.com/v1/products/submit\" \\ -H \"X-API-Key: sk_live_your_api_key\" \\ -H \"Content-Type: application/json\" \\ -d '{ \"barcode\": \"1234567890123\", \"url\": \"https://www.brand.com/product-page\" }'"
+                    - generic [ref=e511]:
+                      - paragraph [ref=e512]: Réponse
+                      - generic [ref=e513]:
+                        - generic [ref=e514]:
+                          - generic [ref=e515]: json
+                          - button "Copy code" [ref=e516] [cursor=pointer]:
+                            - img [ref=e517]
+                        - code [ref=e521]: "{ \"submissionId\": \"65fa..3d\", \"status\": \"pending\", \"message\": \"Submitted for moderation. Approved entries are usually live within 24 hours.\" }"
+                - separator [ref=e522]
+          - generic [ref=e523]:
+            - heading "Limitation de débit de l'API cosmétique" [level=2] [ref=e524]:
+              - img [ref=e525]
+              - text: Limitation de débit de l'API cosmétique
+            - paragraph [ref=e527]: Les limites de débit de l'API d'analyse d'ingrédients dépendent de votre niveau d'abonnement. Les limites sont renvoyées dans les en-têtes de réponse.
+            - table [ref=e529]:
+              - rowgroup [ref=e530]:
+                - row "Plan Limite Réinitialisation" [ref=e531]:
+                  - columnheader "Plan" [ref=e532]
+                  - columnheader "Limite" [ref=e533]
+                  - columnheader "Réinitialisation" [ref=e534]
+              - rowgroup [ref=e535]:
+                - row "Free 20 000 requêtes/mois Mensuellement à la date de facturation" [ref=e536]:
+                  - cell "Free" [ref=e537]
+                  - cell "20 000 requêtes/mois" [ref=e538]
+                  - cell "Mensuellement à la date de facturation" [ref=e539]
+            - generic [ref=e540]:
+              - paragraph [ref=e541]: "En-têtes de réponse :"
+              - generic [ref=e542]:
+                - generic [ref=e543]:
+                  - generic [ref=e544]: http
+                  - button "Copy code" [ref=e545] [cursor=pointer]:
+                    - img [ref=e546]
+                - code [ref=e550]: "X-RateLimit-Limit: 20000 X-RateLimit-Remaining: 19831 X-RateLimit-Reset: 1711929600"
+          - generic [ref=e551]:
+            - heading "Codes d'erreur INCI API" [level=2] [ref=e552]:
+              - img [ref=e553]
+              - text: Codes d'erreur INCI API
+            - table [ref=e556]:
+              - rowgroup [ref=e557]:
+                - row "Code Signification Action" [ref=e558]:
+                  - columnheader "Code" [ref=e559]
+                  - columnheader "Signification" [ref=e560]
+                  - columnheader "Action" [ref=e561]
+              - rowgroup [ref=e562]:
+                - row "400 Requête incorrecte Vérifiez les paramètres et le format du corps de la requête" [ref=e563]:
+                  - cell "400" [ref=e564]:
+                    - code [ref=e565]: "400"
+                  - cell "Requête incorrecte" [ref=e566]
+                  - cell "Vérifiez les paramètres et le format du corps de la requête" [ref=e567]
+                - row "401 Non autorisé Vérifiez votre clé API dans l'en-tête X-API-Key" [ref=e568]:
+                  - cell "401" [ref=e569]:
+                    - code [ref=e570]: "401"
+                  - cell "Non autorisé" [ref=e571]
+                  - cell "Vérifiez votre clé API dans l'en-tête X-API-Key" [ref=e572]
+                - row "403 Interdit L'endpoint nécessite un plan supérieur" [ref=e573]:
+                  - cell "403" [ref=e574]:
+                    - code [ref=e575]: "403"
+                  - cell "Interdit" [ref=e576]
+                  - cell "L'endpoint nécessite un plan supérieur" [ref=e577]
+                - row "404 Introuvable Produit ou ingrédient absent de notre base" [ref=e578]:
+                  - cell "404" [ref=e579]:
+                    - code [ref=e580]: "404"
+                  - cell "Introuvable" [ref=e581]
+                  - cell "Produit ou ingrédient absent de notre base" [ref=e582]
+                - row "429 Limite de débit dépassée Attendez les secondes Retry-After puis réessayez" [ref=e583]:
+                  - cell "429" [ref=e584]:
+                    - code [ref=e585]: "429"
+                  - cell "Limite de débit dépassée" [ref=e586]
+                  - cell "Attendez les secondes Retry-After puis réessayez" [ref=e587]
+                - row "500 Erreur interne du serveur Réessayez plus tard, contactez le support si le problème persiste" [ref=e588]:
+                  - cell "500" [ref=e589]:
+                    - code [ref=e590]: "500"
+                  - cell "Erreur interne du serveur" [ref=e591]
+                  - cell "Réessayez plus tard, contactez le support si le problème persiste" [ref=e592]
+            - generic [ref=e593]:
+              - paragraph [ref=e594]: "Format de la réponse d'erreur :"
+              - generic [ref=e595]:
+                - generic [ref=e596]:
+                  - generic [ref=e597]: json
+                  - button "Copy code" [ref=e598] [cursor=pointer]:
+                    - img [ref=e599]
+                - code [ref=e603]: "{ \"success\": false, \"error\": { \"code\": 404, \"message\": \"Product not found for barcode: 1234567890123\" } }"
+  - contentinfo [ref=e604]:
+    - generic [ref=e605]:
+      - generic [ref=e606]:
+        - generic [ref=e607]:
+          - generic [ref=e608]:
+            - img "INCI API" [ref=e609]
+            - generic [ref=e610]: INCI API
+          - paragraph [ref=e611]: API d'intelligence des ingrédients beauté. Du code-barres à l'INCI puis à la sécurité.
+        - generic [ref=e612]:
+          - heading "Produit" [level=4] [ref=e613]
+          - list [ref=e614]:
+            - listitem [ref=e615]:
+              - link "Vérificateur de sécurité" [ref=e616] [cursor=pointer]:
+                - /url: /fr/checker
+            - listitem [ref=e617]:
+              - link "Fonctionnalités" [ref=e618] [cursor=pointer]:
+                - /url: /fr/#features
+            - listitem [ref=e619]:
+              - link "Tarifs" [ref=e620] [cursor=pointer]:
+                - /url: /fr/pricing
+            - listitem [ref=e621]:
+              - link "Docs API" [ref=e622] [cursor=pointer]:
+                - /url: /fr/docs
+            - listitem [ref=e623]:
+              - link "Playground" [ref=e624] [cursor=pointer]:
+                - /url: /dashboard/playground
+        - generic [ref=e625]:
+          - heading "Entreprise" [level=4] [ref=e626]
+          - list [ref=e627]:
+            - listitem [ref=e628]:
+              - link "À propos" [ref=e629] [cursor=pointer]:
+                - /url: /fr/about
+            - listitem [ref=e630]:
+              - link "Blog" [ref=e631] [cursor=pointer]:
+                - /url: /fr/blog
+            - listitem [ref=e632]:
+              - link "Contact" [ref=e633] [cursor=pointer]:
+                - /url: /fr/contact
+        - generic [ref=e634]:
+          - heading "Mentions légales" [level=4] [ref=e635]
+          - list [ref=e636]:
+            - listitem [ref=e637]:
+              - link "Politique de confidentialité" [ref=e638] [cursor=pointer]:
+                - /url: /fr/privacy
+            - listitem [ref=e639]:
+              - link "Conditions d'utilisation" [ref=e640] [cursor=pointer]:
+                - /url: /fr/terms
+            - listitem [ref=e641]:
+              - link "Politique de cookies" [ref=e642] [cursor=pointer]:
+                - /url: /fr/cookies
+            - listitem [ref=e643]:
+              - link "DPA" [ref=e644] [cursor=pointer]:
+                - /url: /fr/dpa
+            - listitem [ref=e645]:
+              - link "Licence API" [ref=e646] [cursor=pointer]:
+                - /url: /fr/api-license
+        - generic [ref=e647]:
+          - heading "Développeurs" [level=4] [ref=e648]
+          - list [ref=e649]:
+            - listitem [ref=e650]:
+              - link "Documentation" [ref=e651] [cursor=pointer]:
+                - /url: /fr/docs
+            - listitem [ref=e652]:
+              - link "Statut de l'API" [ref=e653] [cursor=pointer]:
+                - /url: /fr/status
+            - listitem [ref=e654]:
+              - link "GitHub" [ref=e655] [cursor=pointer]:
+                - /url: https://github.com/andriisukhanov/barcode
+      - generic [ref=e656]:
+        - paragraph [ref=e657]: © 2026 INCI API. Tous droits réservés.
+        - link "GitHub" [ref=e659] [cursor=pointer]:
+          - /url: https://github.com/andriisukhanov/barcode
+          - img [ref=e660]

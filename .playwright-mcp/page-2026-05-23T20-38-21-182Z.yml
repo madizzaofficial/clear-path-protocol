@@ -1,0 +1,242 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]:
+      - link "INCI API INCI API" [ref=e7] [cursor=pointer]:
+        - /url: /fr
+        - img "INCI API" [ref=e8]
+        - generic [ref=e9]: INCI API
+      - navigation [ref=e10]:
+        - link "Vérificateur de sécurité" [ref=e11] [cursor=pointer]:
+          - /url: /fr/checker
+        - link "Tarifs" [ref=e12] [cursor=pointer]:
+          - /url: /fr/pricing
+        - link "Docs" [ref=e13] [cursor=pointer]:
+          - /url: /fr/docs
+        - link "À propos" [ref=e14] [cursor=pointer]:
+          - /url: /fr/about
+        - link "Blog" [ref=e15] [cursor=pointer]:
+          - /url: /fr/blog
+      - generic [ref=e16]:
+        - button "Changer de langue" [ref=e18] [cursor=pointer]:
+          - img [ref=e19]
+          - generic [ref=e22]: 🇫🇷
+          - generic [ref=e23]: Français
+          - generic [ref=e24]: "Langue actuelle : Français"
+        - link "Se connecter" [ref=e25] [cursor=pointer]:
+          - /url: /login
+        - link "Commencer" [ref=e26] [cursor=pointer]:
+          - /url: /register
+  - main [ref=e27]:
+    - article [ref=e28]:
+      - region "INCI API hero — API d'intelligence des ingrédients cosmétiques" [ref=e29]:
+        - generic [ref=e33]:
+          - generic [ref=e35]:
+            - img [ref=e36]
+            - text: API d'intelligence des ingrédients beauté
+          - 'heading "API d''ingrédients cosmétiques : Décodez n''importe quel produit de beauté" [level=1] [ref=e38]'
+          - paragraph [ref=e39]: L'API d'analyse INCI qui alimente les apps beauté. De la recherche par code-barres aux scores de sécurité, détection d'allergènes et compatibilité avec les types de peau, le tout en un seul appel.
+          - generic [ref=e40]:
+            - link "Vérifier vos cosmétiques" [ref=e41] [cursor=pointer]:
+              - /url: /fr/checker
+              - img [ref=e42]
+              - text: Vérifier vos cosmétiques
+            - link "Obtenir un accès API" [ref=e44] [cursor=pointer]:
+              - /url: /register
+              - text: Obtenir un accès API
+              - img [ref=e45]
+          - paragraph [ref=e47]: Vérificateur de sécurité gratuit pour les consommateurs. 100 requêtes API gratuites par mois pour les développeurs.
+      - region "Beta status" [ref=e48]:
+        - generic [ref=e50]:
+          - img [ref=e51]
+          - paragraph [ref=e55]: Database is in active growth. We are still building coverage across the full beauty catalogue, so some lookups will miss INCI data. Access is free for everyone while we scale.
+      - region "Démo en direct du scanner de codes-barres cosmétiques" [ref=e56]:
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - heading "Essayez la recherche de produits beauté par code-barres" [level=2] [ref=e59]
+            - paragraph [ref=e60]: Saisissez un code-barres cosmétique pour obtenir une analyse de sécurité instantanée des ingrédients. 2 recherches gratuites toutes les 10 minutes.
+          - generic [ref=e63]:
+            - textbox "Saisissez un code-barres (ex. 3337875597913)..." [ref=e65]
+            - button "Analyser" [ref=e66] [cursor=pointer]:
+              - img [ref=e67]
+              - text: Analyser
+      - paragraph [ref=e72]: Data provided for informational purposes only. Not medical advice.
+      - region "Comment fonctionne l'API d'analyse INCI" [ref=e73]:
+        - generic [ref=e74]:
+          - generic [ref=e75]:
+            - heading "Comment fonctionne l'API décodeur INCI" [level=2] [ref=e76]
+            - paragraph [ref=e77]: Trois étapes du code-barres à l'intelligence complète des ingrédients cosmétiques.
+          - generic [ref=e78]:
+            - generic [ref=e79]:
+              - img [ref=e81]
+              - generic [ref=e86]:
+                - generic [ref=e87]: "1"
+                - img [ref=e88]
+              - heading "Scanner le code-barres" [level=3] [ref=e90]
+              - paragraph [ref=e91]: Envoyez un code-barres UPC/EAN ou collez une liste INCI brute.
+            - generic [ref=e92]:
+              - img [ref=e94]
+              - generic [ref=e97]:
+                - generic [ref=e98]: "2"
+                - img [ref=e99]
+              - heading "Nous analysons l'INCI" [level=3] [ref=e101]
+              - paragraph [ref=e102]: Chaque ingrédient est vérifié dans EU CosIng, CIR et la recherche publiée.
+            - generic [ref=e103]:
+              - img [ref=e105]
+              - generic [ref=e108]: "3"
+              - heading "Obtenez l'intelligence" [level=3] [ref=e109]
+              - paragraph [ref=e110]: Scores de sécurité, allergènes, compatibilité cutanée, sécurité pendant la grossesse — le tout dans une seule réponse.
+      - region "Fonctionnalités de l'API de score de sécurité cosmétique" [ref=e111]:
+        - generic [ref=e112]:
+          - generic [ref=e113]:
+            - generic [ref=e115]: Fonctionnalités clés
+            - 'heading "API de score de sécurité cosmétique : tout ce dont votre app beauté a besoin" [level=2] [ref=e116]'
+            - paragraph [ref=e117]: Remplacez des mois de recherche d'ingrédients par un seul appel API. Score de sécurité, détection d'allergènes, compatibilité cutanée et sécurité pendant la grossesse dans un endpoint unique.
+          - generic [ref=e118]:
+            - generic [ref=e120]:
+              - img [ref=e122]
+              - heading "Score de sécurité" [level=3] [ref=e124]
+              - paragraph [ref=e125]: Chaque ingrédient noté de 1 à 10 selon EU CosIng, CIR et la recherche publiée.
+            - generic [ref=e127]:
+              - img [ref=e129]
+              - heading "Détection d'allergènes" [level=3] [ref=e131]
+              - paragraph [ref=e132]: Les 80 allergènes obligatoires UE + sensibilisants de contact + allergènes conservateurs signalés instantanément.
+            - generic [ref=e134]:
+              - img [ref=e136]
+              - heading "Compatibilité cutanée" [level=3] [ref=e138]
+              - paragraph [ref=e139]: "Faites correspondre les produits aux types de peau : grasse, sèche, sensible, mixte, à tendance acnéique."
+            - generic [ref=e141]:
+              - img [ref=e143]
+              - heading "Sécurité pendant la grossesse" [level=3] [ref=e146]
+              - paragraph [ref=e147]: Détection automatique des rétinoïdes, BHA et autres ingrédients déconseillés pendant la grossesse.
+            - generic [ref=e149]:
+              - img [ref=e151]
+              - heading "Evidence-based ingredient effects" [level=3] [ref=e153]
+              - paragraph [ref=e154]: Every effect backed by RCT or peer-reviewed evidence — see mechanism, biomarker, and clinical concentration.
+      - region "API beauté pour développeurs — exemples de code" [ref=e155]:
+        - generic [ref=e156]:
+          - generic [ref=e157]:
+            - generic [ref=e159]: Pour les développeurs
+            - 'heading "API beauté pour développeurs : intégration simple" [level=2] [ref=e160]'
+            - paragraph [ref=e161]: Intégrez l'API d'ingrédients cosmétiques en quelques minutes. Réponses JSON propres, documentation complète et SDK pour chaque stack.
+          - generic [ref=e162]:
+            - generic [ref=e163]:
+              - paragraph [ref=e164]: Requête
+              - generic [ref=e165]:
+                - generic [ref=e166]:
+                  - generic [ref=e167]: javascript
+                  - button "Copy code" [ref=e168] [cursor=pointer]:
+                    - img [ref=e169]
+                - code [ref=e173]: "// Analyze any beauty product by barcode const response = await fetch( 'https://inciapi.com/v1/products/3337875597913/safety', { headers: { 'X-API-Key': 'sk_live_your_key' } } ); const analysis = await response.json();"
+            - generic [ref=e174]:
+              - paragraph [ref=e175]: Réponse
+              - generic [ref=e176]:
+                - generic [ref=e177]:
+                  - generic [ref=e178]: json
+                  - button "Copy code" [ref=e179] [cursor=pointer]:
+                    - img [ref=e180]
+                - code [ref=e184]: "{ \"overallSafetyScore\": 92, \"cleanBeautyScore\": 88, \"ingredients\": [ { \"inciName\": \"Aqua\", \"safetyRating\": 1, \"functions\": [\"Solvent\"], \"isAllergen\": false, \"isPregnancySafe\": true }, { \"inciName\": \"Niacinamide\", \"safetyRating\": 1, \"functions\": [\"Antioxidant\", \"Brightening\"], \"isAllergen\": false, \"isPregnancySafe\": true } ], \"allergenWarnings\": [], \"pregnancySafe\": true, \"skinCompatibility\": [ { \"skinType\": \"sensitive\", \"compatible\": true, \"score\": 95 }, { \"skinType\": \"oily\", \"compatible\": true, \"score\": 88 } ] }"
+          - link "Lire la documentation API complète" [ref=e186] [cursor=pointer]:
+            - /url: /fr/docs
+            - text: Lire la documentation API complète
+            - img [ref=e187]
+      - region "Database growth" [ref=e189]:
+        - generic [ref=e190]:
+          - generic [ref=e191]:
+            - generic [ref=e193]:
+              - img [ref=e194]
+              - text: Database in growth phase
+            - heading "Live coverage snapshot" [level=2] [ref=e198]
+            - paragraph [ref=e199]: We are still actively collecting ingredient data. The counters below reflect what is in the database right now — no projections, no claims about coverage we have not earned yet.
+          - generic [ref=e200]:
+            - generic [ref=e201]:
+              - paragraph [ref=e202]:
+                - generic [ref=e203]: 0+
+              - paragraph [ref=e204]: Ingrédients dans la base
+            - generic [ref=e205]:
+              - paragraph [ref=e206]:
+                - generic [ref=e207]: 0+
+              - paragraph [ref=e208]: Produits analysés
+      - region "Commencez avec l'API d'ingrédients cosmétiques" [ref=e209]:
+        - generic [ref=e211]:
+          - heading "Prêt à ajouter l'intelligence des ingrédients à votre app ?" [level=2] [ref=e212]
+          - paragraph [ref=e213]: "Rejoignez les développeurs d'apps beauté qui font confiance à INCI API pour le score de sécurité cosmétique, la détection d'allergènes et l'analyse de compatibilité cutanée. Gratuit pour tous : 20 000 requêtes par mois."
+          - generic [ref=e214]:
+            - link "Obtenir votre clé API" [ref=e215] [cursor=pointer]:
+              - /url: /register
+              - text: Obtenir votre clé API
+              - img [ref=e216]
+            - link "Lire la documentation" [ref=e218] [cursor=pointer]:
+              - /url: /fr/docs
+  - contentinfo [ref=e219]:
+    - generic [ref=e220]:
+      - generic [ref=e221]:
+        - generic [ref=e222]:
+          - generic [ref=e223]:
+            - img "INCI API" [ref=e224]
+            - generic [ref=e225]: INCI API
+          - paragraph [ref=e226]: API d'intelligence des ingrédients beauté. Du code-barres à l'INCI puis à la sécurité.
+        - generic [ref=e227]:
+          - heading "Produit" [level=4] [ref=e228]
+          - list [ref=e229]:
+            - listitem [ref=e230]:
+              - link "Vérificateur de sécurité" [ref=e231] [cursor=pointer]:
+                - /url: /fr/checker
+            - listitem [ref=e232]:
+              - link "Fonctionnalités" [ref=e233] [cursor=pointer]:
+                - /url: /fr/#features
+            - listitem [ref=e234]:
+              - link "Tarifs" [ref=e235] [cursor=pointer]:
+                - /url: /fr/pricing
+            - listitem [ref=e236]:
+              - link "Docs API" [ref=e237] [cursor=pointer]:
+                - /url: /fr/docs
+            - listitem [ref=e238]:
+              - link "Playground" [ref=e239] [cursor=pointer]:
+                - /url: /dashboard/playground
+        - generic [ref=e240]:
+          - heading "Entreprise" [level=4] [ref=e241]
+          - list [ref=e242]:
+            - listitem [ref=e243]:
+              - link "À propos" [ref=e244] [cursor=pointer]:
+                - /url: /fr/about
+            - listitem [ref=e245]:
+              - link "Blog" [ref=e246] [cursor=pointer]:
+                - /url: /fr/blog
+            - listitem [ref=e247]:
+              - link "Contact" [ref=e248] [cursor=pointer]:
+                - /url: /fr/contact
+        - generic [ref=e249]:
+          - heading "Mentions légales" [level=4] [ref=e250]
+          - list [ref=e251]:
+            - listitem [ref=e252]:
+              - link "Politique de confidentialité" [ref=e253] [cursor=pointer]:
+                - /url: /fr/privacy
+            - listitem [ref=e254]:
+              - link "Conditions d'utilisation" [ref=e255] [cursor=pointer]:
+                - /url: /fr/terms
+            - listitem [ref=e256]:
+              - link "Politique de cookies" [ref=e257] [cursor=pointer]:
+                - /url: /fr/cookies
+            - listitem [ref=e258]:
+              - link "DPA" [ref=e259] [cursor=pointer]:
+                - /url: /fr/dpa
+            - listitem [ref=e260]:
+              - link "Licence API" [ref=e261] [cursor=pointer]:
+                - /url: /fr/api-license
+        - generic [ref=e262]:
+          - heading "Développeurs" [level=4] [ref=e263]
+          - list [ref=e264]:
+            - listitem [ref=e265]:
+              - link "Documentation" [ref=e266] [cursor=pointer]:
+                - /url: /fr/docs
+            - listitem [ref=e267]:
+              - link "Statut de l'API" [ref=e268] [cursor=pointer]:
+                - /url: /fr/status
+            - listitem [ref=e269]:
+              - link "GitHub" [ref=e270] [cursor=pointer]:
+                - /url: https://github.com/andriisukhanov/barcode
+      - generic [ref=e271]:
+        - paragraph [ref=e272]: © 2026 INCI API. Tous droits réservés.
+        - link "GitHub" [ref=e274] [cursor=pointer]:
+          - /url: https://github.com/andriisukhanov/barcode
+          - img [ref=e275]

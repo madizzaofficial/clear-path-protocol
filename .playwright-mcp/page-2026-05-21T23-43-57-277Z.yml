@@ -1,0 +1,193 @@
+- generic [ref=e2]:
+  - generic [ref=e6]:
+    - link "Ingredients explained" [ref=e7] [cursor=pointer]:
+      - /url: /
+      - img "Ingredients explained" [ref=e8]
+    - generic [ref=e11]:
+      - textbox "Search" [ref=e12]
+      - button "Search" [ref=e13] [cursor=pointer]
+    - generic [ref=e14]:
+      - link "Products" [ref=e15] [cursor=pointer]:
+        - /url: /products
+      - link "Ingredients" [ref=e16] [cursor=pointer]:
+        - /url: /ingredients
+      - link "Decode INCI" [ref=e17] [cursor=pointer]:
+        - /url: /decode-inci
+      - generic [ref=e18]:
+        - link "Login" [ref=e19] [cursor=pointer]:
+          - /url: /account/login
+        - link "Register" [ref=e20] [cursor=pointer]:
+          - /url: /account/register
+  - link:
+    - /url: https://www.instagram.com/incidecodercom/
+  - generic [ref=e22]:
+    - generic [ref=e23]:
+      - img "Niacinamide" [ref=e27]
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - heading "Niacinamide" [level=1] [ref=e30]
+          - generic [ref=e31]: superstar
+        - generic [ref=e32]: "Also-called-like-this: vitamin B3, nicotinamide"
+        - generic [ref=e33]:
+          - text: "What-it-does:"
+          - generic [ref=e34]:
+            - link "cell-communicating ingredient" [ref=e35] [cursor=pointer]:
+              - /url: /ingredient-functions/cell-communicating-ingredient
+            - text: ","
+            - link "skin brightening" [ref=e36] [cursor=pointer]:
+              - /url: /ingredient-functions/skin-brightening
+            - text: ","
+            - link "anti-acne" [ref=e37] [cursor=pointer]:
+              - /url: /ingredient-functions/anti-acne
+            - text: ","
+            - link "moisturizer/humectant" [ref=e38] [cursor=pointer]:
+              - /url: /ingredient-functions/moisturizer-humectant
+    - paragraph [ref=e40]:
+      - button "Official CosIng Information" [ref=e41] [cursor=pointer]
+    - heading "Quick Facts" [level=2] [ref=e42]
+    - list [ref=e45]:
+      - listitem [ref=e46]: A multi-functional skincare superstar with several proven benefits for the skin
+      - listitem [ref=e47]: Great anti-aging, wrinkle smoothing ingredient used at 4-5% concentration
+      - listitem [ref=e48]: Fades brown spots alone or in combination with amino sugar, acetyl glucosamine
+      - listitem [ref=e49]: Increases ceramide synthesis that results in a stronger, healthier skin barrier and better skin hydration
+      - listitem [ref=e50]: Can help to improve several skin conditions including acne, rosacea, and atopic dermatitis
+    - heading "Geeky Details" [level=2] [ref=e51]
+    - generic [ref=e52]:
+      - generic [ref=e54]:
+        - generic [ref=e55]:
+          - paragraph [ref=e56]:
+            - text: Niacinamide, or as us normal people call it
+            - strong [ref=e57]: vitamin B3,
+            - text: is a real skincare superstar that has had so many studies and has so many skin benefits that we have to warn you that this "geeky details" description will not be short.
+          - paragraph [ref=e58]:
+            - text: "Just as an intro a couple of thing about the stuff itself: it's a"
+            - strong [ref=e59]: water-soluble
+            - text: vitamin that usually comes in white powder form. It is odorless and has a salty, bitter taste. It can be found in meat, fish, wheat and small amounts in vegetables. The version used in cosmetics is produced exclusively synthetically.
+        - button "[more]" [ref=e61] [cursor=pointer]
+      - button "Something incorrect or missing? Let us know!" [ref=e63] [cursor=pointer]:
+        - img [ref=e64]
+        - text: Something incorrect or missing? Let us know!
+    - heading "Show me some proof" [level=2] [ref=e65]
+    - generic [ref=e67]:
+      - list [ref=e68]:
+        - listitem [ref=e69]: Walocko, Frances M., et al. "The role of nicotinamide in acne treatment." Dermatologic Therapy (2017).
+        - listitem [ref=e70]: "Journal of Cosmetic Dermatology, Volume 13 (4) – Dec 1, 2014, A review of nicotinamide: treatment of skin diseases and potential side effects"
+        - listitem [ref=e71]: Skin Pharmacol Physiol 2014;27:311-315, Niacinamide - Mechanisms of Action and Its Topical Use in Dermatology
+      - button "[more]" [ref=e73] [cursor=pointer]
+    - heading "Products with a known amount of Niacinamide" [level=2] [ref=e74]
+    - link "Show all >>" [ref=e82] [cursor=pointer]:
+      - /url: /ingredients/niacinamide?koffset=1
+    - heading "Other products with Niacinamide" [level=2] [ref=e83]
+    - generic [ref=e85]:
+      - link "100% Pure Niacinamide Boost" [ref=e86] [cursor=pointer]:
+        - /url: /products/100-pure-niacinamide-boost
+      - link "3AM Everyday Body Lotion" [ref=e87] [cursor=pointer]:
+        - /url: /products/3am-everyday-body-lotion
+      - link "AA- Daiso Wrinkle Eye Cream" [ref=e88] [cursor=pointer]:
+        - /url: /products/aa-daiso-wrinkle-eye-cream
+      - link "AERIS Vitamin Watering Ampoule" [ref=e89] [cursor=pointer]:
+        - /url: /products/aeris-vitamin-watering-ampoule
+      - link "ASTALIFT The Serum Multitune" [ref=e90] [cursor=pointer]:
+        - /url: /products/astalift-the-serum-multitune
+      - link "Advance purity niacinamide" [ref=e91] [cursor=pointer]:
+        - /url: /products/advance-purity-niacinamide-
+      - link "Aktis Nia Face Serum" [ref=e92] [cursor=pointer]:
+        - /url: /products/aktis-nia-face-serum
+      - link "Alchemitelabs 10/10 Skin Acne Clearing Ampoulé 7% Niacinamide Aloe + Arnica Extract" [ref=e93] [cursor=pointer]:
+        - /url: /products/alchemitelabs-10-10-skin-acne-clearing-ampoule-7-niacinamide-aloe-arnica-extract
+      - link "Allies of Skin Molecular Saviour Probiotics Treatment Mist" [ref=e94] [cursor=pointer]:
+        - /url: /products/allies-of-skin-molecular-saviour-probiotics-treatment-mist-2
+      - link "Aquila Dazzling Glow Vitamin C Barrier Serum" [ref=e95] [cursor=pointer]:
+        - /url: /products/aquila-dazzling-glow-vitamin-c-barrier-serum
+      - link "Aurelderma Lumiedge Skin Gel For Sheer Radiance" [ref=e96] [cursor=pointer]:
+        - /url: /products/aurelderma-lumiedge-skin-gel-for-sheer-radiance
+      - link "Avene Hyaluron Activ B3 Concentrated Plumping Serum" [ref=e97] [cursor=pointer]:
+        - /url: /products/avene-hyaluron-activ-b3-concentrated-plumping-serum
+      - link "Axis-Y Dark Spot Correcting Glow Serum" [ref=e98] [cursor=pointer]:
+        - /url: /products/axis-y-dark-spot-correcting-glow-serum-3
+      - link "BANOBAGI Milk Thistle Repair Serum" [ref=e99] [cursor=pointer]:
+        - /url: /products/banobagi-milk-thistle-repair-serum
+      - link "BCL Kansosan Medicated Moist Lotion" [ref=e100] [cursor=pointer]:
+        - /url: /products/bcl-kansosan-medicated-moist-lotion
+      - link "BRTC UV Moisture Essence Sun SPF 50" [ref=e101] [cursor=pointer]:
+        - /url: /products/brtc-uv-moisture-essence-sun-spf-50
+      - link "Bake cosmetics Bake Morning Cuddles Sunscreen" [ref=e102] [cursor=pointer]:
+        - /url: /products/bake-cosmetics-bake-morning-cuddles-sunscreen
+      - link "Be Bodywise 5% Niacinamide Serum" [ref=e103] [cursor=pointer]:
+        - /url: /products/be-bodywise-5-niacinamide-serum
+      - link "BeautyAct Radiant Skin Primer" [ref=e104] [cursor=pointer]:
+        - /url: /products/beautyact-radiant-skin-primer
+      - link "Blemguard Face Serum" [ref=e105] [cursor=pointer]:
+        - /url: /products/blemguard-face-serum
+      - link "Bless Acne Treatment Serum" [ref=e106] [cursor=pointer]:
+        - /url: /products/bless-treatment-acne-serum
+      - link "Bloomka Calendula+B3 Whitening Toner" [ref=e107] [cursor=pointer]:
+        - /url: /products/the-bath-box-calendula-b3-whitening-toner
+      - link "Bloop Skincare No Monday Blues Hydrating Moisturizer" [ref=e108] [cursor=pointer]:
+        - /url: /products/bloop-skincare-no-monday-blues-hydrating-moisturizer
+      - link "BrandMD Needle Free" [ref=e109] [cursor=pointer]:
+        - /url: /products/brandmd-needle-free
+      - link "COSRX The 6 Peptide Skin Booster" [ref=e110] [cursor=pointer]:
+        - /url: /products/cosrx-the-6-peptide-skin-booster
+      - link "Centellian24 Madeca Micro Startoc Serum" [ref=e111] [cursor=pointer]:
+        - /url: /products/centellian24-madeca-micro-startoc-serum
+      - link "Cloud 9 Skin Solutions Clarity Skin Clearing Spot Gel" [ref=e112] [cursor=pointer]:
+        - /url: /products/cloud-9-skin-solutions-clarity-skin-clearing-spot-gel
+      - link "Clozac Anti Acne & Anti Bacterial Face Wash" [ref=e113] [cursor=pointer]:
+        - /url: /products/clozac-anti-acne-anti-bacterial-face-wash
+      - link "Conscious Chemist ® Sunscreen SPF 50 Pa++++ | 50g | Sunscreen For Oily Skin, Gel Sunscreen, Niacinamide With Black Berry Extract, Hybrid Lightweight, All Skin Types - Berry Bright" [ref=e114] [cursor=pointer]:
+        - /url: /products/conscious-chemist-r-sunscreen-spf-50-pa-50g-sunscreen-for-oily-skin-gel-sunscreen-niacinamide-with-black-berry-extract-hybrid-lightweight-all-skin-types-berry-bright
+      - link "DIKA UV Gentle Sunscreen SPF50+pa++++" [ref=e115] [cursor=pointer]:
+        - /url: /products/dika-uv-gentle-sunscreen-spf50-pa
+      - link "DIKA UV Gentle Sunscreen SPF50+pa++++" [ref=e116] [cursor=pointer]:
+        - /url: /products/dika-uv-gentle-sunscreen-spf50-pa-2
+      - link "Deconstruct Clearing Serum 2% Alpha Arbutin+ 5% Niacinamide" [ref=e117] [cursor=pointer]:
+        - /url: /products/deconstruct-clearing-serum-2-alpha-arbutin-5-niacinamide
+      - link "DermDoc Niacinamide And Sodium Hyaluronate Serum" [ref=e118] [cursor=pointer]:
+        - /url: /products/dermdoc-niacinamide-and-sodium-hyaluronate-serum
+      - link "Derma Health Pharma Xelite" [ref=e119] [cursor=pointer]:
+        - /url: /products/derma-health-pharma-xelite
+      - link "DermaXP Txa White Moisturizer" [ref=e120] [cursor=pointer]:
+        - /url: /products/dermaxp-txa-white-moisturizer
+      - link "Dermabright Facewash" [ref=e121] [cursor=pointer]:
+        - /url: /products/dermabright-facewash
+      - link "Dermorepubliq Niacinamide Acne And Pil Control Face Bar Soap" [ref=e122] [cursor=pointer]:
+        - /url: /products/dermorepubliq-niacinamide-acne-and-pil-control-face-bar-soap
+      - link "Dr. Jart+ Every Sun Day Tone Up Sun Screen Spf 50+ Pa+++" [ref=e123] [cursor=pointer]:
+        - /url: /products/dr-jart-every-sun-day-tone-up-sun-screen-spf-50-pa
+      - link "Edriva Sunscreen Brightening" [ref=e124] [cursor=pointer]:
+        - /url: /products/edriva-sunscreen-brightening
+      - link "Elizavecca Peptide 3d Fix Elastic Bubble Facial Cream" [ref=e125] [cursor=pointer]:
+        - /url: /products/elizavecca-peptide-3d-fix-elastic-bubble-facial-cream
+      - link "Elvicto Bright Up Moisturizer" [ref=e126] [cursor=pointer]:
+        - /url: /products/elvicto-bright-up-moisturizer
+      - link "Epona Premium Snail Tone Up Cream" [ref=e127] [cursor=pointer]:
+        - /url: /products/epona-premium-snail-tone-up-cream
+      - link "Fair eye Advanced Dark Circle Care Cream" [ref=e128] [cursor=pointer]:
+        - /url: /products/fair-eye-advanced-dark-circle-care-cream
+      - link "Fairy Skin Mild Facial Kit" [ref=e129] [cursor=pointer]:
+        - /url: /products/fairy-skin-mild-facial-kit
+      - link "Fantraa 10% Niacinamide Serum" [ref=e130] [cursor=pointer]:
+        - /url: /products/fantraa-10-niacinamide-serum
+      - link "Fixderma Nigrifix Underarm Lightening Roll On" [ref=e131] [cursor=pointer]:
+        - /url: /products/fixderma-nigrifix-underarm-lightening-roll-on
+      - link "Foxtale Coverup Sunscreen" [ref=e132] [cursor=pointer]:
+        - /url: /products/foxtale-coverup-sunscreen
+      - link "Fyne The Niacinamide Overnight Gel Mask" [ref=e133] [cursor=pointer]:
+        - /url: /products/fyne-the-niacinamide-overnight-gel-mask
+      - link "Good Vibes Detan Glow Day Cream SPF 30" [ref=e134] [cursor=pointer]:
+        - /url: /products/good-vibes-detan-glow-day-cream-spf-30
+      - link "Hada Labo Gokujyun Aging Care Lotion" [ref=e135] [cursor=pointer]:
+        - /url: /products/hada-labo-gokujyun-aging-care-lotion
+      - link "Next page >>" [ref=e137] [cursor=pointer]:
+        - /url: /ingredients/niacinamide?uoffset=1
+  - generic [ref=e138]:
+    - generic [ref=e141]:
+      - text: We do a Best of INCIDecoder email once a month with the most interesting products and ingredients we bump into.
+      - textbox "Your email address" [ref=e144]
+    - generic [ref=e145]:
+      - generic [ref=e146]: "*INCI is a list of the standardized and internationally accepted names used in the declaration of ingredients on cosmetic and personal care products. It is published by the Personal Care Product Council."
+      - generic [ref=e147]:
+        - text: Copyright 2026 |
+        - link "About" [ref=e148] [cursor=pointer]:
+          - /url: /about

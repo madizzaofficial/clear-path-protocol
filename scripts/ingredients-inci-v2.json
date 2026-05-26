@@ -1,0 +1,4677 @@
+{
+  "water": {
+    "slug": "water",
+    "found": true,
+    "name": "Water",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "solvent"
+    ],
+    "role_fr": "Solvant",
+    "description_en": "Good old water, aka H2O. The most common skincare ingredient of all. You can usually find it right in the very first spot of the ingredient list, meaning it’s the biggest thing out of all the stuff that makes up the product.",
+    "url": "https://incidecoder.com/ingredients/water",
+    "inci_name": "WATER"
+  },
+  "aqua": {
+    "slug": "aqua",
+    "found": true,
+    "name": "Water",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "solvent"
+    ],
+    "role_fr": "Solvant",
+    "description_en": "Good old water, aka H2O. The most common skincare ingredient of all. You can usually find it right in the very first spot of the ingredient list, meaning it’s the biggest thing out of all the stuff that makes up the product.",
+    "url": "https://incidecoder.com/ingredients/aqua",
+    "inci_name": "AQUA"
+  },
+  "butylene-glycol": {
+    "slug": "butylene-glycol",
+    "found": true,
+    "name": "Butylene Glycol",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "1",
+    "comedogenicity": 1,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant",
+      "solvent"
+    ],
+    "role_fr": "Humectant",
+    "description_en": "Butylene glycol, or let’s just call it BG, is a multi-tasking colorless, syrupy liquid. It’s a great pick for creating a nice feeling product.",
+    "url": "https://incidecoder.com/ingredients/butylene-glycol",
+    "inci_name": "BUTYLENE GLYCOL"
+  },
+  "propylene-glycol": {
+    "slug": "propylene-glycol",
+    "found": true,
+    "name": "Propylene Glycol",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant",
+      "solvent"
+    ],
+    "role_fr": "Humectant",
+    "description_en": "Propylene Glycol (PG) is a colorless liquid, whose main job, usually, is toimprovethe so-calledfreeze-thaw stabilityof the products. This means that it makes sure that a product doesn’t freeze or melt in low or high temperatures. To achieve this, small amounts - usually less than 2% - is used.",
+    "url": "https://incidecoder.com/ingredients/propylene-glycol",
+    "inci_name": "PROPYLENE GLYCOL"
+  },
+  "propanediol": {
+    "slug": "propanediol",
+    "found": true,
+    "name": "Propanediol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "solvent",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": "Propanediol is anaturalalternative for the often used and often bad-mouthedpropylene glycol. It's produced sustainably from corn sugar and it's Ecocert approved.",
+    "url": "https://incidecoder.com/ingredients/propanediol",
+    "inci_name": "PROPANEDIOL"
+  },
+  "pentylene-glycol": {
+    "slug": "pentylene-glycol",
+    "found": true,
+    "name": "Pentylene Glycol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "solvent",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": "Amulti-functional, silky feeling helperingredient that can do quite many things. It's used as anemulsion stabilizer,solventand a broad spectrumantimicrobial.According to manufacturerinfo, it's also amoisturizerand helps to make the product feel great on the skin. It works synergistically with preservatives and helps to improve water-resistance of sunscreens.",
+    "url": "https://incidecoder.com/ingredients/pentylene-glycol",
+    "inci_name": "PENTYLENE GLYCOL"
+  },
+  "dipropylene-glycol": {
+    "slug": "dipropylene-glycol",
+    "found": true,
+    "name": "Dipropylene Glycol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "solvent"
+    ],
+    "role_fr": "Solvant",
+    "description_en": "A clear, colorless liquid that works as a solvent and viscosity decreasing ingredient. It also has great skin-moisturizing abilities.",
+    "url": "https://incidecoder.com/ingredients/dipropylene-glycol",
+    "inci_name": "DIPROPYLENE GLYCOL"
+  },
+  "hexylene-glycol": {
+    "slug": "hexylene-glycol",
+    "found": true,
+    "name": "Hexylene Glycol",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0-2",
+    "comedogenicity": 2,
+    "verdict": null,
+    "what_it_does": [
+      "solvent",
+      "emulsifying",
+      "perfuming",
+      "surfactant/cleansing"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "Similar toother glycols, it's a helper ingredient used as asolvent, or tothin out thick formulasand make them more nicely spreadable.",
+    "url": "https://incidecoder.com/ingredients/hexylene-glycol",
+    "inci_name": "HEXYLENE GLYCOL"
+  },
+  "ethoxydiglycol": {
+    "slug": "ethoxydiglycol",
+    "found": true,
+    "name": "Ethoxydiglycol",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "solvent",
+      "moisturizer/humectant",
+      "perfuming"
+    ],
+    "role_fr": "Humectant",
+    "description_en": "A nice odorless liquid used mainly as asuperior solubilizer and efficacy booster for cosmetic active ingredientssuch as skincare bigshotvitamin C, self-tanning activeDHAor the anti-acne gold standard,benzoyl peroxide.",
+    "url": "https://incidecoder.com/ingredients/ethoxydiglycol",
+    "inci_name": "ETHOXYDIGLYCOL"
+  },
+  "glycerin": {
+    "slug": "glycerin",
+    "found": true,
+    "name": "Glycerin",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": "superstar",
+    "what_it_does": [
+      "skin-identical ingredient",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "Glycerin doesn’t sound very glamorous but it is a realoldie but a goodie. It’s been used in cosmetics for more than  50 years and it’s a totally natural ingredient that’s also in the outermost layer of our skin (called stratum corneum - SC).",
+    "url": "https://incidecoder.com/ingredients/glycerin",
+    "inci_name": "GLYCERIN"
+  },
+  "glycerol": {
+    "slug": "glycerol",
+    "found": true,
+    "name": "Glycerin",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": "superstar",
+    "what_it_does": [
+      "skin-identical ingredient",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "Glycerin doesn’t sound very glamorous but it is a realoldie but a goodie. It’s been used in cosmetics for more than  50 years and it’s a totally natural ingredient that’s also in the outermost layer of our skin (called stratum corneum - SC).",
+    "url": "https://incidecoder.com/ingredients/glycerol",
+    "inci_name": "GLYCEROL"
+  },
+  "sodium-hyaluronate": {
+    "slug": "sodium-hyaluronate",
+    "found": true,
+    "name": "Sodium Hyaluronate",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient",
+      "moisturizer/humectant",
+      "nmf"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "It’s the - sodium form - cousin of the famousNMF,hyaluronic acid(HA). If HA does not tell you anything we have a super detailed, geeky explanationabout it here.  The TL; DR version of HA is that it's a huge polymer (big molecule from repeated subunits) found in the skin that acts as aspongehelping the skin to hold onto water, being plump and elastic. HA is famous for itscrazy water holding capacityas it can bind up to 1000 times its own weight in water.",
+    "url": "https://incidecoder.com/ingredients/sodium-hyaluronate",
+    "inci_name": "SODIUM HYALURONATE"
+  },
+  "hyaluronic-acid": {
+    "slug": "hyaluronic-acid",
+    "found": true,
+    "name": "Hyaluronic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "skin-identical ingredient",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "Hyaluronic acid (HA) and its various forms are thecurrent IT-moisturizers. So let’s see, what is hyaluronic acid and even more importantly what’s the big deal about it?",
+    "url": "https://incidecoder.com/ingredients/hyaluronic-acid",
+    "inci_name": "HYALURONIC ACID"
+  },
+  "sodium-hyaluronate-crosspolymer": {
+    "slug": "sodium-hyaluronate-crosspolymer",
+    "found": true,
+    "name": "Sodium Hyaluronate Crosspolymer",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient",
+      "antioxidant",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "It's a special\"cross-linked\" from of IT-moisturizer,hyaluronic acid(HA). Cross-linked means that \"normal\" HA pieces (1-2 million Da molecular weight) are chemically bound togeather to create a big, \"infinite\" mesh.",
+    "url": "https://incidecoder.com/ingredients/sodium-hyaluronate-crosspolymer",
+    "inci_name": "SODIUM HYALURONATE CROSSPOLYMER"
+  },
+  "panthenol": {
+    "slug": "panthenol",
+    "found": true,
+    "name": "Panthenol",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "soothing",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Apaisant",
+    "description_en": "An easy-to-formulate, commonly used, nice to have ingredient that’s also called pro-vitamin B5. As you might guess from the “pro” part, it’s a precursor to vitamin B5 (whose fancy name is pantothenic acid).",
+    "url": "https://incidecoder.com/ingredients/panthenol",
+    "inci_name": "PANTHENOL"
+  },
+  "betaine": {
+    "slug": "betaine",
+    "found": true,
+    "name": "Betaine",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": "A sugar beet-derived amino acid derivative withnice skin protection and moisturization properties. Betaine's special thing is being anosmolyte, a molecule that helps tocontrol cell-water balance.  It is also a natural osmoprotectant, meaning that it attracts water away from the protein surface and thus protects them from denaturation and increases their thermodynamic stability.",
+    "url": "https://incidecoder.com/ingredients/betaine",
+    "inci_name": "BETAINE"
+  },
+  "sodium-pca": {
+    "slug": "sodium-pca",
+    "found": true,
+    "name": "Sodium PCA",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "PCA stands for Pyrrolidone Carboxylic Acid and though it might not sound like it, it is a thing that can be found naturally in our skin. The sodium salt form of PCA is an importantskin-identical ingredient and great natural moisturizerthat helps the skin to hold onto water and stay nicely hydrated.",
+    "url": "https://incidecoder.com/ingredients/sodium-pca",
+    "inci_name": "SODIUM PCA"
+  },
+  "sorbitol": {
+    "slug": "sorbitol",
+    "found": true,
+    "name": "Sorbitol",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": "It's a sweet tastingsugar substitutethathelps your skin to hold onto waterwhen used in cosmetic products. It also helps to thicken up products and give them a bit more slip.",
+    "url": "https://incidecoder.com/ingredients/sorbitol",
+    "inci_name": "SORBITOL"
+  },
+  "sodium-lactate": {
+    "slug": "sodium-lactate",
+    "found": true,
+    "name": "Sodium Lactate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "buffering",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": "The sodium salt oflactic acid. It's a greatskin moisturizerand also used toregulate the pH valueof the cosmetic formula. It's a natural ingredient approved by both ECOCERT and COSMOS.",
+    "url": "https://incidecoder.com/ingredients/sodium-lactate",
+    "inci_name": "SODIUM LACTATE"
+  },
+  "urea": {
+    "slug": "urea",
+    "found": true,
+    "name": "Urea",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "Yes, it's the thing that can be found naturally in pee. And in the skin. It is an awesomenatural moisturizing factor, aka NMF.NMFs are important components that help the skin to hold onto water and keep it plump, elastic and hydrated. Urea makes up about 7% of NMFs next to other things such as amino acids (40%), PCA (12%) or Lactate (12%).",
+    "url": "https://incidecoder.com/ingredients/urea",
+    "inci_name": "UREA"
+  },
+  "mannitol": {
+    "slug": "mannitol",
+    "found": true,
+    "name": "Mannitol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": "A type ofsugar molecule, that has water-binding properties and helps tokeep your skin hydrated.",
+    "url": "https://incidecoder.com/ingredients/mannitol",
+    "inci_name": "MANNITOL"
+  },
+  "erythritol": {
+    "slug": "erythritol",
+    "found": true,
+    "name": "Erythritol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/erythritol",
+    "inci_name": "ERYTHRITOL"
+  },
+  "xylitol": {
+    "slug": "xylitol",
+    "found": true,
+    "name": "Xylitol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": "A type ofsugarthat's part of amoisturizingtrio called Aquaxyl. You can read more about its magic properties atxylitylglucoside.",
+    "url": "https://incidecoder.com/ingredients/xylitol",
+    "inci_name": "XYLITOL"
+  },
+  "trehalose": {
+    "slug": "trehalose",
+    "found": true,
+    "name": "Trehalose",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": "A type of sugar that haswater-bindingproperties and helps to keep your skinhydrated.",
+    "url": "https://incidecoder.com/ingredients/trehalose",
+    "inci_name": "TREHALOSE"
+  },
+  "inositol": {
+    "slug": "inositol",
+    "found": true,
+    "name": "Inositol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/inositol",
+    "inci_name": "INOSITOL"
+  },
+  "sucrose": {
+    "slug": "sucrose",
+    "found": true,
+    "name": "Sucrose",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "soothing",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Apaisant",
+    "description_en": "A type fosugar, usually refined from cane or beet sugar. On the skin, it haswater-bindingproperties and helps to keep your skinhydrated.",
+    "url": "https://incidecoder.com/ingredients/sucrose",
+    "inci_name": "SUCROSE"
+  },
+  "fructose": {
+    "slug": "fructose",
+    "found": true,
+    "name": "Fructose",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": "Fancy name forfruit sugar. It has nicewater-bindingproperties and helps to keep skinhydrated.",
+    "url": "https://incidecoder.com/ingredients/fructose",
+    "inci_name": "FRUCTOSE"
+  },
+  "maltose": {
+    "slug": "maltose",
+    "found": true,
+    "name": "Maltose",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/maltose",
+    "inci_name": "MALTOSE"
+  },
+  "glucose": {
+    "slug": "glucose",
+    "found": true,
+    "name": "Glucose",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": "A fancy name forsugar. Luckily when you put it on your skin it's good for you not like when you eat it. :) It haswater-bindingproperties, which means that it helps to keep your skin nice andhydrated.",
+    "url": "https://incidecoder.com/ingredients/glucose",
+    "inci_name": "GLUCOSE"
+  },
+  "lactose": {
+    "slug": "lactose",
+    "found": true,
+    "name": "Lactose",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/lactose",
+    "inci_name": "LACTOSE"
+  },
+  "fructooligosaccharides": {
+    "slug": "fructooligosaccharides",
+    "found": true,
+    "name": "Fructooligosaccharides",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/fructooligosaccharides",
+    "inci_name": "FRUCTOOLIGOSACCHARIDES"
+  },
+  "niacinamide": {
+    "slug": "niacinamide",
+    "found": true,
+    "name": "Niacinamide",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "cell-communicating ingredient",
+      "skin brightening",
+      "anti-acne",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Actif",
+    "description_en": "Niacinamide, or as us normal people call itvitamin B3,is a real skincare superstar that has had so many studies and has so many skin benefits that we have to warn you that this \"geeky details\" description will not be short.",
+    "url": "https://incidecoder.com/ingredients/niacinamide",
+    "inci_name": "NIACINAMIDE"
+  },
+  "retinol": {
+    "slug": "retinol",
+    "found": true,
+    "name": "Retinol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "cell-communicating ingredient"
+    ],
+    "role_fr": null,
+    "description_en": "If you like to read about skincare (and if you are here, it seems that you do :)), we are sure that you have already read a lot about retinol. It is the ingredient everyone keeps talking about and there is a reason for that: it is themostproven anti-aging superstaravailable over the counter.",
+    "url": "https://incidecoder.com/ingredients/retinol",
+    "inci_name": "RETINOL"
+  },
+  "retinyl-palmitate": {
+    "slug": "retinyl-palmitate",
+    "found": true,
+    "name": "Retinyl Palmitate",
+    "inci_name_found": null,
+    "irritancy": 1,
+    "comedogenicity_raw": "1-3",
+    "comedogenicity": 3,
+    "verdict": null,
+    "what_it_does": [
+      "cell-communicating ingredient"
+    ],
+    "role_fr": null,
+    "description_en": "It's anester form of vitamin A(retinol + palmitic acid) thatbelongs to the \"retinoid family\". The retinoid family is pretty much the royal family of skincare, with the king being the FDA-approved anti-aging ingredienttretinoin.Retinolis also a very famous member of the family, but it's likePrince George, two steps away from the throne. Retinyl palmitate will be thenPrince Charlotte(George's little sister), quite far (3 steps) away from the throne.",
+    "url": "https://incidecoder.com/ingredients/retinyl-palmitate",
+    "inci_name": "RETINYL PALMITATE"
+  },
+  "retinal": {
+    "slug": "retinal",
+    "found": true,
+    "name": "Retinal",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "cell-communicating ingredient"
+    ],
+    "role_fr": null,
+    "description_en": "If you are reading here, we are pretty sure the words retinoids and retinol ring a bell, but if not, you are seriously missing out, pleaseclick here immediately to catch up.  The TL;DR version is thatretinoids are the royal family of skincare with tretinoin being the king, the only FDA-approved ingredient to treat the signs of photoaging.Retinolis like a grandkid, it has to be converted (through two steps) in the skin to become retinoic acid. The conversion means retinol is both less effective and less harsh on the skin.",
+    "url": "https://incidecoder.com/ingredients/retinal",
+    "inci_name": "RETINAL"
+  },
+  "bakuchiol": {
+    "slug": "bakuchiol",
+    "found": true,
+    "name": "Bakuchiol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "cell-communicating ingredient",
+      "antioxidant",
+      "antimicrobial/antibacterial"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "At first glance, you could think that Bakuchiol is your averageplant extract. It is derived from the seeds ofPsoralea Corylifolia, aka Babchi, a plant important inIndian and Chinese medicine. The molecule was first isolated in 1973 and several anti-something properties are known about it: it hasanti-inflammatory, antioxidant, anti-tumor, anti-bacterialand hepatoprotective magical abilities like plenty of other Ayurvedic plant extracts.",
+    "url": "https://incidecoder.com/ingredients/bakuchiol",
+    "inci_name": "BAKUCHIOL"
+  },
+  "salicylic-acid": {
+    "slug": "salicylic-acid",
+    "found": true,
+    "name": "Salicylic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "exfoliant",
+      "anti-acne",
+      "soothing",
+      "preservative"
+    ],
+    "role_fr": "Actif",
+    "description_en": "If you have ever struggled with let’s just call it “problem skin” (you know, acne, blackheads, whiteheads, large pores) then most probably you are familiar with salicylic acid (SA). Even if the name does not ring a bell, you have probably used it. Next to benzoyl peroxide, it’s thegold standard ingredient for treating problem skin.",
+    "url": "https://incidecoder.com/ingredients/salicylic-acid",
+    "inci_name": "SALICYLIC ACID"
+  },
+  "azelaic-acid": {
+    "slug": "azelaic-acid",
+    "found": true,
+    "name": "Azelaic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "anti-acne",
+      "soothing",
+      "buffering"
+    ],
+    "role_fr": "Actif",
+    "description_en": "Azelaic acid is a superstar acid with some serious magic properties. Before we list them out here's just a short intro.",
+    "url": "https://incidecoder.com/ingredients/azelaic-acid",
+    "inci_name": "AZELAIC ACID"
+  },
+  "alpha-arbutin": {
+    "slug": "alpha-arbutin",
+    "found": true,
+    "name": "Alpha-Arbutin",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant",
+      "skin brightening"
+    ],
+    "role_fr": "Actif",
+    "description_en": "An opticalisomerof naturally occurringarbutin(or beta-arbutin). Just like its sibling, alpha-arbutin is also askin-brightening, depigmenting agent.",
+    "url": "https://incidecoder.com/ingredients/alpha-arbutin",
+    "inci_name": "ALPHA ARBUTIN"
+  },
+  "arbutin": {
+    "slug": "arbutin",
+    "found": true,
+    "name": "Arbutin",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant",
+      "skin brightening"
+    ],
+    "role_fr": "Actif",
+    "description_en": "A pretty well-known and often used ingredient with the magic ability tofade brown spots. It's used traditionally in Japan andcan be found naturally ina couple ofplants, including the leaves of pear trees, wheat andbearberry.",
+    "url": "https://incidecoder.com/ingredients/arbutin",
+    "inci_name": "ARBUTIN"
+  },
+  "ascorbic-acid": {
+    "slug": "ascorbic-acid",
+    "found": true,
+    "name": "Ascorbic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "antioxidant",
+      "skin brightening",
+      "buffering"
+    ],
+    "role_fr": "Actif",
+    "description_en": "If Vit C was a person it would be someone like Beyoncé, Jennifer Lopez or Mariah Carey. Serious performance,A-list superstarbut at the same time shows some major divaish behaviour.",
+    "url": "https://incidecoder.com/ingredients/ascorbic-acid",
+    "inci_name": "ASCORBIC ACID"
+  },
+  "ascorbyl-glucoside": {
+    "slug": "ascorbyl-glucoside",
+    "found": true,
+    "name": "Ascorbyl Glucoside",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "antioxidant",
+      "skin brightening"
+    ],
+    "role_fr": "Actif",
+    "description_en": "A form of skincare superstar,vitamin C. If you do not know why vitamin C is such a big deal in skincare, we have a reallydetailed, geeky descriptionthat's good to read. :)",
+    "url": "https://incidecoder.com/ingredients/ascorbyl-glucoside",
+    "inci_name": "ASCORBYL GLUCOSIDE"
+  },
+  "sodium-ascorbyl-phosphate": {
+    "slug": "sodium-ascorbyl-phosphate",
+    "found": true,
+    "name": "Sodium Ascorbyl Phosphate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "antioxidant",
+      "anti-acne"
+    ],
+    "role_fr": "Actif",
+    "description_en": "The sodium saltform of skincare superstar,vitamin C. If you do not know what the big fuss about vitamin C is, you are missing out and you have toclick here and read all the geeky detailsabout it.",
+    "url": "https://incidecoder.com/ingredients/sodium-ascorbyl-phosphate",
+    "inci_name": "SODIUM ASCORBYL PHOSPHATE"
+  },
+  "ascorbyl-tetraisopalmitate": {
+    "slug": "ascorbyl-tetraisopalmitate",
+    "found": true,
+    "name": "Ascorbyl Tetraisopalmitate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/ascorbyl-tetraisopalmitate",
+    "inci_name": "ASCORBYL TETRAISOPALMITATE"
+  },
+  "adenosine": {
+    "slug": "adenosine",
+    "found": true,
+    "name": "Adenosine",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "cell-communicating ingredient"
+    ],
+    "role_fr": null,
+    "description_en": "Adenosine is an important littlecompound in our bodythat has a vitalcell-signalling role. Research on smearing it on our face is also promising and shows so far a couple of things:",
+    "url": "https://incidecoder.com/ingredients/adenosine",
+    "inci_name": "ADENOSINE"
+  },
+  "ectoin": {
+    "slug": "ectoin",
+    "found": true,
+    "name": "Ectoin",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant",
+      "soothing",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "Ectoin is a surprisingly well-researched, multi-functional active that can do frompollution & lightprotectiontoskin hydration, soothing, andbarrier repair, several things to your skin.",
+    "url": "https://incidecoder.com/ingredients/ectoin",
+    "inci_name": "ECTOIN"
+  },
+  "tranexamic-acid": {
+    "slug": "tranexamic-acid",
+    "found": true,
+    "name": "Tranexamic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "skin brightening",
+      "soothing"
+    ],
+    "role_fr": "Actif",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/tranexamic-acid",
+    "inci_name": "TRANEXAMIC ACID"
+  },
+  "hexylresorcinol": {
+    "slug": "hexylresorcinol",
+    "found": true,
+    "name": "Hexylresorcinol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "skin brightening",
+      "antimicrobial/antibacterial"
+    ],
+    "role_fr": "Actif",
+    "description_en": "Amoleculethat is naturally presentin the bran of ryeand other cereals. It has been used for a long time in the food industry as an \"anti-browning agent\" for fresh-cut fruits or shrimps.",
+    "url": "https://incidecoder.com/ingredients/hexylresorcinol",
+    "inci_name": "HEXYLRESORCINOL"
+  },
+  "zinc-pca": {
+    "slug": "zinc-pca",
+    "found": true,
+    "name": "Zinc Pca",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "anti-acne",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Actif",
+    "description_en": "If you have oily, acne-prone skin, Zinc PCA is one of the actives to put on your \"TO TRY\" list.",
+    "url": "https://incidecoder.com/ingredients/zinc-pca",
+    "inci_name": "ZINC PCA"
+  },
+  "caffeine": {
+    "slug": "caffeine",
+    "found": true,
+    "name": "Caffeine",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant",
+      "perfuming"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "Hello, our favorite molecule that helps us wake up in the morning and then keeps us going through the day. As asuper well-known stimulant from coffee, tea and plenty of other soft drinks, Caffeine needs no introduction. So we will skip right to the part where we talk about what the hell it does in so-so many cosmetic products.",
+    "url": "https://incidecoder.com/ingredients/caffeine",
+    "inci_name": "CAFFEINE"
+  },
+  "carnitine": {
+    "slug": "carnitine",
+    "found": true,
+    "name": "Carnitine",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [],
+    "role_fr": null,
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/carnitine",
+    "inci_name": "CARNITINE"
+  },
+  "creatine": {
+    "slug": "creatine",
+    "found": true,
+    "name": "Creatine",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [],
+    "role_fr": null,
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/creatine",
+    "inci_name": "CREATINE"
+  },
+  "taurine": {
+    "slug": "taurine",
+    "found": true,
+    "name": "Taurine",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "buffering"
+    ],
+    "role_fr": "Régulateur pH",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/taurine",
+    "inci_name": "TAURINE"
+  },
+  "arginine": {
+    "slug": "arginine",
+    "found": true,
+    "name": "Arginine",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "A semi-essential (infants cannot synthesize it, but adults can)amino acidthat is one of the primary building blocks of hair keratin and skin collagen. It's anatural moisturizing factor, a skin hydrator and might also help tospeed up wound healing.",
+    "url": "https://incidecoder.com/ingredients/arginine",
+    "inci_name": "ARGININE"
+  },
+  "glutamine": {
+    "slug": "glutamine",
+    "found": true,
+    "name": "Glutamine",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [],
+    "role_fr": null,
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/glutamine",
+    "inci_name": "GLUTAMINE"
+  },
+  "lysine": {
+    "slug": "lysine",
+    "found": true,
+    "name": "Lysine",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [],
+    "role_fr": null,
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/lysine",
+    "inci_name": "LYSINE"
+  },
+  "proline": {
+    "slug": "proline",
+    "found": true,
+    "name": "Proline",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "Anon-essential amino acid(meaning that our body can produce it) that's also one of the major building blocks of collagen.According to the Futurederm blog, it might be able toimprove wrinkleswhen combined with other amino acids, glycine and leucine",
+    "url": "https://incidecoder.com/ingredients/proline",
+    "inci_name": "PROLINE"
+  },
+  "palmitoyl-tripeptide-1": {
+    "slug": "palmitoyl-tripeptide-1",
+    "found": true,
+    "name": "Palmitoyl Tripeptide-1",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "cell-communicating ingredient"
+    ],
+    "role_fr": null,
+    "description_en": "A reallyfamous peptide that is part of Matrixyl 3000, the most sold peptide complex in the word. Before we go and find out what the big deal with Matrixyl 3000 is, let's just focus on Palmitoyl Tripeptide-1 itself for a bit.",
+    "url": "https://incidecoder.com/ingredients/palmitoyl-tripeptide-1",
+    "inci_name": "PALMITOYL TRIPEPTIDE-1"
+  },
+  "palmitoyl-tetrapeptide-7": {
+    "slug": "palmitoyl-tetrapeptide-7",
+    "found": true,
+    "name": "Palmitoyl Tetrapeptide-7",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "cell-communicating ingredient"
+    ],
+    "role_fr": null,
+    "description_en": "Afour amino acid peptidewith the amino sequence of glycine-glutamine-proline-arginine. It is attached to palmitic acid (a fatty acid)  to increase oil solubility and skin penetration.",
+    "url": "https://incidecoder.com/ingredients/palmitoyl-tetrapeptide-7",
+    "inci_name": "PALMITOYL TETRAPEPTIDE-7"
+  },
+  "palmitoyl-pentapeptide-4": {
+    "slug": "palmitoyl-pentapeptide-4",
+    "found": true,
+    "name": "Palmitoyl Pentapeptide-4",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "cell-communicating ingredient"
+    ],
+    "role_fr": null,
+    "description_en": "A pretty famous andbetter-researchedpeptideconsisting of five amino acids (the building blocks of all proteins). It was created in a joint effort by the French ingredient supplier, Sederma and the cosmetics industry big shot, Procter&Gamble.",
+    "url": "https://incidecoder.com/ingredients/palmitoyl-pentapeptide-4",
+    "inci_name": "PALMITOYL PENTAPEPTIDE-4"
+  },
+  "acetyl-hexapeptide-3": {
+    "slug": "acetyl-hexapeptide-3",
+    "found": true,
+    "name": "Acetyl Hexapeptide-8",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "cell-communicating ingredient",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": "If you see a cosmetic product that claims that it has \"Botox-like effect\" then two things are almost certain: one, the product overpromises and two, it contains Argireline.",
+    "url": "https://incidecoder.com/ingredients/acetyl-hexapeptide-3",
+    "inci_name": "ACETYL HEXAPEPTIDE-3"
+  },
+  "tripeptide-1": {
+    "slug": "tripeptide-1",
+    "found": true,
+    "name": "Tripeptide-1",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "cell-communicating ingredient"
+    ],
+    "role_fr": null,
+    "description_en": "A small, three amino acid (glycine-histidine-lysine or GHK) peptide that is famous for being atype I collagen fragment. The theory behind collagen-fragment peptides is that when collagen naturally breaks down in the skin, the resulting peptide fragments signal to the skin that it should get to work and create some nice, new collagen.",
+    "url": "https://incidecoder.com/ingredients/tripeptide-1",
+    "inci_name": "TRIPEPTIDE-1"
+  },
+  "sh-oligopeptide-1": {
+    "slug": "sh-oligopeptide-1",
+    "found": true,
+    "name": "SH-Oligopeptide-1",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "controversial",
+    "what_it_does": [
+      "cell-communicating ingredient"
+    ],
+    "role_fr": null,
+    "description_en": "Sh-Oligopeptide-1 is the famous molecule, which is also calledEpidermal Growth Factoror EGF. Chemically speaking, Growth Factors are largish peptides orsmallish proteins, or to put it in another way, medium-length amino acid sequences (EGF consists of 53 amino acids).  Biologically speaking, Growth Factors arecellular signal moleculesthat canstimulate cell growth, proliferation, healingand/or differentiation.",
+    "url": "https://incidecoder.com/ingredients/sh-oligopeptide-1",
+    "inci_name": "SH-OLIGOPEPTIDE-1"
+  },
+  "copper-tripeptide-1": {
+    "slug": "copper-tripeptide-1",
+    "found": true,
+    "name": "Copper Tripeptide-1",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "cell-communicating ingredient",
+      "soothing",
+      "antioxidant"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "Compared to A-list skincare superstars (thinkvitamin C,glycolicorretinol), copper-tripeptide seems to be the new and exciting thing, but in fact, it has been around for a long time, since 1973 to be exact.",
+    "url": "https://incidecoder.com/ingredients/copper-tripeptide-1",
+    "inci_name": "COPPER TRIPEPTIDE-1"
+  },
+  "zinc-oxide": {
+    "slug": "zinc-oxide",
+    "found": true,
+    "name": "Zinc Oxide",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "1",
+    "comedogenicity": 1,
+    "verdict": null,
+    "what_it_does": [
+      "sunscreen"
+    ],
+    "role_fr": "Filtre UV",
+    "description_en": "When it comes to sunscreen agents,Zinc Oxide is pretty much in a league of its own. It's aphysical(or inorganic)sunscreenthat has a lot in common with fellow inorganic sunscreenTitanium Dioxide(TiO2) but a couple of things make it superior even to TiO2.",
+    "url": "https://incidecoder.com/ingredients/zinc-oxide",
+    "inci_name": "ZINC OXIDE"
+  },
+  "titanium-dioxide": {
+    "slug": "titanium-dioxide",
+    "found": true,
+    "name": "Titanium Dioxide",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "sunscreen",
+      "colorant"
+    ],
+    "role_fr": "Filtre UV",
+    "description_en": "Titanium Dioxide isone of the two members of the elite sunscreen group called physical sunscreens(or inorganic sunscreens if you’re a science geek andwant to be precise).",
+    "url": "https://incidecoder.com/ingredients/titanium-dioxide",
+    "inci_name": "TITANIUM DIOXIDE"
+  },
+  "tocopherol": {
+    "slug": "tocopherol",
+    "found": true,
+    "name": "Tocopherol",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0-3",
+    "comedogenicity": 3,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "Vitamin E is themajor fat-soluble antioxidant in our skin. As a strong antioxidant it’s an A-player in protecting the skin cells from the nasty little things called free-radicals that want to destroy the lovely collagen that makes our skin nice and firm.",
+    "url": "https://incidecoder.com/ingredients/tocopherol",
+    "inci_name": "TOCOPHEROL"
+  },
+  "tocopheryl-acetate": {
+    "slug": "tocopheryl-acetate",
+    "found": true,
+    "name": "Tocopheryl Acetate",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "It’s themost commonly used version of pure vitamin Ein cosmetics.You can read all about the pure form here. This one is the so-called esterified version.",
+    "url": "https://incidecoder.com/ingredients/tocopheryl-acetate",
+    "inci_name": "TOCOPHERYL ACETATE"
+  },
+  "ferulic-acid": {
+    "slug": "ferulic-acid",
+    "found": true,
+    "name": "Ferulic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant",
+      "antimicrobial/antibacterial"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "Ferulic Acid (FA) is a goodie that can be found naturally in plant cell walls. There is a lot of it especially in the bran of grasses such as rice, wheat and oats.",
+    "url": "https://incidecoder.com/ingredients/ferulic-acid",
+    "inci_name": "FERULIC ACID"
+  },
+  "resveratrol": {
+    "slug": "resveratrol",
+    "found": true,
+    "name": "Resveratrol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "If you are looking for a reason why red wine is good for you, good news, you have found it! Resveratrol, aka the \"red grape antioxidant\" is the thing that's suspected to keep the French from coronary heart disease despite their not so healthy eating habits (such as high saturated fat intake).",
+    "url": "https://incidecoder.com/ingredients/resveratrol",
+    "inci_name": "RESVERATROL"
+  },
+  "ubiquinone": {
+    "slug": "ubiquinone",
+    "found": true,
+    "name": "Ubiquinone",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "Thanks to Nivea, Q10 is a pretty well-known ingredient and the fame and Beiersdorf's (the parent company of Nivea) obsession with it are not for no reason. It's anantioxidant found naturally in human cellswhere it plays a bigrole in energy production.",
+    "url": "https://incidecoder.com/ingredients/ubiquinone",
+    "inci_name": "UBIQUINONE"
+  },
+  "hydroxyacetophenone": {
+    "slug": "hydroxyacetophenone",
+    "found": true,
+    "name": "Hydroxyacetophenone",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant",
+      "preservative"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "A handy multifunctional ingredient that works as apreservative booster, as well as anantioxidant and soothing agent.",
+    "url": "https://incidecoder.com/ingredients/hydroxyacetophenone",
+    "inci_name": "HYDROXYACETOPHENONE"
+  },
+  "sodium-metabisulfite": {
+    "slug": "sodium-metabisulfite",
+    "found": true,
+    "name": "Sodium Metabisulfite",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant",
+      "preservative"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/sodium-metabisulfite",
+    "inci_name": "SODIUM METABISULFITE"
+  },
+  "ascorbyl-palmitate": {
+    "slug": "ascorbyl-palmitate",
+    "found": true,
+    "name": "Ascorbyl Palmitate",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "2",
+    "comedogenicity": 2,
+    "verdict": "superstar",
+    "what_it_does": [
+      "antioxidant"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "Aform of skincare superstar,vitamin C.Even though we are massive vitamin C fans,  Ascorbyl Palmitate  (AP) is our least favorite. (Btw, if you do not know what the big deal with vitamin C is then you are missing out. You must go and readour geeky detailsabout it.)",
+    "url": "https://incidecoder.com/ingredients/ascorbyl-palmitate",
+    "inci_name": "ASCORBYL PALMITATE"
+  },
+  "bht": {
+    "slug": "bht",
+    "found": true,
+    "name": "BHT",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant",
+      "preservative"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "It's the acronym for Butylated Hydroxy Toluene. It's a common synthetic antioxidant that's used as apreservative.",
+    "url": "https://incidecoder.com/ingredients/bht",
+    "inci_name": "BHT"
+  },
+  "allantoin": {
+    "slug": "allantoin",
+    "found": true,
+    "name": "Allantoin",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "soothing"
+    ],
+    "role_fr": "Apaisant",
+    "description_en": "Super commonsoothing ingredient. It can be found naturally in the roots & leaves of the comfrey plant, but more often than not what's in the cosmetic products is produced synthetically.",
+    "url": "https://incidecoder.com/ingredients/allantoin",
+    "inci_name": "ALLANTOIN"
+  },
+  "bisabolol": {
+    "slug": "bisabolol",
+    "found": true,
+    "name": "Bisabolol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "soothing"
+    ],
+    "role_fr": "Apaisant",
+    "description_en": "It's one of theactive partsof Chamomilethat contains about 30% of bisabolol. It's a clear oily fluid that is used in skincare as a niceanti-inflammatory and soothingingredient.",
+    "url": "https://incidecoder.com/ingredients/bisabolol",
+    "inci_name": "BISABOLOL"
+  },
+  "centella-asiatica-extract": {
+    "slug": "centella-asiatica-extract",
+    "found": true,
+    "name": "Centella Asiatica Extract",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "soothing",
+      "antioxidant",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "Centella Asiatica - or sometimes also called Gotu Kola or Cica - has been used in folk medicine for hundreds of years. It’s traditionally used toimprove small wounds, burns and scratches and it’s also a well knownanti-inflammatory agentfor eczema.",
+    "url": "https://incidecoder.com/ingredients/centella-asiatica-extract",
+    "inci_name": "CENTELLA ASIATICA EXTRACT"
+  },
+  "asiaticoside": {
+    "slug": "asiaticoside",
+    "found": true,
+    "name": "Asiaticoside",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant",
+      "perfuming"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "One of the main biologically active components of the famous medicinal plant,Centella Asiatica, aka Gotu Kola. It has well establishedwound healing and antioxidant activities.",
+    "url": "https://incidecoder.com/ingredients/asiaticoside",
+    "inci_name": "ASIATICOSIDE"
+  },
+  "madecassoside": {
+    "slug": "madecassoside",
+    "found": true,
+    "name": "Madecassoside",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "antioxidant",
+      "soothing"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "One of the main biologically active components of the famous medicinal plant,Centella Asiatica, aka Gotu Kola. It has well establishedwound healing, skin-soothing and antioxidant activities.",
+    "url": "https://incidecoder.com/ingredients/madecassoside",
+    "inci_name": "MADECASSOSIDE"
+  },
+  "glycyrrhizic-acid": {
+    "slug": "glycyrrhizic-acid",
+    "found": true,
+    "name": "Glycyrrhizic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/glycyrrhizic-acid",
+    "inci_name": "GLYCYRRHIZIC ACID"
+  },
+  "glycyrrhetinic-acid": {
+    "slug": "glycyrrhetinic-acid",
+    "found": true,
+    "name": "Glycyrrhetinic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "soothing"
+    ],
+    "role_fr": "Apaisant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/glycyrrhetinic-acid",
+    "inci_name": "GLYCYRRHETINIC ACID"
+  },
+  "dipotassium-glycyrrhizate": {
+    "slug": "dipotassium-glycyrrhizate",
+    "found": true,
+    "name": "Dipotassium Glycyrrhizate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "soothing",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Apaisant",
+    "description_en": "The salt form of one of the main anti-inflammatory ingredients in the licorice plant, monoammonium glycyrrhizinate. It’s a yellowish powder with a nice sweet smell.",
+    "url": "https://incidecoder.com/ingredients/dipotassium-glycyrrhizate",
+    "inci_name": "DIPOTASSIUM GLYCYRRHIZATE"
+  },
+  "glycyrrhiza-glabra-root-extract": {
+    "slug": "glycyrrhiza-glabra-root-extract",
+    "found": true,
+    "name": "Glycyrrhiza Glabra  Root Extract",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "soothing",
+      "skin brightening"
+    ],
+    "role_fr": "Actif",
+    "description_en": "You might know licorice as a sweet treat from your childhood, but it's actually a legume that grows around the Mediterranean Sea, the Middle East, central and southern Russia. It's sweet and yellow and not only used for licorice all sorts but it's also askincare superstarthanks to two magic properties:",
+    "url": "https://incidecoder.com/ingredients/glycyrrhiza-glabra-root-extract",
+    "inci_name": "GLYCYRRHIZA GLABRA ROOT EXTRACT"
+  },
+  "glycyrrhiza-inflata-root-extract": {
+    "slug": "glycyrrhiza-inflata-root-extract",
+    "found": true,
+    "name": "Glycyrrhiza Inflata Root Extract",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [],
+    "role_fr": null,
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/glycyrrhiza-inflata-root-extract",
+    "inci_name": "GLYCYRRHIZA INFLATA ROOT EXTRACT"
+  },
+  "aloe-barbadensis-leaf-juice": {
+    "slug": "aloe-barbadensis-leaf-juice",
+    "found": true,
+    "name": "Aloe Barbadensis Leaf Juice",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "soothing",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Apaisant",
+    "description_en": "Aloe Vera is one of today’s magic plants. It does have some very nice properties indeed, though famous dermatologist Leslie Baumann warns us in her book that most of the evidence is anecdotal and the plant might be a bit overhyped.",
+    "url": "https://incidecoder.com/ingredients/aloe-barbadensis-leaf-juice",
+    "inci_name": "ALOE BARBADENSIS LEAF JUICE"
+  },
+  "aloe-vera": {
+    "slug": "aloe-vera",
+    "found": true,
+    "name": "Aloe Barbadensis Leaf Juice",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "soothing",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Apaisant",
+    "description_en": "Aloe Vera is one of today’s magic plants. It does have some very nice properties indeed, though famous dermatologist Leslie Baumann warns us in her book that most of the evidence is anecdotal and the plant might be a bit overhyped.",
+    "url": "https://incidecoder.com/ingredients/aloe-vera",
+    "inci_name": "ALOE VERA"
+  },
+  "chamomilla-recutita-extract": {
+    "slug": "chamomilla-recutita-extract",
+    "found": true,
+    "name": "Chamomilla Recutita Extract",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [],
+    "role_fr": null,
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/chamomilla-recutita-extract",
+    "inci_name": "CHAMOMILLA RECUTITA EXTRACT"
+  },
+  "calendula-officinalis-extract": {
+    "slug": "calendula-officinalis-extract",
+    "found": true,
+    "name": "Calendula Officinalis Extract",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "soothing",
+      "antioxidant"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "The extract coming from the popular garden plant Calendula or Marigold. It's used traditionally as a skin-repairing and soothing plant extract.",
+    "url": "https://incidecoder.com/ingredients/calendula-officinalis-extract",
+    "inci_name": "CALENDULA OFFICINALIS EXTRACT"
+  },
+  "camellia-sinensis-leaf-extract": {
+    "slug": "camellia-sinensis-leaf-extract",
+    "found": true,
+    "name": "Camellia Sinensis Leaf Extract",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "antioxidant",
+      "soothing"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "We will tell you straight away that we are big green tea fans. Drinking it and slathering it all over your face are both great ideas. But as this is INCIDecoder and not a find-out-what’s-healthy-to-drink site we will now just focus on why you should put it on your face.",
+    "url": "https://incidecoder.com/ingredients/camellia-sinensis-leaf-extract",
+    "inci_name": "CAMELLIA SINENSIS LEAF EXTRACT"
+  },
+  "green-tea-extract": {
+    "slug": "green-tea-extract",
+    "found": true,
+    "name": "Camellia Sinensis Leaf Extract",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "antioxidant",
+      "soothing"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "We will tell you straight away that we are big green tea fans. Drinking it and slathering it all over your face are both great ideas. But as this is INCIDecoder and not a find-out-what’s-healthy-to-drink site we will now just focus on why you should put it on your face.",
+    "url": "https://incidecoder.com/ingredients/green-tea-extract",
+    "inci_name": "GREEN TEA EXTRACT"
+  },
+  "oat-extract": {
+    "slug": "oat-extract",
+    "found": true,
+    "name": "Avena Sativa Kernel Extract",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant",
+      "soothing",
+      "emollient",
+      "abrasive/scrub"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "When you hear oatmeal, you probably think of breakfast, but the finely ground version of whole oat kernels, aka colloidal oatmeal, can dogoodthingsforyour skin, especially if it'sdry, itchy or prone to skin-rashes or eczema.",
+    "url": "https://incidecoder.com/ingredients/oat-extract",
+    "inci_name": "OAT EXTRACT"
+  },
+  "avena-sativa-kernel-extract": {
+    "slug": "avena-sativa-kernel-extract",
+    "found": true,
+    "name": "Avena Sativa Kernel Extract",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant",
+      "soothing",
+      "emollient",
+      "abrasive/scrub"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "When you hear oatmeal, you probably think of breakfast, but the finely ground version of whole oat kernels, aka colloidal oatmeal, can dogoodthingsforyour skin, especially if it'sdry, itchy or prone to skin-rashes or eczema.",
+    "url": "https://incidecoder.com/ingredients/avena-sativa-kernel-extract",
+    "inci_name": "AVENA SATIVA KERNEL EXTRACT"
+  },
+  "beta-glucan": {
+    "slug": "beta-glucan",
+    "found": true,
+    "name": "Beta-Glucan",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "soothing",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Apaisant",
+    "description_en": "Beta-Glucan is a nice big molecule composed of many smaller sugar molecules (called polysaccharide). It’s in the cell walls of yeast, some mushrooms, seaweeds, and cereals.",
+    "url": "https://incidecoder.com/ingredients/beta-glucan",
+    "inci_name": "BETA-GLUCAN"
+  },
+  "ceramide-np": {
+    "slug": "ceramide-np",
+    "found": true,
+    "name": "Ceramide NP",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "One of the many types of ceramides that can be found naturally in the upper layer of the skin. Ceramides make up about 50% of the goopy stuff that's between our skin cells and play a superimportant role in having a healthy skin barrier and keeping the skin hydrated. It works even better when combined with its pal, Ceramide 1.",
+    "url": "https://incidecoder.com/ingredients/ceramide-np",
+    "inci_name": "CERAMIDE NP"
+  },
+  "ceramide-ap": {
+    "slug": "ceramide-ap",
+    "found": true,
+    "name": "Ceramide AP",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "A type of ceramide that can be found naturally in the upper layer of the skin. Ceramides make up 50% of the goopy stuff that's between our skin cells and play asuper important role in having a healthy skin barrier and keeping the skin hydrated.",
+    "url": "https://incidecoder.com/ingredients/ceramide-ap",
+    "inci_name": "CERAMIDE AP"
+  },
+  "ceramide-eop": {
+    "slug": "ceramide-eop",
+    "found": true,
+    "name": "Ceramide EOP",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "Ceramides get quite a lot of hype recently and good news: there is a reason for that. But before we go into the details, let's just quickly define what the heck ceramides are:",
+    "url": "https://incidecoder.com/ingredients/ceramide-eop",
+    "inci_name": "CERAMIDE EOP"
+  },
+  "ceramide-2": {
+    "slug": "ceramide-2",
+    "found": true,
+    "name": "Ceramide NG",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "One of the 9 types of ceramides that can be found naturally in the upper layer of the skin. Ceramides make up a big part (about 50%) of the goopy stuff that's between our skin cells (called extracellular matrix) and play a superimportant role in having a healthy skin barrier and keeping the skin hydrated.",
+    "url": "https://incidecoder.com/ingredients/ceramide-2",
+    "inci_name": "CERAMIDE 2"
+  },
+  "ceramide-3": {
+    "slug": "ceramide-3",
+    "found": true,
+    "name": "Ceramide NP",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "One of the many types of ceramides that can be found naturally in the upper layer of the skin. Ceramides make up about 50% of the goopy stuff that's between our skin cells and play a superimportant role in having a healthy skin barrier and keeping the skin hydrated. It works even better when combined with its pal, Ceramide 1.",
+    "url": "https://incidecoder.com/ingredients/ceramide-3",
+    "inci_name": "CERAMIDE 3"
+  },
+  "ceramide-6-ii": {
+    "slug": "ceramide-6-ii",
+    "found": true,
+    "name": "Ceramide AP",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "A type of ceramide that can be found naturally in the upper layer of the skin. Ceramides make up 50% of the goopy stuff that's between our skin cells and play asuper important role in having a healthy skin barrier and keeping the skin hydrated.",
+    "url": "https://incidecoder.com/ingredients/ceramide-6-ii",
+    "inci_name": "CERAMIDE 6-II"
+  },
+  "cholesterol": {
+    "slug": "cholesterol",
+    "found": true,
+    "name": "Cholesterol",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient",
+      "emollient"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "It's one of the important lipids that can be found naturally in the outer layer of the skin. About25% of the goopy stuff between our skin cells consists of cholesterol. Together withceramidesand fatty acids, they play avital role in having a healthy skin barrierand keeping the skin hydrated.",
+    "url": "https://incidecoder.com/ingredients/cholesterol",
+    "inci_name": "CHOLESTEROL"
+  },
+  "phytosphingosine": {
+    "slug": "phytosphingosine",
+    "found": true,
+    "name": "Phytosphingosine",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient",
+      "cell-communicating ingredient",
+      "anti-acne",
+      "antimicrobial/antibacterial"
+    ],
+    "role_fr": "Actif",
+    "description_en": "It's a type of lipid, a so-called sphingoid base thatcan be found naturally in the upper layer of the skin. It's found both in \"free-form\" and as part of famous skin lipids,ceramides.",
+    "url": "https://incidecoder.com/ingredients/phytosphingosine",
+    "inci_name": "PHYTOSPHINGOSINE"
+  },
+  "sphingolipids": {
+    "slug": "sphingolipids",
+    "found": true,
+    "name": "Sphingolipids",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/sphingolipids",
+    "inci_name": "SPHINGOLIPIDS"
+  },
+  "butyl-methoxydibenzoylmethane": {
+    "slug": "butyl-methoxydibenzoylmethane",
+    "found": true,
+    "name": "Butyl Methoxydibenzoylmethane",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "sunscreen"
+    ],
+    "role_fr": "Filtre UV",
+    "description_en": "The famous Avobenzone. It is a special snowflake as it isthe only globally available chemical sunscreen agent that provides proper UVA protection(in the US,new generation sunscreen agentsare not approved because of impossible FDA regulations). It is the global gold standard of UVA protection and is the most used UVA sunscreen in the world.",
+    "url": "https://incidecoder.com/ingredients/butyl-methoxydibenzoylmethane",
+    "inci_name": "BUTYL METHOXYDIBENZOYLMETHANE"
+  },
+  "bis-ethylhexyloxyphenol-methoxyphenyl-triazine": {
+    "slug": "bis-ethylhexyloxyphenol-methoxyphenyl-triazine",
+    "found": true,
+    "name": "Bis-Ethylhexyloxyphenol Methoxyphenyl Triazine",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "sunscreen"
+    ],
+    "role_fr": "Filtre UV",
+    "description_en": "ItsINCIname is abit of a mouthful, but Bis-Ethylhexyloxyphenol Methoxyphenyl Triazine is worth recognizing it as it isone of the best sunscreen agents known today. Unfortunately, it's not FDA-approved so you will not find it in sunscreens coming from the US (not because it's not good, but because US regulations make it impossible for newer sunscreen agents to get approved), but it is widely available in other parts of the world like Europe, Australia or Asia.",
+    "url": "https://incidecoder.com/ingredients/bis-ethylhexyloxyphenol-methoxyphenyl-triazine",
+    "inci_name": "BIS-ETHYLHEXYLOXYPHENOL METHOXYPHENYL TRIAZINE"
+  },
+  "ethylhexyl-triazone": {
+    "slug": "ethylhexyl-triazone",
+    "found": true,
+    "name": "Ethylhexyl Triazone",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "sunscreen"
+    ],
+    "role_fr": "Filtre UV",
+    "description_en": "Ethylhexyl Triazone is a new generation,chemical sunscreen(not available in the US due to impossible FDA regulations) that gives thehighest photo-stable absorption of all available UVB filterstoday. It protects in the UVB range (280-320nm) with a peak protection of 314nm. It is an oil soluble, odorless, colorless powder that works well in fragrance-free formulas. It can be used up to 5% worldwide except for the US and Canada.",
+    "url": "https://incidecoder.com/ingredients/ethylhexyl-triazone",
+    "inci_name": "ETHYLHEXYL TRIAZONE"
+  },
+  "phenylbenzimidazole-sulfonic-acid": {
+    "slug": "phenylbenzimidazole-sulfonic-acid",
+    "found": true,
+    "name": "Phenylbenzimidazole Sulfonic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "sunscreen"
+    ],
+    "role_fr": "Filtre UV",
+    "description_en": "Achemical sunscreenagent that gives strongprotection in the UVB(280-320nm) range with its peak protection at 306 nm. Its special property is that unlike most sunscreen agents, it is not oil but water soluble, so it isideal to create light, oily skin compatibleformulas.  It is also fairly photostable and can be used to protect other less stable UV filters (like famous UVA blocker,avobenzone) in the formula. It is approved worldwide and can be used up to 4% in the US and up to 8% in the EU.",
+    "url": "https://incidecoder.com/ingredients/phenylbenzimidazole-sulfonic-acid",
+    "inci_name": "PHENYLBENZIMIDAZOLE SULFONIC ACID"
+  },
+  "diethylamino-hydroxybenzoyl-hexyl-benzoate": {
+    "slug": "diethylamino-hydroxybenzoyl-hexyl-benzoate",
+    "found": true,
+    "name": "Diethylamino Hydroxybenzoyl Hexyl Benzoate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "sunscreen"
+    ],
+    "role_fr": "Filtre UV",
+    "description_en": "Diethylamino Hydroxybenzoyl Hexyl Benzoate is a new generation,chemical sunscreen agent(not available in the US due to impossible FDA regulations) that's designed forhigh UVA protection and high photostability. It gives sun protection in the whole UVA range (320-400 nm) with peak protection at 354nm. It can be used up to 10% worldwide except for the US and Canada.",
+    "url": "https://incidecoder.com/ingredients/diethylamino-hydroxybenzoyl-hexyl-benzoate",
+    "inci_name": "DIETHYLAMINO HYDROXYBENZOYL HEXYL BENZOATE"
+  },
+  "methylene-bis-benzotriazolyl-tetramethylbutylphenol": {
+    "slug": "methylene-bis-benzotriazolyl-tetramethylbutylphenol",
+    "found": true,
+    "name": "Methylene Bis-Benzotriazolyl Tetramethylbutylphenol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "sunscreen"
+    ],
+    "role_fr": "Filtre UV",
+    "description_en": "The long name covers a nicesunscreen agentand quite a special one at that: It's a \"hybrid\" sunscreen meaning it's half-way between physical (the ones that, at least partly,reflect the sun) and chemical agents (that absorb the rays, which most sunscreens do).  It is anew generation UV filterand, just like its sister,Trinosorb S, it is not available in the US.",
+    "url": "https://incidecoder.com/ingredients/methylene-bis-benzotriazolyl-tetramethylbutylphenol",
+    "inci_name": "METHYLENE BIS-BENZOTRIAZOLYL TETRAMETHYLBUTYLPHENOL"
+  },
+  "ethylhexyl-salicylate": {
+    "slug": "ethylhexyl-salicylate",
+    "found": true,
+    "name": "Ethylhexyl Salicylate",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "sunscreen"
+    ],
+    "role_fr": "Filtre UV",
+    "description_en": "A colorless to light yellowish oily liquid that works as aUVB(280-320nm)sunscreen filterwith a peak absorbance at 306 nm. It'snot a strong filterin itself, it's always used in combination with other sunscreen agents to further enhance the SPF and tosolubilize other solid UV filters.",
+    "url": "https://incidecoder.com/ingredients/ethylhexyl-salicylate",
+    "inci_name": "ETHYLHEXYL SALICYLATE"
+  },
+  "ethylhexyl-methoxycrylene": {
+    "slug": "ethylhexyl-methoxycrylene",
+    "found": true,
+    "name": "Ethylhexyl Methoxycrylene",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [],
+    "role_fr": null,
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/ethylhexyl-methoxycrylene",
+    "inci_name": "ETHYLHEXYL METHOXYCRYLENE"
+  },
+  "iscotrizinol": {
+    "slug": "iscotrizinol",
+    "found": false,
+    "url": "https://incidecoder.com/ingredients/iscotrizinol",
+    "http_status": 404,
+    "inci_name": "ISCOTRIZINOL"
+  },
+  "cetyl-alcohol": {
+    "slug": "cetyl-alcohol",
+    "found": true,
+    "name": "Cetyl Alcohol",
+    "inci_name_found": null,
+    "irritancy": 2,
+    "comedogenicity_raw": "2",
+    "comedogenicity": 2,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "viscosity controlling",
+      "emulsion stabilising"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A so-called fatty (the good, non-drying kind of) alcohol that does all kinds of things in a skincare product: it makes yourskin feel smooth and nice(emollient), helps tothicken up productsand also helps water and oil to blend (emulsifier). Can be derived from coconut or palm kernel oil.",
+    "url": "https://incidecoder.com/ingredients/cetyl-alcohol",
+    "inci_name": "CETYL ALCOHOL"
+  },
+  "stearyl-alcohol": {
+    "slug": "stearyl-alcohol",
+    "found": true,
+    "name": "Stearyl Alcohol",
+    "inci_name_found": null,
+    "irritancy": 2,
+    "comedogenicity_raw": "2",
+    "comedogenicity": 2,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "viscosity controlling",
+      "emulsifying",
+      "surfactant/cleansing",
+      "emulsion stabilising"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A handy multi-tasker, white to light yellowish oil-loving wax that works very well in oil-in-water emulsions.  Itmakes your skin feel nice and smooth(emollient),stabilizes oil-water mixesandgives bodyto them.",
+    "url": "https://incidecoder.com/ingredients/stearyl-alcohol",
+    "inci_name": "STEARYL ALCOHOL"
+  },
+  "cetearyl-alcohol": {
+    "slug": "cetearyl-alcohol",
+    "found": true,
+    "name": "Cetearyl Alcohol",
+    "inci_name_found": null,
+    "irritancy": 1,
+    "comedogenicity_raw": "2",
+    "comedogenicity": 2,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "viscosity controlling",
+      "emulsifying",
+      "surfactant/cleansing",
+      "emulsion stabilising"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "An extremely commonmultitaskeringredient that gives your skin anice soft feel(emollient) andgives body to creamsand lotions. It also helps to stabilize oil-water mixes (emulsions), though it does not function as an emulsifier in itself. Its typical use level in most cream type formulas is 2-3%.",
+    "url": "https://incidecoder.com/ingredients/cetearyl-alcohol",
+    "inci_name": "CETEARYL ALCOHOL"
+  },
+  "behenyl-alcohol": {
+    "slug": "behenyl-alcohol",
+    "found": true,
+    "name": "Behenyl Alcohol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "viscosity controlling",
+      "emulsion stabilising"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A fatty alcohol (the non-drying type with a long oil loving chain of 22 carbon atoms) that is used toincrease the viscosityof the formula and it also helps the oily and the watery parts to stay nicely mixed together (calledemulsion stabilizing).",
+    "url": "https://incidecoder.com/ingredients/behenyl-alcohol",
+    "inci_name": "BEHENYL ALCOHOL"
+  },
+  "arachidyl-alcohol": {
+    "slug": "arachidyl-alcohol",
+    "found": true,
+    "name": "Arachidyl Alcohol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "viscosity controlling",
+      "emulsion stabilising"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A fatty alcohol (the non-drying type with a long oil loving chain of 20 carbon atoms) that is used toincrease the viscosity of the formulaand it also helps the oily and the watery parts to stay nicely mixed together (calledemulsion stabilizing).",
+    "url": "https://incidecoder.com/ingredients/arachidyl-alcohol",
+    "inci_name": "ARACHIDYL ALCOHOL"
+  },
+  "octyldodecanol": {
+    "slug": "octyldodecanol",
+    "found": true,
+    "name": "Octyldodecanol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "perfuming"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A clear, slightly yellow, odorless oil  that's a verycommon, medium-spreading emollient. It makes the skin feel nice and smooth and works in a wide range of formulas.",
+    "url": "https://incidecoder.com/ingredients/octyldodecanol",
+    "inci_name": "OCTYLDODECANOL"
+  },
+  "stearic-acid": {
+    "slug": "stearic-acid",
+    "found": true,
+    "name": "Stearic Acid",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "2-3",
+    "comedogenicity": 3,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "viscosity controlling"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A commonmulti-tasker fatty acid. It makes your skin feel nice and smooth (emollient), gives body to cream type products and helps to stabilize water and oil mixes (aka emulsions).",
+    "url": "https://incidecoder.com/ingredients/stearic-acid",
+    "inci_name": "STEARIC ACID"
+  },
+  "palmitic-acid": {
+    "slug": "palmitic-acid",
+    "found": true,
+    "name": "Palmitic Acid",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "2",
+    "comedogenicity": 2,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient",
+      "emollient",
+      "emulsifying"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "A fatty acid that can be found naturally in the skin. In fact, it's the most common saturated fatty acid found in animals and plants.",
+    "url": "https://incidecoder.com/ingredients/palmitic-acid",
+    "inci_name": "PALMITIC ACID"
+  },
+  "oleic-acid": {
+    "slug": "oleic-acid",
+    "found": true,
+    "name": "Oleic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "avoid",
+    "what_it_does": [
+      "emollient",
+      "emulsifying"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "Acommon fatty acidthat can be found in lots of plant oils. Its name, \"oleic\", means derived fromolive oil, a plant oil rich in oleic acid, butavocado,macadamiaandmarulaoils, just to name a few, are also oleic rich.",
+    "url": "https://incidecoder.com/ingredients/oleic-acid",
+    "inci_name": "OLEIC ACID"
+  },
+  "linoleic-acid": {
+    "slug": "linoleic-acid",
+    "found": true,
+    "name": "Linoleic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient",
+      "emollient",
+      "surfactant/cleansing"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "The famousomega-6 fatty acid,the mother of all ω-6 fatty acids in our body. It is a so-calledpolyunsaturatedfatty acid meaning it has more than one (in this case two) double bonds and a somewhat kinky structure that makes LA and LA-rich oils a thin liquid.",
+    "url": "https://incidecoder.com/ingredients/linoleic-acid",
+    "inci_name": "LINOLEIC ACID"
+  },
+  "behenic-acid": {
+    "slug": "behenic-acid",
+    "found": true,
+    "name": "Behenic Acid",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "surfactant/cleansing",
+      "emulsifying"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/behenic-acid",
+    "inci_name": "BEHENIC ACID"
+  },
+  "caprylic-acid": {
+    "slug": "caprylic-acid",
+    "found": true,
+    "name": "Caprylic Acid",
+    "inci_name_found": null,
+    "irritancy": 3,
+    "comedogenicity_raw": "1",
+    "comedogenicity": 1,
+    "verdict": null,
+    "what_it_does": [
+      "surfactant/cleansing",
+      "emulsifying",
+      "perfuming"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/caprylic-acid",
+    "inci_name": "CAPRYLIC ACID"
+  },
+  "capric-acid": {
+    "slug": "capric-acid",
+    "found": true,
+    "name": "Capric Acid",
+    "inci_name_found": null,
+    "irritancy": 2,
+    "comedogenicity_raw": "2",
+    "comedogenicity": 2,
+    "verdict": "icky",
+    "what_it_does": [
+      "surfactant/cleansing",
+      "emulsifying",
+      "perfuming"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/capric-acid",
+    "inci_name": "CAPRIC ACID"
+  },
+  "myristic-acid": {
+    "slug": "myristic-acid",
+    "found": true,
+    "name": "Myristic Acid",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "3",
+    "comedogenicity": 3,
+    "verdict": null,
+    "what_it_does": [
+      "surfactant/cleansing",
+      "emulsifying",
+      "perfuming"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "A 14 carbon length fatty acid that can be naturally found in nutmeg, palm kernel oil, coconut oil and butter fat. It's used as afoam building cleansing agent.Paula Begoun writesthat it can be a bit drying to the skin.",
+    "url": "https://incidecoder.com/ingredients/myristic-acid",
+    "inci_name": "MYRISTIC ACID"
+  },
+  "dimethicone": {
+    "slug": "dimethicone",
+    "found": true,
+    "name": "Dimethicone",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "1",
+    "comedogenicity": 1,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "Probably themost common siliconeof all. It is a polymer (created from repeating subunits) molecule and has different molecular weight and thus different viscosity versions from water-light to thick liquid.",
+    "url": "https://incidecoder.com/ingredients/dimethicone",
+    "inci_name": "DIMETHICONE"
+  },
+  "phenyl-trimethicone": {
+    "slug": "phenyl-trimethicone",
+    "found": true,
+    "name": "Phenyl Trimethicone",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A silicone fluid that gives anonoily, easy to spreademolliencyto the formulas. It is also used as a water repellent additive and to reduce the tackiness and stickiness of other ingredients. It also imparts gloss, softness and better manageability to hair.",
+    "url": "https://incidecoder.com/ingredients/phenyl-trimethicone",
+    "inci_name": "PHENYL TRIMETHICONE"
+  },
+  "dimethiconol": {
+    "slug": "dimethiconol",
+    "found": true,
+    "name": "Dimethiconol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": "Athick, high molecular weight siliconethat is usuallydiluted in another, lighter siliconefluid (likedimethiconeorcyclopentasiloxane). The dimethiconol containing silicone blendsleave a silky smooth, non-greasy filmon the skin.",
+    "url": "https://incidecoder.com/ingredients/dimethiconol",
+    "inci_name": "DIMETHICONOL"
+  },
+  "squalane": {
+    "slug": "squalane",
+    "found": true,
+    "name": "Squalane",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "1",
+    "comedogenicity": 1,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient",
+      "emollient"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "It seems to us that squalane is in fashion and there is a reason for it. Chemically speaking, it is a saturated  (no double bonds) hydrocarbon (a molecule consisting only of carbon and hydrogen), meaning that it's anice and stable oily liquidwith a long shelf life.",
+    "url": "https://incidecoder.com/ingredients/squalane",
+    "inci_name": "SQUALANE"
+  },
+  "squalene": {
+    "slug": "squalene",
+    "found": true,
+    "name": "Squalene",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient",
+      "antioxidant",
+      "emollient"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "Squalene is anoily liquidthat originally comes from shark liver but luckily it can also be found in a couple of plant oils. Olive (0.6%), peanut (0.1%) and pumpkin (0.35%) oils contain it, though not in huge amounts.",
+    "url": "https://incidecoder.com/ingredients/squalene",
+    "inci_name": "SQUALENE"
+  },
+  "caprylic-capric-triglyceride": {
+    "slug": "caprylic-capric-triglyceride",
+    "found": true,
+    "name": "Caprylic/​Capric Triglyceride",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A super commonemollientthatmakes your skin feel nice and smooth. It comes from coconut oil and glycerin, it’s light-textured, clear, odorless and non-greasy. It’s a nice ingredient that just feels good on the skin, is super well tolerated by every skin type and easy to formulate with. No wonder it’s popular.",
+    "url": "https://incidecoder.com/ingredients/caprylic-capric-triglyceride",
+    "inci_name": "CAPRYLIC/CAPRIC TRIGLYCERIDE"
+  },
+  "coco-caprylate-caprate": {
+    "slug": "coco-caprylate-caprate",
+    "found": true,
+    "name": "Coco-Caprylate/​Caprate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A lightemollient ester(C8-10 fatty acids connected to C12-18 fatty alcohols) that absorbs quickly and leaves a dry butsilky finishon the skin. In terms of skin feel, it is similar toDicaprylyl Carbonate, another commonly used light emollient.",
+    "url": "https://incidecoder.com/ingredients/coco-caprylate-caprate",
+    "inci_name": "COCO-CAPRYLATE/CAPRATE"
+  },
+  "dicaprylyl-carbonate": {
+    "slug": "dicaprylyl-carbonate",
+    "found": true,
+    "name": "Dicaprylyl Carbonate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A clear, colorless, almost odorless oil that spreads nicely and easily andgives a velvet dry skin feel. It is good friends with sunscreen agents and helps to solubilize them. Also, it makes sunscreens feel lighter and spread easier.",
+    "url": "https://incidecoder.com/ingredients/dicaprylyl-carbonate",
+    "inci_name": "DICAPRYLYL CARBONATE"
+  },
+  "dicaprylyl-ether": {
+    "slug": "dicaprylyl-ether",
+    "found": true,
+    "name": "Dicaprylyl Ether",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "solvent"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A clear, colorless and odorless oily liquid that works as afast-spreading emollient with a dry skin feel.",
+    "url": "https://incidecoder.com/ingredients/dicaprylyl-ether",
+    "inci_name": "DICAPRYLYL ETHER"
+  },
+  "c12-15-alkyl-benzoate": {
+    "slug": "c12-15-alkyl-benzoate",
+    "found": true,
+    "name": "C12-15 Alkyl Benzoate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "antimicrobial/antibacterial"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "An often usedemollient with a light and silky feel. It's very mild to both skin and eyes and spreads nicely and easily. It's often used in sunscreens as it's also an excellent solvent for sunscreen agents.",
+    "url": "https://incidecoder.com/ingredients/c12-15-alkyl-benzoate",
+    "inci_name": "C12-15 ALKYL BENZOATE"
+  },
+  "dibutyl-adipate": {
+    "slug": "dibutyl-adipate",
+    "found": true,
+    "name": "Dibutyl Adipate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "solvent"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A clear, colorless, odorless oily liquid that makes the formula easily spreadable and alsomakes the skin nice and smooth(emollient). It's especially helpful in sunscreens as it can help tosolubilize UV filters.",
+    "url": "https://incidecoder.com/ingredients/dibutyl-adipate",
+    "inci_name": "DIBUTYL ADIPATE"
+  },
+  "butylene-glycol-dicaprylate-dicaprate": {
+    "slug": "butylene-glycol-dicaprylate-dicaprate",
+    "found": true,
+    "name": "Butylene Glycol Dicaprylate/​Dicaprate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/butylene-glycol-dicaprylate-dicaprate",
+    "inci_name": "BUTYLENE GLYCOL DICAPRYLATE/DICAPRATE"
+  },
+  "isononyl-isononanoate": {
+    "slug": "isononyl-isononanoate",
+    "found": true,
+    "name": "Isononyl Isononanoate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "Anemollient ester with a rich and creamybut non-greasyskin feel. It makes skin supple and protects dry skin.",
+    "url": "https://incidecoder.com/ingredients/isononyl-isononanoate",
+    "inci_name": "ISONONYL ISONONANOATE"
+  },
+  "ethylhexyl-isononanoate": {
+    "slug": "ethylhexyl-isononanoate",
+    "found": true,
+    "name": "Ethylhexyl Isononanoate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/ethylhexyl-isononanoate",
+    "inci_name": "ETHYLHEXYL ISONONANOATE"
+  },
+  "ethylhexyl-olivate": {
+    "slug": "ethylhexyl-olivate",
+    "found": true,
+    "name": "Ethylhexyl Olivate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [],
+    "role_fr": null,
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/ethylhexyl-olivate",
+    "inci_name": "ETHYLHEXYL OLIVATE"
+  },
+  "ethylhexyl-stearate": {
+    "slug": "ethylhexyl-stearate",
+    "found": true,
+    "name": "Ethylhexyl Stearate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A clear, almost colorless (or slightly yellowish) oily liquid (an ester to be precise) that's used as amedium spreading emollient. It gives skin a nice and smooth after-feel and it's very good at reducing oiliness or greasiness coming from other heavier oils in the formula.",
+    "url": "https://incidecoder.com/ingredients/ethylhexyl-stearate",
+    "inci_name": "ETHYLHEXYL STEARATE"
+  },
+  "diisopropyl-sebacate": {
+    "slug": "diisopropyl-sebacate",
+    "found": true,
+    "name": "Diisopropyl Sebacate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "solvent",
+      "uv-filters"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A clear, colorless, practically odorless, light liquid that works as ahandy helper ingredient in sunscreen formulas. Ithelps to create high-SPF formulas with reduced concentrations ofUV-filtersand it also helps to createcosmetically elegantformulas (and that's no easy feat when it comes to sunscreens). It absorbs rapidly, makes the product easily spreadable and reduces greasiness coming from the oil-soluble sunscreen agents.",
+    "url": "https://incidecoder.com/ingredients/diisopropyl-sebacate",
+    "inci_name": "DIISOPROPYL SEBACATE"
+  },
+  "triethylhexanoin": {
+    "slug": "triethylhexanoin",
+    "found": true,
+    "name": "Triethylhexanoin",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "emollient",
+      "perfuming"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "Triethylhexanoin is a colorless to pale yellow liquid ester thatmakes the skin nice and smooth, aka emollient. It has a pleasantnon-sticky, non-greasy feelto it, gives formulassmooth applicationproperties and also helps moisture retention.",
+    "url": "https://incidecoder.com/ingredients/triethylhexanoin",
+    "inci_name": "TRIETHYLHEXANOIN"
+  },
+  "isopropyl-myristate": {
+    "slug": "isopropyl-myristate",
+    "found": true,
+    "name": "Isopropyl Myristate",
+    "inci_name_found": null,
+    "irritancy": 3,
+    "comedogenicity_raw": "3-5",
+    "comedogenicity": 5,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "perfuming"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A  clear, colorless oil-like liquid thatmakes the skin feel smooth and nice(aka emollient) and it does so without it being greasy.",
+    "url": "https://incidecoder.com/ingredients/isopropyl-myristate",
+    "inci_name": "ISOPROPYL MYRISTATE"
+  },
+  "isopropyl-palmitate": {
+    "slug": "isopropyl-palmitate",
+    "found": true,
+    "name": "Isopropyl Palmitate",
+    "inci_name_found": null,
+    "irritancy": 1,
+    "comedogenicity_raw": "3-4",
+    "comedogenicity": 4,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A clear, colorlessemollient ester(oily liquid from isopropyl alcohol + palmitic acid) that makes the skin nice and smooth. It has very good spreading properties and gives a silky touch to the products.",
+    "url": "https://incidecoder.com/ingredients/isopropyl-palmitate",
+    "inci_name": "ISOPROPYL PALMITATE"
+  },
+  "ethylhexyl-palmitate": {
+    "slug": "ethylhexyl-palmitate",
+    "found": true,
+    "name": "Ethylhexyl Palmitate",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "2-4",
+    "comedogenicity": 4,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A super common, medium-spreadingemollientester thatgives richness to the formulaand a mild feel during rubout. It can be a replacement for mineral oil and is often combined with other emollients to achieve different sensorial properties.",
+    "url": "https://incidecoder.com/ingredients/ethylhexyl-palmitate",
+    "inci_name": "ETHYLHEXYL PALMITATE"
+  },
+  "pentaerythrityl-tetraethylhexanoate": {
+    "slug": "pentaerythrityl-tetraethylhexanoate",
+    "found": true,
+    "name": "Pentaerythrityl Tetraethylhexanoate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "viscosity controlling"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A high-molecular-weightemollient esterthat makes your skin nice and smooth. It leaves a non-oily, light, \"wet\" feel on the skin.",
+    "url": "https://incidecoder.com/ingredients/pentaerythrityl-tetraethylhexanoate",
+    "inci_name": "PENTAERYTHRITYL TETRAETHYLHEXANOATE"
+  },
+  "neopentyl-glycol-diheptanoate": {
+    "slug": "neopentyl-glycol-diheptanoate",
+    "found": true,
+    "name": "Neopentyl Glycol Diheptanoate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A clear, odorless,very light emollient esterthat helps to achieve light textures. It has great spreadability, a good slip, and asilky skin feel.  It's ideal to solubilize sunscreen agents and fragrances. It's also touted asa volatile(evaporates from the skin rather than absorbs into it)silicone alternative, especially to replaceCyclomethicone mixes.",
+    "url": "https://incidecoder.com/ingredients/neopentyl-glycol-diheptanoate",
+    "inci_name": "NEOPENTYL GLYCOL DIHEPTANOATE"
+  },
+  "butyrospermum-parkii-butter": {
+    "slug": "butyrospermum-parkii-butter",
+    "found": true,
+    "name": "Butyrospermum Parkii Butter",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "Unless you live under a rock you must have heard aboutshea butter. It's probably the most hyped up natural butter in skincare today. It comes from the seeds ofAfrican Shea or Karite Treesand used as amagic moisturizer and emollient.",
+    "url": "https://incidecoder.com/ingredients/butyrospermum-parkii-butter",
+    "inci_name": "BUTYROSPERMUM PARKII BUTTER"
+  },
+  "simmondsia-chinensis-seed-oil": {
+    "slug": "simmondsia-chinensis-seed-oil",
+    "found": true,
+    "name": "Simmondsia Chinensis Seed Oil",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0-2",
+    "comedogenicity": 2,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "Jojoba is a drought resistant evergreen shrub native to South-western North America. It's known and grown for jojoba oil, the golden yellow liquid coming from the seeds (about 50% of the weight of the seeds will be oil).",
+    "url": "https://incidecoder.com/ingredients/simmondsia-chinensis-seed-oil",
+    "inci_name": "SIMMONDSIA CHINENSIS SEED OIL"
+  },
+  "argania-spinosa-kernel-oil": {
+    "slug": "argania-spinosa-kernel-oil",
+    "found": true,
+    "name": "Argania Spinosa Kernel Oil",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant",
+      "emollient"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "When it comes to cosmetic oils and hype, argan oil is for sure leading the way. Dubbed as the \"liquid gold of Morocco\", we have to admit we have some trouble determining why this oil enjoys such a special miracle status. Not that it's not good, it is good, even great but reading the research about argan and a bunch of other plant oils we just do not see the big, unique differentiating factor (though that might be our fault not reading enough, obvs.)",
+    "url": "https://incidecoder.com/ingredients/argania-spinosa-kernel-oil",
+    "inci_name": "ARGANIA SPINOSA KERNEL OIL"
+  },
+  "helianthus-annuus-seed-oil": {
+    "slug": "helianthus-annuus-seed-oil",
+    "found": true,
+    "name": "Helianthus Annuus Seed Oil",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "Sunflower does not need a big intro as you probably use it in the kitchen as cooking oil, or you munch on the seeds as a healthy snack or you adore its big, beautiful yellow flower during the summer - or you do all of these and probably even more. And by even more  we mean putting it all over your face as sunflower oil isone of the most commonly used plant oils in skincare.",
+    "url": "https://incidecoder.com/ingredients/helianthus-annuus-seed-oil",
+    "inci_name": "HELIANTHUS ANNUUS SEED OIL"
+  },
+  "rosa-canina-fruit-oil": {
+    "slug": "rosa-canina-fruit-oil",
+    "found": true,
+    "name": "Rosa Canina Fruit Oil",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "Though it says fruit oil in its name, the rosehip fruit contains the seeds that contain the oil. So this one is the same asRosa Canina Seed Oil,  or Rosehip Oil, known for itshigh omega fatty acid content(linoleic acid - 51%, linolenic acid - 19% and oleic acid - 20%) andskin-regenerative properties.",
+    "url": "https://incidecoder.com/ingredients/rosa-canina-fruit-oil",
+    "inci_name": "ROSA CANINA FRUIT OIL"
+  },
+  "prunus-amygdalus-dulcis-oil": {
+    "slug": "prunus-amygdalus-dulcis-oil",
+    "found": true,
+    "name": "Prunus Amygdalus Dulcis Oil",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "1-3",
+    "comedogenicity": 3,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "Theemollient plant oilthat comesfrom almonds. Similar to other plant oils, it is loaded with skin-nourishing fatty acids (oleic acid- 55-86% andlinoleic acid7-35%) and contains several other skin goodies such as antioxidantvitamin E and vitamin Bversions.",
+    "url": "https://incidecoder.com/ingredients/prunus-amygdalus-dulcis-oil",
+    "inci_name": "PRUNUS AMYGDALUS DULCIS OIL"
+  },
+  "vitis-vinifera-seed-oil": {
+    "slug": "vitis-vinifera-seed-oil",
+    "found": true,
+    "name": "Vitis Vinifera Seed Oil",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant",
+      "emollient"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "A goodie plant oil coming from the polyphenol-rich seeds of the grape. It's alight emollient oilthat makes your skin feel smooth and nice and alsocontains a bunch of good-for-the-skin stuff. It's a great source ofantioxidant polyphenols, barrier repairfatty acid linoleic acid(about 55-77%, while oleic acid is about 12-27%) and antioxidant, skin-protectantvitamin E.",
+    "url": "https://incidecoder.com/ingredients/vitis-vinifera-seed-oil",
+    "inci_name": "VITIS VINIFERA SEED OIL"
+  },
+  "persea-gratissima-oil": {
+    "slug": "persea-gratissima-oil",
+    "found": true,
+    "name": "Persea Gratissima Oil",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0-3",
+    "comedogenicity": 3,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant",
+      "emollient"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "The oil coming from the pulp of one of the most nutritious fruits in the world, the avocado. It's loaded with thenourishing and moisturizing fatty acid,oleic(70%) and contains some others includingpalmitic(10%) andlinoleicacid (8%). It also contains a bunch ofminerals and vitamins A,Eand D.",
+    "url": "https://incidecoder.com/ingredients/persea-gratissima-oil",
+    "inci_name": "PERSEA GRATISSIMA OIL"
+  },
+  "macadamia-ternifolia-seed-oil": {
+    "slug": "macadamia-ternifolia-seed-oil",
+    "found": true,
+    "name": "Macadamia Ternifolia Seed Oil",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "good stuff",
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "The golden yellow oil coming from the Macadamia nut, a native Australian nut. Similar to other plant oils, it'sloaded with emollient and nourishing fatty acids. It's ahigh oleic acid oil(50-67% oleic acid and only 0-5% linoleic acid) that makes it very emollient andideal for dry skin types(and less ideal for acne-prone skin).",
+    "url": "https://incidecoder.com/ingredients/macadamia-ternifolia-seed-oil",
+    "inci_name": "MACADAMIA TERNIFOLIA SEED OIL"
+  },
+  "calophyllum-inophyllum-seed-oil": {
+    "slug": "calophyllum-inophyllum-seed-oil",
+    "found": true,
+    "name": "Calophyllum Inophyllum Seed Oil",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antioxidant",
+      "emollient",
+      "antimicrobial/antibacterial"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "A green-yellowish oil coming from cool places like Tahiti, Bora Bora, and the island of Polynesia. Similar to other more common plant oils, it's loaded withnourishing and moisturizingfatty acids (oleic acid: 30-55%,linoleic acid: 15-45%,palmitic acid: 5-20% andstearic acid: 5-25%).",
+    "url": "https://incidecoder.com/ingredients/calophyllum-inophyllum-seed-oil",
+    "inci_name": "CALOPHYLLUM INOPHYLLUM SEED OIL"
+  },
+  "camellia-sinensis-seed-oil": {
+    "slug": "camellia-sinensis-seed-oil",
+    "found": true,
+    "name": "Camellia Sinensis Seed Oil",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/camellia-sinensis-seed-oil",
+    "inci_name": "CAMELLIA SINENSIS SEED OIL"
+  },
+  "hippophae-rhamnoides-oil": {
+    "slug": "hippophae-rhamnoides-oil",
+    "found": true,
+    "name": "Hippophae Rhamnoides Fruit Oil",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "antioxidant",
+      "emollient"
+    ],
+    "role_fr": "Antioxydant",
+    "description_en": "The oil coming from the pulp of the sea buckthorn berry. It has a pretty unique fatty acid composition: 65% is a combination of the rareOmega-7, aka palmitoleic acidand the more commonpalmitic acid. Fatty acids give the oil nicemoisturizing and skin-protectingabilities.",
+    "url": "https://incidecoder.com/ingredients/hippophae-rhamnoides-oil",
+    "inci_name": "HIPPOPHAE RHAMNOIDES OIL"
+  },
+  "cocos-nucifera-oil": {
+    "slug": "cocos-nucifera-oil",
+    "found": true,
+    "name": "Cocos Nucifera Oil",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "4",
+    "comedogenicity": 4,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "perfuming"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "There is definitely some craze going on for coconut oil both in the healthy eating space (often claimed to be the healthiest oil to cook with but this is a topic for another site) and in the skin and hair care space.",
+    "url": "https://incidecoder.com/ingredients/cocos-nucifera-oil",
+    "inci_name": "COCOS NUCIFERA OIL"
+  },
+  "theobroma-cacao-seed-butter": {
+    "slug": "theobroma-cacao-seed-butter",
+    "found": true,
+    "name": "Theobroma Cacao Seed Butter",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "4",
+    "comedogenicity": 4,
+    "verdict": "superstar",
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "Theobroma means \"food of the gods\" in Greek though probably \"treat of the people\" would be more spot on. The cacao fruits and especially the seeds in it need no introduction as everyone knows them as the magical raw material of the magical sweet treat, chocolate (the flavour is composed of more than 1200(!) substances, and the exact chemical nature of it is not really understood, so it's indeed magic. :)).",
+    "url": "https://incidecoder.com/ingredients/theobroma-cacao-seed-butter",
+    "inci_name": "THEOBROMA CACAO SEED BUTTER"
+  },
+  "coco-caprylate": {
+    "slug": "coco-caprylate",
+    "found": true,
+    "name": "Coco-Caprylate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A clear, colorless to slightly yellowish oil thatmakes the skin nice and smooth(emollient), spreads easily on the skin and is marketed as agood alternative to volatile(does not absorb into the skin but rather evaporates from it)siliconeslikeCyclomethicone.",
+    "url": "https://incidecoder.com/ingredients/coco-caprylate",
+    "inci_name": "COCO-CAPRYLATE"
+  },
+  "meadowfoam-seed-oil": {
+    "slug": "meadowfoam-seed-oil",
+    "found": true,
+    "name": "Limnanthes Alba Seed Oil",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "Theemollient plant oilcoming from the seeds of the white flowering plant calledmeadowfoam.  Meadowfoam Oil has a unique fatty acid composition with95% of it being long chain fatty acids(eicosenoic acidC20:1 - 61%,docosenoicacidC22:1 - 16% anddocosadienoic acidC22:2 - 18%) that make the oilextraordinarily stable. It alsocontains antioxidant componentssuch asvitaminE as well asphytosterols.",
+    "url": "https://incidecoder.com/ingredients/meadowfoam-seed-oil",
+    "inci_name": "MEADOWFOAM SEED OIL"
+  },
+  "limnanthes-alba-seed-oil": {
+    "slug": "limnanthes-alba-seed-oil",
+    "found": true,
+    "name": "Limnanthes Alba Seed Oil",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "Theemollient plant oilcoming from the seeds of the white flowering plant calledmeadowfoam.  Meadowfoam Oil has a unique fatty acid composition with95% of it being long chain fatty acids(eicosenoic acidC20:1 - 61%,docosenoicacidC22:1 - 16% anddocosadienoic acidC22:2 - 18%) that make the oilextraordinarily stable. It alsocontains antioxidant componentssuch asvitaminE as well asphytosterols.",
+    "url": "https://incidecoder.com/ingredients/limnanthes-alba-seed-oil",
+    "inci_name": "LIMNANTHES ALBA SEED OIL"
+  },
+  "rosehip-oil": {
+    "slug": "rosehip-oil",
+    "found": true,
+    "name": "Rosa Canina Seed Oil",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "Theoilcomingfrom the seeds ofdog-rose, a wild rose species native to Europe, northwest Africa and western Asia. It's a niceemollient, moisturizing plant oil loaded with skin-nourishing fatty acids(linoleic acid - 51%, linolenic acid - 19% and oleic acid - 20%).",
+    "url": "https://incidecoder.com/ingredients/rosehip-oil",
+    "inci_name": "ROSEHIP OIL"
+  },
+  "marula-oil": {
+    "slug": "marula-oil",
+    "found": true,
+    "name": "Sclerocarya Birrea  Seed Oil",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "If you have an interest in elephants and Africa, you have probably heard of elephants getting drunk from the fruit of the Marula tree. Thoughthis seems to be only a legend, what is true is that theMarula fruitis really nice (and elephants do love to eat it) and there is a stone in it withseveral oil-rich kernelsinside.",
+    "url": "https://incidecoder.com/ingredients/marula-oil",
+    "inci_name": "MARULA OIL"
+  },
+  "glyceryl-stearate": {
+    "slug": "glyceryl-stearate",
+    "found": true,
+    "name": "Glyceryl Stearate",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "1",
+    "comedogenicity": 1,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "emulsifying"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A super common, waxy, white, solid stuff thathelps water and oil to mix together, gives body to creams and leaves the skin feeling soft and smooth.",
+    "url": "https://incidecoder.com/ingredients/glyceryl-stearate",
+    "inci_name": "GLYCERYL STEARATE"
+  },
+  "peg-100-stearate": {
+    "slug": "peg-100-stearate",
+    "found": true,
+    "name": "PEG-100 Stearate",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "surfactant/cleansing",
+      "emulsifying"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "A very commonwater-loving surfactant and emulsifierthat helps to keep water and oil mixed nicely together.",
+    "url": "https://incidecoder.com/ingredients/peg-100-stearate",
+    "inci_name": "PEG-100 STEARATE"
+  },
+  "cetearyl-glucoside": {
+    "slug": "cetearyl-glucoside",
+    "found": true,
+    "name": "Cetearyl Glucoside",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying",
+      "surfactant/cleansing"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "Asugar based emulsifierthat's especially great for low viscosity lotions or even sprays. It's effective in small amounts, only 1-1.5% is needed to form an emulsion. The resulting cream or lotion has great cosmetic properties with good spreadability and an enhanced soft skin feel.",
+    "url": "https://incidecoder.com/ingredients/cetearyl-glucoside",
+    "inci_name": "CETEARYL GLUCOSIDE"
+  },
+  "polysorbate-20": {
+    "slug": "polysorbate-20",
+    "found": true,
+    "name": "Polysorbate 20",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying",
+      "surfactant/cleansing"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "It's a common little helper ingredient thathelps water and oil to mixtogether. Also, it can help toincrease the solubilityof some other ingredients in the formula.",
+    "url": "https://incidecoder.com/ingredients/polysorbate-20",
+    "inci_name": "POLYSORBATE 20"
+  },
+  "polysorbate-60": {
+    "slug": "polysorbate-60",
+    "found": true,
+    "name": "Polysorbate 60",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying",
+      "surfactant/cleansing"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "A common little helper ingredient thathelps water and oil to mixtogether, aka emulsifier.",
+    "url": "https://incidecoder.com/ingredients/polysorbate-60",
+    "inci_name": "POLYSORBATE 60"
+  },
+  "polysorbate-80": {
+    "slug": "polysorbate-80",
+    "found": true,
+    "name": "Polysorbate 80",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying",
+      "surfactant/cleansing"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "A common little helper ingredient thathelps water and oil to mixtogether, aka emulsifier.",
+    "url": "https://incidecoder.com/ingredients/polysorbate-80",
+    "inci_name": "POLYSORBATE 80"
+  },
+  "sorbitan-stearate": {
+    "slug": "sorbitan-stearate",
+    "found": true,
+    "name": "Sorbitan Stearate",
+    "inci_name_found": null,
+    "irritancy": 1,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "A popular,vegetable-derived oil-loving emulsifierthat helps water to mix with oil. In itself, it is suitable for water-in-oil emulsions (where water droplets are dispersed in oil), but it is more often used as a co-emulsifier next to other, water-loving emulsifiers.",
+    "url": "https://incidecoder.com/ingredients/sorbitan-stearate",
+    "inci_name": "SORBITAN STEARATE"
+  },
+  "sorbitan-oleate": {
+    "slug": "sorbitan-oleate",
+    "found": true,
+    "name": "Sorbitan Oleate",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "3",
+    "comedogenicity": 3,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "A mainly oil-loving, vegetable raw material based ingredient that helps water and oil to mix together, akaemulsifier. It can also function as awetting and dispersing agenthelping insoluble particles such as color pigments or inorganic sunscreens (zinc/titanium dioxide) to disperse nice and even in liquids.",
+    "url": "https://incidecoder.com/ingredients/sorbitan-oleate",
+    "inci_name": "SORBITAN OLEATE"
+  },
+  "sorbitan-sesquioleate": {
+    "slug": "sorbitan-sesquioleate",
+    "found": true,
+    "name": "Sorbitan Sesquioleate",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0-1",
+    "comedogenicity": 1,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "A mainly oil loving molecule that helps water and oil to mix nicely, akaemulsifier. In itself, it can create water-in-oil emulsions (when water droplets are dispersed in oil), but it is used mostly next to water-loving emulsifiers to create nice and smooth oil-in-water creams.  It can also function as awetting and dispersing agenthelping insoluble particles such as color pigments or inorganic sunscreens (zinc/titanium dioxide) to disperse nice and even in liquids.",
+    "url": "https://incidecoder.com/ingredients/sorbitan-sesquioleate",
+    "inci_name": "SORBITAN SESQUIOLEATE"
+  },
+  "sodium-stearoyl-glutamate": {
+    "slug": "sodium-stearoyl-glutamate",
+    "found": true,
+    "name": "Sodium Stearoyl Glutamate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying",
+      "surfactant/cleansing"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "Anamino acid-based emulsifierthat helps water and oil to mix and stay that way. It is considered as natural, environmentally friendly, and hypoallergenic.",
+    "url": "https://incidecoder.com/ingredients/sodium-stearoyl-glutamate",
+    "inci_name": "SODIUM STEAROYL GLUTAMATE"
+  },
+  "steareth-2": {
+    "slug": "steareth-2",
+    "found": true,
+    "name": "Steareth-2",
+    "inci_name_found": null,
+    "irritancy": 2,
+    "comedogenicity_raw": "2",
+    "comedogenicity": 2,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying",
+      "surfactant/cleansing"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "A waxy solid material that helps oil and water to mix together, akaemulsifier. It is derived from the fatty alcohol,stearyl alcoholby ethoxylating it and thus making the molecule a little water-soluble. This version has only a small amount of ethoxylation and thus the molecule is still largely oil soluble. It is often mixed with more water-soluble emulsifiers (such asSteareth-20) to create stable emulsion systems.",
+    "url": "https://incidecoder.com/ingredients/steareth-2",
+    "inci_name": "STEARETH-2"
+  },
+  "steareth-21": {
+    "slug": "steareth-21",
+    "found": true,
+    "name": "Steareth-21",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying",
+      "surfactant/cleansing"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "A waxy solid material that helps oil and water to mix together, akaemulsifier. It is super similar toSteareth-20with just a little more ethoxylation and thus a little more water solubility. It works very well when combined with mostly oil-soluble emulsifiers such asSteareth-2and the two together can form exceptionally stable emulsions.",
+    "url": "https://incidecoder.com/ingredients/steareth-21",
+    "inci_name": "STEARETH-21"
+  },
+  "lecithin": {
+    "slug": "lecithin",
+    "found": true,
+    "name": "Lecithin",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "emulsifying"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "A very common ingredient that can be found in all cell membranes. In cosmetics it's quite the multi-tasker: it's anemollientandwater-bindingingredient but it's also anemulsifierand can be used forstabilizationpurposes. It's also often used tocreate liposomes.",
+    "url": "https://incidecoder.com/ingredients/lecithin",
+    "inci_name": "LECITHIN"
+  },
+  "hydrogenated-lecithin": {
+    "slug": "hydrogenated-lecithin",
+    "found": true,
+    "name": "Hydrogenated Lecithin",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "emulsifying"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "It's the chemically chopped up version of normallecithin. Most often it'sused to create liposomesand to coat and stabilize other ingredients.",
+    "url": "https://incidecoder.com/ingredients/hydrogenated-lecithin",
+    "inci_name": "HYDROGENATED LECITHIN"
+  },
+  "polyglyceryl-3-methylglucose-distearate": {
+    "slug": "polyglyceryl-3-methylglucose-distearate",
+    "found": true,
+    "name": "Polyglyceryl-3 Methylglucose Distearate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "Avegetable-based emulsifierthat helps the oily and watery parts of the formula to mix nicely together. It is compatible with a bunch of cosmetic oils as well as active ingredients and its specialty is creating emulsions with super high heat and freeze stability (from -25 °C and +50 °C).",
+    "url": "https://incidecoder.com/ingredients/polyglyceryl-3-methylglucose-distearate",
+    "inci_name": "POLYGLYCERYL-3 METHYLGLUCOSE DISTEARATE"
+  },
+  "peg-40-hydrogenated-castor-oil": {
+    "slug": "peg-40-hydrogenated-castor-oil",
+    "found": true,
+    "name": "PEG-40 Hydrogenated Castor Oil",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying",
+      "surfactant/cleansing"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "A mildly viscous, amber-colored liquid with fatty odor, made from Castor Oil and polyethylene glycol (PEG).",
+    "url": "https://incidecoder.com/ingredients/peg-40-hydrogenated-castor-oil",
+    "inci_name": "PEG-40 HYDROGENATED CASTOR OIL"
+  },
+  "behentrimonium-methosulfate": {
+    "slug": "behentrimonium-methosulfate",
+    "found": true,
+    "name": "Behentrimonium Methosulfate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "surfactant/cleansing"
+    ],
+    "role_fr": "Tensioactif",
+    "description_en": "In itself, it's anantistatic(stops your hair from flying around because of electricity),hair conditioningand softening ingredient used mainly in haircare products.",
+    "url": "https://incidecoder.com/ingredients/behentrimonium-methosulfate",
+    "inci_name": "BEHENTRIMONIUM METHOSULFATE"
+  },
+  "glyceryl-stearate-se": {
+    "slug": "glyceryl-stearate-se",
+    "found": true,
+    "name": "Glyceryl Stearate SE",
+    "inci_name_found": null,
+    "irritancy": 2,
+    "comedogenicity_raw": "3",
+    "comedogenicity": 3,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "An oily kind of ingredient that can magically blend with water all by itself. This is calledself-emulsifyingand SE in its name stands for that.",
+    "url": "https://incidecoder.com/ingredients/glyceryl-stearate-se",
+    "inci_name": "GLYCERYL STEARATE SE"
+  },
+  "arachidyl-glucoside": {
+    "slug": "arachidyl-glucoside",
+    "found": true,
+    "name": "Arachidyl Glucoside",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying",
+      "surfactant/cleansing"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "An ingredient that is created from the attachment of the water-loving sugar molecule,glucose, and an oil-loving 20 carbon long fatty chain. This makes it a partly water- and partly oil-soluble material, meaning it functions as anemulsifier helping oil and water to mix.",
+    "url": "https://incidecoder.com/ingredients/arachidyl-glucoside",
+    "inci_name": "ARACHIDYL GLUCOSIDE"
+  },
+  "glyceryl-oleate": {
+    "slug": "glyceryl-oleate",
+    "found": true,
+    "name": "Glyceryl Oleate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "emulsifying",
+      "perfuming"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "The attachment ofglycerinandoleic acidthat works mainly as aco-emulsifier and stabilizerto create stable water-oil mixes, aka emulsions. It is also popular in cleansing products as it helps tothicken them upand has somerefattingand skin-smoothing effect.",
+    "url": "https://incidecoder.com/ingredients/glyceryl-oleate",
+    "inci_name": "GLYCERYL OLEATE"
+  },
+  "ceteareth-20": {
+    "slug": "ceteareth-20",
+    "found": true,
+    "name": "Ceteareth-20",
+    "inci_name_found": null,
+    "irritancy": 3,
+    "comedogenicity_raw": "2",
+    "comedogenicity": 2,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying",
+      "surfactant/cleansing"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "A common functional ingredient that helps tokeep the oil-loving and water-loving ingredients together(emulsifier), stabilizes and thickens the products.",
+    "url": "https://incidecoder.com/ingredients/ceteareth-20",
+    "inci_name": "CETEARETH-20"
+  },
+  "ceteareth-12": {
+    "slug": "ceteareth-12",
+    "found": true,
+    "name": "Ceteareth-12",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying",
+      "surfactant/cleansing"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/ceteareth-12",
+    "inci_name": "CETEARETH-12"
+  },
+  "peg-20-ceteareth": {
+    "slug": "peg-20-ceteareth",
+    "found": false,
+    "url": "https://incidecoder.com/ingredients/peg-20-ceteareth",
+    "http_status": 404,
+    "inci_name": "PEG-20 CETEARETH"
+  },
+  "phenoxyethanol": {
+    "slug": "phenoxyethanol",
+    "found": true,
+    "name": "Phenoxyethanol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "preservative"
+    ],
+    "role_fr": "Conservateur",
+    "description_en": "It’s pretty much the current IT-preservative. It’ssafe and gentle, but even more importantly, it’s not a feared-by-everyone-mostly-without-scientific-reason paraben.",
+    "url": "https://incidecoder.com/ingredients/phenoxyethanol",
+    "inci_name": "PHENOXYETHANOL"
+  },
+  "sodium-benzoate": {
+    "slug": "sodium-benzoate",
+    "found": true,
+    "name": "Sodium Benzoate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "preservative"
+    ],
+    "role_fr": "Conservateur",
+    "description_en": "A helper ingredient that helps to make the products stay nice longer, akapreservative. It works mainly against fungi.",
+    "url": "https://incidecoder.com/ingredients/sodium-benzoate",
+    "inci_name": "SODIUM BENZOATE"
+  },
+  "potassium-sorbate": {
+    "slug": "potassium-sorbate",
+    "found": true,
+    "name": "Potassium Sorbate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "preservative"
+    ],
+    "role_fr": "Conservateur",
+    "description_en": "It's one of those things thathelp your cosmetics not to go wrong too soon, aka a preservative. It’s not a strong one and doesn’t really work against bacteria, but more against mold and yeast. To do that it has to break down to its active form, sorbic acid. For that to happen, there has to be water in the product and the right pH value (pH 3-4).",
+    "url": "https://incidecoder.com/ingredients/potassium-sorbate",
+    "inci_name": "POTASSIUM SORBATE"
+  },
+  "ethylhexylglycerin": {
+    "slug": "ethylhexylglycerin",
+    "found": true,
+    "name": "Ethylhexylglycerin",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "preservative",
+      "deodorant"
+    ],
+    "role_fr": "Conservateur",
+    "description_en": "If you have spotted ethylhexylglycerin on the ingredient list, most probably you will see there also the current IT-preservative,phenoxyethanol. They are good friends because ethylhexylglycerin canboost the effectiveness of phenoxyethanol(and other preservatives) and as an added bonus it feels nice on the skin too.",
+    "url": "https://incidecoder.com/ingredients/ethylhexylglycerin",
+    "inci_name": "ETHYLHEXYLGLYCERIN"
+  },
+  "caprylyl-glycol": {
+    "slug": "caprylyl-glycol",
+    "found": true,
+    "name": "Caprylyl Glycol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant",
+      "emollient",
+      "deodorant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": "It’s a handymulti-tasking ingredientthat gives the skin anice, soft feel. At the same time, it alsoboosts the effectiveness of other preservatives, such as the nowadays super commonly usedphenoxyethanol.",
+    "url": "https://incidecoder.com/ingredients/caprylyl-glycol",
+    "inci_name": "CAPRYLYL GLYCOL"
+  },
+  "decylene-glycol": {
+    "slug": "decylene-glycol",
+    "found": true,
+    "name": "Decylene Glycol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [],
+    "role_fr": null,
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/decylene-glycol",
+    "inci_name": "DECYLENE GLYCOL"
+  },
+  "1-2-hexanediol": {
+    "slug": "1-2-hexanediol",
+    "found": true,
+    "name": "1,2-Hexanediol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "solvent"
+    ],
+    "role_fr": "Solvant",
+    "description_en": "A really multi-functional helper ingredient that can do several things in a skincare product: it can bring a soft and pleasant feel to the formula, it can act as ahumectant and emollient, it can be asolventfor some other ingredients (for example it can help to stabilize perfumes in watery products) and it can also help to disperse pigments more evenly in makeup products. And that is still not all: it can alsoboostthe antimicrobial activity ofpreservatives.",
+    "url": "https://incidecoder.com/ingredients/1-2-hexanediol",
+    "inci_name": "1,2-HEXANEDIOL"
+  },
+  "caprylhydroxamic-acid": {
+    "slug": "caprylhydroxamic-acid",
+    "found": true,
+    "name": "Caprylhydroxamic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "chelating"
+    ],
+    "role_fr": "Chélateur",
+    "description_en": "Achelating agentthat helps to preserve cosmetic products by neutralizing the metal ions (especially iron) in the formula (that usually get into there from water). Its special thing is that it also acts as abiostatic and fungistatic agentand remains active even at high pH.",
+    "url": "https://incidecoder.com/ingredients/caprylhydroxamic-acid",
+    "inci_name": "CAPRYLHYDROXAMIC ACID"
+  },
+  "chlorphenesin": {
+    "slug": "chlorphenesin",
+    "found": true,
+    "name": "Chlorphenesin",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "preservative",
+      "antimicrobial/antibacterial"
+    ],
+    "role_fr": "Conservateur",
+    "description_en": "A little helper ingredient that works as a preservative. It works against bacteria and some species of fungi and yeast. It's often combined with IT-preservative,phenoxyethanol.",
+    "url": "https://incidecoder.com/ingredients/chlorphenesin",
+    "inci_name": "CHLORPHENESIN"
+  },
+  "dehydroacetic-acid": {
+    "slug": "dehydroacetic-acid",
+    "found": true,
+    "name": "Dehydroacetic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "preservative"
+    ],
+    "role_fr": "Conservateur",
+    "description_en": "A helper ingredient that helps to make the products stay nice longer, akapreservative. It works mainly against fungi and has only milder effect against bacteria.",
+    "url": "https://incidecoder.com/ingredients/dehydroacetic-acid",
+    "inci_name": "DEHYDROACETIC ACID"
+  },
+  "benzoic-acid": {
+    "slug": "benzoic-acid",
+    "found": true,
+    "name": "Benzoic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "preservative"
+    ],
+    "role_fr": "Conservateur",
+    "description_en": "An Ecocert-approved,natural preservativethat counts as gentle and non-irritating to the skin. Usually, it comes to the formula as part of a preservative blend as it's not enough on its own.",
+    "url": "https://incidecoder.com/ingredients/benzoic-acid",
+    "inci_name": "BENZOIC ACID"
+  },
+  "sorbic-acid": {
+    "slug": "sorbic-acid",
+    "found": true,
+    "name": "Sorbic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "preservative"
+    ],
+    "role_fr": "Conservateur",
+    "description_en": "Amild, natural preservativethat usually comes to the formula together with its other mild preservative friends, such asBenzoic Acidand/orDehydroacetic Acid. Btw, it's also used as a food preservative.",
+    "url": "https://incidecoder.com/ingredients/sorbic-acid",
+    "inci_name": "SORBIC ACID"
+  },
+  "glyceryl-caprylate": {
+    "slug": "glyceryl-caprylate",
+    "found": true,
+    "name": "Glyceryl Caprylate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "preservative"
+    ],
+    "role_fr": "Conservateur",
+    "description_en": "A 100% plant derived, natural (Ecocert approved) multi-functional ingredient that hasemollient and moisturizingproperties, can work as aco-emulsifier(meaning that next to other emulsifiers it can help water and oil to mix)  and even more importantly has astrong antimicrobial activity.",
+    "url": "https://incidecoder.com/ingredients/glyceryl-caprylate",
+    "inci_name": "GLYCERYL CAPRYLATE"
+  },
+  "sodium-levulinate": {
+    "slug": "sodium-levulinate",
+    "found": true,
+    "name": "Sodium Levulinate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [],
+    "role_fr": null,
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/sodium-levulinate",
+    "inci_name": "SODIUM LEVULINATE"
+  },
+  "sodium-anisate": {
+    "slug": "sodium-anisate",
+    "found": true,
+    "name": "Sodium Anisate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "antimicrobial/antibacterial"
+    ],
+    "role_fr": "Antibactérien",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/sodium-anisate",
+    "inci_name": "SODIUM ANISATE"
+  },
+  "benzyl-alcohol": {
+    "slug": "benzyl-alcohol",
+    "found": true,
+    "name": "Benzyl Alcohol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "preservative",
+      "perfuming",
+      "solvent",
+      "viscosity controlling"
+    ],
+    "role_fr": "Solvant",
+    "description_en": "It's one of those things that help your cosmetics not to go wrong too soon, aka apreservative. It can be naturally found in fruits and teas but can also be made synthetically.",
+    "url": "https://incidecoder.com/ingredients/benzyl-alcohol",
+    "inci_name": "BENZYL ALCOHOL"
+  },
+  "carbomer": {
+    "slug": "carbomer",
+    "found": true,
+    "name": "Carbomer",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "1",
+    "comedogenicity": 1,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling",
+      "emulsion stabilising"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "A big molecule created from repeated subunits (a polymer of acrylic acid) that magicallyconverts a liquid into a nice gel formula.  It usually has to be neutralized with a base (such assodium hydroxide) for the thickening to occur and itcreates viscous, clear gelsthat also feel nice and non-tacky on the skin. No wonder, it is a very popular and common ingredient. Typically used at 1% or less in most formulations.",
+    "url": "https://incidecoder.com/ingredients/carbomer",
+    "inci_name": "CARBOMER"
+  },
+  "xanthan-gum": {
+    "slug": "xanthan-gum",
+    "found": true,
+    "name": "Xanthan Gum",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "viscosity controlling",
+      "emulsion stabilising"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "It's one of the most commonly usedthickeners andemulsion stabilizers. If the product is too runny, a little xanthan gum will make it more gel-like. Used alone, it can make the formula sticky and it is a good team player so it is usually combined with other thickeners and so-called rheology modifiers (helper ingredients that adjust the flow and thus the feel of the formula). The typical use level of Xantha Gum is below 1%, it is usually in the 0.1-0.5% range.",
+    "url": "https://incidecoder.com/ingredients/xanthan-gum",
+    "inci_name": "XANTHAN GUM"
+  },
+  "hydroxyethylcellulose": {
+    "slug": "hydroxyethylcellulose",
+    "found": true,
+    "name": "Hydroxyethylcellulose",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling",
+      "emulsion stabilising"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "A nice little helper ingredient that canthicken up cosmetic productsand create beautiful gel formulas. It's derived from cellulose, the major component of the cell wall of green plants. It is compatible with most co-ingredients and gives a very good slip to the formulas.",
+    "url": "https://incidecoder.com/ingredients/hydroxyethylcellulose",
+    "inci_name": "HYDROXYETHYLCELLULOSE"
+  },
+  "hydroxypropyl-methylcellulose": {
+    "slug": "hydroxypropyl-methylcellulose",
+    "found": true,
+    "name": "Hydroxypropyl Methylcellulose",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "1",
+    "comedogenicity": 1,
+    "verdict": null,
+    "what_it_does": [
+      "surfactant/cleansing",
+      "viscosity controlling",
+      "emulsion stabilising"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "A handy helper ingredient (a polymer, i.e. big molecule from repeated subunits) that is used tostabilize emulsions as well as to thicken up products. It can also stabilize foam in cleansing products.",
+    "url": "https://incidecoder.com/ingredients/hydroxypropyl-methylcellulose",
+    "inci_name": "HYDROXYPROPYL METHYLCELLULOSE"
+  },
+  "carrageenan": {
+    "slug": "carrageenan",
+    "found": true,
+    "name": "Carrageenan",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling"
+    ],
+    "role_fr": "Épaississant",
+    "description_en": "A natural polysaccharide (big sugar molecule) coming from red edible seaweeds. It is used as a helper ingredient for itsgelling, thickening and stabilizing properties.",
+    "url": "https://incidecoder.com/ingredients/carrageenan",
+    "inci_name": "CARRAGEENAN"
+  },
+  "microcrystalline-cellulose": {
+    "slug": "microcrystalline-cellulose",
+    "found": true,
+    "name": "Microcrystalline Cellulose",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling",
+      "absorbent/mattifier",
+      "emulsion stabilising"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "Cellulose is an important component of the cell walls of green plants and it's themost abundant natural polymer(big molecule from repeated subunits) on Earth. If the polymer structure is not too big (less than 200 repeated units), cellulose becomes microcrystalline cellulose.",
+    "url": "https://incidecoder.com/ingredients/microcrystalline-cellulose",
+    "inci_name": "MICROCRYSTALLINE CELLULOSE"
+  },
+  "sodium-polyacrylate": {
+    "slug": "sodium-polyacrylate",
+    "found": true,
+    "name": "Sodium Polyacrylate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling",
+      "emulsion stabilising"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "Asuperabsorbent polymer(big molecule from repeated subunits) that has crazy water binding abilities. Sometimes its referred to as \"waterlock\" and can absorb 100 to 1000 times its mass in water.",
+    "url": "https://incidecoder.com/ingredients/sodium-polyacrylate",
+    "inci_name": "SODIUM POLYACRYLATE"
+  },
+  "acrylates-c10-30-alkyl-acrylate-crosspolymer": {
+    "slug": "acrylates-c10-30-alkyl-acrylate-crosspolymer",
+    "found": true,
+    "name": "Acrylates/​C10-30 Alkyl Acrylate Crosspolymer",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling",
+      "emulsion stabilising"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "Though its long name does not reveal it, this polymer molecule (big molecule from repeated subunits or monomers) is a relative to the super common, water-loving thickener,Carbomer. Both of them are big molecules that contain acrylic acid units, but Acrylates/C10-30 Alkyl Acrylate Crosspolymer also contains some other monomers that are hydrophobic, i.e. water-hating.",
+    "url": "https://incidecoder.com/ingredients/acrylates-c10-30-alkyl-acrylate-crosspolymer",
+    "inci_name": "ACRYLATES/C10-30 ALKYL ACRYLATE CROSSPOLYMER"
+  },
+  "hydroxyethyl-acrylate-sodium-acryloyldimethyl-taurate-copolymer": {
+    "slug": "hydroxyethyl-acrylate-sodium-acryloyldimethyl-taurate-copolymer",
+    "found": true,
+    "name": "Hydroxyethyl Acrylate/​Sodium Acryloyldimethyl Taurate Copolymer",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "icky",
+    "what_it_does": [
+      "viscosity controlling",
+      "emulsion stabilising"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": "This long-named, polymer molecule (big molecule from repeated subunits) is a helper ingredient that's good atemulsifying and stabilizing oils into water-based formulas.It also acts as athickening and gelling agentthatcreates nice, non-sticky and supple textures. It works over a very wide pH range (3-12) and can be used to thicken up low-ph formulas, such as exfoliants. Its recommended used range is 0.3-3%.",
+    "url": "https://incidecoder.com/ingredients/hydroxyethyl-acrylate-sodium-acryloyldimethyl-taurate-copolymer",
+    "inci_name": "HYDROXYETHYL ACRYLATE/SODIUM ACRYLOYLDIMETHYL TAURATE COPOLYMER"
+  },
+  "acrylates-copolymer": {
+    "slug": "acrylates-copolymer",
+    "found": true,
+    "name": "Acrylates Copolymer",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling"
+    ],
+    "role_fr": "Épaississant",
+    "description_en": "A big polymer molecule that has a bunch of different versions and thus different uses. It can act as afilm former,asathickening agent,or it canincrease the water-resistance in sunscreens. It is also used to entrap pigments/inorganic sunscreens within a micron size matrix for even coverage and easy application.",
+    "url": "https://incidecoder.com/ingredients/acrylates-copolymer",
+    "inci_name": "ACRYLATES COPOLYMER"
+  },
+  "cellulose": {
+    "slug": "cellulose",
+    "found": true,
+    "name": "Cellulose",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling",
+      "absorbent/mattifier"
+    ],
+    "role_fr": "Épaississant",
+    "description_en": "A natural polymer (big molecule from repeated subunits) that can be found in the cell wall of green plants. It is a natural and sustainable helper ingredient that canimprove the absorptionof the formula and it alsoreduces oilinesson the skin. It is also used as asensory additive and thickening agent.",
+    "url": "https://incidecoder.com/ingredients/cellulose",
+    "inci_name": "CELLULOSE"
+  },
+  "methylcellulose": {
+    "slug": "methylcellulose",
+    "found": true,
+    "name": "Methylcellulose",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling",
+      "emulsion stabilising"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/methylcellulose",
+    "inci_name": "METHYLCELLULOSE"
+  },
+  "silica": {
+    "slug": "silica",
+    "found": true,
+    "name": "Silica",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling",
+      "absorbent/mattifier"
+    ],
+    "role_fr": "Épaississant",
+    "description_en": "A white powdery thing that's the major component of glass and sand. In cosmetics, it’s often in products that are supposed tokeep your skin matteas it has great oil-absorbing abilities. It’s also used as a helper ingredient tothicken up productsor suspend insoluble particles.",
+    "url": "https://incidecoder.com/ingredients/silica",
+    "inci_name": "SILICA"
+  },
+  "silica-dimethyl-silylate": {
+    "slug": "silica-dimethyl-silylate",
+    "found": true,
+    "name": "Silica Dimethyl Silylate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "viscosity controlling",
+      "emulsion stabilising"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "It's a water-hating,fumed silicathat works as athickener for oilsand it can alsosuspend particles in oils.",
+    "url": "https://incidecoder.com/ingredients/silica-dimethyl-silylate",
+    "inci_name": "SILICA DIMETHYL SILYLATE"
+  },
+  "magnesium-aluminum-silicate": {
+    "slug": "magnesium-aluminum-silicate",
+    "found": true,
+    "name": "Magnesium Aluminum Silicate",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": "icky",
+    "what_it_does": [
+      "viscosity controlling",
+      "absorbent/mattifier"
+    ],
+    "role_fr": "Épaississant",
+    "description_en": "A type of clay mineral that works as a nice helper ingredient tothicken and stabilize formulas. As a clay, it consists of platelets that have a negative charge on the surface (face) and a positive on the edge. So the face of one platelet attracts the edge of the other and this builds a so-called \"house of card\" structure meaning that Magnesium Aluminum Silicate (MAS)thickens up products and helps to suspend non-soluble particlessuch as color pigments or inorganic sunscreens (zinc oxideandtitanium dioxide).",
+    "url": "https://incidecoder.com/ingredients/magnesium-aluminum-silicate",
+    "inci_name": "MAGNESIUM ALUMINUM SILICATE"
+  },
+  "kaolin": {
+    "slug": "kaolin",
+    "found": true,
+    "name": "Kaolin",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0",
+    "comedogenicity": 0,
+    "verdict": null,
+    "what_it_does": [
+      "colorant",
+      "abrasive/scrub",
+      "absorbent/mattifier"
+    ],
+    "role_fr": null,
+    "description_en": "Kaolin is atype of clayor to be precise, a naturally occurring hydrous aluminum silicate. When you hear clay, you probably think of a muddy greenish-black mess, but that one isbentonite, and this one is a fine, white powder. It is so white that it's also often used, in small amounts, as a helper ingredient togive opacity and whitenessto the cosmetic formulas.",
+    "url": "https://incidecoder.com/ingredients/kaolin",
+    "inci_name": "KAOLIN"
+  },
+  "talc": {
+    "slug": "talc",
+    "found": true,
+    "name": "Talc",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "1",
+    "comedogenicity": 1,
+    "verdict": "avoid",
+    "what_it_does": [
+      "abrasive/scrub",
+      "absorbent/mattifier"
+    ],
+    "role_fr": null,
+    "description_en": "Talc is themajor component of most powder makeup products(think face powder, eyeshadows, and blushers) that usually contain it up to 70%. Its two winning properties that make it very suitable for this role is itsoutstanding spreadabilityfor a smooth application and itslow covering power, aka translucencyto avoid clown-like effects.",
+    "url": "https://incidecoder.com/ingredients/talc",
+    "inci_name": "TALC"
+  },
+  "mica": {
+    "slug": "mica",
+    "found": true,
+    "name": "Mica",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "colorant"
+    ],
+    "role_fr": null,
+    "description_en": "A super versatile and commonmineral powderthat comes in different particle sizes. It is amulti-taskerused to improve skin feel,increase product slip, give the product light-reflecting properties, enhance skin adhesionor serve as ananti-caking agent.",
+    "url": "https://incidecoder.com/ingredients/mica",
+    "inci_name": "MICA"
+  },
+  "nylon-12": {
+    "slug": "nylon-12",
+    "found": true,
+    "name": "Nylon-12",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling"
+    ],
+    "role_fr": "Épaississant",
+    "description_en": "An  odorless, slightly yellowish powder that's used as a polymer microsphere (a tiny little ball from repeated subunits). It gives products an elegant,silky textureand better slip. It can alsoscatter light to blur fine lineswhile letting enough light through so that the skin still looks natural.",
+    "url": "https://incidecoder.com/ingredients/nylon-12",
+    "inci_name": "NYLON-12"
+  },
+  "trimethylsiloxysilicate": {
+    "slug": "trimethylsiloxysilicate",
+    "found": true,
+    "name": "Trimethylsiloxysilicate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "Asolid silicone resinthat creates a permeable film over the skin. It makes makeup formulas morelong-lastingand can enhance thewater resistanceof sunscreens. It leaves a non-tacky film when dried.",
+    "url": "https://incidecoder.com/ingredients/trimethylsiloxysilicate",
+    "inci_name": "TRIMETHYLSILOXYSILICATE"
+  },
+  "starch": {
+    "slug": "starch",
+    "found": true,
+    "name": "Starch",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [],
+    "role_fr": null,
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/starch",
+    "inci_name": "STARCH"
+  },
+  "tapioca-starch": {
+    "slug": "tapioca-starch",
+    "found": true,
+    "name": "Tapioca Starch",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling"
+    ],
+    "role_fr": "Épaississant",
+    "description_en": "A soft, white powder that can be used as atalcreplacementin body powders or in pressed powders. It also has someoil absorbingproperties and givesincreased cushion and richness to emulsion-type formulas.",
+    "url": "https://incidecoder.com/ingredients/tapioca-starch",
+    "inci_name": "TAPIOCA STARCH"
+  },
+  "copernicia-cerifera-cera": {
+    "slug": "copernicia-cerifera-cera",
+    "found": true,
+    "name": "Copernicia Cerifera Wax",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "1",
+    "comedogenicity": 1,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "Avegetable waxcoming from the leaves of the Brazilian tropical palm tree,Copernicia cerifera.Similar to other waxes, it is used tostabilize and give body to products, or to keep stick type formulas solid. It is thehardest natural waxwith a high melting point (around 85C) and high gloss making it a great wax choice for lip products.",
+    "url": "https://incidecoder.com/ingredients/copernicia-cerifera-cera",
+    "inci_name": "COPERNICIA CERIFERA CERA"
+  },
+  "candelilla-cera": {
+    "slug": "candelilla-cera",
+    "found": true,
+    "name": "Candelilla Cera",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "1",
+    "comedogenicity": 1,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "Avegetable waxcoming from the leaves of the North Mexican candelilla shrubs (Euphorbia cerifera and Euphorbia antisyphilitica).  Similar to other waxes, it is used tostabilize products and give body to them, or to keep stick type formulas solid. It has a melting point around 70C and has high gloss making it a good choice for lip products.",
+    "url": "https://incidecoder.com/ingredients/candelilla-cera",
+    "inci_name": "CANDELILLA CERA"
+  },
+  "cera-alba": {
+    "slug": "cera-alba",
+    "found": true,
+    "name": "Cera Alba",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0-2",
+    "comedogenicity": 2,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "viscosity controlling",
+      "emulsifying",
+      "perfuming"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "It's the yellow, solid stuff that you probably know from beeswax candles. It's a natural materialproduced by honey beesto build their honeycomb.",
+    "url": "https://incidecoder.com/ingredients/cera-alba",
+    "inci_name": "CERA ALBA"
+  },
+  "cera-flava": {
+    "slug": "cera-flava",
+    "found": true,
+    "name": "Cera Alba",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "0-2",
+    "comedogenicity": 2,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "viscosity controlling",
+      "emulsifying",
+      "perfuming"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "It's the yellow, solid stuff that you probably know from beeswax candles. It's a natural materialproduced by honey beesto build their honeycomb.",
+    "url": "https://incidecoder.com/ingredients/cera-flava",
+    "inci_name": "CERA FLAVA"
+  },
+  "hydrogenated-jojoba-oil": {
+    "slug": "hydrogenated-jojoba-oil",
+    "found": true,
+    "name": "Hydrogenated Jojoba Oil",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "abrasive/scrub",
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/hydrogenated-jojoba-oil",
+    "inci_name": "HYDROGENATED JOJOBA OIL"
+  },
+  "carnauba": {
+    "slug": "carnauba",
+    "found": true,
+    "name": "Copernicia Cerifera Wax",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "1",
+    "comedogenicity": 1,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "Avegetable waxcoming from the leaves of the Brazilian tropical palm tree,Copernicia cerifera.Similar to other waxes, it is used tostabilize and give body to products, or to keep stick type formulas solid. It is thehardest natural waxwith a high melting point (around 85C) and high gloss making it a great wax choice for lip products.",
+    "url": "https://incidecoder.com/ingredients/carnauba",
+    "inci_name": "CARNAUBA"
+  },
+  "synthetic-beeswax": {
+    "slug": "synthetic-beeswax",
+    "found": true,
+    "name": "Synthetic Beeswax",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling",
+      "emulsion stabilising"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/synthetic-beeswax",
+    "inci_name": "SYNTHETIC BEESWAX"
+  },
+  "paraffin": {
+    "slug": "paraffin",
+    "found": true,
+    "name": "Paraffin",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling",
+      "perfuming"
+    ],
+    "role_fr": "Épaississant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/paraffin",
+    "inci_name": "PARAFFIN"
+  },
+  "sodium-hydroxide": {
+    "slug": "sodium-hydroxide",
+    "found": true,
+    "name": "Sodium Hydroxide",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "buffering"
+    ],
+    "role_fr": "Régulateur pH",
+    "description_en": "The unfancy name for it is lye. It’s a solid white stuff that’svery alkalineand used in small amounts toadjust the pH of the productand make it just right.",
+    "url": "https://incidecoder.com/ingredients/sodium-hydroxide",
+    "inci_name": "SODIUM HYDROXIDE"
+  },
+  "potassium-hydroxide": {
+    "slug": "potassium-hydroxide",
+    "found": true,
+    "name": "Potassium Hydroxide",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "buffering"
+    ],
+    "role_fr": "Régulateur pH",
+    "description_en": "It's a very alkaline stuff that helps toset the pH of the cosmetic formulato be just right. It's similar to the more often usedsodium hydroxideand pretty much the same of what we wrote there applies here too.",
+    "url": "https://incidecoder.com/ingredients/potassium-hydroxide",
+    "inci_name": "POTASSIUM HYDROXIDE"
+  },
+  "triethanolamine": {
+    "slug": "triethanolamine",
+    "found": true,
+    "name": "Triethanolamine",
+    "inci_name_found": null,
+    "irritancy": 0,
+    "comedogenicity_raw": "2",
+    "comedogenicity": 2,
+    "verdict": null,
+    "what_it_does": [
+      "buffering"
+    ],
+    "role_fr": "Régulateur pH",
+    "description_en": "It’s a little helper ingredient that helps toset the pH of a cosmeticformulation to be just right. It’s very alkaline (you know the opposite of being very acidic): a 1% solution has a pH of around 10.",
+    "url": "https://incidecoder.com/ingredients/triethanolamine",
+    "inci_name": "TRIETHANOLAMINE"
+  },
+  "aminomethyl-propanol": {
+    "slug": "aminomethyl-propanol",
+    "found": true,
+    "name": "Aminomethyl Propanol",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "buffering"
+    ],
+    "role_fr": "Régulateur pH",
+    "description_en": "An alkaline (high pH, aka basic) material that is used toset the pH of the cosmetic formula to the right value.",
+    "url": "https://incidecoder.com/ingredients/aminomethyl-propanol",
+    "inci_name": "AMINOMETHYL PROPANOL"
+  },
+  "citric-acid": {
+    "slug": "citric-acid",
+    "found": true,
+    "name": "Citric Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "buffering"
+    ],
+    "role_fr": "Régulateur pH",
+    "description_en": "Citric acid comes from citrus fruits and is an AHA. If these magic three letters don’t tell you anything,click hereand read our detailed description on glycolic acid, the most famous AHA.",
+    "url": "https://incidecoder.com/ingredients/citric-acid",
+    "inci_name": "CITRIC ACID"
+  },
+  "lactic-acid": {
+    "slug": "lactic-acid",
+    "found": true,
+    "name": "Lactic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "exfoliant",
+      "moisturizer/humectant",
+      "buffering"
+    ],
+    "role_fr": "Exfoliant AHA",
+    "description_en": "Lactic acid is thesecondmost well-known andmost well researched among the AHAs. The no. 1 is glycolic acid. If you're new to AHAs we strongly suggest that you head over to ourdescription about glycolic acid. There you will find a super detailed geeky description and many of the things we wrote are true to all AHAs and to lactic acid as well.",
+    "url": "https://incidecoder.com/ingredients/lactic-acid",
+    "inci_name": "LACTIC ACID"
+  },
+  "phosphoric-acid": {
+    "slug": "phosphoric-acid",
+    "found": true,
+    "name": "Phosphoric Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "buffering"
+    ],
+    "role_fr": "Régulateur pH",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/phosphoric-acid",
+    "inci_name": "PHOSPHORIC ACID"
+  },
+  "malic-acid": {
+    "slug": "malic-acid",
+    "found": true,
+    "name": "Malic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "exfoliant",
+      "buffering"
+    ],
+    "role_fr": "Exfoliant AHA",
+    "description_en": "Malic acidcomes from apple and is an AHA. If these magic three letters don’t tell you anything,click here and read our detailed description on glycolic acid, the most famous AHA.",
+    "url": "https://incidecoder.com/ingredients/malic-acid",
+    "inci_name": "MALIC ACID"
+  },
+  "disodium-edta": {
+    "slug": "disodium-edta",
+    "found": true,
+    "name": "Disodium EDTA",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "chelating"
+    ],
+    "role_fr": "Chélateur",
+    "description_en": "Super common little helper ingredient thathelps products to remain nice and stable for a longer time. It does so by neutralizing the metal ions in the formula (that usually get into there from water) that would otherwise cause some not so nice changes.",
+    "url": "https://incidecoder.com/ingredients/disodium-edta",
+    "inci_name": "DISODIUM EDTA"
+  },
+  "trisodium-edta": {
+    "slug": "trisodium-edta",
+    "found": true,
+    "name": "Trisodium EDTA",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "chelating"
+    ],
+    "role_fr": "Chélateur",
+    "description_en": "A common helper ingredient that works as a so-called chelating agent.  Ithelps products to remain nice and stable for a longer timeby neutralizing the metal ions in the formula (that usually get into there from water) that would otherwise cause some not so nice changes.",
+    "url": "https://incidecoder.com/ingredients/trisodium-edta",
+    "inci_name": "TRISODIUM EDTA"
+  },
+  "tetrasodium-edta": {
+    "slug": "tetrasodium-edta",
+    "found": true,
+    "name": "Tetrasodium EDTA",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "chelating"
+    ],
+    "role_fr": "Chélateur",
+    "description_en": "A handy helper ingredient thathelps products to remain nice and stable for a longer time. It does so by neutralizing the metal ions in the formula (that usually get into there from water) that would otherwise cause some not so nice changes.",
+    "url": "https://incidecoder.com/ingredients/tetrasodium-edta",
+    "inci_name": "TETRASODIUM EDTA"
+  },
+  "trisodium-ethylenediamine-disuccinate": {
+    "slug": "trisodium-ethylenediamine-disuccinate",
+    "found": true,
+    "name": "Trisodium Ethylenediamine Disuccinate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "chelating"
+    ],
+    "role_fr": "Chélateur",
+    "description_en": "A helper ingredient that helps toneutralize the metal ionsin the formula (they usually come from water) so it stays nice longer. The special property of this particular ingredient is that it's more effective against more problematic ions, like Cu (copper) and Fe (iron) compared to less problematic ones like Ca (calcium)  and Mg (magnesium).",
+    "url": "https://incidecoder.com/ingredients/trisodium-ethylenediamine-disuccinate",
+    "inci_name": "TRISODIUM ETHYLENEDIAMINE DISUCCINATE"
+  },
+  "phytic-acid": {
+    "slug": "phytic-acid",
+    "found": true,
+    "name": "Phytic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "chelating"
+    ],
+    "role_fr": "Chélateur",
+    "description_en": "Though its name says acid, it's not really an exfoliant. It's aplant extractwithsome antioxidantproperties. Its main thing in cosmetic products is toneutralize the metal ionsin the formula (that usually get into there from water) that would otherwise cause some not so nice changes.  It's a natural alternative to sometimes bad-mouthed chelating agents,EDTAs.",
+    "url": "https://incidecoder.com/ingredients/phytic-acid",
+    "inci_name": "PHYTIC ACID"
+  },
+  "sodium-phytate": {
+    "slug": "sodium-phytate",
+    "found": true,
+    "name": "Sodium Phytate",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "chelating"
+    ],
+    "role_fr": "Chélateur",
+    "description_en": "It’s one of those little helper ingredients thatmakes sure the product stays the same over time. No color change or anything like that. It does so by neutralizing the metal ions in the formula (that usually get into there from water) that would otherwise cause some not so nice changes.",
+    "url": "https://incidecoder.com/ingredients/sodium-phytate",
+    "inci_name": "SODIUM PHYTATE"
+  },
+  "glycolic-acid": {
+    "slug": "glycolic-acid",
+    "found": true,
+    "name": "Glycolic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "exfoliant",
+      "buffering"
+    ],
+    "role_fr": "Exfoliant AHA",
+    "description_en": "Unless you have avoided every bit of skin care info out there so far (in this case special welcome to you! :)) you must have heard of glycolic acid. Or at least aboutAHAs or to put it even more nice-soundingfruit acids.",
+    "url": "https://incidecoder.com/ingredients/glycolic-acid",
+    "inci_name": "GLYCOLIC ACID"
+  },
+  "mandelic-acid": {
+    "slug": "mandelic-acid",
+    "found": true,
+    "name": "Mandelic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "exfoliant",
+      "antimicrobial/antibacterial"
+    ],
+    "role_fr": "Exfoliant AHA",
+    "description_en": "An AHA,thatcomes from bitter almondand is named after the German name of almond, “mandel”. If you have never heard of AHAs (where have you been? :)) then go ahead andread all about the most famous representative, glycolic acid. We will wait. When it comes to skincare you have to know about AHAs. Sogo and read it, and let’s meet here afterward.",
+    "url": "https://incidecoder.com/ingredients/mandelic-acid",
+    "inci_name": "MANDELIC ACID"
+  },
+  "gluconolactone": {
+    "slug": "gluconolactone",
+    "found": true,
+    "name": "Gluconolactone",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "exfoliant",
+      "chelating"
+    ],
+    "role_fr": "Exfoliant AHA",
+    "description_en": "Gluconolactone iskind of an acid, even though you would probably not guess it from its name. It’s aPHA, or polyhydroxy acid. PHAs are close relatives to the famous AHAs, both in terms of similar chemical structure and similar effects on the skin. They are oftenmarketed as new-generation AHAs. So if AHAs do not tell you anything,you can read all about them here. Go and read. We tell you, it’s worth the time.",
+    "url": "https://incidecoder.com/ingredients/gluconolactone",
+    "inci_name": "GLUCONOLACTONE"
+  },
+  "lactobionic-acid": {
+    "slug": "lactobionic-acid",
+    "found": true,
+    "name": "Lactobionic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": "superstar",
+    "what_it_does": [
+      "exfoliant",
+      "buffering"
+    ],
+    "role_fr": "Exfoliant AHA",
+    "description_en": "Lactobionic acid is the brother or maybe the sister ofgluconolactone. Usually, it’s called a PHA, though some studies call it bionic acid or aldobionic acid. Not that this matters too much. What matters is that it’s similarly awesome to gluconolactone. Sogo read about gluconolactoneto get the idea.",
+    "url": "https://incidecoder.com/ingredients/lactobionic-acid",
+    "inci_name": "LACTOBIONIC ACID"
+  },
+  "tartaric-acid": {
+    "slug": "tartaric-acid",
+    "found": true,
+    "name": "Tartaric Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "exfoliant",
+      "buffering"
+    ],
+    "role_fr": "Exfoliant AHA",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/tartaric-acid",
+    "inci_name": "TARTARIC ACID"
+  },
+  "pyruvic-acid": {
+    "slug": "pyruvic-acid",
+    "found": true,
+    "name": "Pyruvic Acid",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [],
+    "role_fr": null,
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/pyruvic-acid",
+    "inci_name": "PYRUVIC ACID"
+  },
+  "hydrolyzed-collagen": {
+    "slug": "hydrolyzed-collagen",
+    "found": true,
+    "name": "Hydrolyzed Collagen",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": "Thechemically chopped up version of the big protein molecule, collagen. It is often derived from fish or bovine sources and works as anice moisturizer and humectantthat helps the skin to hold onto water.",
+    "url": "https://incidecoder.com/ingredients/hydrolyzed-collagen",
+    "inci_name": "HYDROLYZED COLLAGEN"
+  },
+  "hydrolyzed-elastin": {
+    "slug": "hydrolyzed-elastin",
+    "found": true,
+    "name": "Hydrolyzed Elastin",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant",
+      "emollient"
+    ],
+    "role_fr": "Humectant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/hydrolyzed-elastin",
+    "inci_name": "HYDROLYZED ELASTIN"
+  },
+  "hydrolyzed-keratin": {
+    "slug": "hydrolyzed-keratin",
+    "found": true,
+    "name": "Hydrolyzed Keratin",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/hydrolyzed-keratin",
+    "inci_name": "HYDROLYZED KERATIN"
+  },
+  "hydrolyzed-silk": {
+    "slug": "hydrolyzed-silk",
+    "found": true,
+    "name": "Hydrolyzed Silk",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/hydrolyzed-silk",
+    "inci_name": "HYDROLYZED SILK"
+  },
+  "hydrolyzed-wheat-protein": {
+    "slug": "hydrolyzed-wheat-protein",
+    "found": true,
+    "name": "Hydrolyzed Wheat Protein",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": "A chemically chopped up version of wheat protein that consists mainly of amino acids (the building blocks), peptides (a couple of amino acids together), and proteins (lots of amino acids together).",
+    "url": "https://incidecoder.com/ingredients/hydrolyzed-wheat-protein",
+    "inci_name": "HYDROLYZED WHEAT PROTEIN"
+  },
+  "hydrolyzed-oat-protein": {
+    "slug": "hydrolyzed-oat-protein",
+    "found": true,
+    "name": "Hydrolyzed Oat Protein",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [],
+    "role_fr": null,
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/hydrolyzed-oat-protein",
+    "inci_name": "HYDROLYZED OAT PROTEIN"
+  },
+  "hydrolyzed-soy-protein": {
+    "slug": "hydrolyzed-soy-protein",
+    "found": true,
+    "name": "Hydrolyzed Soy Protein",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/hydrolyzed-soy-protein",
+    "inci_name": "HYDROLYZED SOY PROTEIN"
+  },
+  "glycine": {
+    "slug": "glycine",
+    "found": true,
+    "name": "Glycine",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "A non-essential amino acid (the building blocks of skin proteins, like collagen or elastin), that the body can produce itself, but its production decreases with age. When you put it all over your face, itworks as a moisturizerand maybe more.",
+    "url": "https://incidecoder.com/ingredients/glycine",
+    "inci_name": "GLYCINE"
+  },
+  "serine": {
+    "slug": "serine",
+    "found": true,
+    "name": "Serine",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "Serine is anamino acidthat most often comes to the formula as part of amoisturizingcomplex. It's a non-essential amino acid (meaning that our body can synthesize it) and serves as a water-binding ingredient.",
+    "url": "https://incidecoder.com/ingredients/serine",
+    "inci_name": "SERINE"
+  },
+  "threonine": {
+    "slug": "threonine",
+    "found": true,
+    "name": "Threonine",
+    "inci_name_found": null,
+    "irritancy": null,
+    "comedogenicity": null,
+    "comedogenicity_raw": null,
+    "verdict": null,
+    "what_it_does": [
+      "skin-identical ingredient"
+    ],
+    "role_fr": "Barrière",
+    "description_en": "Anessential amino acidthat's also a key building block of collagen and elastin. When taken orally, it helps the digestive and intestinal tracts function more smoothly and also helps the absorption of nutrients. As for skincare, it is not clear what it does other than being askinhydrator.",
+    "url": "https://incidecoder.com/ingredients/threonine",
+    "inci_name": "THREONINE"
+  }
+}

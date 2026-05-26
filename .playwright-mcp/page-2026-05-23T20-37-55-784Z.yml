@@ -1,0 +1,242 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]:
+      - link "INCI API INCI API" [ref=e7] [cursor=pointer]:
+        - /url: /fr
+        - img "INCI API" [ref=e8]
+        - generic [ref=e9]: INCI API
+      - navigation [ref=e10]:
+        - link "header.nav.checker" [ref=e11] [cursor=pointer]:
+          - /url: /fr/checker
+        - link "header.nav.pricing" [ref=e12] [cursor=pointer]:
+          - /url: /fr/pricing
+        - link "header.nav.docs" [ref=e13] [cursor=pointer]:
+          - /url: /fr/docs
+        - link "header.nav.about" [ref=e14] [cursor=pointer]:
+          - /url: /fr/about
+        - link "header.nav.blog" [ref=e15] [cursor=pointer]:
+          - /url: /fr/blog
+      - generic [ref=e16]:
+        - button "languageSwitcher.tooltip" [ref=e18] [cursor=pointer]:
+          - img [ref=e19]
+          - generic [ref=e22]: 🇫🇷
+          - generic [ref=e23]: Français
+          - generic [ref=e24]: languageSwitcher.current
+        - link "header.logIn" [ref=e25] [cursor=pointer]:
+          - /url: /login
+        - link "header.getStarted" [ref=e26] [cursor=pointer]:
+          - /url: /register
+  - main [ref=e27]:
+    - article [ref=e28]:
+      - region "hero.ariaLabel" [ref=e29]:
+        - generic [ref=e33]:
+          - generic [ref=e35]:
+            - img [ref=e36]
+            - text: hero.badge
+          - heading "hero.titleLead hero.titleHighlight" [level=1] [ref=e38]
+          - paragraph [ref=e39]: hero.subtitle
+          - generic [ref=e40]:
+            - link "hero.ctaCheck" [ref=e41] [cursor=pointer]:
+              - /url: /fr/checker
+              - img [ref=e42]
+              - text: hero.ctaCheck
+            - link "hero.ctaApi" [ref=e44] [cursor=pointer]:
+              - /url: /register
+              - text: hero.ctaApi
+              - img [ref=e45]
+          - paragraph [ref=e47]: hero.freeNote
+      - region "Beta status" [ref=e48]:
+        - generic [ref=e50]:
+          - img [ref=e51]
+          - paragraph [ref=e55]: Database is in active growth. We are still building coverage across the full beauty catalogue, so some lookups will miss INCI data. Access is free for everyone while we scale.
+      - region "demo.ariaLabel" [ref=e56]:
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - heading "demo.title" [level=2] [ref=e59]
+            - paragraph [ref=e60]: demo.subtitle
+          - generic [ref=e63]:
+            - textbox "demo.inputPlaceholder" [ref=e65]
+            - button "demo.analyze" [ref=e66] [cursor=pointer]:
+              - img [ref=e67]
+              - text: demo.analyze
+      - paragraph [ref=e72]: Data provided for informational purposes only. Not medical advice.
+      - region "howItWorks.ariaLabel" [ref=e73]:
+        - generic [ref=e74]:
+          - generic [ref=e75]:
+            - heading "howItWorks.title" [level=2] [ref=e76]
+            - paragraph [ref=e77]: howItWorks.subtitle
+          - generic [ref=e78]:
+            - generic [ref=e79]:
+              - img [ref=e81]
+              - generic [ref=e86]:
+                - generic [ref=e87]: "1"
+                - img [ref=e88]
+              - heading "howItWorks.steps.scan.title" [level=3] [ref=e90]
+              - paragraph [ref=e91]: howItWorks.steps.scan.description
+            - generic [ref=e92]:
+              - img [ref=e94]
+              - generic [ref=e97]:
+                - generic [ref=e98]: "2"
+                - img [ref=e99]
+              - heading "howItWorks.steps.analyze.title" [level=3] [ref=e101]
+              - paragraph [ref=e102]: howItWorks.steps.analyze.description
+            - generic [ref=e103]:
+              - img [ref=e105]
+              - generic [ref=e108]: "3"
+              - heading "howItWorks.steps.intelligence.title" [level=3] [ref=e109]
+              - paragraph [ref=e110]: howItWorks.steps.intelligence.description
+      - region "features.ariaLabel" [ref=e111]:
+        - generic [ref=e112]:
+          - generic [ref=e113]:
+            - generic [ref=e115]: features.badge
+            - heading "features.title" [level=2] [ref=e116]
+            - paragraph [ref=e117]: features.subtitle
+          - generic [ref=e118]:
+            - generic [ref=e120]:
+              - img [ref=e122]
+              - heading "features.items.safety.title" [level=3] [ref=e124]
+              - paragraph [ref=e125]: features.items.safety.description
+            - generic [ref=e127]:
+              - img [ref=e129]
+              - heading "features.items.allergens.title" [level=3] [ref=e131]
+              - paragraph [ref=e132]: features.items.allergens.description
+            - generic [ref=e134]:
+              - img [ref=e136]
+              - heading "features.items.skin.title" [level=3] [ref=e138]
+              - paragraph [ref=e139]: features.items.skin.description
+            - generic [ref=e141]:
+              - img [ref=e143]
+              - heading "features.items.pregnancy.title" [level=3] [ref=e146]
+              - paragraph [ref=e147]: features.items.pregnancy.description
+            - generic [ref=e149]:
+              - img [ref=e151]
+              - heading "Evidence-based ingredient effects" [level=3] [ref=e153]
+              - paragraph [ref=e154]: Every effect backed by RCT or peer-reviewed evidence — see mechanism, biomarker, and clinical concentration.
+      - region "developers.ariaLabel" [ref=e155]:
+        - generic [ref=e156]:
+          - generic [ref=e157]:
+            - generic [ref=e159]: developers.badge
+            - heading "developers.title" [level=2] [ref=e160]
+            - paragraph [ref=e161]: developers.subtitle
+          - generic [ref=e162]:
+            - generic [ref=e163]:
+              - paragraph [ref=e164]: developers.requestLabel
+              - generic [ref=e165]:
+                - generic [ref=e166]:
+                  - generic [ref=e167]: javascript
+                  - button "Copy code" [ref=e168] [cursor=pointer]:
+                    - img [ref=e169]
+                - code [ref=e173]: "// Analyze any beauty product by barcode const response = await fetch( 'https://inciapi.com/v1/products/3337875597913/safety', { headers: { 'X-API-Key': 'sk_live_your_key' } } ); const analysis = await response.json();"
+            - generic [ref=e174]:
+              - paragraph [ref=e175]: developers.responseLabel
+              - generic [ref=e176]:
+                - generic [ref=e177]:
+                  - generic [ref=e178]: json
+                  - button "Copy code" [ref=e179] [cursor=pointer]:
+                    - img [ref=e180]
+                - code [ref=e184]: "{ \"overallSafetyScore\": 92, \"cleanBeautyScore\": 88, \"ingredients\": [ { \"inciName\": \"Aqua\", \"safetyRating\": 1, \"functions\": [\"Solvent\"], \"isAllergen\": false, \"isPregnancySafe\": true }, { \"inciName\": \"Niacinamide\", \"safetyRating\": 1, \"functions\": [\"Antioxidant\", \"Brightening\"], \"isAllergen\": false, \"isPregnancySafe\": true } ], \"allergenWarnings\": [], \"pregnancySafe\": true, \"skinCompatibility\": [ { \"skinType\": \"sensitive\", \"compatible\": true, \"score\": 95 }, { \"skinType\": \"oily\", \"compatible\": true, \"score\": 88 } ] }"
+          - link "developers.ctaDocs" [ref=e186] [cursor=pointer]:
+            - /url: /fr/docs
+            - text: developers.ctaDocs
+            - img [ref=e187]
+      - region "Database growth" [ref=e189]:
+        - generic [ref=e190]:
+          - generic [ref=e191]:
+            - generic [ref=e193]:
+              - img [ref=e194]
+              - text: Database in growth phase
+            - heading "Live coverage snapshot" [level=2] [ref=e198]
+            - paragraph [ref=e199]: We are still actively collecting ingredient data. The counters below reflect what is in the database right now — no projections, no claims about coverage we have not earned yet.
+          - generic [ref=e200]:
+            - generic [ref=e201]:
+              - paragraph [ref=e202]:
+                - generic [ref=e203]: 0+
+              - paragraph [ref=e204]: socialProof.stats.ingredients
+            - generic [ref=e205]:
+              - paragraph [ref=e206]:
+                - generic [ref=e207]: 0+
+              - paragraph [ref=e208]: socialProof.stats.products
+      - region "cta.ariaLabel" [ref=e209]:
+        - generic [ref=e211]:
+          - heading "cta.title" [level=2] [ref=e212]
+          - paragraph [ref=e213]: cta.subtitle
+          - generic [ref=e214]:
+            - link "cta.primary" [ref=e215] [cursor=pointer]:
+              - /url: /register
+              - text: cta.primary
+              - img [ref=e216]
+            - link "cta.secondary" [ref=e218] [cursor=pointer]:
+              - /url: /fr/docs
+  - contentinfo [ref=e219]:
+    - generic [ref=e220]:
+      - generic [ref=e221]:
+        - generic [ref=e222]:
+          - generic [ref=e223]:
+            - img "INCI API" [ref=e224]
+            - generic [ref=e225]: INCI API
+          - paragraph [ref=e226]: footer.tagline
+        - generic [ref=e227]:
+          - heading "footer.sections.product.title" [level=4] [ref=e228]
+          - list [ref=e229]:
+            - listitem [ref=e230]:
+              - link "footer.sections.product.checker" [ref=e231] [cursor=pointer]:
+                - /url: /fr/checker
+            - listitem [ref=e232]:
+              - link "footer.sections.product.features" [ref=e233] [cursor=pointer]:
+                - /url: /fr/#features
+            - listitem [ref=e234]:
+              - link "footer.sections.product.pricing" [ref=e235] [cursor=pointer]:
+                - /url: /fr/pricing
+            - listitem [ref=e236]:
+              - link "footer.sections.product.docs" [ref=e237] [cursor=pointer]:
+                - /url: /fr/docs
+            - listitem [ref=e238]:
+              - link "footer.sections.product.playground" [ref=e239] [cursor=pointer]:
+                - /url: /dashboard/playground
+        - generic [ref=e240]:
+          - heading "footer.sections.company.title" [level=4] [ref=e241]
+          - list [ref=e242]:
+            - listitem [ref=e243]:
+              - link "footer.sections.company.about" [ref=e244] [cursor=pointer]:
+                - /url: /fr/about
+            - listitem [ref=e245]:
+              - link "footer.sections.company.blog" [ref=e246] [cursor=pointer]:
+                - /url: /fr/blog
+            - listitem [ref=e247]:
+              - link "footer.sections.company.contact" [ref=e248] [cursor=pointer]:
+                - /url: /fr/contact
+        - generic [ref=e249]:
+          - heading "footer.sections.legal.title" [level=4] [ref=e250]
+          - list [ref=e251]:
+            - listitem [ref=e252]:
+              - link "footer.sections.legal.privacy" [ref=e253] [cursor=pointer]:
+                - /url: /fr/privacy
+            - listitem [ref=e254]:
+              - link "footer.sections.legal.terms" [ref=e255] [cursor=pointer]:
+                - /url: /fr/terms
+            - listitem [ref=e256]:
+              - link "footer.sections.legal.cookies" [ref=e257] [cursor=pointer]:
+                - /url: /fr/cookies
+            - listitem [ref=e258]:
+              - link "footer.sections.legal.dpa" [ref=e259] [cursor=pointer]:
+                - /url: /fr/dpa
+            - listitem [ref=e260]:
+              - link "footer.sections.legal.apiLicense" [ref=e261] [cursor=pointer]:
+                - /url: /fr/api-license
+        - generic [ref=e262]:
+          - heading "footer.sections.developer.title" [level=4] [ref=e263]
+          - list [ref=e264]:
+            - listitem [ref=e265]:
+              - link "footer.sections.developer.documentation" [ref=e266] [cursor=pointer]:
+                - /url: /fr/docs
+            - listitem [ref=e267]:
+              - link "footer.sections.developer.status" [ref=e268] [cursor=pointer]:
+                - /url: /fr/status
+            - listitem [ref=e269]:
+              - link "footer.sections.developer.github" [ref=e270] [cursor=pointer]:
+                - /url: https://github.com/andriisukhanov/barcode
+      - generic [ref=e271]:
+        - paragraph [ref=e272]: footer.copyright
+        - link "footer.social.github" [ref=e274] [cursor=pointer]:
+          - /url: https://github.com/andriisukhanov/barcode
+          - img [ref=e275]
