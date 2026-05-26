@@ -102,11 +102,9 @@ type AdminSkinState = {
   nextCallDate?: string;
   updatedAt: number;
   // % metrics (0–100, set by coach)
-  inflammationPct?: number;
+  acnePct?: number;
   sensibilityPct?: number;
-  comedonsPct?: number;
-  toleranceRoutinePct?: number;
-  hydrationPct?: number;
+  barrierPct?: number;
   coachObservation?: string;
   objectives?: string;
   // Direction
@@ -305,11 +303,9 @@ function StudentPage() {
         nextEvolution: skinStateDraft.nextEvolution ?? "",
         nextCallDate: skinStateDraft.nextCallDate,
         updatedAt: Date.now(),
-        inflammationPct: skinStateDraft.inflammationPct,
+        acnePct: skinStateDraft.acnePct,
         sensibilityPct: skinStateDraft.sensibilityPct,
-        comedonsPct: skinStateDraft.comedonsPct,
-        toleranceRoutinePct: skinStateDraft.toleranceRoutinePct,
-        hydrationPct: skinStateDraft.hydrationPct,
+        barrierPct: skinStateDraft.barrierPct,
         coachObservation: skinStateDraft.coachObservation,
         objectives: skinStateDraft.objectives,
         coachPhrase: skinStateDraft.coachPhrase,
@@ -842,17 +838,15 @@ function StudentPage() {
                 />
               </div>
 
-              {/* Skin metrics (%) */}
+              {/* Skin metrics (%) — 3 barometres */}
               <div className="mb-5 space-y-4">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Baromètres peau (0 – 100%)</p>
                 {(
                   [
-                    { key: "inflammationPct", label: "Inflammation", hint: "0 = aucune → 100 = intense" },
-                    { key: "sensibilityPct", label: "Sensibilité", hint: "0 = faible → 100 = élevée" },
-                    { key: "comedonsPct", label: "Comédons", hint: "0 = aucun → 100 = nombreux" },
-                    { key: "toleranceRoutinePct", label: "Tolérance routine", hint: "0 = mauvaise → 100 = excellente" },
-                    { key: "hydrationPct", label: "Hydratation", hint: "0 = déshydratée → 100 = optimale" },
-                  ] as const
+                    { key: "acnePct" as const, label: "Acné", hint: "0 = contrôlée → 100 = sévère" },
+                    { key: "sensibilityPct" as const, label: "Sensibilité", hint: "0 = faible → 100 = élevée/réactive" },
+                    { key: "barrierPct" as const, label: "Barrière cutanée", hint: "0 = compromise → 100 = excellente" },
+                  ]
                 ).map(({ key, label, hint }) => (
                   <div key={key}>
                     <div className="mb-1 flex items-center justify-between">
@@ -868,7 +862,7 @@ function StudentPage() {
                       step={5}
                       value={skinStateDraft[key] ?? 50}
                       onChange={(e) => setSkinStateDraft((d) => ({ ...d, [key]: parseInt(e.target.value) }))}
-                      className="w-full accent-primary cursor-pointer"
+                      className="w-full cursor-pointer accent-primary"
                     />
                     <p className="mt-0.5 text-[10px] text-muted-foreground/60">{hint}</p>
                   </div>
