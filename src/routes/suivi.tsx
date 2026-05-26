@@ -327,39 +327,9 @@ function Suivi() {
               {skinState?.coachPhrase && (
                 <p className="mt-2 text-sm italic text-foreground/60">"{skinState.coachPhrase}"</p>
               )}
-            </div>
-
-            {/* Phase timeline */}
-            <div className="relative mt-6">
-              <div className="absolute left-3 right-3 top-3 h-px bg-foreground/15" />
-              <div className="flex items-start justify-between">
-                {JOURNEY_PHASES.map((phase) => {
-                  const isPast = dayCount > phase.dayEnd;
-                  const isCurrent = dayCount >= phase.dayStart && dayCount <= phase.dayEnd;
-                  return (
-                    <div key={phase.id} className="relative flex flex-1 flex-col items-center gap-1.5">
-                      <div
-                        className={`relative z-10 flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold transition-all ${
-                          isCurrent
-                            ? "scale-110 bg-foreground text-background shadow-md"
-                            : isPast
-                            ? "bg-foreground/30 text-foreground/80"
-                            : "bg-foreground/10 text-foreground/25"
-                        }`}
-                      >
-                        {isPast ? <Check className="h-3 w-3" /> : phase.id}
-                      </div>
-                      <p
-                        className={`max-w-[44px] text-center text-[8px] font-medium leading-tight ${
-                          isCurrent ? "text-foreground/80" : isPast ? "text-foreground/40" : "text-foreground/20"
-                        }`}
-                      >
-                        {phase.shortLabel}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
+              <span className="mt-3 inline-flex items-center rounded-full bg-background/50 px-3 py-1 text-xs font-semibold backdrop-blur-sm">
+                Phase {currentPhase.id}/6
+              </span>
             </div>
           </div>
 
@@ -409,8 +379,58 @@ function Suivi() {
             )}
           </div>
 
-          {/* ── 3. Progression protocole ──────── col-span-2 row-3 ── */}
+          {/* ── 3. Mon parcours ──────────────── col-span-2 row-3 ── */}
           <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-span-2 lg:row-start-3">
+            <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Mon parcours</p>
+            <div className="space-y-1">
+              {JOURNEY_PHASES.map((phase) => {
+                const isPast = dayCount > phase.dayEnd;
+                const isCurrent = dayCount >= phase.dayStart && dayCount <= phase.dayEnd;
+                return (
+                  <div
+                    key={phase.id}
+                    className={`flex items-start gap-3 rounded-2xl px-3 py-2.5 transition-colors ${
+                      isCurrent ? "bg-primary-soft" : ""
+                    }`}
+                  >
+                    {/* State icon */}
+                    <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                      isCurrent
+                        ? "bg-primary text-primary-foreground"
+                        : isPast
+                        ? "bg-emerald-100 dark:bg-emerald-950/40"
+                        : "border border-border/60 bg-transparent"
+                    }`}>
+                      {isPast ? (
+                        <Check className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                      ) : isCurrent ? (
+                        phase.id
+                      ) : (
+                        <span className="text-foreground/25">{phase.id}</span>
+                      )}
+                    </div>
+                    {/* Text */}
+                    <div className={`min-w-0 flex-1 ${isPast ? "opacity-50" : !isCurrent ? "opacity-35" : ""}`}>
+                      <div className="flex items-center gap-2">
+                        <p className={`text-sm font-medium ${isCurrent ? "text-foreground" : ""}`}>{phase.label}</p>
+                        {isCurrent && (
+                          <span className="rounded-full bg-primary px-2 py-0.5 text-[9px] font-semibold text-primary-foreground">
+                            Phase actuelle
+                          </span>
+                        )}
+                      </div>
+                      <p className={`mt-0.5 text-xs ${isCurrent ? "text-foreground/70" : "text-muted-foreground"}`}>
+                        {phase.description}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ── 4. Progression protocole ──────── col-span-2 row-4 ── */}
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-span-2 lg:row-start-4">
             <div className="mb-4 flex items-center justify-between">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                 Protocole
@@ -525,21 +545,6 @@ function Suivi() {
               </p>
             )}
 
-            <div className="mt-4 flex items-center justify-between rounded-2xl bg-muted/40 px-4 py-3">
-              <p className="text-xs text-muted-foreground">Adhérence 28j · {adherenceDays} jours</p>
-              <span
-                className={`text-sm font-semibold ${
-                  adherencePct >= 70
-                    ? "text-emerald-600 dark:text-emerald-400"
-                    : adherencePct >= 40
-                    ? "text-amber-600 dark:text-amber-400"
-                    : "text-red-500"
-                }`}
-              >
-                {adherencePct}%
-              </span>
-            </div>
-
             <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/20">
               <Phone className="h-4 w-4" /> Contacter le coach
             </button>
@@ -579,8 +584,8 @@ function Suivi() {
 
           </div>
 
-          {/* ── 6. Journal photo ─── col-start-1 col-span-2 row-4 ── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-1 lg:col-span-2 lg:row-start-4">
+          {/* ── 6. Journal photo ─── col-start-1 col-span-2 row-5 ── */}
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-1 lg:col-span-2 lg:row-start-5">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                 Journal photo
