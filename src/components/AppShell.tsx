@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Home, BookOpen, Sparkles, ShieldCheck, User, LogOut, UserCircle, Camera, Moon, Sun, HelpCircle, FlaskConical } from "lucide-react";
+import { Home, BookOpen, Sparkles, ShieldCheck, User, LogOut, UserCircle, Camera, Moon, Sun, HelpCircle, FlaskConical, TrendingUp } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 import { ReactNode } from "react";
 import {
@@ -55,6 +55,11 @@ function UserMenu() {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2">
+            <Link to="/faq">
+              <HelpCircle className="mr-2 h-4 w-4" /> FAQ
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2">
             <Link to="/profile">
               <UserCircle className="mr-2 h-4 w-4" /> Mon profil
             </Link>
@@ -81,10 +86,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const nav = [
     { to: "/", label: "Accueil", icon: Home },
-    { to: "/course", label: "Protocole", icon: BookOpen },
+    { to: "/suivi", label: "Suivi", icon: TrendingUp },
     { to: "/products", label: "Routine", icon: Sparkles },
     { to: "/journal", label: "Journal", icon: Camera },
-    { to: "/faq", label: "FAQ", icon: HelpCircle },
+    { to: "/course", label: "Protocole", icon: BookOpen },
     ...(isAdmin ? [{ to: "/admin", label: "Admin", icon: ShieldCheck }] : []),
   ] as const;
 

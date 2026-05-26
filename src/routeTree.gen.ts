@@ -18,6 +18,7 @@ import { Route as JournalRouteImport } from './routes/journal'
 import { Route as IntakeRouteImport } from './routes/intake'
 import { Route as IngredientAnalyzerRouteImport } from './routes/ingredient-analyzer'
 import { Route as FinishRouteImport } from './routes/finish'
+import { Route as SuiviRouteImport } from './routes/suivi'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as CourseRouteImport } from './routes/course'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -80,6 +81,11 @@ const IngredientAnalyzerRoute = IngredientAnalyzerRouteImport.update({
 const FinishRoute = FinishRouteImport.update({
   id: '/finish',
   path: '/finish',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuiviRoute = SuiviRouteImport.update({
+  id: '/suivi',
+  path: '/suivi',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqRoute = FaqRouteImport.update({
@@ -179,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/course': typeof CourseRoute
   '/faq': typeof FaqRoute
+  '/suivi': typeof SuiviRoute
   '/finish': typeof FinishRoute
   '/ingredient-analyzer': typeof IngredientAnalyzerRoute
   '/intake': typeof IntakeRoute
@@ -208,6 +215,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/course': typeof CourseRoute
   '/faq': typeof FaqRoute
+  '/suivi': typeof SuiviRoute
   '/finish': typeof FinishRoute
   '/ingredient-analyzer': typeof IngredientAnalyzerRoute
   '/intake': typeof IntakeRoute
@@ -237,6 +245,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/course': typeof CourseRoute
   '/faq': typeof FaqRoute
+  '/suivi': typeof SuiviRoute
   '/finish': typeof FinishRoute
   '/ingredient-analyzer': typeof IngredientAnalyzerRoute
   '/intake': typeof IntakeRoute
@@ -268,6 +277,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/course'
     | '/faq'
+    | '/suivi'
     | '/finish'
     | '/ingredient-analyzer'
     | '/intake'
@@ -297,6 +307,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/course'
     | '/faq'
+    | '/suivi'
     | '/finish'
     | '/ingredient-analyzer'
     | '/intake'
@@ -325,6 +336,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/course'
     | '/faq'
+    | '/suivi'
     | '/finish'
     | '/ingredient-analyzer'
     | '/intake'
@@ -355,6 +367,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   CourseRoute: typeof CourseRoute
   FaqRoute: typeof FaqRoute
+  SuiviRoute: typeof SuiviRoute
   FinishRoute: typeof FinishRoute
   IngredientAnalyzerRoute: typeof IngredientAnalyzerRoute
   IntakeRoute: typeof IntakeRoute
@@ -448,6 +461,13 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/suivi': {
+      id: '/suivi'
+      path: '/suivi'
+      fullPath: '/suivi'
+      preLoaderRoute: typeof SuiviRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/course': {
@@ -591,6 +611,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   CourseRoute: CourseRoute,
   FaqRoute: FaqRoute,
+  SuiviRoute: SuiviRoute,
   FinishRoute: FinishRoute,
   IngredientAnalyzerRoute: IngredientAnalyzerRoute,
   IntakeRoute: IntakeRoute,

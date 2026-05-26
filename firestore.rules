@@ -159,6 +159,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ── Admin skin state (coaching direction per student) ─────────────────────
+    // docId = student UID. Admin writes the coaching state; student reads theirs.
+    match /admin_skin_state/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isAdmin();
+    }
+
     // Deny everything else by default
     match /{document=**} {
       allow read, write: if false;

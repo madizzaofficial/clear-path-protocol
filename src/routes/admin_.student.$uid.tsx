@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, query, where, getDocs, addDoc, updateDoc, deleteField, orderBy } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs, addDoc, updateDoc, deleteField, orderBy, setDoc } from "firebase/firestore";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
@@ -91,6 +91,18 @@ function formatDate(dateStr: string): string {
 
 type CoachNote = { id: string; note: string; authorName: string; authorUid: string; createdAt: string; isFromStudent?: boolean };
 
+type AdminSkinState = {
+  uid: string;
+  acneLevel: number;
+  barrierLevel: number;
+  sensitivityLevel: number;
+  currentObjective: string;
+  currentStrategy: string;
+  nextEvolution: string;
+  nextCallDate?: string;
+  updatedAt: number;
+};
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 function StudentPage() {
@@ -108,6 +120,9 @@ function StudentPage() {
   const [notes, setNotes] = useState<CoachNote[]>([]);
   const [noteInput, setNoteInput] = useState("");
   const [sendingNote, setSendingNote] = useState(false);
+  const [skinState, setSkinState] = useState<AdminSkinState | null>(null);
+  const [skinStateDraft, setSkinStateDraft] = useState<Partial<AdminSkinState>>({ acneLevel: 3, barrierLevel: 3, sensitivityLevel: 3 });
+  const [savingSkinState, setSavingSkinState] = useState(false);
   const [resolvingReport, setResolvingReport] = useState<string | null>(null);
   const [isDisabling, setIsDisabling] = useState(false);
   const [editingIntake, setEditingIntake] = useState(false);
@@ -126,7 +141,7 @@ function StudentPage() {
     if (!isAdmin || !uid) return;
     async function load() {
       setLoading(true);
-      const [profileSnap, intakeSnap, routineSnap, progressSnap, photosSnap, notesSnap, reportsSnap] = await Promise.all([
+      const [profileSnap, intakeSnap, routineSnap, progressSnap, photosSnap, notesSnap, reportsSnap, skinStateSnap] = await Promise.all([
         getDoc(doc(db, "users", uid)),
         getDoc(doc(db, "intake_answers", uid)),
         getDoc(doc(db, "routines", uid)),
@@ -134,6 +149,7 @@ function StudentPage() {
         getDocs(query(collection(db, "progress_photos"), where("uid", "==", uid))),
         getDocs(query(collection(db, "users", uid, "notes"), orderBy("createdAt", "desc"))),
         getDoc(doc(db, "routine_reports", uid)),
+        getDoc(doc(db, "admin_skin_state", uid)),
       ]);
       setProfile(profileSnap.exists() ? (profileSnap.data() as StudentProfile) : null);
       setIntake(intakeSnap.exists() ? (intakeSnap.data() as IntakeAnswers) : null);
@@ -149,6 +165,11 @@ function StudentPage() {
       setPhotos(sorted);
       setNotes(notesSnap.docs.map((d) => ({ id: d.id, ...d.data() } as CoachNote)));
       if (reportsSnap.exists()) setReports(reportsSnap.data() as Record<string, "irritant" | "allergie">);
+      if (skinStateSnap.exists()) {
+        const ss = skinStateSnap.data() as AdminSkinState;
+        setSkinState(ss);
+        setSkinStateDraft(ss);
+      }
       const initial = Object.fromEntries(course.chapters.map((c) => [c.id, true]));
       setOpenChapters(initial);
       setLoading(false);
@@ -250,6 +271,31 @@ function StudentPage() {
       toast.error("Impossible d'enregistrer.");
     } finally {
       setSavingIntake(false);
+    }
+  }
+
+  async function saveSkinState() {
+    if (savingSkinState) return;
+    setSavingSkinState(true);
+    try {
+      const data: AdminSkinState = {
+        uid,
+        acneLevel: skinStateDraft.acneLevel ?? 3,
+        barrierLevel: skinStateDraft.barrierLevel ?? 3,
+        sensitivityLevel: skinStateDraft.sensitivityLevel ?? 3,
+        currentObjective: skinStateDraft.currentObjective ?? "",
+        currentStrategy: skinStateDraft.currentStrategy ?? "",
+        nextEvolution: skinStateDraft.nextEvolution ?? "",
+        nextCallDate: skinStateDraft.nextCallDate,
+        updatedAt: Date.now(),
+      };
+      await setDoc(doc(db, "admin_skin_state", uid), data, { merge: true });
+      setSkinState(data);
+      toast.success("État & direction sauvegardés.");
+    } catch {
+      toast.error("Impossible de sauvegarder.");
+    } finally {
+      setSavingSkinState(false);
     }
   }
 
@@ -729,6 +775,86 @@ function StudentPage() {
         {/* ── Notes ──────────────────────────────────────────────────────────── */}
         {tab === "notes" && (
           <div className="space-y-6">
+            {/* État & Direction */}
+            <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+              <div className="mb-5 flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  État & Direction
+                </p>
+                {skinState && (
+                  <span className="text-[10px] text-muted-foreground">
+                    Mis à jour {new Date(skinState.updatedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                  </span>
+                )}
+              </div>
+
+              {/* Level selectors */}
+              <div className="mb-5 space-y-4">
+                <LevelSelector
+                  label="Acné"
+                  help="1 = contrôlée → 5 = sévère"
+                  value={skinStateDraft.acneLevel ?? 3}
+                  onChange={(v) => setSkinStateDraft((d) => ({ ...d, acneLevel: v }))}
+                />
+                <LevelSelector
+                  label="Barrière cutanée"
+                  help="1 = compromise → 5 = excellente"
+                  value={skinStateDraft.barrierLevel ?? 3}
+                  onChange={(v) => setSkinStateDraft((d) => ({ ...d, barrierLevel: v }))}
+                />
+                <LevelSelector
+                  label="Sensibilité"
+                  help="1 = élevée → 5 = très faible"
+                  value={skinStateDraft.sensitivityLevel ?? 3}
+                  onChange={(v) => setSkinStateDraft((d) => ({ ...d, sensitivityLevel: v }))}
+                />
+              </div>
+
+              {/* Text fields */}
+              <div className="mb-5 space-y-4">
+                {(
+                  [
+                    { key: "currentObjective", label: "Objectif actuel", placeholder: "Ex. Stabiliser la barrière cutanée avant d'introduire les actifs…" },
+                    { key: "currentStrategy", label: "Stratégie en cours", placeholder: "Ex. Routine minimaliste + SPF quotidien + Niacinamide 2x/sem…" },
+                    { key: "nextEvolution", label: "Prochaine évolution", placeholder: "Ex. Dans ~2 sem. : azélaïque 2x/sem…" },
+                  ] as const
+                ).map(({ key, label, placeholder }) => (
+                  <div key={key}>
+                    <label className="mb-1.5 block text-sm font-medium">{label}</label>
+                    <textarea
+                      autoComplete="off"
+                      value={(skinStateDraft[key] as string) ?? ""}
+                      onChange={(e) => setSkinStateDraft((d) => ({ ...d, [key]: e.target.value }))}
+                      placeholder={placeholder}
+                      rows={2}
+                      className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
+                ))}
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium">Prochain appel</label>
+                  <input
+                    type="date"
+                    value={skinStateDraft.nextCallDate ?? ""}
+                    onChange={(e) => setSkinStateDraft((d) => ({ ...d, nextCallDate: e.target.value }))}
+                    className="rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  onClick={saveSkinState}
+                  disabled={savingSkinState}
+                  className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  {savingSkinState ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                  Sauvegarder l'état
+                </button>
+              </div>
+            </div>
+
             {/* Send new note */}
             <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
               <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -832,6 +958,42 @@ function EmptyState({ icon, title, body }: { icon: string; title: string; body: 
       <span className="text-4xl">{icon}</span>
       <p className="mt-4 font-display text-lg font-semibold">{title}</p>
       <p className="mt-1 max-w-xs text-center text-sm text-muted-foreground">{body}</p>
+    </div>
+  );
+}
+
+function LevelSelector({
+  label,
+  help,
+  value,
+  onChange,
+}: {
+  label: string;
+  help: string;
+  value: number;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <div className="w-40 shrink-0">
+        <p className="text-sm font-medium">{label}</p>
+        <p className="text-[10px] text-muted-foreground">{help}</p>
+      </div>
+      <div className="flex gap-1.5">
+        {[1, 2, 3, 4, 5].map((v) => (
+          <button
+            key={v}
+            onClick={() => onChange(v)}
+            className={`h-9 w-9 rounded-xl text-sm font-semibold transition-colors ${
+              value === v
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "border border-border bg-muted/40 text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            {v}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

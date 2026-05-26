@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { course, allLessons } from "@/lib/course-data";
-import { Play, Check, Sparkles, Sun, Moon, ArrowRight, TrendingUp, BookOpen, Flame, Send, Loader2, MessageSquare, Trophy } from "lucide-react";
+import { Play, Check, Sparkles, Sun, Moon, ArrowRight, TrendingUp, BookOpen, Flame, Send, Loader2, MessageSquare, Trophy, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import { useAuth } from "@/hooks/use-auth";
@@ -38,6 +38,12 @@ const MILESTONES = [
 type RoutineStep = { id: string; category: string; product: string };
 type CoachNote = { id: string; note: string; authorName: string; createdAt: string; isFromStudent?: boolean };
 
+type AdminSkinState = {
+  acneLevel: number; barrierLevel: number; sensitivityLevel: number;
+  currentObjective?: string; updatedAt?: number;
+};
+type SkinCheckStatus = "ok" | "problem" | "reaction" | null;
+
 type HomeData = {
   loading: boolean;
   completedLessons: string[];
@@ -48,6 +54,9 @@ type HomeData = {
   streak: number;
   monthCheckins: Record<string, { am: string[]; pm: string[] }>;
   firestoreDisplayName: string | null;
+  skinState: AdminSkinState | null;
+  skinCheck: SkinCheckStatus;
+  latestCoachNote: CoachNote | null;
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -138,6 +147,9 @@ function Dashboard() {
     streak: 0,
     monthCheckins: {},
     firestoreDisplayName: null,
+    skinState: null,
+    skinCheck: null,
+    latestCoachNote: null,
   });
 
   useEffect(() => {
@@ -152,6 +164,8 @@ function Dashboard() {
     const monthStart = `${monthPrefix}-01`;
     const monthEnd = `${monthPrefix}-31`;
 
+    const skinCheckDocId = `${user.uid}-${todayKey}`;
+
     Promise.allSettled([
       getDoc(doc(db, "progress", user.uid)),
       getDoc(doc(db, "routines", user.uid)),
@@ -162,8 +176,10 @@ function Dashboard() {
         where(documentId(), ">=", monthStart),
         where(documentId(), "<=", monthEnd),
       )),
-      getDocs(query(collection(db, "users", user.uid, "notes"), orderBy("createdAt", "desc"), limit(10))),
-    ]).then(async ([progressRes, routineRes, userRes, todayRes, monthRes, notesRes]) => {
+      getDocs(query(collection(db, "users", user.uid, "notes"), orderBy("createdAt", "desc"), limit(5))),
+      getDoc(doc(db, "admin_skin_state", user.uid)),
+      getDoc(doc(db, "daily_checkins", skinCheckDocId)),
+    ]).then(async ([progressRes, routineRes, userRes, todayRes, monthRes, notesRes, skinStateRes, skinCheckRes]) => {
       const routineSnap = routineRes.status === "fulfilled" ? routineRes.value : null;
       const routineData = routineSnap?.exists() ? routineSnap.data() : null;
       const routine =
@@ -185,10 +201,20 @@ function Dashboard() {
       const userSnap = userRes.status === "fulfilled" ? userRes.value : null;
       const todaySnap = todayRes.status === "fulfilled" ? todayRes.value : null;
 
+      let latestCoachNote: CoachNote | null = null;
       if (notesRes.status === "fulfilled") {
         const allNotes = notesRes.value.docs.map((d) => ({ id: d.id, ...d.data() } as CoachNote));
+        latestCoachNote = allNotes.find((n) => !n.isFromStudent) ?? null;
         setCoachNotes(allNotes.filter((n) => !n.isFromStudent).slice(0, 3));
       }
+
+      const skinState =
+        skinStateRes.status === "fulfilled" && skinStateRes.value.exists()
+          ? (skinStateRes.value.data() as AdminSkinState)
+          : null;
+
+      const skinCheckSnap = skinCheckRes.status === "fulfilled" ? skinCheckRes.value : null;
+      const skinCheck = skinCheckSnap?.exists() ? (skinCheckSnap.data().skinStatus as SkinCheckStatus) : null;
 
       setData({
         loading: false,
@@ -200,15 +226,29 @@ function Dashboard() {
         streak,
         monthCheckins,
         firestoreDisplayName: userSnap?.exists() ? (userSnap.data().displayName ?? null) : null,
+        skinState,
+        skinCheck,
+        latestCoachNote,
       });
     });
   }, [user]);
 
   const lessons = allLessons();
-  const { loading, completedLessons, routine, enrolledAt, checkedAm, checkedPm, streak, monthCheckins, firestoreDisplayName } = data;
+  const { loading, completedLessons, routine, enrolledAt, checkedAm, checkedPm, streak, monthCheckins, firestoreDisplayName, skinState, skinCheck, latestCoachNote } = data;
 
   const done = completedLessons.length;
   const progress = Math.round((done / lessons.length) * 100);
+
+  async function saveSkinCheck(status: SkinCheckStatus) {
+    if (!user || !status) return;
+    const todayKey = new Date().toISOString().slice(0, 10);
+    setData((prev) => ({ ...prev, skinCheck: status }));
+    try {
+      await setDoc(doc(db, "daily_checkins", `${user.uid}-${todayKey}`), { uid: user.uid, date: todayKey, skinStatus: status }, { merge: true });
+    } catch {
+      toast.error("Impossible de sauvegarder.");
+    }
+  }
 
   useEffect(() => {
     if (data.loading || progress === 0) return;
@@ -301,6 +341,12 @@ function Dashboard() {
     }
   }
 
+  const SKIN_CHECK_OPTIONS: { status: SkinCheckStatus; label: string; icon: string; active: string; inactive: string }[] = [
+    { status: "ok", label: "Ça va", icon: "✅", active: "bg-emerald-500 text-white border-emerald-500", inactive: "border-border bg-card hover:bg-muted/60" },
+    { status: "problem", label: "Léger pb", icon: "⚡", active: "bg-amber-400 text-white border-amber-400", inactive: "border-border bg-card hover:bg-muted/60" },
+    { status: "reaction", label: "Réaction", icon: "⚠️", active: "bg-red-400 text-white border-red-400", inactive: "border-border bg-card hover:bg-muted/60" },
+  ];
+
   return (
     <AppShell>
       <AnimatePresence>
@@ -316,200 +362,166 @@ function Dashboard() {
           </motion.div>
         )}
       </AnimatePresence>
-      <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
 
-        {/* Welcome header */}
-        <section className="mb-10">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">
+      <main className="mx-auto max-w-lg px-4 pb-28 pt-8 space-y-4">
+
+        {/* ── Header ─────────────────────────────────────────────────── */}
+        <section className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
             Semaine {position.week} · Jour {position.day}
           </p>
-          <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight text-balance md:text-5xl">
+          <h1 className="font-display text-3xl font-semibold tracking-tight">
             {getGreeting()}, {firstName}.
           </h1>
-          <p className="mt-2 max-w-xl text-muted-foreground">
-            {allDone
-              ? "Protocole terminé — tu as fait un travail incroyable. 🎉"
-              : done === 0
-              ? "Prêt à commencer ? Ta peau va te remercier."
-              : `${done} leçon${done > 1 ? "s" : ""} terminée${done > 1 ? "s" : ""}. Continue sur cette lancée.`}
-          </p>
-          {allDone && (
-            <div className="mt-4">
-              <Link
-                to="/finish"
-                className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90 transition-opacity"
-              >
-                <Trophy className="h-4 w-4" /> Voir mon récap de fin
-              </Link>
-            </div>
+
+          {/* Skin state pill */}
+          {skinState?.currentObjective && (
+            <p className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1 text-xs text-muted-foreground shadow-soft">
+              🌿 {skinState.currentObjective.length > 60 ? skinState.currentObjective.slice(0, 57) + "…" : skinState.currentObjective}
+            </p>
           )}
+
+          {/* Protocol progress pill */}
+          <div className="flex items-center gap-2 pt-1">
+            <div className="relative h-1.5 flex-1 rounded-full bg-muted overflow-hidden">
+              <div className="absolute inset-y-0 left-0 rounded-full bg-primary transition-all duration-700" style={{ width: `${progress}%` }} />
+            </div>
+            <span className="text-xs font-medium tabular-nums text-muted-foreground">{progress}%</span>
+            {next && (
+              <Link to="/lesson/$lessonId" params={{ lessonId: next.id }}
+                className="flex items-center gap-1 text-xs font-medium text-primary hover:underline shrink-0">
+                <Play className="h-3 w-3 fill-primary" /> Reprendre
+              </Link>
+            )}
+            {allDone && (
+              <Link to="/finish" className="flex items-center gap-1 text-xs font-medium text-primary hover:underline shrink-0">
+                <Trophy className="h-3 w-3" /> Récap
+              </Link>
+            )}
+          </div>
         </section>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-
-          {/* ── Hero card — row 1, col 1-2 ────────────────────────────────── */}
-          {!allDone && next ? (
-            <Link to="/lesson/$lessonId" params={{ lessonId: next.id }} className="group block min-w-0 lg:col-span-2">
-              <div className="relative h-full overflow-hidden rounded-3xl bg-gradient-warm p-8 shadow-elegant md:p-10">
-                <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gradient-primary opacity-30 blur-3xl" />
-                <div className="relative">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-background/70 px-3 py-1 text-xs font-medium text-foreground backdrop-blur">
-                    <Play className="h-3 w-3 fill-primary text-primary" />
-                    {done === 0 ? "Commencer le protocole" : "Continuer le protocole"}
-                  </span>
-                  <h2 className="mt-5 font-display text-2xl font-semibold md:text-3xl">{next.title}</h2>
-                  <p className="mt-2 max-w-md text-sm text-foreground/70">{next.summary}</p>
-                  <div className="mt-6 flex items-center gap-4">
-                    <div className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-transform group-hover:scale-[1.02]">
-                      {done === 0 ? "Démarrer" : "Reprendre"} <ArrowRight className="h-4 w-4" />
-                    </div>
-                    <span className="text-sm text-foreground/60">{next.duration}</span>
-                  </div>
-                </div>
+        {/* ── Routine du jour ────────────────────────────────────────── */}
+        <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
+          <div className="flex items-center justify-between px-5 pt-5 pb-4">
+            <h2 className="font-display text-lg font-semibold">Routine du jour</h2>
+            {streak > 0 && (
+              <div className="flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-500 dark:bg-orange-950/40">
+                <Flame className="h-3.5 w-3.5" /> {streak}j
               </div>
-            </Link>
-          ) : (
-            <div className="relative lg:col-span-2 overflow-hidden rounded-3xl bg-gradient-primary p-8 shadow-elegant md:p-10">
-              <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary-foreground/20 blur-3xl" />
-              <div className="relative">
-                <p className="text-sm font-medium uppercase tracking-wider text-primary-foreground/80">Terminé</p>
-                <h2 className="mt-3 font-display text-3xl font-semibold text-primary-foreground">Félicitations ! 🎉</h2>
-                <p className="mt-2 text-primary-foreground/80">Tu as complété les {lessons.length} leçons du Clear Skin Protocol.</p>
-              </div>
-            </div>
-          )}
-
-          {/* ── Routine du jour — row 1, col 3 ───────────────────────────── */}
-          <div className="min-w-0 overflow-hidden rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-            <div className="mb-5 flex items-center justify-between">
-              <h3 className="font-display text-lg font-semibold">Routine du jour</h3>
-              {streak > 0 && (
-                <div className="flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-500 dark:bg-orange-950/40">
-                  <Flame className="h-3.5 w-3.5" />
-                  {streak}j
-                </div>
-              )}
-            </div>
-            {loading ? (
-              <div className="space-y-2">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-8 animate-pulse rounded-xl bg-muted" />
-                ))}
-              </div>
-            ) : !routine || (routine.am.length === 0 && routine.pm.length === 0) ? (
-              <div className="rounded-2xl bg-muted/50 p-4 text-center">
-                <p className="text-sm text-muted-foreground">
-                  Ton coach prépare ta routine personnalisée.
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-5">
-                  {routine.am.length > 0 && (
-                    <HomeRoutineBlock
-                      icon={Sun}
-                      label="Matin"
-                      steps={routine.am}
-                      checked={checkedAm}
-                      onToggle={(id) => toggleStep("am", id)}
-                    />
-                  )}
-                  {routine.pm.length > 0 && (
-                    <HomeRoutineBlock
-                      icon={Moon}
-                      label="Soir"
-                      steps={routine.pm}
-                      checked={checkedPm}
-                      onToggle={(id) => toggleStep("pm", id)}
-                    />
-                  )}
-                </div>
-                {routineAllDone && (
-                  <div className="mt-5 flex items-center justify-center gap-2 rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium text-foreground">
-                    <Check className="h-4 w-4 text-primary" />
-                    Routine complète pour aujourd'hui
-                  </div>
-                )}
-              </>
             )}
           </div>
 
-          {/* ── Calendar — row 2, col 1-2 ─────────────────────────────────── */}
-          <div className="lg:col-span-2">
-            <RoutineCalendar
-              totalSteps={totalRoutineSteps}
-              monthCheckins={monthCheckins}
-              checkedAm={checkedAm}
-              checkedPm={checkedPm}
-            />
-          </div>
-
-          {/* ── Progression — row 2, col 3 ────────────────────────────────── */}
-          <ProtocolProgressCard
-            progress={progress}
-            done={done}
-            total={lessons.length}
-            week={position.week}
-            currentChapter={currentChapter}
-            chapterDone={chapterDone}
-          />
-
-          {/* ── Coach notes — row 3, full width ──────────────────────────── */}
-          {coachNotes.length > 0 && (
-            <div className="lg:col-span-3 rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-              <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Messages de ton coach
-              </p>
-              <div className="space-y-3">
-                {coachNotes.map((n) => (
-                  <div key={n.id} className="rounded-2xl bg-primary-soft/40 p-4">
-                    <p className="text-sm text-foreground leading-relaxed">{n.note}</p>
-                    <div className="mt-2 flex items-center justify-between gap-3">
-                      <p className="text-xs text-muted-foreground">
-                        {n.authorName} · {new Date(n.createdAt).toLocaleDateString("fr-FR")}
-                      </p>
-                      {replyingTo !== n.id && (
-                        <button
-                          onClick={() => { setReplyingTo(n.id); setReplyText(""); }}
-                          className="flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
-                        >
-                          <MessageSquare className="h-3 w-3" /> Répondre
-                        </button>
-                      )}
-                    </div>
-                    {replyingTo === n.id && (
-                      <div className="mt-3 flex items-end gap-2">
-                        <textarea
-                          value={replyText}
-                          onChange={(e) => setReplyText(e.target.value)}
-                          placeholder="Ta réponse…"
-                          rows={2}
-                          className="flex-1 resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground/50 focus:border-primary focus:ring-1 focus:ring-primary/20"
-                        />
-                        <div className="flex flex-col gap-1">
-                          <button
-                            onClick={() => sendReply(n.id)}
-                            disabled={sendingReply || !replyText.trim()}
-                            className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
-                          >
-                            {sendingReply ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-                          </button>
-                          <button
-                            onClick={() => setReplyingTo(null)}
-                            className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-xs text-muted-foreground transition-colors hover:bg-muted"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
+          {!routine || (routine.am.length === 0 && routine.pm.length === 0) ? (
+            <div className="px-5 pb-5">
+              <div className="rounded-2xl bg-muted/50 p-4 text-center">
+                <p className="text-sm text-muted-foreground">Ton coach prépare ta routine personnalisée.</p>
               </div>
             </div>
+          ) : (
+            <div className="space-y-4 px-5 pb-5">
+              {routine.am.length > 0 && (
+                <>
+                  <div className="flex items-center gap-2 border-t border-border/40 pt-1">
+                    <Sun className="h-3.5 w-3.5 text-amber-400" />
+                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Matin</span>
+                    <span className="ml-auto text-xs tabular-nums text-muted-foreground">{checkedAm.length}/{routine.am.length}</span>
+                  </div>
+                  <HomeRoutineBlock icon={Sun} label="Matin" steps={routine.am} checked={checkedAm} onToggle={(id) => toggleStep("am", id)} />
+                </>
+              )}
+              {routine.pm.length > 0 && (
+                <>
+                  <div className="flex items-center gap-2 border-t border-border/40 pt-1">
+                    <Moon className="h-3.5 w-3.5 text-indigo-400" />
+                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Soir</span>
+                    <span className="ml-auto text-xs tabular-nums text-muted-foreground">{checkedPm.length}/{routine.pm.length}</span>
+                  </div>
+                  <HomeRoutineBlock icon={Moon} label="Soir" steps={routine.pm} checked={checkedPm} onToggle={(id) => toggleStep("pm", id)} />
+                </>
+              )}
+              {routineAllDone && (
+                <div className="flex items-center justify-center gap-2 rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium text-foreground">
+                  <Check className="h-4 w-4 text-primary" /> Routine complète pour aujourd'hui 🎉
+                </div>
+              )}
+            </div>
           )}
-
         </div>
+
+        {/* ── Quick check ────────────────────────────────────────────── */}
+        {hasRoutine && (
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
+            <p className="mb-3 text-sm font-semibold">Comment va ta peau aujourd'hui ?</p>
+            <div className="grid grid-cols-3 gap-2">
+              {SKIN_CHECK_OPTIONS.map((opt) => (
+                <button
+                  key={opt.status}
+                  onClick={() => saveSkinCheck(opt.status)}
+                  className={`flex flex-col items-center gap-1.5 rounded-2xl border px-3 py-3 text-xs font-medium transition-all ${
+                    skinCheck === opt.status ? opt.active : opt.inactive
+                  }`}
+                >
+                  <span className="text-xl">{opt.icon}</span>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Latest coach note ───────────────────────────────────────── */}
+        {latestCoachNote && (
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
+            <div className="mb-3 flex items-center gap-2">
+              <MessageSquare className="h-3.5 w-3.5 text-primary" />
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Ton coach dit…</p>
+            </div>
+            <p className="text-sm leading-relaxed text-foreground line-clamp-4">{latestCoachNote.note}</p>
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <p className="text-xs text-muted-foreground">
+                {new Date(latestCoachNote.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}
+              </p>
+              <div className="flex items-center gap-3">
+                {replyingTo !== latestCoachNote.id && (
+                  <button
+                    onClick={() => { setReplyingTo(latestCoachNote!.id); setReplyText(""); }}
+                    className="flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+                  >
+                    <MessageSquare className="h-3 w-3" /> Répondre
+                  </button>
+                )}
+                <Link to="/suivi" className="flex items-center gap-1 text-xs font-medium text-primary hover:underline">
+                  Voir tout <ChevronRight className="h-3 w-3" />
+                </Link>
+              </div>
+            </div>
+            {replyingTo === latestCoachNote.id && (
+              <div className="mt-3 flex items-end gap-2">
+                <textarea
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  placeholder="Ta réponse…"
+                  rows={2}
+                  className="flex-1 resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground/50 focus:border-primary focus:ring-1 focus:ring-primary/20"
+                />
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={() => sendReply(latestCoachNote!.id)}
+                    disabled={sendingReply || !replyText.trim()}
+                    className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+                  >
+                    {sendingReply ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                  </button>
+                  <button
+                    onClick={() => setReplyingTo(null)}
+                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-xs text-muted-foreground transition-colors hover:bg-muted"
+                  >✕</button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <PwaInstallBanner />
       </main>
