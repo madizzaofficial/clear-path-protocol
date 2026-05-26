@@ -474,10 +474,10 @@ function RoutineBlock({
           const report = reports[step.id];
           return (
             <li key={step.id} className={`px-6 py-5 transition-colors md:px-8 ${isChecked ? "bg-muted/30" : ""}`}>
-              <div className="flex gap-4">
 
-                {/* Product image */}
-                <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-muted md:h-28 md:w-28">
+              {/* ── Ligne haute : image + titre + check ── */}
+              <div className="flex items-start gap-4">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-muted md:h-20 md:w-20">
                   {step.imageUrl ? (
                     <img src={step.imageUrl} alt="" className="h-full w-full rounded-2xl object-contain p-1" />
                   ) : (
@@ -485,12 +485,11 @@ function RoutineBlock({
                   )}
                 </div>
 
-                {/* Content */}
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="rounded-full bg-primary-soft px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-primary">
                           {step.category}
                         </span>
                         <span className="text-[11px] font-medium text-muted-foreground/60">#{i + 1}</span>
@@ -502,55 +501,13 @@ function RoutineBlock({
                         {report && (
                           <span className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${report === "allergie" ? "bg-red-100 text-red-600" : "bg-orange-100 text-orange-600"}`}>
                             <AlertTriangle className="h-2.5 w-2.5" />
-                            {report === "allergie" ? "Allergie signalée" : "Irritant signalé"}
+                            {report === "allergie" ? "Allergie" : "Irritant"}
                           </span>
                         )}
                       </div>
-                      <h3 className={`mt-1.5 font-display text-base font-semibold ${isChecked ? "text-muted-foreground line-through" : ""}`}>
+                      <h3 className={`mt-1 font-display text-base font-semibold leading-snug ${isChecked ? "text-muted-foreground line-through" : ""}`}>
                         {step.product}
                       </h3>
-                      {step.introNote && (
-                        <div className="mt-1.5 flex items-start gap-1.5 rounded-xl bg-violet-50 px-3 py-2 dark:bg-violet-950/20">
-                          <Clock className="mt-0.5 h-3 w-3 shrink-0 text-violet-500" />
-                          <p className="text-xs italic text-violet-700 dark:text-violet-300">{step.introNote}</p>
-                        </div>
-                      )}
-                      {step.whyThisProduct && (
-                        <div className="mt-2 rounded-xl bg-primary-soft/50 px-3 py-2.5">
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-primary/60">Pourquoi ce produit</p>
-                          <p className="mt-0.5 text-sm leading-relaxed text-foreground/80">{step.whyThisProduct}</p>
-                        </div>
-                      )}
-                      {step.instructions && (
-                        <div className="mt-2">
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">Instructions</p>
-                          <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{step.instructions}</p>
-                        </div>
-                      )}
-                      <div className="mt-3 flex items-center gap-2 flex-wrap">
-                        {step.purchaseUrl && (
-                          <a
-                            href={step.purchaseUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-xl bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-80"
-                          >
-                            <ShoppingCart className="h-3 w-3" /> Acheter
-                          </a>
-                        )}
-                        {report ? (
-                          <span className="inline-flex items-center gap-1.5 rounded-xl bg-orange-50 px-3 py-1.5 text-xs font-medium text-orange-600 dark:bg-orange-950/30 dark:text-orange-400">
-                            <Check className="h-3 w-3" /> Signalement reçu · ton coach en est informé
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => onReport(step)}
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-orange-300 hover:text-orange-500"
-                          >
-                            <AlertTriangle className="h-3 w-3" /> Signaler
-                          </button>
-                        )}
-                      </div>
                     </div>
 
                     {/* Check toggle */}
@@ -566,6 +523,50 @@ function RoutineBlock({
                     </button>
                   </div>
                 </div>
+              </div>
+
+              {/* ── Blocs texte pleine largeur ── */}
+              {step.introNote && (
+                <div className="mt-3 flex items-start gap-1.5 rounded-xl bg-violet-50 px-3 py-2 dark:bg-violet-950/20">
+                  <Clock className="mt-0.5 h-3 w-3 shrink-0 text-violet-500" />
+                  <p className="text-xs italic text-violet-700 dark:text-violet-300">{step.introNote}</p>
+                </div>
+              )}
+              {step.whyThisProduct && (
+                <div className="mt-3 rounded-xl bg-primary-soft/50 px-3 py-2.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-primary/60">Pourquoi ce produit</p>
+                  <p className="mt-0.5 text-sm leading-relaxed text-foreground/80">{step.whyThisProduct}</p>
+                </div>
+              )}
+              {step.instructions && (
+                <div className="mt-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">Instructions</p>
+                  <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{step.instructions}</p>
+                </div>
+              )}
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {step.purchaseUrl && (
+                  <a
+                    href={step.purchaseUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-80"
+                  >
+                    <ShoppingCart className="h-3 w-3" /> Acheter
+                  </a>
+                )}
+                {report ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-xl bg-orange-50 px-3 py-1.5 text-xs font-medium text-orange-600 dark:bg-orange-950/30 dark:text-orange-400">
+                    <Check className="h-3 w-3" /> Signalement reçu · ton coach en est informé
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => onReport(step)}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-orange-300 hover:text-orange-500"
+                  >
+                    <AlertTriangle className="h-3 w-3" /> Signaler
+                  </button>
+                )}
               </div>
             </li>
           );
@@ -603,8 +604,8 @@ function BonusBlock({ blocks }: { blocks: ExtraBlock[] }) {
           <ol className="divide-y divide-border/60">
             {block.steps.map((step, i) => (
               <li key={step.id} className="px-6 py-5 md:px-8">
-                <div className="flex gap-4">
-                  <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-yellow-200/60 bg-yellow-50/60 dark:border-yellow-900/30 dark:bg-yellow-950/20 md:h-28 md:w-28">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-yellow-200/60 bg-yellow-50/60 dark:border-yellow-900/30 dark:bg-yellow-950/20 md:h-20 md:w-20">
                     {step.imageUrl ? (
                       <img src={step.imageUrl} alt="" className="h-full w-full rounded-2xl object-contain p-1" />
                     ) : (
@@ -612,28 +613,28 @@ function BonusBlock({ blocks }: { blocks: ExtraBlock[] }) {
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-yellow-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="rounded-full bg-yellow-100 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400">
                         {step.category}
                       </span>
                       <span className="text-[11px] font-medium text-muted-foreground/60">#{i + 1}</span>
                     </div>
-                    <h4 className="mt-1.5 font-display text-base font-semibold">{step.product}</h4>
-                    {step.instructions && (
-                      <div className="mt-2">
-                        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">Instructions</p>
-                        <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{step.instructions}</p>
-                      </div>
-                    )}
-                    {step.purchaseUrl && (
-                      <div className="mt-3">
-                        <a href={step.purchaseUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-xl bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-80">
-                          <ShoppingCart className="h-3 w-3" /> Acheter
-                        </a>
-                      </div>
-                    )}
+                    <h4 className="mt-1 font-display text-base font-semibold leading-snug">{step.product}</h4>
                   </div>
                 </div>
+                {step.instructions && (
+                  <div className="mt-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">Instructions</p>
+                    <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{step.instructions}</p>
+                  </div>
+                )}
+                {step.purchaseUrl && (
+                  <div className="mt-3">
+                    <a href={step.purchaseUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-xl bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-80">
+                      <ShoppingCart className="h-3 w-3" /> Acheter
+                    </a>
+                  </div>
+                )}
               </li>
             ))}
           </ol>

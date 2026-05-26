@@ -454,124 +454,88 @@ BUILTIN_INGREDIENTS: dict[str, str] = {
 
 # ── Découverte des slugs ───────────────────────────────────────────────────────
 
+def _stream_get(session: requests.Session, url: str, timeout: int = 120) -> bytes:
+    """Fetch a URL with streaming to handle large responses without timing out."""
+    r = session.get(url, headers=HEADERS, timeout=timeout, stream=True)
+    r.raise_for_status()
+    chunks = []
+    for chunk in r.iter_content(chunk_size=65536):
+        chunks.append(chunk)
+    return b"".join(chunks)
+
+
 def discover_ingredients(session: requests.Session) -> dict[str, str]:
     """
-    Découvre les slugs d'ingrédients INCIDecoder via plusieurs stratégies :
-      1. robots.txt → cherche l'URL du sitemap
-      2. Sitemap XML s'il existe
-      3. Pages de listing alphabétiques (/ingredients?letter=A, etc.)
-      4. Fallback : liste intégrée
+    Découvre les slugs d'ingrédients INCIDecoder via le sitemap officiel.
+
+    Approche :
+      1. robots.txt → récupère l'URL du sitemap index
+      2. Sitemap index (téléchargement en streaming, timeout 120s)
+      3. Filtre les sub-sitemaps dont le nom contient "ingredient"
+      4. Extrait tous les slugs des sitemaps d'ingrédients trouvés
+      5. Fallback : liste intégrée BUILTIN_INGREDIENTS
     """
     slugs: dict[str, str] = {}
+    ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 
-    # ── Stratégie 1 : robots.txt ─────────────────────────────────────────────
-    sitemap_urls: list[str] = []
+    # ── Étape 1 : trouver l'URL du sitemap index ─────────────────────────────
+    index_url = "https://incidecoder.com/sitemap-index.xml"
     try:
         r = session.get("https://incidecoder.com/robots.txt", headers=HEADERS, timeout=15)
         for line in r.text.splitlines():
             if line.lower().startswith("sitemap:"):
-                url = line.split(":", 1)[1].strip()
-                sitemap_urls.append(url)
-                print(f"  Sitemap trouvé dans robots.txt : {url}")
-    except Exception as e:
-        print(f"  robots.txt inaccessible : {e}")
-
-    # ── Stratégie 2 : Sitemap XML ────────────────────────────────────────────
-    for sitemap_url in sitemap_urls + [
-        "https://incidecoder.com/sitemap.xml",
-        "https://incidecoder.com/sitemap-index.xml",
-        "https://incidecoder.com/sitemaps/ingredients.xml",
-    ]:
-        try:
-            r = session.get(sitemap_url, headers=HEADERS, timeout=20)
-            r.raise_for_status()
-            root = ET.fromstring(r.text)
-            ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
-
-            # Sitemap index : récurser sur les sub-sitemaps d'ingrédients
-            sub_maps = [
-                sm.text.strip()
-                for sm in root.findall(".//sm:sitemap/sm:loc", ns)
-                if sm.text and "ingredient" in sm.text.lower()
-            ]
-            if sub_maps:
-                for sub_url in sub_maps:
-                    try:
-                        r2 = session.get(sub_url, headers=HEADERS, timeout=20)
-                        r2.raise_for_status()
-                        root2 = ET.fromstring(r2.text)
-                        for loc in root2.findall(".//sm:url/sm:loc", ns):
-                            if loc.text and "/ingredients/" in loc.text:
-                                m = re.search(r"/ingredients/([^/\?#]+)", loc.text)
-                                if m:
-                                    slug = m.group(1)
-                                    slugs[slug] = slug.replace("-", " ").upper()
-                        time.sleep(0.3)
-                    except Exception:
-                        pass
-            else:
-                # Sitemap direct
-                for loc in root.findall(".//sm:url/sm:loc", ns):
-                    if loc.text and "/ingredients/" in loc.text:
-                        m = re.search(r"/ingredients/([^/\?#]+)", loc.text)
-                        if m:
-                            slug = m.group(1)
-                            slugs[slug] = slug.replace("-", " ").upper()
-
-            if slugs:
-                print(f"  {len(slugs)} slugs récupérés depuis {sitemap_url}")
-                return slugs
-
-        except Exception as e:
-            print(f"  Sitemap {sitemap_url} : {e}")
-
-    # ── Stratégie 3 : Pages de listing alphabétiques ─────────────────────────
-    # INCIDecoder peut avoir des pages /ingredients?letter=A ou /ingredients/a
-    print("  Tentative via pages alphabétiques...")
-    letters = list("abcdefghijklmnopqrstuvwxyz") + ["0-9"]
-    listing_patterns = [
-        "https://incidecoder.com/ingredients?letter={l}",
-        "https://incidecoder.com/ingredients/{l}",
-        "https://incidecoder.com/ingredient-list/{l}",
-    ]
-    found_pattern: str | None = None
-
-    # Tester la première lettre pour trouver le bon pattern
-    for pattern in listing_patterns:
-        try:
-            url = pattern.format(l="a")
-            r = session.get(url, headers=HEADERS, timeout=15)
-            if r.status_code == 200 and "/ingredients/" in r.text:
-                found_pattern = pattern
-                print(f"  Pattern de listing trouvé : {pattern}")
+                index_url = line.split(":", 1)[1].strip()
+                print(f"  Sitemap index trouvé dans robots.txt : {index_url}")
                 break
-        except Exception:
-            pass
+    except Exception as e:
+        print(f"  robots.txt inaccessible ({e}) — utilisation de {index_url}")
 
-    if found_pattern:
-        for letter in letters:
-            try:
-                url = found_pattern.format(l=letter)
-                r = session.get(url, headers=HEADERS, timeout=15)
-                if r.status_code != 200:
-                    continue
-                soup = BeautifulSoup(r.text, "html.parser")
-                for a in soup.find_all("a", href=re.compile(r"/ingredients/[^/]+")):
-                    m = re.search(r"/ingredients/([^/\?#\"]+)", a["href"])
+    # ── Étape 2 : télécharger le sitemap index en streaming ──────────────────
+    print(f"  Téléchargement du sitemap index...")
+    try:
+        content = _stream_get(session, index_url, timeout=120)
+        root = ET.fromstring(content)
+
+        # Chercher TOUS les sub-sitemaps d'ingrédients
+        ingredient_sitemaps = [
+            loc.text.strip()
+            for loc in root.findall(".//sm:sitemap/sm:loc", ns)
+            if loc.text and "ingredient" in loc.text.lower()
+        ]
+
+        if not ingredient_sitemaps:
+            print("  Aucun sitemap d'ingrédients dans l'index — fallback liste intégrée.")
+            return {}
+
+        print(f"  {len(ingredient_sitemaps)} sitemap(s) d'ingrédients trouvé(s)")
+
+    except Exception as e:
+        print(f"  Impossible de lire le sitemap index ({e}) — fallback liste intégrée.")
+        return {}
+
+    # ── Étape 3 : extraire les slugs de chaque sitemap d'ingrédients ─────────
+    for i, sm_url in enumerate(ingredient_sitemaps, 1):
+        print(f"  [{i}/{len(ingredient_sitemaps)}] {sm_url}")
+        try:
+            content = _stream_get(session, sm_url, timeout=120)
+            root2 = ET.fromstring(content)
+            before = len(slugs)
+            for loc in root2.findall(".//sm:url/sm:loc", ns):
+                if loc.text and "/ingredients/" in loc.text:
+                    m = re.search(r"/ingredients/([^/\?#]+)", loc.text)
                     if m:
                         slug = m.group(1)
                         slugs[slug] = slug.replace("-", " ").upper()
-                print(f"  {letter.upper()} : {len(slugs)} slugs cumulés")
-                time.sleep(DELAY)
-            except Exception as e:
-                print(f"  Listing {letter} : {e}")
+            print(f"      +{len(slugs) - before} slugs  (total : {len(slugs)})")
+            time.sleep(0.5)
+        except Exception as e:
+            print(f"      Erreur : {e}")
 
     if slugs:
-        print(f"  Total découverts : {len(slugs)} ingrédients")
+        print(f"  Découverte terminée : {len(slugs)} ingrédients")
         return slugs
 
-    # ── Stratégie 4 : Fallback liste intégrée ────────────────────────────────
-    print("  Aucune découverte automatique possible — utilisation de la liste intégrée.")
+    print("  Aucun slug découvert — fallback liste intégrée.")
     return {}
 
 

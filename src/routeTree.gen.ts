@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as SuiviRouteImport } from './routes/suivi'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ProductsRouteImport } from './routes/products'
@@ -18,13 +19,13 @@ import { Route as JournalRouteImport } from './routes/journal'
 import { Route as IntakeRouteImport } from './routes/intake'
 import { Route as IngredientAnalyzerRouteImport } from './routes/ingredient-analyzer'
 import { Route as FinishRouteImport } from './routes/finish'
-import { Route as SuiviRouteImport } from './routes/suivi'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as CourseRouteImport } from './routes/course'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StartTokenRouteImport } from './routes/start.$token'
 import { Route as LessonLessonIdRouteImport } from './routes/lesson.$lessonId'
+import { Route as AdminUnclassifiedRouteImport } from './routes/admin_.unclassified'
 import { Route as AdminTokensRouteImport } from './routes/admin_.tokens'
 import { Route as AdminTemplatesRouteImport } from './routes/admin_.templates'
 import { Route as AdminRoutinesRouteImport } from './routes/admin_.routines'
@@ -41,6 +42,11 @@ import { Route as AdminStudentUidRouteImport } from './routes/admin_.student.$ui
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuiviRoute = SuiviRouteImport.update({
+  id: '/suivi',
+  path: '/suivi',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -83,11 +89,6 @@ const FinishRoute = FinishRouteImport.update({
   path: '/finish',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SuiviRoute = SuiviRouteImport.update({
-  id: '/suivi',
-  path: '/suivi',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
@@ -116,6 +117,11 @@ const StartTokenRoute = StartTokenRouteImport.update({
 const LessonLessonIdRoute = LessonLessonIdRouteImport.update({
   id: '/lesson/$lessonId',
   path: '/lesson/$lessonId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUnclassifiedRoute = AdminUnclassifiedRouteImport.update({
+  id: '/admin_/unclassified',
+  path: '/admin/unclassified',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminTokensRoute = AdminTokensRouteImport.update({
@@ -185,7 +191,6 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/course': typeof CourseRoute
   '/faq': typeof FaqRoute
-  '/suivi': typeof SuiviRoute
   '/finish': typeof FinishRoute
   '/ingredient-analyzer': typeof IngredientAnalyzerRoute
   '/intake': typeof IntakeRoute
@@ -194,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/suivi': typeof SuiviRoute
   '/welcome': typeof WelcomeRoute
   '/admin/admins': typeof AdminAdminsRoute
   '/admin/course-editor': typeof AdminCourseEditorRoute
@@ -204,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/admin/routines': typeof AdminRoutinesRoute
   '/admin/templates': typeof AdminTemplatesRouteWithChildren
   '/admin/tokens': typeof AdminTokensRoute
+  '/admin/unclassified': typeof AdminUnclassifiedRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
   '/admin/student/$uid': typeof AdminStudentUidRoute
@@ -215,7 +222,6 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/course': typeof CourseRoute
   '/faq': typeof FaqRoute
-  '/suivi': typeof SuiviRoute
   '/finish': typeof FinishRoute
   '/ingredient-analyzer': typeof IngredientAnalyzerRoute
   '/intake': typeof IntakeRoute
@@ -224,6 +230,7 @@ export interface FileRoutesByTo {
   '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/suivi': typeof SuiviRoute
   '/welcome': typeof WelcomeRoute
   '/admin/admins': typeof AdminAdminsRoute
   '/admin/course-editor': typeof AdminCourseEditorRoute
@@ -233,6 +240,7 @@ export interface FileRoutesByTo {
   '/admin/products': typeof AdminProductsRoute
   '/admin/routines': typeof AdminRoutinesRoute
   '/admin/tokens': typeof AdminTokensRoute
+  '/admin/unclassified': typeof AdminUnclassifiedRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
   '/admin/student/$uid': typeof AdminStudentUidRoute
@@ -245,7 +253,6 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/course': typeof CourseRoute
   '/faq': typeof FaqRoute
-  '/suivi': typeof SuiviRoute
   '/finish': typeof FinishRoute
   '/ingredient-analyzer': typeof IngredientAnalyzerRoute
   '/intake': typeof IntakeRoute
@@ -254,6 +261,7 @@ export interface FileRoutesById {
   '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/suivi': typeof SuiviRoute
   '/welcome': typeof WelcomeRoute
   '/admin_/admins': typeof AdminAdminsRoute
   '/admin_/course-editor': typeof AdminCourseEditorRoute
@@ -264,6 +272,7 @@ export interface FileRoutesById {
   '/admin_/routines': typeof AdminRoutinesRoute
   '/admin_/templates': typeof AdminTemplatesRouteWithChildren
   '/admin_/tokens': typeof AdminTokensRoute
+  '/admin_/unclassified': typeof AdminUnclassifiedRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
   '/admin_/student/$uid': typeof AdminStudentUidRoute
@@ -277,7 +286,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/course'
     | '/faq'
-    | '/suivi'
     | '/finish'
     | '/ingredient-analyzer'
     | '/intake'
@@ -286,6 +294,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/profile'
     | '/register'
+    | '/suivi'
     | '/welcome'
     | '/admin/admins'
     | '/admin/course-editor'
@@ -296,6 +305,7 @@ export interface FileRouteTypes {
     | '/admin/routines'
     | '/admin/templates'
     | '/admin/tokens'
+    | '/admin/unclassified'
     | '/lesson/$lessonId'
     | '/start/$token'
     | '/admin/student/$uid'
@@ -307,7 +317,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/course'
     | '/faq'
-    | '/suivi'
     | '/finish'
     | '/ingredient-analyzer'
     | '/intake'
@@ -316,6 +325,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/profile'
     | '/register'
+    | '/suivi'
     | '/welcome'
     | '/admin/admins'
     | '/admin/course-editor'
@@ -325,6 +335,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/routines'
     | '/admin/tokens'
+    | '/admin/unclassified'
     | '/lesson/$lessonId'
     | '/start/$token'
     | '/admin/student/$uid'
@@ -336,7 +347,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/course'
     | '/faq'
-    | '/suivi'
     | '/finish'
     | '/ingredient-analyzer'
     | '/intake'
@@ -345,6 +355,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/profile'
     | '/register'
+    | '/suivi'
     | '/welcome'
     | '/admin_/admins'
     | '/admin_/course-editor'
@@ -355,6 +366,7 @@ export interface FileRouteTypes {
     | '/admin_/routines'
     | '/admin_/templates'
     | '/admin_/tokens'
+    | '/admin_/unclassified'
     | '/lesson/$lessonId'
     | '/start/$token'
     | '/admin_/student/$uid'
@@ -367,7 +379,6 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   CourseRoute: typeof CourseRoute
   FaqRoute: typeof FaqRoute
-  SuiviRoute: typeof SuiviRoute
   FinishRoute: typeof FinishRoute
   IngredientAnalyzerRoute: typeof IngredientAnalyzerRoute
   IntakeRoute: typeof IntakeRoute
@@ -376,6 +387,7 @@ export interface RootRouteChildren {
   ProductsRoute: typeof ProductsRoute
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
+  SuiviRoute: typeof SuiviRoute
   WelcomeRoute: typeof WelcomeRoute
   AdminAdminsRoute: typeof AdminAdminsRoute
   AdminCourseEditorRoute: typeof AdminCourseEditorRoute
@@ -386,6 +398,7 @@ export interface RootRouteChildren {
   AdminRoutinesRoute: typeof AdminRoutinesRoute
   AdminTemplatesRoute: typeof AdminTemplatesRouteWithChildren
   AdminTokensRoute: typeof AdminTokensRoute
+  AdminUnclassifiedRoute: typeof AdminUnclassifiedRoute
   LessonLessonIdRoute: typeof LessonLessonIdRoute
   StartTokenRoute: typeof StartTokenRoute
   AdminStudentUidRoute: typeof AdminStudentUidRoute
@@ -398,6 +411,13 @@ declare module '@tanstack/react-router' {
       path: '/welcome'
       fullPath: '/welcome'
       preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/suivi': {
+      id: '/suivi'
+      path: '/suivi'
+      fullPath: '/suivi'
+      preLoaderRoute: typeof SuiviRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -463,13 +483,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/suivi': {
-      id: '/suivi'
-      path: '/suivi'
-      fullPath: '/suivi'
-      preLoaderRoute: typeof SuiviRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/course': {
       id: '/course'
       path: '/course'
@@ -503,6 +516,13 @@ declare module '@tanstack/react-router' {
       path: '/lesson/$lessonId'
       fullPath: '/lesson/$lessonId'
       preLoaderRoute: typeof LessonLessonIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin_/unclassified': {
+      id: '/admin_/unclassified'
+      path: '/admin/unclassified'
+      fullPath: '/admin/unclassified'
+      preLoaderRoute: typeof AdminUnclassifiedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin_/tokens': {
@@ -611,7 +631,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   CourseRoute: CourseRoute,
   FaqRoute: FaqRoute,
-  SuiviRoute: SuiviRoute,
   FinishRoute: FinishRoute,
   IngredientAnalyzerRoute: IngredientAnalyzerRoute,
   IntakeRoute: IntakeRoute,
@@ -620,6 +639,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductsRoute: ProductsRoute,
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
+  SuiviRoute: SuiviRoute,
   WelcomeRoute: WelcomeRoute,
   AdminAdminsRoute: AdminAdminsRoute,
   AdminCourseEditorRoute: AdminCourseEditorRoute,
@@ -630,6 +650,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoutinesRoute: AdminRoutinesRoute,
   AdminTemplatesRoute: AdminTemplatesRouteWithChildren,
   AdminTokensRoute: AdminTokensRoute,
+  AdminUnclassifiedRoute: AdminUnclassifiedRoute,
   LessonLessonIdRoute: LessonLessonIdRoute,
   StartTokenRoute: StartTokenRoute,
   AdminStudentUidRoute: AdminStudentUidRoute,
