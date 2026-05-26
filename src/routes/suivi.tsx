@@ -132,12 +132,12 @@ function Suivi() {
         skinStateSnap, progressSnap, userSnap, routineSnap,
         notesSnap, photosSnap,
       ] = await Promise.all([
-        getDoc(doc(db, "admin_skin_state", user!.uid)),
-        getDoc(doc(db, "progress", user!.uid)),
-        getDoc(doc(db, "users", user!.uid)),
-        getDoc(doc(db, "routines", user!.uid)),
-        getDocs(query(collection(db, "users", user!.uid, "notes"), orderBy("createdAt", "desc"), limit(3))),
-        getDocs(query(collection(db, "progress_photos"), where("uid", "==", user!.uid))),
+        getDoc(doc(db, "admin_skin_state", user!.uid)).catch(() => null),
+        getDoc(doc(db, "progress", user!.uid)).catch(() => null),
+        getDoc(doc(db, "users", user!.uid)).catch(() => null),
+        getDoc(doc(db, "routines", user!.uid)).catch(() => null),
+        getDocs(query(collection(db, "users", user!.uid, "notes"), orderBy("createdAt", "desc"), limit(3))).catch(() => null),
+        getDocs(query(collection(db, "progress_photos"), where("uid", "==", user!.uid))).catch(() => null),
       ]);
 
       // Month checkins
@@ -147,23 +147,23 @@ function Suivi() {
           where(/* docId range */ "__name__", ">=", firstDay),
           where("__name__", "<=", lastDay),
         ),
-      );
+      ).catch(() => null);
       const monthCheckins: Record<string, { am: string[]; pm: string[] }> = {};
-      monthCheckinsSnap.forEach((d) => { monthCheckins[d.id] = d.data() as any; });
+      monthCheckinsSnap?.forEach((d) => { monthCheckins[d.id] = d.data() as any; });
 
       // Today's checkins
       const todayKey = now.toISOString().slice(0, 10);
-      const todaySnap = await getDoc(doc(db, "routine_checkins", user!.uid, "days", todayKey));
-      const todayData = todaySnap.exists() ? todaySnap.data() : { am: [], pm: [] };
+      const todaySnap = await getDoc(doc(db, "routine_checkins", user!.uid, "days", todayKey)).catch(() => null);
+      const todayData = todaySnap?.exists() ? todaySnap.data() : { am: [], pm: [] };
 
       // Latest coach note (not from student)
-      const allNotes: CoachNote[] = notesSnap.docs.map((d) => ({ id: d.id, ...d.data() } as CoachNote));
+      const allNotes: CoachNote[] = notesSnap?.docs.map((d) => ({ id: d.id, ...d.data() } as CoachNote)) ?? [];
       const latestNote = allNotes.find((n) => !n.isFromStudent) ?? null;
 
       // Latest photo — sort client-side (avoids composite index on uid+createdAt)
       let latestPhotoUrl: string | null = null;
       let latestPhotoDate: string | null = null;
-      if (!photosSnap.empty) {
+      if (photosSnap && !photosSnap.empty) {
         const sorted = photosSnap.docs
           .map((d) => d.data())
           .sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
@@ -173,16 +173,16 @@ function Suivi() {
       }
 
       // Routine total steps
-      const routine = routineSnap.exists() ? routineSnap.data() : null;
+      const routine = routineSnap?.exists() ? routineSnap.data() : null;
       const totalRoutineSteps = routine
         ? (routine.am?.length ?? 0) + (routine.pm?.length ?? 0)
         : 0;
 
       setData({
         loading: false,
-        skinState: skinStateSnap.exists() ? (skinStateSnap.data() as AdminSkinState) : null,
-        completedLessons: progressSnap.exists() ? (progressSnap.data().completedLessons ?? []) : [],
-        enrolledAt: userSnap.exists() ? (userSnap.data().enrolledAt ?? null) : null,
+        skinState: skinStateSnap?.exists() ? (skinStateSnap.data() as AdminSkinState) : null,
+        completedLessons: progressSnap?.exists() ? (progressSnap.data().completedLessons ?? []) : [],
+        enrolledAt: userSnap?.exists() ? (userSnap.data().enrolledAt ?? null) : null,
         totalRoutineSteps,
         monthCheckins,
         checkedAm: todayData.am ?? [],
@@ -193,7 +193,10 @@ function Suivi() {
       });
     }
 
-    load().catch(console.error);
+    load().catch((e) => {
+      console.error(e);
+      setData((d) => ({ ...d, loading: false }));
+    });
   }, [user?.uid]);
 
   const {

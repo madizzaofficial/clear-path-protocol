@@ -381,24 +381,52 @@ function Dashboard() {
             </p>
           )}
 
-          {/* Protocol progress pill */}
-          <div className="flex items-center gap-2 pt-1">
-            <div className="relative h-1.5 flex-1 rounded-full bg-muted overflow-hidden">
-              <div className="absolute inset-y-0 left-0 rounded-full bg-primary transition-all duration-700" style={{ width: `${progress}%` }} />
+          {/* Protocol progress card */}
+          {(next || allDone) && (
+            <div className="mt-1 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft">
+              <div className="flex items-center justify-between px-4 py-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+                    Protocole · {progress}% complété
+                  </p>
+                  {currentChapter && (
+                    <p className="mt-0.5 truncate text-sm font-semibold">
+                      {currentChapter.title}
+                    </p>
+                  )}
+                  {next && (
+                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                      → {next.title}
+                    </p>
+                  )}
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all duration-700"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="ml-4 shrink-0">
+                  {next ? (
+                    <Link
+                      to="/lesson/$lessonId"
+                      params={{ lessonId: next.id }}
+                      className="flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground shadow-sm hover:opacity-90"
+                    >
+                      <Play className="h-3 w-3 fill-primary-foreground" /> Reprendre
+                    </Link>
+                  ) : (
+                    <Link
+                      to="/finish"
+                      className="flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground shadow-sm hover:opacity-90"
+                    >
+                      <Trophy className="h-3 w-3" /> Récap
+                    </Link>
+                  )}
+                </div>
+              </div>
             </div>
-            <span className="text-xs font-medium tabular-nums text-muted-foreground">{progress}%</span>
-            {next && (
-              <Link to="/lesson/$lessonId" params={{ lessonId: next.id }}
-                className="flex items-center gap-1 text-xs font-medium text-primary hover:underline shrink-0">
-                <Play className="h-3 w-3 fill-primary" /> Reprendre
-              </Link>
-            )}
-            {allDone && (
-              <Link to="/finish" className="flex items-center gap-1 text-xs font-medium text-primary hover:underline shrink-0">
-                <Trophy className="h-3 w-3" /> Récap
-              </Link>
-            )}
-          </div>
+          )}
         </section>
 
         {/* ── Routine du jour ────────────────────────────────────────── */}
