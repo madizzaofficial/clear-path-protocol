@@ -40,6 +40,7 @@ export type RoutineStep = {
   purchaseUrl?: string;
   startWeek?: number;
   introNote?: string;
+  whyThisProduct?: string;
 };
 
 export type ExtraBlock = {
@@ -57,6 +58,7 @@ export type StepSaveData = {
   purchaseUrl?: string;
   startWeek?: number;
   introNote?: string;
+  whyThisProduct?: string;
 };
 
 // ─── SortableStep ─────────────────────────────────────────────────────────────
@@ -163,6 +165,7 @@ export function StepDialog({
   const [purchaseUrl, setPurchaseUrl] = useState("");
   const [startWeek, setStartWeek] = useState<number | "">("");
   const [introNote, setIntroNote] = useState("");
+  const [whyThisProduct, setWhyThisProduct] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [catalogSearch, setCatalogSearch] = useState("");
@@ -186,6 +189,7 @@ export function StepDialog({
       setPurchaseUrl(step.purchaseUrl ?? "");
       setStartWeek(step.startWeek ?? "");
       setIntroNote(step.introNote ?? "");
+      setWhyThisProduct(step.whyThisProduct ?? "");
       setUploadError(null);
       setUploading(false);
       setShowCatalogPicker(false);
@@ -406,6 +410,22 @@ export function StepDialog({
               />
             </div>
 
+            {/* Pourquoi ce produit */}
+            <div>
+              <label className="mb-2 block text-sm font-medium text-foreground/80">
+                Pourquoi ce produit{" "}
+                <span className="font-normal text-muted-foreground">(visible par l'élève)</span>
+              </label>
+              <textarea
+                autoComplete="off"
+                value={whyThisProduct}
+                onChange={(e) => setWhyThisProduct(e.target.value)}
+                placeholder="ex : L'avoine apaise les rougeurs. Le panthénol répare la barrière cutanée. Assez léger pour ne pas boucher les pores."
+                rows={3}
+                className="w-full resize-none rounded-2xl border border-border bg-background p-3 text-sm outline-none transition-all placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+
             {/* Instauration progressive */}
             <div className="rounded-2xl border border-border/60 bg-muted/30 p-4 space-y-3">
               <div className="flex items-center gap-2">
@@ -477,6 +497,7 @@ export function StepDialog({
                 purchaseUrl: purchaseUrl.trim() || undefined,
                 startWeek: startWeek !== "" ? startWeek : undefined,
                 introNote: introNote.trim() || undefined,
+                whyThisProduct: whyThisProduct.trim() || undefined,
               })
             }
             disabled={saving || !product.trim()}

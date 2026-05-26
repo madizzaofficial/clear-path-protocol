@@ -25,6 +25,7 @@ type RoutineStep = {
   purchaseUrl?: string;
   startWeek?: number;
   introNote?: string;
+  whyThisProduct?: string;
 };
 
 type ExtraBlock = { id: string; name: string; steps: RoutineStep[] };
@@ -522,6 +523,12 @@ function RoutineBlock({
                         <div className="mt-1.5 flex items-start gap-1.5 rounded-xl bg-violet-50 px-3 py-2 dark:bg-violet-950/20">
                           <Clock className="mt-0.5 h-3 w-3 shrink-0 text-violet-500" />
                           <p className="text-xs italic text-violet-700 dark:text-violet-300">{step.introNote}</p>
+                        </div>
+                      )}
+                      {step.whyThisProduct && (
+                        <div className="mt-2 rounded-xl bg-primary-soft/50 px-3 py-2.5">
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-primary/60">Pourquoi ce produit</p>
+                          <p className="mt-0.5 text-sm leading-relaxed text-foreground/80">{step.whyThisProduct}</p>
                         </div>
                       )}
                       {step.instructions && (
