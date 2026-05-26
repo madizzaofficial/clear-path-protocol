@@ -522,8 +522,8 @@ function ProductCard({
               title="Marquer comme vérifié"
               className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-amber-600 transition-colors hover:bg-amber-50 hover:text-amber-700 dark:hover:bg-amber-950/20"
             >
-              <ShieldCheck className="h-3 w-3" />
-              Vérifier
+              <ShieldCheck className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Vérifier</span>
             </button>
             <div className="w-px bg-border" />
           </>
@@ -533,8 +533,8 @@ function ProductCard({
           title="Modifier"
           className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
-          <Pencil className="h-3 w-3" />
-          Modifier
+          <Pencil className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Modifier</span>
         </button>
         <div className="w-px bg-border" />
         <button
@@ -542,8 +542,8 @@ function ProductCard({
           title="Supprimer"
           className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
         >
-          <Trash2 className="h-3 w-3" />
-          Supprimer
+          <Trash2 className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Supprimer</span>
         </button>
       </div>
     </li>
