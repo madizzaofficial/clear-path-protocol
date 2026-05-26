@@ -3,7 +3,7 @@ import { AppShell } from "@/components/AppShell";
 import { allLessons } from "@/lib/course-data";
 import {
   BookOpen, Camera, CalendarDays, MessageSquare, ChevronRight, Loader2,
-  Flame, Sparkles, Phone, Check,
+  Sparkles, Phone, Check,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
@@ -298,12 +298,12 @@ function Suivi() {
     <AppShell>
       <main className="mx-auto max-w-7xl px-4 pb-28 pt-8 sm:px-6">
         {/*
-          DOM order = mobile order: 1→2→3→4→5→6
-          Desktop: explicit col-start/row-start repositions sections into 3-col grid
-          col 1-2: Header(r1) · Évolution(r2) · Progression(r3) · Journal(r4)
-          col 3:   Coaching(r1) · Feedback(r2)
+          DOM = mobile order: Hero · Coaching · Mon parcours · État peau · Feedback · Protocole · Journal
+          Desktop grid (3 cols, explicit row-start):
+            Left  (col 1-2): Hero(r1) · Mon parcours(r2) · Feedback(r3)
+            Right (col 3):   Coaching(r1) · État peau(r2) · Protocole(r3) · Journal(r4)
         */}
-        <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-8 lg:items-start">
+        <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start">
 
           {/* ── 1. Journey hero ─────────────────────── col-span-2 row-1 ── */}
           <div className="overflow-hidden rounded-3xl bg-gradient-warm p-6 shadow-elegant lg:col-span-2 lg:row-start-1">
@@ -333,8 +333,8 @@ function Suivi() {
             </div>
           </div>
 
-          {/* ── 2. État de ta peau ─────────────── col-span-2 row-2 ── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-span-2 lg:row-start-2">
+          {/* ── 4. État de ta peau ─────────────── right col-3 row-2 ── */}
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-3 lg:row-start-2">
             <div className="mb-4 flex items-center justify-between">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                 État de ta peau
@@ -379,8 +379,54 @@ function Suivi() {
             )}
           </div>
 
-          {/* ── 3. Mon parcours ──────────────── col-span-2 row-3 ── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-span-2 lg:row-start-3">
+          {/* ── 2. Coaching ─────────────────── right col-3 row-1 ── */}
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-3 lg:row-start-1">
+            <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              <CalendarDays className="h-3.5 w-3.5" />
+              Prochain point coaching
+            </div>
+
+            {skinState?.nextCallDate ? (
+              <>
+                <p className="text-base font-semibold capitalize">
+                  {formatCallDate(skinState.nextCallDate)}
+                </p>
+                {skinState.nextCallTime && (
+                  <p className="text-sm text-muted-foreground">à {skinState.nextCallTime}</p>
+                )}
+                {daysUntilCall !== null && (
+                  <p
+                    className={`mt-1 text-sm font-semibold ${
+                      daysUntilCall <= 0
+                        ? "text-primary"
+                        : daysUntilCall <= 3
+                        ? "text-amber-600 dark:text-amber-400"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {daysUntilCall < 0
+                      ? "Passé"
+                      : daysUntilCall === 0
+                      ? "Aujourd'hui !"
+                      : daysUntilCall === 1
+                      ? "Demain"
+                      : `Dans ${daysUntilCall} jours`}
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Ton prochain point coaching sera bientôt fixé.
+              </p>
+            )}
+
+            <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/20">
+              <Phone className="h-4 w-4" /> Contacter le coach
+            </button>
+          </div>
+
+          {/* ── 3. Mon parcours ──────────────── left col-span-2 row-2 ── */}
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-span-2 lg:row-start-2">
             <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Mon parcours</p>
             <div className="space-y-1">
               {JOURNEY_PHASES.map((phase) => {
@@ -429,129 +475,8 @@ function Suivi() {
             </div>
           </div>
 
-          {/* ── 4. Progression protocole ──────── col-span-2 row-4 ── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-span-2 lg:row-start-4">
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Protocole
-              </p>
-              <span className="text-xs font-semibold text-primary">
-                {done}/{total} leçons · {protocolPct}%
-              </span>
-            </div>
-
-            <div className="mb-4 h-2 overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary transition-all duration-700"
-                style={{ width: `${protocolPct}%` }}
-              />
-            </div>
-
-            {nextLesson && (
-              <Link
-                to="/lesson/$lessonId"
-                params={{ lessonId: nextLesson.id }}
-                className="flex items-center gap-3 rounded-2xl border border-border/60 bg-muted/20 px-4 py-3 transition-colors hover:bg-muted/40"
-              >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-soft">
-                  <BookOpen className="h-4 w-4 text-primary" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-primary/70">
-                    Prochaine leçon
-                  </p>
-                  <p className="mt-0.5 truncate text-sm font-medium">{nextLesson.title}</p>
-                </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/40" />
-              </Link>
-            )}
-
-            {/* Adhérence 28j */}
-            <div className="mt-4 border-t border-border/60 pt-4">
-              <div className="mb-3 flex items-center justify-between">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Adhérence · 28 jours
-                </p>
-                <div className="flex items-center gap-2">
-                  {streak > 0 && (
-                    <div className="flex items-center gap-1 rounded-full bg-orange-50 px-2.5 py-1 dark:bg-orange-950/40">
-                      <Flame className="h-3 w-3 text-orange-500" />
-                      <span className="text-xs font-semibold text-orange-600 dark:text-orange-400">{streak}</span>
-                    </div>
-                  )}
-                  <span
-                    className={`text-sm font-semibold ${
-                      adherencePct >= 70
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : adherencePct >= 40
-                        ? "text-amber-600 dark:text-amber-400"
-                        : "text-red-500"
-                    }`}
-                  >
-                    {adherencePct}%
-                  </span>
-                </div>
-              </div>
-              <MiniWeekDots checkins28={checkins28} totalSteps={totalRoutineSteps} />
-              <div className="mt-2 flex items-center gap-4 text-[10px] text-muted-foreground">
-                <div className="flex items-center gap-1.5">
-                  <div className="h-2.5 w-2.5 rounded-sm bg-primary" /> Complète
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="h-2.5 w-2.5 rounded-sm bg-primary/30" /> Partielle
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── 4. Coaching & suivi ──────── col-start-3 row-1 ── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-3 lg:row-start-1">
-            <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              <CalendarDays className="h-3.5 w-3.5" />
-              Prochain point coaching
-            </div>
-
-            {skinState?.nextCallDate ? (
-              <>
-                <p className="text-base font-semibold capitalize">
-                  {formatCallDate(skinState.nextCallDate)}
-                </p>
-                {skinState.nextCallTime && (
-                  <p className="text-sm text-muted-foreground">à {skinState.nextCallTime}</p>
-                )}
-                {daysUntilCall !== null && (
-                  <p
-                    className={`mt-1 text-sm font-semibold ${
-                      daysUntilCall <= 0
-                        ? "text-primary"
-                        : daysUntilCall <= 3
-                        ? "text-amber-600 dark:text-amber-400"
-                        : "text-muted-foreground"
-                    }`}
-                  >
-                    {daysUntilCall < 0
-                      ? "Passé"
-                      : daysUntilCall === 0
-                      ? "Aujourd'hui !"
-                      : daysUntilCall === 1
-                      ? "Demain"
-                      : `Dans ${daysUntilCall} jours`}
-                  </p>
-                )}
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Ton prochain point coaching sera bientôt fixé.
-              </p>
-            )}
-
-            <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/20">
-              <Phone className="h-4 w-4" /> Contacter le coach
-            </button>
-          </div>
-
-          {/* ── 5. Feedback du coach ──────── col-start-3 row-2 ── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-3 lg:row-start-2">
+          {/* ── 5. Feedback du coach ──────── left col-span-2 row-3 ── */}
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-span-2 lg:row-start-3">
             <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
               <MessageSquare className="h-3.5 w-3.5" />
               Message du coach
@@ -581,11 +506,41 @@ function Suivi() {
                 </div>
               </div>
             )}
-
           </div>
 
-          {/* ── 6. Journal photo ─── col-start-1 col-span-2 row-5 ── */}
-          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-1 lg:col-span-2 lg:row-start-5">
+          {/* ── 6. Protocole ────────────────── right col-3 row-3 ── */}
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-3 lg:row-start-3">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Protocole
+              </p>
+              <span className="text-xs font-semibold text-primary">
+                {done}/{total} · {protocolPct}%
+              </span>
+            </div>
+            <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-primary transition-all duration-700"
+                style={{ width: `${protocolPct}%` }}
+              />
+            </div>
+            {nextLesson && (
+              <Link
+                to="/lesson/$lessonId"
+                params={{ lessonId: nextLesson.id }}
+                className="flex items-center gap-2 rounded-2xl border border-border/60 bg-muted/20 px-3 py-2.5 transition-colors hover:bg-muted/40"
+              >
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-soft">
+                  <BookOpen className="h-3.5 w-3.5 text-primary" />
+                </div>
+                <p className="min-w-0 flex-1 truncate text-xs font-medium">{nextLesson.title}</p>
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40" />
+              </Link>
+            )}
+          </div>
+
+          {/* ── 7. Journal photo ────────────── right col-3 row-4 ── */}
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-3 lg:row-start-4">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                 Journal photo
@@ -599,8 +554,8 @@ function Suivi() {
             </div>
 
             {photos.length > 0 ? (
-              <div className="grid grid-cols-3 gap-3">
-                {photos.map((photo, i) => {
+              <div className="grid grid-cols-2 gap-2">
+                {photos.slice(0, 2).map((photo, i) => {
                   const url = photo.front ?? photo.left ?? photo.right;
                   if (!url) return null;
                   return (
@@ -622,21 +577,16 @@ function Suivi() {
                 })}
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-4 py-6 text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-dashed border-border bg-muted/30">
-                  <Camera className="h-7 w-7 text-muted-foreground/30" />
+              <div className="flex flex-col items-center gap-3 py-4 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border-2 border-dashed border-border bg-muted/30">
+                  <Camera className="h-5 w-5 text-muted-foreground/30" />
                 </div>
-                <div>
-                  <p className="text-sm font-medium">Commence ton journal photo</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Prends une photo chaque semaine pour visualiser ta transformation.
-                  </p>
-                </div>
+                <p className="text-xs text-muted-foreground">Prends une photo chaque semaine pour suivre ta transformation.</p>
                 <Link
                   to="/journal"
-                  className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm"
+                  className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-sm"
                 >
-                  <Camera className="h-4 w-4" /> Ajouter ma première photo
+                  <Camera className="h-3.5 w-3.5" /> Ajouter une photo
                 </Link>
               </div>
             )}
