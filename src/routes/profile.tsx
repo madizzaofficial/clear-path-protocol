@@ -44,6 +44,11 @@ function ProfilePage() {
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState("");
   const [savingName, setSavingName] = useState(false);
+  const [editingIntake, setEditingIntake] = useState(false);
+  const [savingIntake, setSavingIntake] = useState(false);
+  const [draftSkinType, setDraftSkinType] = useState("");
+  const [draftAcneTypes, setDraftAcneTypes] = useState<string[]>([]);
+  const [draftIntensity, setDraftIntensity] = useState("");
 
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/login" });
@@ -56,7 +61,13 @@ function ProfilePage() {
       getDoc(doc(db, "progress", user.uid)),
       getDoc(doc(db, "users", user.uid)),
     ]).then(([intakeSnap, progressSnap, userSnap]) => {
-      if (intakeSnap.exists()) setIntake(intakeSnap.data() as IntakeAnswers);
+      if (intakeSnap.exists()) {
+        const d = intakeSnap.data() as IntakeAnswers;
+        setIntake(d);
+        setDraftSkinType(d.skinType ?? "");
+        setDraftAcneTypes(d.acneTypes ?? []);
+        setDraftIntensity(d.intensity ?? "");
+      }
       if (progressSnap.exists()) setCompletedLessons(progressSnap.data().completedLessons ?? []);
       if (userSnap.exists()) {
         setEnrolledAt(userSnap.data().enrolledAt ?? null);
@@ -81,6 +92,25 @@ function ProfilePage() {
       toast.error("Impossible d'envoyer l'email. Réessaie.");
     } finally {
       setResetLoading(false);
+    }
+  }
+
+  async function handleSaveIntake() {
+    if (!user || savingIntake) return;
+    setSavingIntake(true);
+    try {
+      await updateDoc(doc(db, "intake_answers", user.uid), {
+        skinType: draftSkinType,
+        acneTypes: draftAcneTypes,
+        intensity: draftIntensity,
+      });
+      setIntake((prev) => prev ? { ...prev, skinType: draftSkinType, acneTypes: draftAcneTypes, intensity: draftIntensity } : prev);
+      setEditingIntake(false);
+      toast.success("Profil peau mis à jour.");
+    } catch {
+      toast.error("Impossible de mettre à jour le profil.");
+    } finally {
+      setSavingIntake(false);
     }
   }
 
@@ -191,13 +221,107 @@ function ProfilePage() {
             </div>
 
             {/* Skin profile */}
-            {intake ? (
-              <div className="mb-6 overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
-                <div className="border-b border-border/60 px-6 py-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Profil peau
-                  </p>
+            <div className="mb-6 overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
+              <div className="flex items-center justify-between border-b border-border/60 px-6 py-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Profil peau</p>
+                {intake && !editingIntake && (
+                  <button
+                    onClick={() => setEditingIntake(true)}
+                    className="rounded-full p-2 text-muted-foreground hover:bg-muted"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+
+              {!intake ? (
+                <div className="p-6 text-center">
+                  <p className="text-sm text-muted-foreground">Bilan peau non renseigné.</p>
                 </div>
+              ) : editingIntake ? (
+                <div className="p-6 space-y-5">
+                  {/* Skin type */}
+                  <div>
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Type de peau</p>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.entries(SKIN_TYPE_LABELS).map(([key, label]) => (
+                        <button
+                          key={key}
+                          onClick={() => setDraftSkinType(key)}
+                          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                            draftSkinType === key
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted text-foreground hover:bg-muted/80"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Acne types */}
+                  <div>
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Types d'acné</p>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.entries(ACNE_TYPE_LABELS).map(([key, label]) => {
+                        const selected = draftAcneTypes.includes(key);
+                        return (
+                          <button
+                            key={key}
+                            onClick={() => setDraftAcneTypes(selected ? draftAcneTypes.filter((t) => t !== key) : [...draftAcneTypes, key])}
+                            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                              selected
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-foreground hover:bg-muted/80"
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Intensity */}
+                  <div>
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Intensité</p>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.entries(INTENSITY_LABELS).map(([key, label]) => (
+                        <button
+                          key={key}
+                          onClick={() => setDraftIntensity(key)}
+                          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                            draftIntensity === key
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted text-foreground hover:bg-muted/80"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Save / Cancel */}
+                  <div className="flex gap-3 pt-1">
+                    <button
+                      onClick={handleSaveIntake}
+                      disabled={savingIntake}
+                      className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+                    >
+                      {savingIntake ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                      Enregistrer
+                    </button>
+                    <button
+                      onClick={() => setEditingIntake(false)}
+                      className="flex items-center gap-2 rounded-full bg-muted px-4 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-muted/80"
+                    >
+                      <X className="h-3.5 w-3.5" /> Annuler
+                    </button>
+                  </div>
+                </div>
+              ) : (
                 <div className="p-6 space-y-4">
                   <div className="flex flex-wrap gap-2">
                     {intake.skinType && (
@@ -236,12 +360,8 @@ function ProfilePage() {
                     </div>
                   )}
                 </div>
-              </div>
-            ) : (
-              <div className="mb-6 rounded-3xl border border-dashed border-border bg-card p-6 text-center shadow-soft">
-                <p className="text-sm text-muted-foreground">Bilan peau non renseigné.</p>
-              </div>
-            )}
+              )}
+            </div>
           </>
         )}
 

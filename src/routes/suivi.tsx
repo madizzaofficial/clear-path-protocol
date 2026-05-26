@@ -3,7 +3,7 @@ import { AppShell } from "@/components/AppShell";
 import { allLessons } from "@/lib/course-data";
 import {
   BookOpen, Camera, CalendarDays, MessageSquare, ChevronRight, Loader2,
-  Sparkles, Phone, Check,
+  Sparkles, Phone, Check, Sun, Moon, UserCircle,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
@@ -43,6 +43,8 @@ type SuiviData = {
   completedLessons: string[];
   enrolledAt: number | null;
   totalRoutineSteps: number;
+  amSteps: number;
+  pmSteps: number;
   checkins28: Record<string, { am: string[]; pm: string[] }>;
   adherencePct: number;
   adherenceDays: number;
@@ -193,6 +195,8 @@ function Suivi() {
     completedLessons: [],
     enrolledAt: null,
     totalRoutineSteps: 0,
+    amSteps: 0,
+    pmSteps: 0,
     checkins28: {},
     adherencePct: 0,
     adherenceDays: 0,
@@ -246,10 +250,9 @@ function Suivi() {
       checkins28Snap?.forEach((d: any) => { checkins28[d.id] = d.data(); });
 
       const routineData = routineSnap?.exists() ? routineSnap.data() : null;
-      const totalRoutineSteps =
-        routineData?.status === "sent"
-          ? (routineData.am?.length ?? 0) + (routineData.pm?.length ?? 0)
-          : 0;
+      const amSteps = routineData?.status === "sent" ? (routineData.am?.length ?? 0) : 0;
+      const pmSteps = routineData?.status === "sent" ? (routineData.pm?.length ?? 0) : 0;
+      const totalRoutineSteps = amSteps + pmSteps;
 
       const { pct, days, streak } = computeAdherence(checkins28, totalRoutineSteps);
 
@@ -267,6 +270,8 @@ function Suivi() {
         completedLessons: progressSnap?.exists() ? (progressSnap.data().completedLessons ?? []) : [],
         enrolledAt: userSnap?.exists() ? (userSnap.data().enrolledAt ?? null) : null,
         totalRoutineSteps,
+        amSteps,
+        pmSteps,
         checkins28,
         adherencePct: pct,
         adherenceDays: days,
@@ -282,7 +287,7 @@ function Suivi() {
   }, [user?.uid]);
 
   const {
-    loading, skinState, completedLessons, enrolledAt, totalRoutineSteps,
+    loading, skinState, completedLessons, enrolledAt, totalRoutineSteps, amSteps, pmSteps,
     checkins28, adherencePct, adherenceDays, streak, latestNote, photos, skinType, acneTypes, intensity,
   } = data;
 
@@ -294,6 +299,9 @@ function Suivi() {
   const currentPhase = JOURNEY_PHASES.find((p) => dayCount >= p.dayStart && dayCount <= p.dayEnd) ?? JOURNEY_PHASES[JOURNEY_PHASES.length - 1];
   const nextLesson = lessons.find((l) => !completedLessons.includes(l.id));
   const daysUntilCall = skinState?.nextCallDate ? getDaysUntil(skinState.nextCallDate) : null;
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const amDone = checkins28[todayKey]?.am?.length ?? 0;
+  const pmDone = checkins28[todayKey]?.pm?.length ?? 0;
 
   const hasSkinMetrics =
     skinState &&
@@ -316,9 +324,10 @@ function Suivi() {
       <main className="mx-auto max-w-7xl px-4 pb-28 pt-8 sm:px-6">
         {/*
           Desktop 3-col grid:
-            Col 1 row-1: Hero gradient  |  Col 2 row-1: Profil de peau  |  Col 3 rows 1-3: right sidebar wrapper
+            Col 1 row-1: Hero gradient  |  Col 2 row-1: État de ta peau  |  Col 3 rows 1-4: right sidebar wrapper
             Col 1-2 row-2: Mon parcours
-            Col 1-2 row-3: Journal photo
+            Col 1-2 row-3: Routine du jour
+            Col 1-2 row-4: Journal photo
         */}
         <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start">
 
@@ -338,43 +347,44 @@ function Suivi() {
             </div>
           </div>
 
-          {/* ── 1b. Profil de peau ──────────────── col-2 row-1 ── */}
+          {/* ── 1b. État de ta peau ─────────────── col-2 row-1 ── */}
           <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-start-2 lg:row-start-1">
-            <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Profil de peau</p>
-            {(skinType || (acneTypes && acneTypes.length > 0) || intensity) ? (
-              <div className="space-y-3">
-                {skinType && (
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs text-muted-foreground">Type</span>
-                    <span className="text-sm font-semibold">{SKIN_TYPE_LABELS[skinType] ?? skinType}</span>
-                  </div>
-                )}
-                {intensity && (
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs text-muted-foreground">Intensité</span>
-                    <span className="text-sm font-semibold">{INTENSITY_LABELS[intensity] ?? intensity}</span>
-                  </div>
-                )}
-                {acneTypes && acneTypes.length > 0 && (
-                  <div className="flex items-start justify-between gap-3">
-                    <span className="shrink-0 text-xs text-muted-foreground">Types d'acné</span>
-                    <div className="flex flex-wrap justify-end gap-1">
-                      {acneTypes.map((t) => (
-                        <span key={t} className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
-                          {ACNE_TYPE_LABELS[t] ?? t}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">État de ta peau</p>
+              {skinState?.updatedAt && (
+                <p className="text-[10px] text-muted-foreground/50">
+                  mis à jour{" "}
+                  {new Date(skinState.updatedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                </p>
+              )}
+            </div>
+            {hasSkinMetrics ? (() => {
+              const infPct = skinState!.inflammationPct ?? 0;
+              const barPct = skinState!.barrierPct ?? 0;
+              const acnPct = skinState!.acnePct ?? 0;
+              const infDesc = infPct >= 67 ? "Active" : infPct >= 34 ? "Modérée" : "Sous contrôle";
+              const barDesc = barPct >= 67 ? "Excellente" : barPct >= 34 ? "En cours" : "Compromise";
+              const acnDesc = acnPct >= 67 ? "Active" : acnPct >= 34 ? "Modérée" : "Contrôlée";
+              return (
+                <div className="grid grid-cols-3 gap-4">
+                  <CircleMetric label="Inflammation" emoji="🔥" pct={infPct} inverted description={infDesc} />
+                  <CircleMetric label="Barrière" emoji="🧱" pct={barPct} description={barDesc} />
+                  <CircleMetric label="Acné" emoji="🧴" pct={acnPct} inverted description={acnDesc} />
+                </div>
+              );
+            })() : (
+              <div className="flex items-start gap-3 py-2">
+                <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/40" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Ton coach met à jour ton bilan de peau.</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground/50">Il sera disponible après ta première consultation.</p>
+                </div>
               </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">Ton profil sera renseigné après ton bilan d'intake.</p>
             )}
           </div>
 
-          {/* ── Right sidebar wrapper ── col-3, rows 1-3, flex-col packed ── */}
-          <div className="flex flex-col gap-4 lg:col-start-3 lg:row-start-1 lg:row-span-3 lg:gap-6">
+          {/* ── Right sidebar wrapper ── col-3, rows 1-4, flex-col packed ── */}
+          <div className="flex flex-col gap-4 lg:col-start-3 lg:row-start-1 lg:row-span-4 lg:gap-6">
 
             {/* Coaching */}
             <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
@@ -409,40 +419,45 @@ function Suivi() {
               </button>
             </div>
 
-            {/* État de ta peau */}
+            {/* Profil de peau */}
             <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
-              <div className="mb-4 flex items-center justify-between">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">État de ta peau</p>
-                {skinState?.updatedAt && (
-                  <p className="text-[10px] text-muted-foreground/50">
-                    mis à jour{" "}
-                    {new Date(skinState.updatedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
-                  </p>
-                )}
-              </div>
-              {hasSkinMetrics ? (() => {
-                const infPct = skinState!.inflammationPct ?? 0;
-                const barPct = skinState!.barrierPct ?? 0;
-                const acnPct = skinState!.acnePct ?? 0;
-                const infDesc = infPct >= 67 ? "Active" : infPct >= 34 ? "Modérée" : "Sous contrôle";
-                const barDesc = barPct >= 67 ? "Excellente" : barPct >= 34 ? "En cours" : "Compromise";
-                const acnDesc = acnPct >= 67 ? "Active" : acnPct >= 34 ? "Modérée" : "Contrôlée";
-                return (
-                  <div className="grid grid-cols-3 gap-4">
-                    <CircleMetric label="Inflammation" emoji="🔥" pct={infPct} inverted description={infDesc} />
-                    <CircleMetric label="Barrière" emoji="🧱" pct={barPct} description={barDesc} />
-                    <CircleMetric label="Acné" emoji="🧴" pct={acnPct} inverted description={acnDesc} />
-                  </div>
-                );
-              })() : (
-                <div className="flex items-start gap-3 py-2">
-                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/40" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Ton coach met à jour ton bilan de peau.</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground/50">Il sera disponible après ta première consultation.</p>
-                  </div>
+              <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Profil de peau</p>
+              {(skinType || (acneTypes && acneTypes.length > 0) || intensity) ? (
+                <div className="space-y-3">
+                  {skinType && (
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs text-muted-foreground">Type</span>
+                      <span className="text-sm font-semibold">{SKIN_TYPE_LABELS[skinType] ?? skinType}</span>
+                    </div>
+                  )}
+                  {intensity && (
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs text-muted-foreground">Intensité</span>
+                      <span className="text-sm font-semibold">{INTENSITY_LABELS[intensity] ?? intensity}</span>
+                    </div>
+                  )}
+                  {acneTypes && acneTypes.length > 0 && (
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="shrink-0 text-xs text-muted-foreground">Types d'acné</span>
+                      <div className="flex flex-wrap justify-end gap-1">
+                        {acneTypes.map((t) => (
+                          <span key={t} className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
+                            {ACNE_TYPE_LABELS[t] ?? t}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Ton profil sera renseigné après ton bilan d'intake.</p>
               )}
+              <Link
+                to="/profile"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+              >
+                <UserCircle className="h-4 w-4" /> Modifier mon profil
+              </Link>
             </div>
 
             {/* Message du coach */}
@@ -489,7 +504,9 @@ function Suivi() {
                     <BookOpen className="h-3.5 w-3.5 text-primary" />
                   </div>
                   <p className="min-w-0 flex-1 truncate text-xs font-medium">{nextLesson.title}</p>
-                  <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40" />
+                  <span className="shrink-0 rounded-full bg-primary px-3 py-1 text-[10px] font-semibold text-primary-foreground">
+                    Continuer
+                  </span>
                 </Link>
               )}
             </div>
@@ -536,8 +553,71 @@ function Suivi() {
             </div>
           </div>
 
-          {/* ── 7. Journal photo ─────────────── col-span-2 row-3 ── */}
+          {/* ── Routine du jour ──────────────── col-span-2 row-3 ── */}
           <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-span-2 lg:row-start-3">
+            <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Routine du jour</p>
+            {totalRoutineSteps > 0 ? (
+              <div className="space-y-3">
+                {/* AM row */}
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-950/30">
+                    <Sun className="h-4 w-4 text-amber-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-medium">Matin</span>
+                      <span className={`text-xs font-semibold tabular-nums ${amDone >= amSteps ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
+                        {amDone}/{amSteps}
+                      </span>
+                    </div>
+                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${amDone >= amSteps ? "bg-emerald-500" : "bg-primary"}`}
+                        style={{ width: amSteps > 0 ? `${Math.min((amDone / amSteps) * 100, 100)}%` : "0%" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                {/* PM row */}
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-950/30">
+                    <Moon className="h-4 w-4 text-indigo-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-medium">Soir</span>
+                      <span className={`text-xs font-semibold tabular-nums ${pmDone >= pmSteps ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
+                        {pmDone}/{pmSteps}
+                      </span>
+                    </div>
+                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${pmDone >= pmSteps ? "bg-emerald-500" : "bg-primary"}`}
+                        style={{ width: pmSteps > 0 ? `${Math.min((pmDone / pmSteps) * 100, 100)}%` : "0%" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <Link
+                  to="/products"
+                  className="mt-1 flex items-center justify-center gap-1.5 rounded-2xl border border-border/60 px-4 py-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
+                >
+                  Voir la routine complète <ChevronRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            ) : (
+              <div className="flex items-start gap-3 py-1">
+                <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/40" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Ta routine personnalisée sera bientôt disponible.</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground/50">Ton coach la prépare pour toi.</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Journal photo ─────────────── col-span-2 row-4 ── */}
+          <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft lg:col-span-2 lg:row-start-4">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Journal photo</p>
               <Link to="/journal" className="flex items-center gap-1 text-xs font-medium text-primary hover:underline">

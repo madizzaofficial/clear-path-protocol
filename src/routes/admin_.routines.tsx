@@ -84,6 +84,7 @@ type SendEmailPayload = {
   displayName: string | null;
   am: RoutineStep[];
   pm: RoutineStep[];
+  isUpdate?: boolean;
 };
 
 import { CATEGORIES } from "@/lib/skincare-categories";
@@ -168,7 +169,7 @@ const sendRoutineEmailFn = createServerFn({ method: "POST" })
     if (!apiKey) throw new Error("RESEND_API_KEY non configurée.");
 
     const firstName = data.displayName?.split(" ")[0] ?? "là";
-    const html = buildEmailHtml(firstName, data.am, data.pm);
+    const html = buildEmailHtml(firstName, data.am, data.pm, data.isUpdate ?? false);
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -179,7 +180,9 @@ const sendRoutineEmailFn = createServerFn({ method: "POST" })
       body: JSON.stringify({
         from: (() => { const r = process.env.RESEND_FROM ?? "onboarding@resend.dev"; return r.includes("<") ? r : `Protocole Clear <${r}>`; })(),
         to: data.email,
-        subject: `${firstName}, ta routine personnalisée est prête ✨`,
+        subject: data.isUpdate
+          ? `${firstName}, ta routine a été mise à jour ✨`
+          : `${firstName}, ta routine personnalisée est prête ✨`,
         html,
       }),
     });
@@ -211,7 +214,7 @@ function escapeHtml(str: string): string {
     .replace(/'/g, "&#039;");
 }
 
-function buildEmailHtml(firstName: string, am: RoutineStep[], pm: RoutineStep[]): string {
+function buildEmailHtml(firstName: string, am: RoutineStep[], pm: RoutineStep[], isUpdate = false): string {
   const stepBlock = (steps: RoutineStep[]) =>
     steps.length === 0
       ? `<p style="color:#999;font-size:14px;font-style:italic;margin:0;">Aucune étape configurée.</p>`
@@ -229,7 +232,7 @@ function buildEmailHtml(firstName: string, am: RoutineStep[], pm: RoutineStep[])
     <td style="vertical-align:top;">
       <span style="display:inline-block;background:#fff3ec;color:#c4724b;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:2px 10px;border-radius:100px;margin-bottom:6px;">${escapeHtml(s.category)}</span>
       <p style="color:#1a1a1a;font-weight:600;margin:0 0 3px;font-size:14px;">${escapeHtml(s.product)}</p>
-      ${s.whyThisProduct ? `<p style="color:#c4724b;background:#fff3ec;border-radius:8px;padding:6px 10px;margin:4px 0 6px;font-size:12px;line-height:1.55;">${escapeHtml(s.whyThisProduct)}</p>` : ""}
+      ${s.whyThisProduct ? `<p style="color:#aaa;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin:6px 0 3px;">Pourquoi ce produit</p><p style="color:#c4724b;background:#fff3ec;border-radius:8px;padding:6px 10px;margin:0 0 6px;font-size:12px;line-height:1.55;">${escapeHtml(s.whyThisProduct)}</p>` : ""}
       <p style="color:#aaa;margin:0;font-size:13px;line-height:1.55;">${escapeHtml(s.instructions)}</p>
       ${s.introNote ? `<p style="color:#7c5fa8;background:#f5f0ff;border-radius:8px;padding:6px 10px;margin:6px 0 0;font-size:12px;font-style:italic;line-height:1.5;">⏱ ${escapeHtml(s.introNote)}</p>` : ""}
       ${s.purchaseUrl ? `<a href="${escapeHtml(s.purchaseUrl)}" style="display:inline-block;margin-top:8px;color:#c4724b;font-size:12px;font-weight:600;text-decoration:none;">Acheter →</a>` : ""}
@@ -253,14 +256,15 @@ function buildEmailHtml(firstName: string, am: RoutineStep[], pm: RoutineStep[])
   <div style="text-align:center;margin-bottom:32px;">
     <img src="https://app.protocole-clear.com/logo_clear.png" alt="Protocole Clear" width="56" height="56" style="border-radius:50%;display:block;margin:0 auto 12px;border:0;" />
     <h1 style="font-family:Georgia,serif;color:#1a1a1a;margin:0;font-size:20px;font-weight:600;letter-spacing:-0.02em;">Protocole Clear</h1>
-    <p style="color:#aaa;font-size:12px;margin:4px 0 0;letter-spacing:0.12em;text-transform:uppercase;">Clear Skin Protocol</p>
   </div>
 
   <!-- Greeting -->
   <div style="background:white;border-radius:24px;padding:28px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
     <h2 style="font-family:Georgia,serif;color:#1a1a1a;margin:0 0 10px;font-size:22px;">Bonjour ${firstName} !</h2>
     <p style="color:#555;margin:0;line-height:1.65;font-size:15px;">
-      Ta routine personnalisée est prête. Elle a été élaborée spécialement pour ta peau. Applique-la chaque jour pour des résultats visibles.
+      ${isUpdate
+        ? "Ta routine personnalisée vient d'être mise à jour. Voici ta nouvelle routine telle que modifiée par ton coach."
+        : 'Ta routine personnalisée est prête. Elle a été élaborée spécialement pour ta peau. Applique-la chaque jour pour des résultats visibles.'}
       </br> </br>Tu peux la consulter sur ton espace personnel via le menu "Routine".
     </p>
   </div>
@@ -299,7 +303,7 @@ function buildEmailHtml(firstName: string, am: RoutineStep[], pm: RoutineStep[])
 
   <!-- Footer -->
   <p style="text-align:center;color:#ccc;font-size:12px;line-height:1.6;margin:0;">
-    Cet email a été envoyé via <strong style="color:#c4724b;">Protocole Clear</strong> · Clear Skin Protocol.<br>
+    Cet email a été envoyé via <strong style="color:#c4724b;">Protocole Clear</strong>.<br>
     Des questions ? Réponds directement à cet email.
   </p>
 
@@ -469,6 +473,7 @@ function RoutinesContent() {
     setSendResult(null);
     setSendError(null);
     try {
+      const isUpdate = !!(routine.sentAt);
       const toSave: StudentRoutine = {
         ...routine,
         status: "sent",
@@ -492,6 +497,7 @@ function RoutinesContent() {
           displayName: selectedUser.displayName,
           am: routine.am,
           pm: routine.pm,
+          isUpdate,
         },
       });
 
