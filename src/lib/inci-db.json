@@ -19388,5 +19388,221 @@
     "description_en": null,
     "url": "https://incidecoder.com/ingredients/c11-13-alkane",
     "inci_name": "C11-13 ALKANE"
+  },
+  "sunflower": {
+    "slug": "sunflower",
+    "found": true,
+    "name": "Sunflower",
+    "irritancy": null,
+    "comedogenicity": null,
+    "verdict": null,
+    "what_it_does": [],
+    "role_fr": null,
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/sunflower",
+    "inci_name": "HELIANTHUS ANNUUS (SUNFLOWER) SEED OIL (HELIANTHUS ANNUUS SEED OIL)"
+  },
+  "rice": {
+    "slug": "rice",
+    "found": true,
+    "name": "Oryza Sativa Cera",
+    "irritancy": null,
+    "comedogenicity": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling"
+    ],
+    "role_fr": "Épaississant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/rice",
+    "inci_name": "ORYZA SATIVA (RICE) STARCH (ORYZA SATIVA STARCH)"
+  },
+  "sweet-almond": {
+    "slug": "sweet-almond",
+    "found": true,
+    "name": "Prunus Amygdalus Dulcis Oil",
+    "irritancy": 0,
+    "comedogenicity": 3,
+    "verdict": null,
+    "what_it_does": [
+      "emollient"
+    ],
+    "role_fr": "Émollient",
+    "description_en": "Theemollient plant oilthat comesfrom almonds. Similar to other plant oils, it is loaded with skin-nourishing fatty acids (oleic acid- 55-86% andlinoleic acid7-35%) and contains several other skin goodies such as antioxidantvitamin E and vitamin Bversions.",
+    "url": "https://incidecoder.com/ingredients/sweet-almond",
+    "inci_name": "PRUNUS AMYGDALUS DULCIS (SWEET ALMOND) OIL"
+  },
+  "stearyl-glycyrrhetinate": {
+    "slug": "stearyl-glycyrrhetinate",
+    "found": true,
+    "name": "Stearyl Glycyrrhetinate",
+    "irritancy": null,
+    "comedogenicity": null,
+    "verdict": null,
+    "what_it_does": [
+      "soothing"
+    ],
+    "role_fr": "Apaisant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/stearyl-glycyrrhetinate",
+    "inci_name": "STEARYL GLYCYRRHETINATE"
+  },
+  "shea": {
+    "slug": "shea",
+    "found": true,
+    "name": "Shea",
+    "irritancy": null,
+    "comedogenicity": null,
+    "verdict": null,
+    "what_it_does": [],
+    "role_fr": null,
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/shea",
+    "inci_name": "BUTYROSPERMUM PARKII (SHEA) BUTTER (BUTYROSPERMUM PARKII BUTTER)"
+  },
+  "ppg-1-peg-9-lauryl-glycol-ether": {
+    "slug": "ppg-1-peg-9-lauryl-glycol-ether",
+    "found": true,
+    "name": "PPG-1-PEG-9 Lauryl Glycol Ether",
+    "irritancy": null,
+    "comedogenicity": null,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying",
+      "surfactant/cleansing"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/ppg-1-peg-9-lauryl-glycol-ether",
+    "inci_name": "PPG-1-PEG-9 LAURYL GLYCOL ETHER"
+  },
+  "polymnia-sonchifolia-root-juice": {
+    "slug": "polymnia-sonchifolia-root-juice",
+    "found": true,
+    "name": "Polymnia Sonchifolia Root Juice",
+    "irritancy": null,
+    "comedogenicity": null,
+    "verdict": null,
+    "what_it_does": [],
+    "role_fr": null,
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/polymnia-sonchifolia-root-juice",
+    "inci_name": "POLYMNIA SONCHIFOLIA ROOT JUICE"
+  },
+  "peg-20-stearate": {
+    "slug": "peg-20-stearate",
+    "found": true,
+    "name": "PEG-20 Stearate",
+    "irritancy": 0,
+    "comedogenicity": 1,
+    "verdict": null,
+    "what_it_does": [
+      "emulsifying",
+      "surfactant/cleansing",
+      "moisturizer/humectant"
+    ],
+    "role_fr": "Humectant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/peg-20-stearate",
+    "inci_name": "PEG-20 STEARATE"
+  },
+  "palmitate-d-ethylhexyle": {
+    "slug": "palmitate-d-ethylhexyle",
+    "found": false,
+    "url": "https://incidecoder.com/ingredients/palmitate-d-ethylhexyle",
+    "inci_name": "PALMITATE D'ÉTHYLHEXYLE"
+  },
+  "o-cymen-5-ol": {
+    "slug": "o-cymen-5-ol",
+    "found": true,
+    "name": "O-Cymen-5-Ol",
+    "irritancy": null,
+    "comedogenicity": null,
+    "verdict": null,
+    "what_it_does": [
+      "preservative",
+      "antimicrobial/antibacterial",
+      "deodorant"
+    ],
+    "role_fr": "Conservateur",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/o-cymen-5-ol",
+    "inci_name": "O-CYMEN-5-OL"
+  },
+  "lactobacillus": {
+    "slug": "lactobacillus",
+    "found": true,
+    "name": "Lactobacillus",
+    "irritancy": null,
+    "comedogenicity": null,
+    "verdict": null,
+    "what_it_does": [],
+    "role_fr": null,
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/lactobacillus",
+    "inci_name": "LACTOBACILLUS"
+  },
+  "huile-de-graine-de-macadamia-ternifolia": {
+    "slug": "huile-de-graine-de-macadamia-ternifolia",
+    "found": false,
+    "url": "https://incidecoder.com/ingredients/huile-de-graine-de-macadamia-ternifolia",
+    "inci_name": "HUILE DE GRAINE DE MACADAMIA TERNIFOLIA"
+  },
+  "diethylamino": {
+    "slug": "diethylamino",
+    "found": false,
+    "url": "https://incidecoder.com/ingredients/diethylamino",
+    "inci_name": "DIETHYLAMINO"
+  },
+  "c20-22-alcohols": {
+    "slug": "c20-22-alcohols",
+    "found": true,
+    "name": "C20-22 Alcohols",
+    "irritancy": null,
+    "comedogenicity": null,
+    "verdict": null,
+    "what_it_does": [
+      "viscosity controlling",
+      "emulsion stabilising"
+    ],
+    "role_fr": "Émulsifiant",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/c20-22-alcohols",
+    "inci_name": "C20-22 ALCOHOLS"
+  },
+  "butyl-avocadate": {
+    "slug": "butyl-avocadate",
+    "found": true,
+    "name": "Butyl Avocadate",
+    "irritancy": null,
+    "comedogenicity": null,
+    "verdict": null,
+    "what_it_does": [],
+    "role_fr": null,
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/butyl-avocadate",
+    "inci_name": "BUTYL AVOCADATE"
+  },
+  "acetylated-glycol-stearate": {
+    "slug": "acetylated-glycol-stearate",
+    "found": true,
+    "name": "Acetylated Glycol Stearate",
+    "irritancy": null,
+    "comedogenicity": null,
+    "verdict": null,
+    "what_it_does": [
+      "emollient",
+      "emulsion stabilising"
+    ],
+    "role_fr": "Émollient",
+    "description_en": null,
+    "url": "https://incidecoder.com/ingredients/acetylated-glycol-stearate",
+    "inci_name": "ACETYLATED GLYCOL STEARATE"
+  },
+  "12-hexanediol": {
+    "slug": "12-hexanediol",
+    "found": false,
+    "url": "https://incidecoder.com/ingredients/12-hexanediol",
+    "inci_name": "1.2-HEXANEDIOL"
   }
 }
