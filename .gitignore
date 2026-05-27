@@ -58,6 +58,9 @@ credentials.json
 .env.*
 *.env
 credentials.json
+firebase-admin.json
+*service-account*.json
+*serviceAccount*.json
 *.pem
 *.key
 .credentials
