@@ -457,10 +457,7 @@ function matchesKey(norm: string, key: string): boolean {
 }
 
 export function analyzeIngredients(raw: string): AnalysisResult {
-  const tokens = raw
-    .split(/(?<!\d),(?!\d)|\n|(?<!\d)\.\s+/)
-    .map((t) => stripQuantity(t.trim().replace(/\.$/, "")))
-    .filter(Boolean);
+  const tokens = splitInciList(raw);
 
   const ingredients: AnalyzedIngredient[] = tokens.map((token) => {
     const norm = translateToInci(normalize(token));
@@ -1342,8 +1339,19 @@ export const INGREDIENT_ROLES = [
   "Épaississant", "Émulsifiant", "Filmogène",
 ] as const;
 
+function splitInciList(raw: string): string[] {
+  // Normalise bullet variants → comma, then strip parenthetical synonyms like (WATER, EAU)
+  // before splitting so the inner commas don't create phantom tokens.
+  const withoutParens = raw.replace(/\([^)]*\)/g, "");
+  const normalised = withoutParens.replace(/\s*[•·]\s*/g, ",");
+  return normalised
+    .split(/(?<!\d),(?!\d)|\n|(?<!\d)\.\s+/)
+    .map((t) => stripQuantity(t.trim().replace(/\.$/, "")))
+    .filter(Boolean);
+}
+
 export function analyzeIngredientsV2(raw: string, profile?: SkinProfile, customIngredients?: Map<string, string>): AnalysisResultV2 {
-  const tokens = raw.split(/(?<!\d),(?!\d)|\n|(?<!\d)\.\s+/).map((t) => stripQuantity(t.trim().replace(/\.$/, ""))).filter(Boolean);
+  const tokens = splitInciList(raw);
 
   const ingredients: AnalyzedIngredient[] = tokens.map((token) => {
     const norm = translateToInci(normalize(token));
