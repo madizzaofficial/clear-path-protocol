@@ -108,12 +108,12 @@ function computeAdherence(
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 const JOURNEY_PHASES = [
-  { id: 1, shortLabel: "S.1", label: "Semaine 1", description: "Tu démarres ta nouvelle routine.", dayStart: 1, dayEnd: 7 },
-  { id: 2, shortLabel: "S.2", label: "Semaine 2", description: "Ta peau s'adapte. Tu trouves le rythme.", dayStart: 8, dayEnd: 14 },
-  { id: 3, shortLabel: "S3-4", label: "Semaines 3–4", description: "La purge peut commencer — c'est bon signe.", dayStart: 15, dayEnd: 28 },
-  { id: 4, shortLabel: "S4-6", label: "Semaines 4–6", description: "La purge se calme. Les premières améliorations arrivent.", dayStart: 29, dayEnd: 42 },
-  { id: 5, shortLabel: "S6-12", label: "Semaines 6–12", description: "La peau s'éclaircit progressivement.", dayStart: 43, dayEnd: 84 },
-  { id: 6, shortLabel: "M3+", label: "Mois 3+", description: "Intègre un soin ciblé pour les marques.", dayStart: 85, dayEnd: Infinity },
+  { id: 1, shortLabel: "S.1",  label: "Semaine 1",    description: "Tu démarres ta nouvelle routine et observes les premiers ajustements de ta peau.", dayStart: 1,  dayEnd: 7 },
+  { id: 2, shortLabel: "S.2",  label: "Semaine 2",    description: "Ta peau commence à trouver son équilibre avec la nouvelle routine.", dayStart: 8,  dayEnd: 14 },
+  { id: 3, shortLabel: "S3-4", label: "Semaines 3–4", description: "Des ajustements peuvent apparaître. C'est une phase normale d'adaptation de la peau.", dayStart: 15, dayEnd: 28 },
+  { id: 4, shortLabel: "S4-6", label: "Semaines 4–6", description: "La peau se stabilise progressivement et les premiers changements visibles commencent à apparaître.", dayStart: 29, dayEnd: 42 },
+  { id: 5, shortLabel: "S6-12",label: "Semaines 6–12",description: "La texture de peau s'améliore progressivement et devient plus régulière.", dayStart: 43, dayEnd: 84 },
+  { id: 6, shortLabel: "M3+",  label: "Mois 3+",      description: "On entre dans une phase d'optimisation pour corriger les marques et uniformiser la peau.", dayStart: 85, dayEnd: Infinity },
 ];
 
 function CircleMetric({ label, emoji, pct, inverted, description }: { label: string; emoji: string; pct: number; inverted?: boolean; description?: string }) {
