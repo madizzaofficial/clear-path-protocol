@@ -14,6 +14,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import type { PurchaseLink } from "@/lib/product-catalog";
+
 type RoutineStep = {
   id: string;
   order: number;
@@ -21,7 +23,9 @@ type RoutineStep = {
   product: string;
   instructions: string;
   imageUrl?: string;
+  /** @deprecated use purchaseLinks */
   purchaseUrl?: string;
+  purchaseLinks?: PurchaseLink[];
   startWeek?: number;
   introNote?: string;
   whyThisProduct?: string;
@@ -545,15 +549,30 @@ function RoutineBlock({
                 </div>
               )}
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                {step.purchaseUrl && (
-                  <a
-                    href={step.purchaseUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-80"
-                  >
-                    <ShoppingCart className="h-3 w-3" /> Acheter
-                  </a>
+                {(step.purchaseLinks?.[0]?.url || step.purchaseUrl) && (
+                  <div className="flex flex-col gap-1">
+                    <a
+                      href={step.purchaseLinks?.[0]?.url ?? step.purchaseUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-80"
+                    >
+                      <ShoppingCart className="h-3 w-3" /> {step.purchaseLinks?.[0]?.label ?? "Acheter"}
+                    </a>
+                    {step.purchaseLinks && step.purchaseLinks.length > 1 && (
+                      <p className="text-[11px] text-muted-foreground/70">
+                        Indisponible ?{" "}
+                        {step.purchaseLinks.slice(1).map((l, i) => (
+                          <span key={l.url}>
+                            {i > 0 && " · "}
+                            <a href={l.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 transition-colors hover:text-muted-foreground">
+                              {l.label}
+                            </a>
+                          </span>
+                        ))}
+                      </p>
+                    )}
+                  </div>
                 )}
                 {report ? (
                   <span className="inline-flex items-center gap-1.5 rounded-xl bg-orange-50 px-3 py-1.5 text-xs font-medium text-orange-600 dark:bg-orange-950/30 dark:text-orange-400">
@@ -628,11 +647,29 @@ function BonusBlock({ blocks }: { blocks: ExtraBlock[] }) {
                     <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{step.instructions}</p>
                   </div>
                 )}
-                {step.purchaseUrl && (
-                  <div className="mt-3">
-                    <a href={step.purchaseUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-xl bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-80">
-                      <ShoppingCart className="h-3 w-3" /> Acheter
+                {(step.purchaseLinks?.[0]?.url || step.purchaseUrl) && (
+                  <div className="mt-3 flex flex-col gap-1">
+                    <a
+                      href={step.purchaseLinks?.[0]?.url ?? step.purchaseUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-80"
+                    >
+                      <ShoppingCart className="h-3 w-3" /> {step.purchaseLinks?.[0]?.label ?? "Acheter"}
                     </a>
+                    {step.purchaseLinks && step.purchaseLinks.length > 1 && (
+                      <p className="text-[11px] text-muted-foreground/70">
+                        Indisponible ?{" "}
+                        {step.purchaseLinks.slice(1).map((l, i) => (
+                          <span key={l.url}>
+                            {i > 0 && " · "}
+                            <a href={l.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 transition-colors hover:text-muted-foreground">
+                              {l.label}
+                            </a>
+                          </span>
+                        ))}
+                      </p>
+                    )}
                   </div>
                 )}
               </li>

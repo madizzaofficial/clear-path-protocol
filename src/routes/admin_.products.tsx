@@ -549,16 +549,23 @@ function ProductCard({
         {product.instructions && (
           <p className="text-xs text-muted-foreground line-clamp-2">{product.instructions}</p>
         )}
-        {product.purchaseUrl && (
-          <a
-            href={product.purchaseUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="mt-auto text-xs font-medium text-primary hover:underline"
-          >
-            Lien achat →
-          </a>
+        {(product.purchaseLinks?.[0] || product.purchaseUrl) && (
+          <div className="mt-auto flex flex-wrap items-center gap-1.5">
+            <a
+              href={product.purchaseLinks?.[0]?.url ?? product.purchaseUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              {product.purchaseLinks?.[0]?.label ?? "Lien achat"} →
+            </a>
+            {product.purchaseLinks && product.purchaseLinks.length > 1 && (
+              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                +{product.purchaseLinks.length - 1}
+              </span>
+            )}
+          </div>
         )}
       </div>
 
@@ -709,7 +716,7 @@ function ProductDialog({
   const [description, setDescription] = useState("");
   const [instructions, setInstructions] = useState("");
   const [imageUrl, setImageUrl] = useState("");
-  const [purchaseUrl, setPurchaseUrl] = useState("");
+  const [purchaseLinks, setPurchaseLinks] = useState<import("@/lib/product-catalog").PurchaseLink[]>([]);
   const [inciNormalized, setInciNormalized] = useState("");
   const [showInci, setShowInci] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
@@ -728,7 +735,11 @@ function ProductDialog({
       setDescription(product.description ?? "");
       setInstructions(product.instructions);
       setImageUrl(product.imageUrl ?? "");
-      setPurchaseUrl(product.purchaseUrl ?? "");
+      setPurchaseLinks(
+        product.purchaseLinks?.length
+          ? product.purchaseLinks
+          : product.purchaseUrl ? [{ url: product.purchaseUrl, label: "Lien principal" }] : []
+      );
       setInciNormalized(product.inciNormalized ?? "");
       setShowInci(!!product.inciNormalized);
       setShowScanner(false);
@@ -835,7 +846,8 @@ function ProductDialog({
       description: description.trim() || undefined,
       instructions,
       imageUrl: imageUrl.trim() || undefined,
-      purchaseUrl: purchaseUrl.trim() || undefined,
+      purchaseLinks: purchaseLinks.filter(l => l.url.trim()).map(l => ({ url: l.url.trim(), label: l.label.trim() || "Lien" })),
+      purchaseUrl: undefined,
       brand: brand.trim() || undefined,
       barcode: barcode.trim() || undefined,
       inciNormalized: inciNormalized.trim() ? normalizeInciText(inciNormalized.trim()) : undefined,
@@ -1044,18 +1056,55 @@ function ProductDialog({
             )}
           </div>
 
-          {/* Purchase URL */}
+          {/* Purchase links */}
           <div>
             <label className="mb-2 block text-sm font-medium text-foreground/80">
-              Lien d'achat <span className="font-normal text-muted-foreground">(URL optionnelle)</span>
+              Liens d'achat <span className="font-normal text-muted-foreground">(optionnel)</span>
             </label>
-            <input
-              autoComplete="off"
-              value={purchaseUrl}
-              onChange={(e) => setPurchaseUrl(e.target.value)}
-              placeholder="https://..."
-              className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
+            <div className="space-y-2">
+              {purchaseLinks.map((link, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <input
+                    autoComplete="off"
+                    value={link.label}
+                    onChange={(e) => {
+                      const next = [...purchaseLinks];
+                      next[idx] = { ...next[idx], label: e.target.value };
+                      setPurchaseLinks(next);
+                    }}
+                    placeholder={idx === 0 ? "Lien principal" : "Ex. Amazon"}
+                    className="h-9 w-28 shrink-0 rounded-2xl border border-border bg-background px-3 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  />
+                  <input
+                    autoComplete="off"
+                    value={link.url}
+                    onChange={(e) => {
+                      const next = [...purchaseLinks];
+                      next[idx] = { ...next[idx], url: e.target.value };
+                      setPurchaseLinks(next);
+                    }}
+                    placeholder="https://..."
+                    className="h-9 min-w-0 flex-1 rounded-2xl border border-border bg-background px-3 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPurchaseLinks(purchaseLinks.filter((_, i) => i !== idx))}
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl text-muted-foreground/50 transition-colors hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+              {purchaseLinks.length < 3 && (
+                <button
+                  type="button"
+                  onClick={() => setPurchaseLinks([...purchaseLinks, { url: "", label: "" }])}
+                  className="flex items-center gap-1.5 rounded-2xl border border-dashed border-border px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Ajouter un lien
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Collapsible INCI section */}

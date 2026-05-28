@@ -3,6 +3,8 @@ import { collection, doc, getDocs, query, setDoc, where } from "firebase/firesto
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+export type PurchaseLink = { url: string; label: string };
+
 export type CatalogProduct = {
   id: string;
   name: string;
@@ -10,7 +12,9 @@ export type CatalogProduct = {
   description?: string;
   instructions: string;
   imageUrl?: string;
+  /** @deprecated use purchaseLinks instead */
   purchaseUrl?: string;
+  purchaseLinks?: PurchaseLink[];
   brand?: string;
   barcode?: string;
   inciNormalized?: string;
