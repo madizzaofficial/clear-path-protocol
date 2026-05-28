@@ -84,6 +84,7 @@ function ProductsContent() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterUnverified, setFilterUnverified] = useState(false);
   const [filterFeatured, setFilterFeatured] = useState(false);
+  const [filterSkinType, setFilterSkinType] = useState("all");
   const [search, setSearch] = useState("");
   const [editingProduct, setEditingProduct] = useState<CatalogProduct | null>(null);
   const [isNewProduct, setIsNewProduct] = useState(false);
@@ -108,7 +109,7 @@ function ProductsContent() {
   }, []);
 
   // Reset to page 0 whenever filters or view mode change
-  useEffect(() => { setPage(0); }, [filterCategory, filterUnverified, filterFeatured, search, viewMode]);
+  useEffect(() => { setPage(0); }, [filterCategory, filterUnverified, filterFeatured, filterSkinType, search, viewMode]);
 
   const unverifiedCount = useMemo(() => products.filter((p) => p.verified === false).length, [products]);
   const featuredCount = useMemo(() => products.filter((p) => p.isFeatured).length, [products]);
@@ -118,6 +119,7 @@ function ProductsContent() {
     if (filterCategory !== "all") result = result.filter((p) => p.category === filterCategory);
     if (filterUnverified) result = result.filter((p) => p.verified === false);
     if (filterFeatured) result = result.filter((p) => p.isFeatured === true);
+    if (filterSkinType !== "all") result = result.filter((p) => p.suitableForSkinTypes?.includes(filterSkinType));
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter((p) => p.name.toLowerCase().includes(q));
@@ -128,7 +130,7 @@ function ProductsContent() {
       if (!a.isFeatured && b.isFeatured) return 1;
       return a.name.localeCompare(b.name, "fr");
     });
-  }, [products, filterCategory, filterUnverified, filterFeatured, search]);
+  }, [products, filterCategory, filterUnverified, filterFeatured, filterSkinType, search]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
@@ -254,6 +256,18 @@ function ProductsContent() {
             <option value="all">Toutes les catégories</option>
             {CATEGORIES.map((c) => (
               <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+          <select
+            value={filterSkinType}
+            onChange={(e) => setFilterSkinType(e.target.value)}
+            className={`h-10 rounded-2xl border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 ${
+              filterSkinType !== "all" ? "border-primary text-primary font-medium" : "border-border"
+            }`}
+          >
+            <option value="all">Tous types de peau</option>
+            {["Normale", "Grasse", "Sèche", "Mixte", "Sensible"].map((t) => (
+              <option key={t} value={t}>{t}</option>
             ))}
           </select>
           <button
@@ -543,6 +557,15 @@ function ProductCard({
         {product.brand && (
           <p className="text-xs text-muted-foreground font-medium">{product.brand}</p>
         )}
+        {product.suitableForSkinTypes && product.suitableForSkinTypes.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {product.suitableForSkinTypes.map((t) => (
+              <span key={t} className="rounded-full bg-primary/8 px-1.5 py-0.5 text-[9px] font-semibold text-primary/70">
+                {t}
+              </span>
+            ))}
+          </div>
+        )}
         {product.description && (
           <p className="text-xs text-muted-foreground/70 italic line-clamp-2">{product.description}</p>
         )}
@@ -649,10 +672,20 @@ function ProductListItem({
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2 mt-0.5">
+        <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
           {product.brand && <span className="text-xs text-muted-foreground font-medium">{product.brand}</span>}
           {product.brand && <span className="text-muted-foreground/30 text-xs">·</span>}
           <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground/70">{product.category}</span>
+          {product.suitableForSkinTypes && product.suitableForSkinTypes.length > 0 && (
+            <>
+              <span className="text-muted-foreground/30 text-xs">·</span>
+              {product.suitableForSkinTypes.map((t) => (
+                <span key={t} className="rounded-full bg-primary/8 px-1.5 py-0.5 text-[9px] font-semibold text-primary/70">
+                  {t}
+                </span>
+              ))}
+            </>
+          )}
         </div>
       </div>
 
@@ -717,6 +750,7 @@ function ProductDialog({
   const [instructions, setInstructions] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [purchaseLinks, setPurchaseLinks] = useState<import("@/lib/product-catalog").PurchaseLink[]>([]);
+  const [suitableForSkinTypes, setSuitableForSkinTypes] = useState<string[]>([]);
   const [inciNormalized, setInciNormalized] = useState("");
   const [showInci, setShowInci] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
@@ -740,6 +774,7 @@ function ProductDialog({
           ? product.purchaseLinks
           : product.purchaseUrl ? [{ url: product.purchaseUrl, label: "Lien principal" }] : []
       );
+      setSuitableForSkinTypes(product.suitableForSkinTypes ?? []);
       setInciNormalized(product.inciNormalized ?? "");
       setShowInci(!!product.inciNormalized);
       setShowScanner(false);
@@ -850,6 +885,7 @@ function ProductDialog({
       purchaseUrl: undefined,
       brand: brand.trim() || undefined,
       barcode: barcode.trim() || undefined,
+      suitableForSkinTypes: suitableForSkinTypes.length ? suitableForSkinTypes : undefined,
       inciNormalized: inciNormalized.trim() ? normalizeInciText(inciNormalized.trim()) : undefined,
       inciHash: hash,
       verified: true,
@@ -978,6 +1014,34 @@ function ProductDialog({
                 <option key={c}>{c}</option>
               ))}
             </select>
+          </div>
+
+          {/* Skin types */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-foreground/80">
+              Types de peau adaptés <span className="font-normal text-muted-foreground">(optionnel)</span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {["Normale", "Grasse", "Sèche", "Mixte", "Sensible"].map((t) => {
+                const active = suitableForSkinTypes.includes(t);
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setSuitableForSkinTypes(
+                      active ? suitableForSkinTypes.filter((s) => s !== t) : [...suitableForSkinTypes, t]
+                    )}
+                    className={`rounded-2xl border px-3 py-1.5 text-xs font-medium transition-colors ${
+                      active
+                        ? "border-primary bg-primary-soft text-primary"
+                        : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                    }`}
+                  >
+                    {t}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Description */}

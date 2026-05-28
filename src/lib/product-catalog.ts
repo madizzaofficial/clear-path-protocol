@@ -19,6 +19,7 @@ export type CatalogProduct = {
   barcode?: string;
   inciNormalized?: string;
   inciHash?: string;
+  suitableForSkinTypes?: string[];
   verified: boolean;
   isFeatured?: boolean;
   createdAt: number;
