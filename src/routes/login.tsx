@@ -13,27 +13,35 @@ const sendPasswordResetFn = createServerFn({ method: "POST" })
   .handler(async (ctx) => {
     const { email } = ctx.data;
 
+    const projectId   = process.env.FIREBASE_PROJECT_ID;
+    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+    const privateKeyRaw = process.env.FIREBASE_PRIVATE_KEY ?? "";
+
+    console.log("[reset] env check — projectId:", !!projectId, "clientEmail:", !!clientEmail, "privateKey:", !!privateKeyRaw);
+
+    if (!projectId || !clientEmail || !privateKeyRaw) {
+      console.error("[reset] Missing Firebase Admin env vars — aborting");
+      return { ok: true };
+    }
+
     // Init firebase-admin lazily (safe for serverless)
     const admin = await import("firebase-admin");
     if (!admin.default.apps.length) {
-      const privateKey = (process.env.FIREBASE_PRIVATE_KEY ?? "").replace(/\\n/g, "\n");
+      const privateKey = privateKeyRaw.replace(/\\n/g, "\n");
       admin.default.initializeApp({
-        credential: admin.default.credential.cert({
-          projectId:   process.env.FIREBASE_PROJECT_ID,
-          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-          privateKey,
-        }),
+        credential: admin.default.credential.cert({ projectId, clientEmail, privateKey }),
       });
     }
 
-    // Generate the reset link (does NOT send Firebase's email)
+    // Generate the reset link (does NOT trigger Firebase's own email)
     let resetLink: string;
     try {
       resetLink = await admin.default.auth().generatePasswordResetLink(email, {
         url: "https://app.protocole-clear.com/login",
       });
-    } catch {
-      // Silently succeed — don't reveal whether the email exists
+      console.log("[reset] link generated ok for", email);
+    } catch (err) {
+      console.error("[reset] generatePasswordResetLink failed:", err);
       return { ok: true };
     }
 
@@ -41,18 +49,22 @@ const sendPasswordResetFn = createServerFn({ method: "POST" })
     const apiKey = process.env.RESEND_API_KEY;
     const rawFrom = process.env.RESEND_FROM ?? "onboarding@resend.dev";
     const from = rawFrom.includes("<") ? rawFrom : `Protocole Clear <${rawFrom}>`;
-    if (apiKey) {
-      await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          from,
-          to: email,
-          subject: "Réinitialise ton mot de passe — Protocole Clear",
-          html: buildResetEmailHtml(resetLink),
-        }),
-      });
+    if (!apiKey) {
+      console.error("[reset] RESEND_API_KEY missing — email not sent");
+      return { ok: true };
     }
+
+    const resendRes = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from,
+        to: email,
+        subject: "Réinitialise ton mot de passe — Protocole Clear",
+        html: buildResetEmailHtml(resetLink),
+      }),
+    });
+    console.log("[reset] Resend status:", resendRes.status, "for", email);
 
     return { ok: true };
   });
