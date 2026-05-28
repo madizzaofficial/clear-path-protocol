@@ -376,7 +376,7 @@ function Suivi() {
                 return (
                   <div className="grid w-full grid-cols-3 gap-4">
                     <CircleMetric label="Inflammation" emoji="🔥" pct={infPct} inverted description={infDesc} />
-                    <CircleMetric label="Barrière" emoji="🧱" pct={barPct} description={barDesc} />
+                    <CircleMetric label="Barrière cutanée" emoji="🧱" pct={barPct} description={barDesc} />
                     <CircleMetric label="Acné" emoji="🧴" pct={acnPct} inverted description={acnDesc} />
                   </div>
                 );
