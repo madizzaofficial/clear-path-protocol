@@ -18,6 +18,7 @@ import {
   Pencil,
   Plus,
   ShieldCheck,
+  Star,
   Trash2,
   Upload,
   X,
@@ -82,6 +83,7 @@ function ProductsContent() {
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterUnverified, setFilterUnverified] = useState(false);
+  const [filterFeatured, setFilterFeatured] = useState(false);
   const [search, setSearch] = useState("");
   const [editingProduct, setEditingProduct] = useState<CatalogProduct | null>(null);
   const [isNewProduct, setIsNewProduct] = useState(false);
@@ -106,20 +108,27 @@ function ProductsContent() {
   }, []);
 
   // Reset to page 0 whenever filters or view mode change
-  useEffect(() => { setPage(0); }, [filterCategory, filterUnverified, search, viewMode]);
+  useEffect(() => { setPage(0); }, [filterCategory, filterUnverified, filterFeatured, search, viewMode]);
 
   const unverifiedCount = useMemo(() => products.filter((p) => p.verified === false).length, [products]);
+  const featuredCount = useMemo(() => products.filter((p) => p.isFeatured).length, [products]);
 
   const filtered = useMemo(() => {
     let result = products;
     if (filterCategory !== "all") result = result.filter((p) => p.category === filterCategory);
     if (filterUnverified) result = result.filter((p) => p.verified === false);
+    if (filterFeatured) result = result.filter((p) => p.isFeatured === true);
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter((p) => p.name.toLowerCase().includes(q));
     }
-    return [...result].sort((a, b) => a.name.localeCompare(b.name, "fr"));
-  }, [products, filterCategory, filterUnverified, search]);
+    return [...result].sort((a, b) => {
+      // Featured products first within sorted order
+      if (a.isFeatured && !b.isFeatured) return -1;
+      if (!a.isFeatured && b.isFeatured) return 1;
+      return a.name.localeCompare(b.name, "fr");
+    });
+  }, [products, filterCategory, filterUnverified, filterFeatured, search]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
@@ -171,6 +180,12 @@ function ProductsContent() {
     } finally {
       setSaving(false);
     }
+  }
+
+  async function handleToggleFeatured(id: string, current: boolean) {
+    const next = !current;
+    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, isFeatured: next } : p)));
+    await setDoc(doc(db, "admin_products", id), { isFeatured: next, updatedAt: Date.now() }, { merge: true });
   }
 
   async function handleDelete(id: string) {
@@ -242,6 +257,24 @@ function ProductsContent() {
             ))}
           </select>
           <button
+            onClick={() => setFilterFeatured((v) => !v)}
+            className={`flex h-10 items-center gap-2 rounded-2xl border px-4 text-sm font-medium transition-colors ${
+              filterFeatured
+                ? "border-yellow-400 bg-yellow-50 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400"
+                : "border-border bg-background text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            <Star className={`h-3.5 w-3.5 ${filterFeatured ? "fill-yellow-500 text-yellow-500" : ""}`} />
+            Ma sélection
+            {featuredCount > 0 && (
+              <span className={`rounded-full px-1.5 py-0.5 text-xs font-bold ${
+                filterFeatured ? "bg-yellow-200 text-yellow-800 dark:bg-yellow-800/40 dark:text-yellow-300" : "bg-muted text-muted-foreground"
+              }`}>
+                {featuredCount}
+              </span>
+            )}
+          </button>
+          <button
             onClick={() => setFilterUnverified((v) => !v)}
             className={`flex h-10 items-center gap-2 rounded-2xl border px-4 text-sm font-medium transition-colors ${
               filterUnverified
@@ -306,6 +339,7 @@ function ProductsContent() {
                   onEdit={() => openEdit(p)}
                   onDelete={() => setDeletingId(p.id)}
                   onVerify={() => handleQuickVerify(p.id)}
+                  onToggleFeatured={() => handleToggleFeatured(p.id, !!p.isFeatured)}
                 />
               ))}
             </ul>
@@ -332,6 +366,7 @@ function ProductsContent() {
                     onEdit={() => openEdit(p)}
                     onDelete={() => setDeletingId(p.id)}
                     onVerify={() => handleQuickVerify(p.id)}
+                    onToggleFeatured={() => handleToggleFeatured(p.id, !!p.isFeatured)}
                   />
                 ))}
               </ul>
@@ -455,14 +490,16 @@ function ProductCard({
   onEdit,
   onDelete,
   onVerify,
+  onToggleFeatured,
 }: {
   product: CatalogProduct;
   onEdit: () => void;
   onDelete: () => void;
   onVerify: () => void;
+  onToggleFeatured: () => void;
 }) {
   return (
-    <li onClick={onEdit} className="group relative flex cursor-pointer flex-col overflow-hidden rounded-3xl border border-border bg-card transition-shadow hover:shadow-md">
+    <li onClick={onEdit} className={`group relative flex cursor-pointer flex-col overflow-hidden rounded-3xl border bg-card transition-shadow hover:shadow-md ${product.isFeatured ? "border-yellow-300 dark:border-yellow-700/50" : "border-border"}`}>
       {/* Image */}
       <div className="relative aspect-square w-full overflow-hidden rounded-t-3xl bg-muted">
         {product.imageUrl ? (
@@ -481,6 +518,18 @@ function ProductCard({
             Non vérifié
           </span>
         )}
+        {/* Featured star button */}
+        <button
+          onClick={(e) => { e.stopPropagation(); onToggleFeatured(); }}
+          title={product.isFeatured ? "Retirer de ma sélection" : "Ajouter à ma sélection"}
+          className={`absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full shadow-sm transition-all ${
+            product.isFeatured
+              ? "bg-yellow-400 text-white hover:bg-yellow-500"
+              : "bg-background/80 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-yellow-50 hover:text-yellow-500"
+          }`}
+        >
+          <Star className={`h-3.5 w-3.5 ${product.isFeatured ? "fill-white" : ""}`} />
+        </button>
       </div>
 
       {/* Body */}
@@ -557,16 +606,18 @@ function ProductListItem({
   onEdit,
   onDelete,
   onVerify,
+  onToggleFeatured,
 }: {
   product: CatalogProduct;
   onEdit: () => void;
   onDelete: () => void;
   onVerify: () => void;
+  onToggleFeatured: () => void;
 }) {
   return (
-    <li className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/30 transition-colors">
+    <li className={`flex items-center gap-3 px-4 py-2.5 hover:bg-muted/30 transition-colors ${product.isFeatured ? "bg-yellow-50/40 dark:bg-yellow-900/10" : ""}`}>
       {/* Thumbnail */}
-      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-border/60 bg-muted">
+      <div className={`h-10 w-10 shrink-0 overflow-hidden rounded-xl border bg-muted ${product.isFeatured ? "border-yellow-300 dark:border-yellow-700/50" : "border-border/60"}`}>
         {product.imageUrl ? (
           <img src={product.imageUrl} alt={product.name} className="h-full w-full rounded-xl object-contain p-0.5" />
         ) : (
@@ -580,6 +631,11 @@ function ProductListItem({
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <p className="truncate text-sm font-semibold text-foreground">{product.name}</p>
+          {product.isFeatured && (
+            <span className="shrink-0 rounded-full bg-yellow-400 px-1.5 py-0.5 text-[9px] font-bold text-yellow-900">
+              ★ Sélection
+            </span>
+          )}
           {product.verified === false && (
             <span className="shrink-0 rounded-full bg-amber-500 px-1.5 py-0.5 text-[9px] font-bold text-white">
               Non vérifié
@@ -595,6 +651,13 @@ function ProductListItem({
 
       {/* Actions */}
       <div className="flex shrink-0 items-center gap-1">
+        <button
+          onClick={(e) => { e.stopPropagation(); onToggleFeatured(); }}
+          title={product.isFeatured ? "Retirer de ma sélection" : "Ajouter à ma sélection"}
+          className={`flex h-7 w-7 items-center justify-center rounded-xl transition-colors ${product.isFeatured ? "text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20" : "text-muted-foreground/40 hover:bg-yellow-50 hover:text-yellow-500 dark:hover:bg-yellow-900/20"}`}
+        >
+          <Star className={`h-3.5 w-3.5 ${product.isFeatured ? "fill-yellow-400" : ""}`} />
+        </button>
         {product.verified === false && (
           <button
             onClick={(e) => { e.stopPropagation(); onVerify(); }}

@@ -16,6 +16,7 @@ export type CatalogProduct = {
   inciNormalized?: string;
   inciHash?: string;
   verified: boolean;
+  isFeatured?: boolean;
   createdAt: number;
   updatedAt: number;
 };
