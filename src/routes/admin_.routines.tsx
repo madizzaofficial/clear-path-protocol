@@ -42,6 +42,9 @@ import {
   LayoutTemplate,
   BookmarkPlus,
   X,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import {
   Dialog,
@@ -50,6 +53,14 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { suggestRoutineFn, type RoutineSuggestion, type SuggestedStep } from "@/lib/ai-coach";
+import { getFeaturedCatalogProducts } from "@/lib/product-catalog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -402,6 +413,12 @@ function RoutinesContent() {
   const [pendingReasonTag, setPendingReasonTag] = useState<RoutineChangeReason>("ajustement");
   const [pendingReasonNote, setPendingReasonNote] = useState("");
 
+  const [aiSheetOpen, setAiSheetOpen] = useState(false);
+  const [aiSuggestStep, setAiSuggestStep] = useState<"idle" | "loading" | "done">("idle");
+  const [aiSuggestion, setAiSuggestion] = useState<RoutineSuggestion | null>(null);
+  const [aiReasoningOpen, setAiReasoningOpen] = useState(false);
+  const [pendingAiRoutine, setPendingAiRoutine] = useState<RoutineSuggestion | null>(null);
+
   const { uid: preselectedUid } = Route.useSearch();
 
   const sensors = useSensors(
@@ -631,6 +648,78 @@ function RoutinesContent() {
     } finally {
       setSavingToCatalog(false);
     }
+  }
+
+  async function handleSuggestRoutine() {
+    if (!selectedUser || !intake) return;
+    setAiSuggestStep("loading");
+    setAiSuggestion(null);
+    try {
+      const featured = await getFeaturedCatalogProducts();
+      const result = await suggestRoutineFn({
+        data: {
+          intake: {
+            skinType: intake.skinType,
+            acneTypes: intake.acneTypes,
+            intensity: intake.intensity,
+          },
+          featuredProducts: featured.map((p) => ({
+            id: p.id,
+            name: p.name,
+            brand: p.brand,
+            category: p.category,
+            inciAnalysis: p.inciAnalysis
+              ? {
+                  verdict: p.inciAnalysis.verdict,
+                  texture: p.inciAnalysis.texture,
+                  flags: p.inciAnalysis.flags.map((f) => ({ name: f.name, category: f.category, risk: f.risk })),
+                }
+              : undefined,
+            suitableForSkinTypes: p.suitableForSkinTypes,
+          })),
+        },
+      });
+      setAiSuggestion(result);
+      setAiSuggestStep("done");
+    } catch {
+      setAiSuggestStep("idle");
+    }
+  }
+
+  function handleApplySuggestion(suggestion: RoutineSuggestion) {
+    if (!routine) return;
+    const toRoutineStep = (s: SuggestedStep, idx: number): RoutineStep => {
+      const catalog = catalogProducts.find((p) => p.id === s.productId);
+      return {
+        id: `s-${Date.now()}-${idx}`,
+        order: idx,
+        category: s.category,
+        product: s.productName,
+        instructions: catalog?.instructions ?? "",
+        imageUrl: catalog?.imageUrl,
+        purchaseUrl: catalog?.purchaseLinks?.[0]?.url ?? (catalog as any)?.purchaseUrl,
+      };
+    };
+    const updated: StudentRoutine = {
+      ...routine,
+      am: suggestion.am.sort((a, b) => a.order - b.order).map(toRoutineStep),
+      pm: suggestion.pm.sort((a, b) => a.order - b.order).map(toRoutineStep),
+      status: "draft",
+      updatedAt: Date.now(),
+    };
+    setRoutine(updated);
+    saveRoutine(updated);
+    if (selectedUser) {
+      import("firebase/firestore").then(({ doc: firestoreDoc, setDoc: firestoreSetDoc }) => {
+        firestoreSetDoc(
+          firestoreDoc(db, "routines", selectedUser.uid),
+          { aiSuggestion: { ...suggestion, appliedAt: Date.now() } },
+          { merge: true },
+        ).catch(() => {});
+      });
+    }
+    setPendingAiRoutine(null);
+    setAiSheetOpen(false);
   }
 
   const filteredTemplates = useMemo(() => {
@@ -1061,6 +1150,14 @@ function RoutinesContent() {
                   {/* Actions */}
                   <div className="flex flex-wrap items-center justify-end gap-3">
                     <button
+                      onClick={() => { setAiSheetOpen(true); if (aiSuggestStep === "idle") setAiSuggestion(null); }}
+                      disabled={!intake}
+                      className="flex items-center gap-2 rounded-2xl border border-primary/30 bg-primary/5 px-5 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/10 disabled:opacity-40"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      Aide IA ✦
+                    </button>
+                    <button
                       onClick={() => routine && saveRoutine({ ...routine, updatedAt: Date.now() })}
                       disabled={saving || !routine}
                       className="flex items-center gap-2 rounded-2xl border border-border bg-card px-5 py-3 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-40"
@@ -1344,6 +1441,166 @@ function RoutinesContent() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {/* AI Routine Suggestion Sheet */}
+      <Sheet open={aiSheetOpen} onOpenChange={setAiSheetOpen}>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto flex flex-col gap-0 p-0">
+          <SheetHeader className="px-6 pt-6 pb-4 border-b border-border/60">
+            <SheetTitle className="font-display flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Aide IA — Suggestion de routine
+            </SheetTitle>
+          </SheetHeader>
+
+          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+            {/* Student profile recap */}
+            {intake && (
+              <div className="rounded-2xl bg-muted/40 p-4 space-y-1.5 text-sm">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                  Profil élève
+                </p>
+                {intake.skinType && (
+                  <p><span className="text-muted-foreground">Type de peau :</span> {SKIN_TYPE_LABELS[intake.skinType] ?? intake.skinType}</p>
+                )}
+                {intake.acneTypes && intake.acneTypes.length > 0 && (
+                  <p><span className="text-muted-foreground">Acné :</span> {intake.acneTypes.map((t) => ACNE_TYPE_LABELS[t] ?? t).join(", ")}</p>
+                )}
+                {intake.intensity && (
+                  <p><span className="text-muted-foreground">Intensité :</span> {INTENSITY_LABELS[intake.intensity] ?? intake.intensity}</p>
+                )}
+              </div>
+            )}
+
+            {!intake && (
+              <p className="text-sm text-muted-foreground rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3">
+                Aucun bilan rempli pour cet élève. Impossible de générer une suggestion.
+              </p>
+            )}
+
+            {/* Idle state */}
+            {aiSuggestStep === "idle" && intake && (
+              <div className="text-center py-6 space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  L'IA analysera le profil peau et proposera une routine AM/PM avec les produits de <strong>Ma Sélection</strong>, en vérifiant la synergie des actifs.
+                </p>
+                <button
+                  onClick={handleSuggestRoutine}
+                  className="flex items-center gap-2 mx-auto rounded-2xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Générer la suggestion
+                </button>
+              </div>
+            )}
+
+            {/* Loading state */}
+            {aiSuggestStep === "loading" && (
+              <div className="flex flex-col items-center gap-3 py-10 text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-sm">Analyse en cours…</p>
+              </div>
+            )}
+
+            {/* Done state */}
+            {aiSuggestStep === "done" && aiSuggestion && (
+              <div className="space-y-5">
+                {/* AM */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sun className="h-4 w-4 text-amber-500" />
+                    <p className="text-sm font-semibold">Routine Matin ({aiSuggestion.am.length} étape{aiSuggestion.am.length !== 1 ? "s" : ""})</p>
+                  </div>
+                  <ul className="space-y-2">
+                    {aiSuggestion.am.sort((a, b) => a.order - b.order).map((step) => (
+                      <li key={step.productId} className="rounded-2xl border border-border/60 bg-card p-3 space-y-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-sm font-medium leading-tight">{step.productName}</p>
+                          <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">{step.category}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{step.whyThisProduct}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* PM */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Moon className="h-4 w-4 text-indigo-500" />
+                    <p className="text-sm font-semibold">Routine Soir ({aiSuggestion.pm.length} étape{aiSuggestion.pm.length !== 1 ? "s" : ""})</p>
+                  </div>
+                  <ul className="space-y-2">
+                    {aiSuggestion.pm.sort((a, b) => a.order - b.order).map((step) => (
+                      <li key={step.productId} className="rounded-2xl border border-border/60 bg-card p-3 space-y-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-sm font-medium leading-tight">{step.productName}</p>
+                          <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">{step.category}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{step.whyThisProduct}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Reasoning collapsible */}
+                {aiSuggestion.reasoning && (
+                  <div className="rounded-2xl border border-border/60 overflow-hidden">
+                    <button
+                      onClick={() => setAiReasoningOpen((o) => !o)}
+                      className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium hover:bg-muted/40 transition-colors"
+                    >
+                      Raisonnement IA
+                      {aiReasoningOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                    </button>
+                    {aiReasoningOpen && (
+                      <div className="px-4 pb-4 text-xs text-muted-foreground leading-relaxed border-t border-border/60 pt-3">
+                        {aiSuggestion.reasoning}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={() => { setAiSuggestStep("idle"); setAiSuggestion(null); setAiReasoningOpen(false); }}
+                    className="flex-1 rounded-2xl border border-border px-4 py-2.5 text-sm font-medium hover:bg-muted transition-colors"
+                  >
+                    Regénérer
+                  </button>
+                  <button
+                    onClick={() => setPendingAiRoutine(aiSuggestion)}
+                    className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-foreground px-4 py-2.5 text-sm font-semibold text-background hover:opacity-90 transition-opacity"
+                  >
+                    Appliquer →
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Confirm apply AI suggestion */}
+      <AlertDialog open={!!pendingAiRoutine} onOpenChange={(o) => !o && setPendingAiRoutine(null)}>
+        <AlertDialogContent className="rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Appliquer la suggestion IA ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              La routine de <strong>{selectedUser?.displayName ?? selectedUser?.email ?? "cet élève"}</strong> sera remplacée par la suggestion IA ({pendingAiRoutine?.am.length ?? 0} étapes AM · {pendingAiRoutine?.pm.length ?? 0} étapes PM). Elle passera en brouillon.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-2xl">Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => pendingAiRoutine && handleApplySuggestion(pendingAiRoutine)}
+              className="rounded-2xl"
+            >
+              Appliquer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </AdminShell>
   );
 }

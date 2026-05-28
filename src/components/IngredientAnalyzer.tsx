@@ -532,7 +532,7 @@ function ExplanationCard({
           <p className="text-sm leading-relaxed text-foreground/90">{text}</p>
           <div className="flex items-center justify-between">
             <span className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-              Généré par IA · GPT-4o mini
+              Généré par IA · DeepSeek V4 Flash
             </span>
             <button
               onClick={() => setState("idle")}
@@ -908,7 +908,7 @@ export function ProductComparator({ skinProfile, customIngredients }: { skinProf
               className="flex w-full items-center justify-center gap-2 rounded-2xl bg-muted/60 px-4 py-3 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted"
             >
               <Sparkles className="h-4 w-4 text-primary" />
-              Comparer avec l'IA selon mon profil
+              Obtenir une analyse personnalisée
             </button>
           )}
 
@@ -929,7 +929,7 @@ export function ProductComparator({ skinProfile, customIngredients }: { skinProf
               <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{compText}</p>
               <div className="flex items-center justify-between">
                 <span className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                  Généré par IA · GPT-4o mini
+                  Généré par IA · DeepSeek V4 Flash
                 </span>
                 <button
                   onClick={() => setCompState("idle")}

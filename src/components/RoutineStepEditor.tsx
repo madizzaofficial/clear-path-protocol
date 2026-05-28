@@ -26,6 +26,7 @@ import { SearchInput } from "@/components/SearchInput";
 import { uploadProductImageFn } from "@/lib/upload-image";
 import { CATEGORIES } from "@/lib/skincare-categories";
 import type { CatalogProduct } from "@/routes/admin_.products";
+import type { InciAnalysis } from "@/lib/inci-analysis";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -40,6 +41,7 @@ export type RoutineStep = {
   startWeek?: number;
   introNote?: string;
   whyThisProduct?: string;
+  inciAnalysis?: InciAnalysis;
 };
 
 export type ExtraBlock = {
@@ -57,6 +59,7 @@ export type StepSaveData = {
   startWeek?: number;
   introNote?: string;
   whyThisProduct?: string;
+  inciAnalysis?: InciAnalysis;
 };
 
 // ─── SortableStep ─────────────────────────────────────────────────────────────
@@ -163,6 +166,7 @@ export function StepDialog({
   const [startWeek, setStartWeek] = useState<number | "">("");
   const [introNote, setIntroNote] = useState("");
   const [whyThisProduct, setWhyThisProduct] = useState("");
+  const [stepInciAnalysis, setStepInciAnalysis] = useState<InciAnalysis | undefined>(undefined);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [catalogSearch, setCatalogSearch] = useState("");
@@ -186,6 +190,7 @@ export function StepDialog({
       setStartWeek(step.startWeek ?? "");
       setIntroNote(step.introNote ?? "");
       setWhyThisProduct(step.whyThisProduct ?? "");
+      setStepInciAnalysis(step.inciAnalysis);
       setUploadError(null);
       setUploading(false);
       setShowCatalogPicker(false);
@@ -199,6 +204,7 @@ export function StepDialog({
     setInstructions(p.instructions);
     setImageUrl(p.imageUrl ?? "");
     setPurchaseUrl(p.purchaseUrl ?? "");
+    setStepInciAnalysis(p.inciAnalysis);
     setCatalogSearch("");
     setShowCatalogPicker(false);
   }
@@ -477,6 +483,7 @@ export function StepDialog({
                 startWeek: startWeek !== "" ? startWeek : undefined,
                 introNote: introNote.trim() || undefined,
                 whyThisProduct: whyThisProduct.trim() || undefined,
+                inciAnalysis: stepInciAnalysis,
               })
             }
             disabled={saving || !product.trim()}

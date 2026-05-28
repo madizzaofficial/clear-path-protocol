@@ -57,17 +57,18 @@ export function toSnapshot(r: AnalysisResultV2): ProductSnapshot {
   };
 }
 
-// ─── OpenAI helper ────────────────────────────────────────────────────────────
+// ─── DeepSeek helper ──────────────────────────────────────────────────────────
 
-async function callGpt(systemPrompt: string, userContent: string, maxTokens = 300): Promise<string> {
-  const apiKey = process.env.OPENAI_API_KEY;
+async function callDeepSeek(systemPrompt: string, userContent: string, maxTokens = 300): Promise<string> {
+  const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) return "";
 
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+  const res = await fetch("https://api.deepseek.com/v1/chat/completions", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    signal: AbortSignal.timeout(20_000),
     body: JSON.stringify({
-      model: "gpt-4o-mini",
+      model: "deepseek-v4-flash",
       temperature: 0.3,
       max_tokens: maxTokens,
       messages: [
@@ -104,7 +105,7 @@ export const generateExplanationFn = createServerFn({ method: "POST" })
   .inputValidator((d: ExplanationPayload) => d)
   .handler(async (ctx) => {
     const { product, skinProfile } = ctx.data;
-    const text = await callGpt(EXPLANATION_SYSTEM, JSON.stringify({ product, skinProfile }), 280);
+    const text = await callDeepSeek(EXPLANATION_SYSTEM, JSON.stringify({ product, skinProfile }), 280);
     return { text };
   });
 
@@ -131,6 +132,6 @@ export const compareProductsFn = createServerFn({ method: "POST" })
   .inputValidator((d: ComparisonPayload) => d)
   .handler(async (ctx) => {
     const { productA, productB, skinProfile } = ctx.data;
-    const text = await callGpt(COMPARISON_SYSTEM, JSON.stringify({ productA, productB, skinProfile }), 320);
+    const text = await callDeepSeek(COMPARISON_SYSTEM, JSON.stringify({ productA, productB, skinProfile }), 320);
     return { text };
   });

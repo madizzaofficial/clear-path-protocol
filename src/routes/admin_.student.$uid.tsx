@@ -8,8 +8,15 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Loader2, Check, Sun, Moon, ClipboardList,
   BookOpen, ChevronDown, Lock, Play, ImageOff, MessageSquare, Send, AlertTriangle,
-  Ban, UserCheck, Pencil, X, ShoppingCart, Package, Activity, Flame, CalendarDays, History,
+  Ban, UserCheck, Pencil, X, ShoppingCart, Package, Activity, Flame, CalendarDays, History, Sparkles,
 } from "lucide-react";
+import {
+  analyzeIntakeFn,
+  analyzeIntakeFinalFn,
+  analyzeProgressFn,
+  analyzeProgressFinalFn,
+  type AiAnalysisResult,
+} from "@/lib/ai-coach";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
@@ -78,6 +85,7 @@ type IntakeAnswers = {
   mainGoal?: string;
   photoUrls?: string[];
   completedAt?: number;
+  aiAnalysis?: AiAnalysisResult;
 };
 
 type RoutineStep = {
@@ -140,6 +148,7 @@ type AdminSkinState = {
   nextCallDate?: string;
   nextCallTime?: string;
   updatedAt: number;
+  aiProgress?: AiAnalysisResult;
 };
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -177,6 +186,19 @@ function StudentPage() {
   const [skinStateHistory, setSkinStateHistory] = useState<SkinStateHistoryEntry[]>([]);
   const [routineHistory, setRoutineHistory] = useState<RoutineHistoryEntry[]>([]);
   const { tab: initialTab } = Route.useSearch();
+
+  // ── AI coach states ──────────────────────────────────────────────────────
+  type AiStep = "idle" | "analyzing" | "draft" | "finalizing" | "final";
+  const [intakeAiStep, setIntakeAiStep] = useState<AiStep>("idle");
+  const [intakeAiDraft, setIntakeAiDraft] = useState("");
+  const [intakeAiAdminNote, setIntakeAiAdminNote] = useState("");
+  const [intakeAiFinal, setIntakeAiFinal] = useState("");
+  const [progressAiStep, setProgressAiStep] = useState<AiStep>("idle");
+  const [progressAiDraft, setProgressAiDraft] = useState("");
+  const [progressAiAdminNote, setProgressAiAdminNote] = useState("");
+  const [progressAiFinal, setProgressAiFinal] = useState("");
+  const [selectedPhotoEntries, setSelectedPhotoEntries] = useState<string[]>([]);
+  const [progressAiContext, setProgressAiContext] = useState("");
   const [tab, setTab] = useState<Tab>(initialTab ?? "profil");
   const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
 
@@ -217,6 +239,19 @@ function StudentPage() {
         const ss = skinStateSnap.data() as AdminSkinState;
         setSkinState(ss);
         setSkinStateDraft(ss);
+        if (ss.aiProgress) {
+          setProgressAiDraft(ss.aiProgress.draft);
+          setProgressAiAdminNote(ss.aiProgress.adminNote);
+          setProgressAiFinal(ss.aiProgress.final);
+          setProgressAiStep("final");
+        }
+      }
+      if (intakeSnap.exists() && intakeSnap.data().aiAnalysis) {
+        const ai = intakeSnap.data().aiAnalysis as AiAnalysisResult;
+        setIntakeAiDraft(ai.draft);
+        setIntakeAiAdminNote(ai.adminNote);
+        setIntakeAiFinal(ai.final);
+        setIntakeAiStep("final");
       }
       const today = new Date();
       const todayKey = today.toISOString().slice(0, 10);
@@ -340,6 +375,124 @@ function StudentPage() {
       toast.error("Impossible d'enregistrer.");
     } finally {
       setSavingIntake(false);
+    }
+  }
+
+  // ── AI coach handlers ────────────────────────────────────────────────────
+
+  function getSelectedPhotosFlat() {
+    return photos
+      .filter((p) => selectedPhotoEntries.includes(p.date))
+      .flatMap((p) =>
+        (
+          [
+            p.front ? { url: p.front, date: p.date, label: "Face" } : null,
+            p.left ? { url: p.left, date: p.date, label: "Profil gauche" } : null,
+            p.right ? { url: p.right, date: p.date, label: "Profil droit" } : null,
+          ] as ({ url: string; date: string; label: string } | null)[]
+        ).filter((x): x is { url: string; date: string; label: string } => x !== null)
+      );
+  }
+
+  function getSkinStateHistoryInput() {
+    return skinStateHistory.map((e) => ({
+      inflammation: e.inflammationPct,
+      barrier: e.barrierPct,
+      acne: e.acnePct,
+      date: e.timestamp,
+    }));
+  }
+
+  async function handleIntakeAnalyze() {
+    if (!intake) return;
+    setIntakeAiStep("analyzing");
+    try {
+      const res = await analyzeIntakeFn({
+        data: {
+          intake: {
+            skinType: intake.skinType,
+            acneTypes: intake.acneTypes,
+            intensity: intake.intensity,
+            currentRoutine: intake.currentRoutine,
+            mainGoal: intake.mainGoal,
+          },
+          photoUrls: intake.photoUrls ?? [],
+        },
+      });
+      setIntakeAiDraft(res.text);
+      setIntakeAiStep("draft");
+    } catch {
+      setIntakeAiStep("idle");
+      toast.error("Analyse impossible. Réessaie.");
+    }
+  }
+
+  async function handleIntakeFinalize() {
+    if (!intake || !intakeAiAdminNote.trim()) return;
+    setIntakeAiStep("finalizing");
+    try {
+      const res = await analyzeIntakeFinalFn({
+        data: {
+          intake: {
+            skinType: intake.skinType,
+            acneTypes: intake.acneTypes,
+            intensity: intake.intensity,
+            currentRoutine: intake.currentRoutine,
+            mainGoal: intake.mainGoal,
+          },
+          photoUrls: intake.photoUrls ?? [],
+          draft: intakeAiDraft,
+          adminNote: intakeAiAdminNote,
+        },
+      });
+      const result: AiAnalysisResult = { draft: intakeAiDraft, adminNote: intakeAiAdminNote, final: res.text, analyzedAt: Date.now() };
+      await setDoc(doc(db, "intake_answers", uid), { aiAnalysis: result }, { merge: true });
+      setIntakeAiFinal(res.text);
+      setIntakeAiStep("final");
+    } catch {
+      setIntakeAiStep("draft");
+      toast.error("Impossible de finaliser. Réessaie.");
+    }
+  }
+
+  async function handleProgressAnalyze() {
+    setProgressAiStep("analyzing");
+    try {
+      const res = await analyzeProgressFn({
+        data: {
+          photos: getSelectedPhotosFlat(),
+          skinStateHistory: getSkinStateHistoryInput(),
+          adminContext: progressAiContext || undefined,
+        },
+      });
+      setProgressAiDraft(res.text);
+      setProgressAiStep("draft");
+    } catch {
+      setProgressAiStep("idle");
+      toast.error("Analyse impossible. Réessaie.");
+    }
+  }
+
+  async function handleProgressFinalize() {
+    if (!progressAiAdminNote.trim()) return;
+    setProgressAiStep("finalizing");
+    try {
+      const res = await analyzeProgressFinalFn({
+        data: {
+          photos: getSelectedPhotosFlat(),
+          skinStateHistory: getSkinStateHistoryInput(),
+          adminContext: progressAiContext || undefined,
+          draft: progressAiDraft,
+          adminNote: progressAiAdminNote,
+        },
+      });
+      const result: AiAnalysisResult = { draft: progressAiDraft, adminNote: progressAiAdminNote, final: res.text, analyzedAt: Date.now() };
+      await setDoc(doc(db, "admin_skin_state", uid), { aiProgress: result }, { merge: true });
+      setProgressAiFinal(res.text);
+      setProgressAiStep("final");
+    } catch {
+      setProgressAiStep("draft");
+      toast.error("Impossible de finaliser. Réessaie.");
     }
   }
 
@@ -673,6 +826,103 @@ function StudentPage() {
                 </div>
               </div>
 
+              {/* ── Bilan IA progression ── */}
+              <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                <div className="mb-4 flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Bilan IA progression</p>
+                </div>
+
+                {progressAiStep === "idle" && (
+                  <div className="space-y-4">
+                    {photos.length > 0 && (
+                      <div>
+                        <p className="mb-2 text-xs font-medium text-muted-foreground">Photos à inclure (optionnel)</p>
+                        <div className="flex flex-wrap gap-2">
+                          {photos.slice(0, 8).map((p) => (
+                            <label key={p.date} className="flex cursor-pointer items-center gap-1.5">
+                              <input
+                                type="checkbox"
+                                checked={selectedPhotoEntries.includes(p.date)}
+                                onChange={() =>
+                                  setSelectedPhotoEntries((prev) =>
+                                    prev.includes(p.date) ? prev.filter((d) => d !== p.date) : [...prev, p.date]
+                                  )
+                                }
+                                className="h-3.5 w-3.5 rounded border-border accent-primary"
+                              />
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(p.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <textarea
+                      value={progressAiContext}
+                      onChange={(e) => setProgressAiContext(e.target.value)}
+                      rows={2}
+                      placeholder="Contexte : changement alimentation, stress, nouvel actif…"
+                      className="w-full resize-none rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none focus:border-primary"
+                    />
+                    <button
+                      onClick={handleProgressAnalyze}
+                      className="flex items-center gap-2 rounded-xl bg-muted/60 px-4 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted"
+                    >
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      Analyser la progression
+                    </button>
+                  </div>
+                )}
+
+                {(progressAiStep === "analyzing" || progressAiStep === "finalizing") && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    {progressAiStep === "analyzing" ? "Analyse en cours…" : "Génération du verdict…"}
+                  </div>
+                )}
+
+                {progressAiStep === "draft" && (
+                  <div className="space-y-3">
+                    <div className="rounded-xl border border-border/60 bg-muted/30 px-4 py-3">
+                      <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{progressAiDraft}</p>
+                    </div>
+                    <textarea
+                      value={progressAiAdminNote}
+                      onChange={(e) => setProgressAiAdminNote(e.target.value)}
+                      rows={3}
+                      placeholder="Votre analyse / observations avant le verdict final…"
+                      className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+                    />
+                    <button
+                      onClick={handleProgressFinalize}
+                      disabled={!progressAiAdminNote.trim()}
+                      className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-40"
+                    >
+                      <Check className="h-4 w-4" /> Valider →
+                    </button>
+                  </div>
+                )}
+
+                {progressAiStep === "final" && (
+                  <div className="space-y-3">
+                    <div className="rounded-xl border border-primary/20 bg-primary-soft/30 px-4 py-3">
+                      <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{progressAiFinal}</p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-muted-foreground/60">Verdict IA · GPT-4o</span>
+                      <button
+                        onClick={() => { setProgressAiStep("idle"); setProgressAiDraft(""); setProgressAiAdminNote(""); setSelectedPhotoEntries([]); }}
+                        className="text-[10px] text-muted-foreground/60 underline underline-offset-2 hover:text-muted-foreground"
+                      >
+                        Ré-analyser
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Évolution métriques peau */}
               {skinStateHistory.length >= 2 && (
                 <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
@@ -956,6 +1206,62 @@ function StudentPage() {
                         </div>
                       </IntakeSection>
                     )}
+
+                    {/* ── Analyse IA du bilan ── */}
+                    <IntakeSection title="Analyse IA du bilan">
+                      {intakeAiStep === "idle" && (
+                        <button
+                          onClick={handleIntakeAnalyze}
+                          className="flex items-center gap-2 rounded-xl bg-muted/60 px-4 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted"
+                        >
+                          <Sparkles className="h-4 w-4 text-primary" />
+                          Analyser le bilan
+                        </button>
+                      )}
+                      {(intakeAiStep === "analyzing" || intakeAiStep === "finalizing") && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                          {intakeAiStep === "analyzing" ? "Analyse en cours…" : "Génération du verdict…"}
+                        </div>
+                      )}
+                      {intakeAiStep === "draft" && (
+                        <div className="space-y-3">
+                          <div className="rounded-xl border border-border/60 bg-muted/30 px-4 py-3">
+                            <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{intakeAiDraft}</p>
+                          </div>
+                          <textarea
+                            value={intakeAiAdminNote}
+                            onChange={(e) => setIntakeAiAdminNote(e.target.value)}
+                            rows={3}
+                            placeholder="Votre analyse / avis avant le verdict final…"
+                            className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+                          />
+                          <button
+                            onClick={handleIntakeFinalize}
+                            disabled={!intakeAiAdminNote.trim()}
+                            className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-40"
+                          >
+                            <Check className="h-4 w-4" /> Valider →
+                          </button>
+                        </div>
+                      )}
+                      {intakeAiStep === "final" && (
+                        <div className="space-y-3">
+                          <div className="rounded-xl border border-primary/20 bg-primary-soft/30 px-4 py-3">
+                            <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{intakeAiFinal}</p>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] text-muted-foreground/60">Verdict IA · GPT-4o</span>
+                            <button
+                              onClick={() => setIntakeAiStep("idle")}
+                              className="text-[10px] text-muted-foreground/60 underline underline-offset-2 hover:text-muted-foreground"
+                            >
+                              Ré-analyser
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </IntakeSection>
                   </>
                 )}
               </>

@@ -44,7 +44,8 @@ import { CATEGORIES } from "@/lib/skincare-categories";
 import { uploadProductImageFn } from "@/lib/upload-image";
 import { lookupBarcodeFn, extractInciFromUrlFn } from "@/lib/product-ingestion";
 import { computeInciHash, normalizeInciText } from "@/lib/inci-hash";
-import type { CatalogProduct } from "@/lib/product-catalog";
+import type { CatalogProduct, InciAnalysis } from "@/lib/product-catalog";
+import { analyzeInciFn } from "@/lib/inci-analysis";
 import { LiveBarcodeScanner } from "@/components/LiveBarcodeScanner";
 
 // Re-export so existing imports in RoutineStepEditor and admin routes keep working
@@ -566,6 +567,15 @@ function ProductCard({
             ))}
           </div>
         )}
+        {product.inciAnalysis && (
+          <span className={`w-fit rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${
+            product.inciAnalysis.verdict === "compatible" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+            : product.inciAnalysis.verdict === "prudence" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+            : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+          }`}>
+            {product.inciAnalysis.verdict === "compatible" ? "✓ INCI ok" : product.inciAnalysis.verdict === "prudence" ? "⚠ INCI prudence" : "✗ INCI problématique"}
+          </span>
+        )}
         {product.description && (
           <p className="text-xs text-muted-foreground/70 italic line-clamp-2">{product.description}</p>
         )}
@@ -686,6 +696,20 @@ function ProductListItem({
               ))}
             </>
           )}
+          {product.inciAnalysis && (
+            <>
+              <span className="text-muted-foreground/30 text-xs">·</span>
+              <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
+                product.inciAnalysis.verdict === "compatible"
+                  ? "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400"
+                  : product.inciAnalysis.verdict === "prudence"
+                  ? "bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400"
+                  : "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+              }`}>
+                {product.inciAnalysis.verdict === "compatible" ? "✓ INCI ok" : product.inciAnalysis.verdict === "prudence" ? "⚠ INCI prudence" : "✗ INCI problématique"}
+              </span>
+            </>
+          )}
         </div>
       </div>
 
@@ -752,6 +776,10 @@ function ProductDialog({
   const [purchaseLinks, setPurchaseLinks] = useState<import("@/lib/product-catalog").PurchaseLink[]>([]);
   const [suitableForSkinTypes, setSuitableForSkinTypes] = useState<string[]>([]);
   const [inciNormalized, setInciNormalized] = useState("");
+  const [inciAnalysis, setInciAnalysis] = useState<InciAnalysis | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analyzeError, setAnalyzeError] = useState<string | null>(null);
+  const [showAnalysisFlags, setShowAnalysisFlags] = useState(false);
   const [showInci, setShowInci] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -776,6 +804,9 @@ function ProductDialog({
       );
       setSuitableForSkinTypes(product.suitableForSkinTypes ?? []);
       setInciNormalized(product.inciNormalized ?? "");
+      setInciAnalysis(product.inciAnalysis ?? null);
+      setAnalyzeError(null);
+      setShowAnalysisFlags(false);
       setShowInci(!!product.inciNormalized);
       setShowScanner(false);
       setUploadError(null);
@@ -870,6 +901,21 @@ function ProductDialog({
     }
   }
 
+  async function handleAnalyze() {
+    if (!inciNormalized.trim()) return;
+    setAnalyzing(true);
+    setAnalyzeError(null);
+    try {
+      const result = await analyzeInciFn({ data: { inciText: inciNormalized.trim(), productName: name.trim() || "Produit" } });
+      if (result) { setInciAnalysis(result); setShowAnalysisFlags(false); }
+      else setAnalyzeError("Analyse indisponible — vérifie ta clé API DeepSeek.");
+    } catch {
+      setAnalyzeError("Erreur lors de l'analyse.");
+    } finally {
+      setAnalyzing(false);
+    }
+  }
+
   async function handleSubmit() {
     let hash: string | undefined;
     if (inciNormalized.trim()) {
@@ -886,6 +932,7 @@ function ProductDialog({
       brand: brand.trim() || undefined,
       barcode: barcode.trim() || undefined,
       suitableForSkinTypes: suitableForSkinTypes.length ? suitableForSkinTypes : undefined,
+      inciAnalysis: inciAnalysis ?? undefined,
       inciNormalized: inciNormalized.trim() ? normalizeInciText(inciNormalized.trim()) : undefined,
       inciHash: hash,
       verified: true,
@@ -1185,19 +1232,97 @@ function ProductDialog({
                     renseignée
                   </span>
                 )}
+                {inciAnalysis && (
+                  <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                    inciAnalysis.verdict === "compatible" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                    : inciAnalysis.verdict === "prudence" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                    : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                  }`}>
+                    {inciAnalysis.verdict === "compatible" ? "✓ Compatible" : inciAnalysis.verdict === "prudence" ? "⚠ Prudence" : "✗ Déconseillé"}
+                  </span>
+                )}
               </span>
               <ChevronDown className={`h-4 w-4 transition-transform ${showInci ? "rotate-180" : ""}`} />
             </button>
             {showInci && (
-              <div className="border-t border-border px-4 pb-4 pt-3">
+              <div className="border-t border-border px-4 pb-4 pt-3 space-y-3">
                 <textarea
                   autoComplete="off"
                   value={inciNormalized}
-                  onChange={(e) => setInciNormalized(e.target.value)}
+                  onChange={(e) => { setInciNormalized(e.target.value); setInciAnalysis(null); }}
                   rows={5}
                   placeholder="Water, Glycerin, Niacinamide, ..."
                   className="w-full resize-y rounded-2xl border border-border bg-background px-4 py-3 text-xs leading-relaxed outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
+
+                {/* Analyze button */}
+                <button
+                  type="button"
+                  onClick={handleAnalyze}
+                  disabled={!inciNormalized.trim() || analyzing}
+                  className="flex items-center gap-2 rounded-2xl border border-border px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary-soft/30 hover:text-primary disabled:opacity-40"
+                >
+                  {analyzing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                  {analyzing ? "Analyse en cours…" : inciAnalysis ? "Ré-analyser les ingrédients" : "Analyser les ingrédients →"}
+                </button>
+
+                {analyzeError && (
+                  <p className="text-xs text-destructive">{analyzeError}</p>
+                )}
+
+                {/* Analysis result */}
+                {inciAnalysis && (
+                  <div className="rounded-2xl border border-border bg-muted/30 p-3 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                          inciAnalysis.verdict === "compatible" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                          : inciAnalysis.verdict === "prudence" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                          : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                        }`}>
+                          {inciAnalysis.verdict === "compatible" ? "✓ Compatible" : inciAnalysis.verdict === "prudence" ? "⚠ Prudence" : "✗ Déconseillé"}
+                        </span>
+                        <span className="text-xs text-muted-foreground">Score {inciAnalysis.score}/10</span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{inciAnalysis.summary}</p>
+                    <p className="text-xs text-muted-foreground/70">
+                      <span className="font-medium text-foreground/60">Texture :</span> {inciAnalysis.texture.label}
+                      {inciAnalysis.texture.suited_for.length > 0 && ` — adaptée : ${inciAnalysis.texture.suited_for.join(", ")}`}
+                      {inciAnalysis.texture.avoid_for.length > 0 && ` · à éviter : ${inciAnalysis.texture.avoid_for.join(", ")}`}
+                    </p>
+                    {inciAnalysis.flags.length > 0 && (
+                      <div>
+                        <button
+                          type="button"
+                          onClick={() => setShowAnalysisFlags((v) => !v)}
+                          className="flex items-center gap-1 text-xs font-medium text-amber-600 hover:underline"
+                        >
+                          <ChevronDown className={`h-3 w-3 transition-transform ${showAnalysisFlags ? "rotate-180" : ""}`} />
+                          {inciAnalysis.flags.length} ingrédient{inciAnalysis.flags.length > 1 ? "s" : ""} à noter
+                        </button>
+                        {showAnalysisFlags && (
+                          <ul className="mt-2 space-y-1.5">
+                            {inciAnalysis.flags.map((f) => (
+                              <li key={f.name} className="rounded-xl bg-background p-2">
+                                <div className="flex items-start justify-between gap-2">
+                                  <span className="text-xs font-semibold text-foreground/80">{f.name}</span>
+                                  <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
+                                    f.risk === "élevé" ? "bg-red-100 text-red-700" : f.risk === "moyen" ? "bg-amber-100 text-amber-700" : "bg-muted text-muted-foreground"
+                                  }`}>{f.risk}</span>
+                                </div>
+                                <p className="mt-0.5 text-xs text-muted-foreground">{f.concern}</p>
+                                {f.riskFor.length > 0 && (
+                                  <p className="mt-0.5 text-[10px] text-muted-foreground/60">Risque pour : {f.riskFor.join(", ")}</p>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>

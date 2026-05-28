@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/dialog";
 
 import type { PurchaseLink } from "@/lib/product-catalog";
+import type { InciAnalysis } from "@/lib/inci-analysis";
+import { getPersonalizedAnalysis } from "@/lib/inci-analysis";
 
 type RoutineStep = {
   id: string;
@@ -29,6 +31,7 @@ type RoutineStep = {
   startWeek?: number;
   introNote?: string;
   whyThisProduct?: string;
+  inciAnalysis?: InciAnalysis;
 };
 
 type ExtraBlock = { id: string; name: string; steps: RoutineStep[] };
@@ -115,6 +118,7 @@ function RoutinePage() {
   const [toAvoid, setToAvoid] = useState<NutritionItem[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [intakeCompleted, setIntakeCompleted] = useState(false);
+  const [skinProfile, setSkinProfile] = useState<{ skinType: string; acneTypes: string[] } | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/login" });
@@ -145,8 +149,13 @@ function RoutinePage() {
       }
       if (remindersRes.status === "fulfilled" && remindersRes.value.exists())
         setReminders(remindersRes.value.data().items ?? []);
-      if (intakeRes.status === "fulfilled" && intakeRes.value.exists())
+      if (intakeRes.status === "fulfilled" && intakeRes.value.exists()) {
         setIntakeCompleted(true);
+        const intakeData = intakeRes.value.data();
+        if (intakeData?.skinType || intakeData?.acneTypes) {
+          setSkinProfile({ skinType: intakeData.skinType ?? "", acneTypes: intakeData.acneTypes ?? [] });
+        }
+      }
       setLoadingRoutine(false);
     });
   }, [user]);
@@ -292,6 +301,7 @@ function RoutinePage() {
                 steps={routine.am}
                 checked={checkedAm}
                 reports={reports}
+                skinProfile={skinProfile}
                 onToggle={(id) => toggleStep("am", id)}
                 onReport={setReportStep}
               />
@@ -305,6 +315,7 @@ function RoutinePage() {
                 steps={routine.pm}
                 checked={checkedPm}
                 reports={reports}
+                skinProfile={skinProfile}
                 onToggle={(id) => toggleStep("pm", id)}
                 onReport={setReportStep}
               />
@@ -434,7 +445,7 @@ function RoutinePage() {
 }
 
 function RoutineBlock({
-  title, icon: Icon, accent, session, steps, checked, reports, onToggle, onReport,
+  title, icon: Icon, accent, session, steps, checked, reports, skinProfile, onToggle, onReport,
 }: {
   title: string;
   icon: typeof Sun;
@@ -443,6 +454,7 @@ function RoutineBlock({
   steps: RoutineStep[];
   checked: string[];
   reports: Record<string, "irritant" | "allergie">;
+  skinProfile: { skinType: string; acneTypes: string[] } | null;
   onToggle: (id: string) => void;
   onReport: (step: RoutineStep) => void;
 }) {
@@ -542,6 +554,58 @@ function RoutineBlock({
                   <p className="mt-0.5 text-sm leading-relaxed text-foreground/80">{step.whyThisProduct}</p>
                 </div>
               )}
+              {step.inciAnalysis && skinProfile && (() => {
+                const { relevantFlags, textureWarning, textureSuited, personalizedVerdict } =
+                  getPersonalizedAnalysis(step.inciAnalysis, skinProfile);
+                return (
+                  <div className="mt-3 rounded-xl border border-border/60 bg-muted/30 px-3 py-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">
+                        Analyse pour ton profil
+                      </p>
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                        personalizedVerdict === "compatible"
+                          ? "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400"
+                          : personalizedVerdict === "prudence"
+                          ? "bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400"
+                          : "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+                      }`}>
+                        {personalizedVerdict === "compatible" ? "Compatible" : personalizedVerdict === "prudence" ? "Prudence" : "Déconseillé"}
+                      </span>
+                    </div>
+                    <p className={`mt-1.5 text-xs ${
+                      textureSuited
+                        ? "text-green-700 dark:text-green-400"
+                        : textureWarning
+                        ? "text-amber-700 dark:text-amber-400"
+                        : "text-muted-foreground/70"
+                    }`}>
+                      Texture : {step.inciAnalysis.texture.label}
+                      {textureSuited && " — adaptée à ta peau"}
+                      {textureWarning && " — peut être trop riche pour ta peau"}
+                    </p>
+                    {relevantFlags.length > 0 ? (
+                      <ul className="mt-2 space-y-1">
+                        {relevantFlags.map((f) => (
+                          <li key={f.name} className="flex items-start gap-1.5 text-xs">
+                            <span className={`mt-0.5 shrink-0 ${f.risk === "élevé" ? "text-red-500" : f.risk === "moyen" ? "text-amber-500" : "text-muted-foreground/50"}`}>
+                              {f.risk === "élevé" ? "●" : f.risk === "moyen" ? "●" : "○"}
+                            </span>
+                            <span>
+                              <span className="font-medium">{f.name}</span>
+                              <span className="text-muted-foreground/70"> — {f.concern}</span>
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-1.5 text-xs text-green-700 dark:text-green-400">
+                        Aucun ingrédient problématique pour ton profil ✓
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
               {step.instructions && (
                 <div className="mt-3">
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">Instructions</p>

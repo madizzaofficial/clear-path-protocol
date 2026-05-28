@@ -1,5 +1,7 @@
 import { db } from "./firebase";
 import { collection, doc, getDocs, query, setDoc, where } from "firebase/firestore";
+import type { InciAnalysis } from "./inci-analysis";
+export type { InciAnalysis } from "./inci-analysis";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -20,6 +22,7 @@ export type CatalogProduct = {
   inciNormalized?: string;
   inciHash?: string;
   suitableForSkinTypes?: string[];
+  inciAnalysis?: InciAnalysis;
   verified: boolean;
   isFeatured?: boolean;
   createdAt: number;
@@ -38,6 +41,11 @@ export async function getCatalogProductByHash(inciHash: string): Promise<Catalog
   const snap = await getDocs(query(collection(db, "admin_products"), where("inciHash", "==", inciHash)));
   if (snap.empty) return null;
   return snap.docs[0].data() as CatalogProduct;
+}
+
+export async function getFeaturedCatalogProducts(): Promise<CatalogProduct[]> {
+  const snap = await getDocs(query(collection(db, "admin_products"), where("isFeatured", "==", true)));
+  return snap.docs.map((d) => d.data() as CatalogProduct);
 }
 
 // ─── Write ────────────────────────────────────────────────────────────────────
