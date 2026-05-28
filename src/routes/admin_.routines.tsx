@@ -918,7 +918,8 @@ function RoutinesContent() {
                       className={`p-4 ${currentSteps.length > 0 ? "border-t border-border/40" : ""}`}
                     >
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setEditingStep({
                             id: "",
                             order: currentSteps.length,
@@ -992,7 +993,7 @@ function RoutinesContent() {
                                   </div>
                                   <div className="flex items-center gap-1">
                                     <button
-                                      onClick={() => { setEditingStep(step); setIsNewStep(false); setEditingExtrasBlockId(block.id); }}
+                                      onClick={(e) => { e.stopPropagation(); setEditingStep(step); setIsNewStep(false); setEditingExtrasBlockId(block.id); }}
                                       className="flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                                     >
                                       <Pencil className="h-3.5 w-3.5" />
@@ -1012,7 +1013,7 @@ function RoutinesContent() {
                           {/* Add step */}
                           <div className={`p-4 ${block.steps.length > 0 ? "border-t border-border/40" : ""}`}>
                             <button
-                              onClick={() => { setEditingStep({ id: "", order: block.steps.length, category: CATEGORIES[0], product: "", instructions: "" }); setIsNewStep(true); setEditingExtrasBlockId(block.id); }}
+                              onClick={(e) => { e.stopPropagation(); setEditingStep({ id: "", order: block.steps.length, category: CATEGORIES[0], product: "", instructions: "" }); setIsNewStep(true); setEditingExtrasBlockId(block.id); }}
                               className="flex items-center gap-2 rounded-2xl border border-dashed border-yellow-300/60 px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:border-yellow-400 hover:bg-yellow-50/60 hover:text-foreground dark:border-yellow-800/40 dark:hover:bg-yellow-950/20"
                             >
                               <Plus className="h-4 w-4" /> Ajouter une étape
