@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
-import { auth, db } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { sendPasswordResetEmail, updateProfile } from "firebase/auth";
+import { updateProfile } from "firebase/auth";
+import { sendPasswordResetFn } from "@/lib/password-reset";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Calendar, Check, Loader2, LogOut, Mail, Pencil, X } from "lucide-react";
@@ -86,9 +87,10 @@ function ProfilePage() {
     if (!user?.email || resetLoading) return;
     setResetLoading(true);
     try {
-      await sendPasswordResetEmail(auth, user.email);
+      await sendPasswordResetFn({ data: { email: user.email } });
       toast.success("Email de réinitialisation envoyé à " + user.email);
-    } catch {
+    } catch (err) {
+      console.error("[reset] client error:", err);
       toast.error("Impossible d'envoyer l'email. Réessaie.");
     } finally {
       setResetLoading(false);
