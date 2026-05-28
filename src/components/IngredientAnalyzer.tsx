@@ -529,11 +529,8 @@ function ExplanationCard({
 
       {state === "done" && (
         <div className="space-y-3">
-          <p className="text-sm leading-relaxed text-foreground/90">{text}</p>
-          <div className="flex items-center justify-between">
-            <span className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-              Généré par IA · DeepSeek V4 Flash
-            </span>
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{text}</p>
+          <div className="flex justify-end">
             <button
               onClick={() => setState("idle")}
               className="text-[10px] text-muted-foreground/60 hover:text-muted-foreground underline underline-offset-2"
@@ -927,10 +924,7 @@ export function ProductComparator({ skinProfile, customIngredients }: { skinProf
           {compState === "done" && (
             <div className="rounded-2xl border border-border/60 bg-card px-5 py-4 space-y-3">
               <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{compText}</p>
-              <div className="flex items-center justify-between">
-                <span className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                  Généré par IA · DeepSeek V4 Flash
-                </span>
+              <div className="flex justify-end">
                 <button
                   onClick={() => setCompState("idle")}
                   className="text-[10px] text-muted-foreground/60 hover:text-muted-foreground underline underline-offset-2"
