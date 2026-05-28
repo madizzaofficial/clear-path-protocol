@@ -11,6 +11,7 @@ import { AuthProvider } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import { Toaster } from "@/components/ui/sonner";
 import { useEffect } from "react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 import appCss from "../styles.css?url";
 
@@ -116,6 +117,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <body>
         {children}
         <Scripts />
+        <SpeedInsights />
       </body>
     </html>
   );
