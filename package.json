@@ -13,6 +13,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "-": "^0.0.1",
     "@aws-sdk/client-s3": "^3.1045.0",
     "@aws-sdk/s3-request-presigner": "^3.1045.0",
     "@cloudflare/vite-plugin": "^1.25.5",
@@ -60,7 +61,10 @@
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
     "firebase": "^12.13.0",
+    "firebase-admin": "^13.10.0",
+    "firebase-tools": "^15.18.0",
     "framer-motion": "^12.38.0",
+    "g": "^2.0.1",
     "inngest": "^4.3.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.575.0",

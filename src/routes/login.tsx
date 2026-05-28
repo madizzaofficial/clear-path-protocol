@@ -1,9 +1,97 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
 import { Sparkles, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { auth } from "@/lib/firebase";
-import { GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo, signOut, sendPasswordResetEmail } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo, signOut } from "firebase/auth";
+
+// ── Server function: generate reset link + send via Resend ────────────────────
+
+const sendPasswordResetFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { email: string }) => d)
+  .handler(async (ctx) => {
+    const { email } = ctx.data;
+
+    // Init firebase-admin lazily (safe for serverless)
+    const admin = await import("firebase-admin");
+    if (!admin.default.apps.length) {
+      const privateKey = (process.env.FIREBASE_PRIVATE_KEY ?? "").replace(/\\n/g, "\n");
+      admin.default.initializeApp({
+        credential: admin.default.credential.cert({
+          projectId:   process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          privateKey,
+        }),
+      });
+    }
+
+    // Generate the reset link (does NOT send Firebase's email)
+    let resetLink: string;
+    try {
+      resetLink = await admin.default.auth().generatePasswordResetLink(email, {
+        url: "https://app.protocole-clear.com/login",
+      });
+    } catch {
+      // Silently succeed — don't reveal whether the email exists
+      return { ok: true };
+    }
+
+    // Send via Resend with Protocole Clear branding
+    const apiKey = process.env.RESEND_API_KEY;
+    const rawFrom = process.env.RESEND_FROM ?? "onboarding@resend.dev";
+    const from = rawFrom.includes("<") ? rawFrom : `Protocole Clear <${rawFrom}>`;
+    if (apiKey) {
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from,
+          to: email,
+          subject: "Réinitialise ton mot de passe — Protocole Clear",
+          html: buildResetEmailHtml(resetLink),
+        }),
+      });
+    }
+
+    return { ok: true };
+  });
+
+function buildResetEmailHtml(resetLink: string): string {
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#faf9f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <div style="max-width:560px;margin:40px auto;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.06);">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#f5e6da 0%,#faf0e8 100%);padding:40px 40px 32px;text-align:center;">
+      <p style="margin:0 0 8px;font-size:12px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:#c4724b;">Protocole Clear</p>
+      <h1 style="margin:0;font-size:26px;font-weight:700;color:#1a1a1a;letter-spacing:-0.5px;">Réinitialisation du mot de passe</h1>
+    </div>
+
+    <!-- Body -->
+    <div style="padding:36px 40px;">
+      <p style="margin:0 0 16px;font-size:15px;line-height:1.65;color:#444;">Tu as demandé à réinitialiser le mot de passe de ton compte Protocole Clear.</p>
+      <p style="margin:0 0 28px;font-size:15px;line-height:1.65;color:#444;">Clique sur le bouton ci-dessous pour choisir un nouveau mot de passe. Le lien est valable 1 heure.</p>
+
+      <div style="text-align:center;margin:0 0 32px;">
+        <a href="${resetLink}" style="display:inline-block;background:#c4724b;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:9999px;font-size:15px;font-weight:600;letter-spacing:0.02em;">
+          Réinitialiser mon mot de passe →
+        </a>
+      </div>
+
+      <p style="margin:0;font-size:13px;line-height:1.6;color:#888;">Si tu n'es pas à l'origine de cette demande, ignore cet email — ton mot de passe ne changera pas.</p>
+    </div>
+
+    <!-- Footer -->
+    <div style="border-top:1px solid #f0ece8;padding:20px 40px;text-align:center;">
+      <p style="margin:0;font-size:12px;color:#aaa;">Protocole Clear · <a href="https://app.protocole-clear.com" style="color:#c4724b;text-decoration:none;">app.protocole-clear.com</a></p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -53,7 +141,7 @@ function LoginPage() {
     }
     setResetLoading(true);
     try {
-      await sendPasswordResetEmail(auth, email.trim());
+      await sendPasswordResetFn({ data: { email: email.trim() } });
     } catch {
       // Ne pas révéler si l'email existe ou non
     } finally {
