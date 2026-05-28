@@ -10,6 +10,7 @@ import {
 import { AuthProvider } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import { Toaster } from "@/components/ui/sonner";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import { useEffect } from "react";
 
 import appCss from "../styles.css?url";
@@ -136,6 +137,7 @@ function RootComponent() {
       <AuthProvider>
         <Outlet />
         <Toaster position="top-center" richColors />
+        <SpeedInsights />
       </AuthProvider>
     </QueryClientProvider>
   );
