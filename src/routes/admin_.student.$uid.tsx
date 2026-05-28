@@ -1024,8 +1024,8 @@ function StudentPage() {
               />
             ) : (
               <div className="grid gap-6 md:grid-cols-2">
-                <RoutineBlock label="Matin" icon={Sun} steps={routine.am} />
-                <RoutineBlock label="Soir" icon={Moon} steps={routine.pm} />
+                <RoutineBlock label="Matin" icon={Sun} steps={routine.am} reports={reports} />
+                <RoutineBlock label="Soir" icon={Moon} steps={routine.pm} reports={reports} />
               </div>
             )}
           </div>
@@ -1033,54 +1033,86 @@ function StudentPage() {
 
         {/* ── Historique ──────────────────────────────────────────────────────── */}
         {tab === "historique" && (
-          <div className="space-y-6">
-            {routineHistory.length === 0 ? (
-              <EmptyState icon="📋" title="Aucun historique" body="L'historique se construira à chaque envoi de routine." />
-            ) : (
-              <div className="relative space-y-0">
-                {/* Vertical line */}
-                <div className="absolute left-5 top-4 bottom-4 w-px bg-border/60" />
-                {routineHistory.map((entry, i) => (
-                  <div key={entry.id} className="relative flex gap-4 pb-6">
-                    {/* Dot */}
-                    <div className={`relative z-10 mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-background shadow-sm ${entry.isUpdate ? "bg-muted" : "bg-primary"}`}>
-                      {entry.isUpdate ? <History className="h-4 w-4 text-muted-foreground" /> : <Sun className="h-4 w-4 text-primary-foreground" />}
-                    </div>
+          <div className="space-y-10">
 
-                    <div className="flex-1 rounded-2xl border border-border/60 bg-card p-4 shadow-soft">
-                      <div className="mb-2 flex flex-wrap items-center gap-2">
-                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${REASON_TAG_COLORS[entry.reasonTag] ?? REASON_TAG_COLORS.autre}`}>
-                          {REASON_TAG_LABELS[entry.reasonTag] ?? entry.reasonTag}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(entry.timestamp).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
-                        </span>
-                      </div>
-
-                      {entry.note && (
-                        <p className="mb-3 text-sm italic text-muted-foreground">"{entry.note}"</p>
-                      )}
-
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        {[
-                          { label: "☀️ Matin", steps: entry.am },
-                          { label: "🌙 Soir", steps: entry.pm },
-                        ].map(({ label, steps }) => (
-                          <div key={label}>
-                            <p className="mb-1.5 text-xs font-semibold text-muted-foreground">{label} — {steps.length} étape{steps.length !== 1 ? "s" : ""}</p>
-                            <ul className="space-y-0.5">
-                              {steps.map((s, j) => (
-                                <li key={j} className="text-xs text-foreground/80">• {s.product}</li>
-                              ))}
-                            </ul>
+            {/* ── États de peau ── */}
+            <section>
+              <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">États de peau</p>
+              {skinStateHistory.length === 0 ? (
+                <EmptyState icon="🧴" title="Aucun bilan enregistré" body="Les bilans apparaîtront ici après chaque sauvegarde de l'état de peau." />
+              ) : (
+                <div className="relative space-y-0">
+                  <div className="absolute left-5 top-4 bottom-4 w-px bg-border/60" />
+                  {[...skinStateHistory].reverse().map((entry) => {
+                    const infDesc = entry.inflammationPct >= 67 ? "Active" : entry.inflammationPct >= 34 ? "Modérée" : "Sous contrôle";
+                    const barDesc = entry.barrierPct >= 67 ? "Excellente" : entry.barrierPct >= 34 ? "En cours" : "Compromise";
+                    const acnDesc = entry.acnePct >= 67 ? "Active" : entry.acnePct >= 34 ? "Modérée" : "Contrôlée";
+                    return (
+                      <div key={entry.id} className="relative flex gap-4 pb-6">
+                        <div className="relative z-10 mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-background bg-muted shadow-sm">
+                          <Activity className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 rounded-2xl border border-border/60 bg-card p-4 shadow-soft">
+                          <p className="mb-3 text-xs text-muted-foreground">
+                            {new Date(entry.timestamp).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                          </p>
+                          <div className="grid grid-cols-3 gap-2">
+                            <AdminCircleMetric label="Inflammation" emoji="🔥" pct={entry.inflammationPct} inverted description={infDesc} />
+                            <AdminCircleMetric label="Barrière cutanée" emoji="🧱" pct={entry.barrierPct} description={barDesc} />
+                            <AdminCircleMetric label="Acné" emoji="🧴" pct={entry.acnePct} inverted description={acnDesc} />
                           </div>
-                        ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+
+            {/* ── Routines ── */}
+            <section>
+              <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Routines</p>
+              {routineHistory.length === 0 ? (
+                <EmptyState icon="📋" title="Aucun historique" body="L'historique se construira à chaque envoi de routine." />
+              ) : (
+                <div className="relative space-y-0">
+                  <div className="absolute left-5 top-4 bottom-4 w-px bg-border/60" />
+                  {routineHistory.map((entry) => (
+                    <div key={entry.id} className="relative flex gap-4 pb-6">
+                      <div className={`relative z-10 mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-background shadow-sm ${entry.isUpdate ? "bg-muted" : "bg-primary"}`}>
+                        {entry.isUpdate ? <History className="h-4 w-4 text-muted-foreground" /> : <Sun className="h-4 w-4 text-primary-foreground" />}
+                      </div>
+                      <div className="flex-1 rounded-2xl border border-border/60 bg-card p-4 shadow-soft">
+                        <div className="mb-2 flex flex-wrap items-center gap-2">
+                          <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${REASON_TAG_COLORS[entry.reasonTag] ?? REASON_TAG_COLORS.autre}`}>
+                            {REASON_TAG_LABELS[entry.reasonTag] ?? entry.reasonTag}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(entry.timestamp).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                          </span>
+                        </div>
+                        {entry.note && (
+                          <p className="mb-3 text-sm italic text-muted-foreground">"{entry.note}"</p>
+                        )}
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {[{ label: "☀️ Matin", steps: entry.am }, { label: "🌙 Soir", steps: entry.pm }].map(({ label, steps }) => (
+                            <div key={label}>
+                              <p className="mb-1.5 text-xs font-semibold text-muted-foreground">{label} — {steps.length} étape{steps.length !== 1 ? "s" : ""}</p>
+                              <ul className="space-y-0.5">
+                                {steps.map((s, j) => (
+                                  <li key={j} className="text-xs text-foreground/80">• {s.product}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </section>
+
           </div>
         )}
 
@@ -1383,10 +1415,12 @@ function RoutineBlock({
   label,
   icon: Icon,
   steps,
+  reports = {},
 }: {
   label: string;
   icon: React.ElementType;
   steps: RoutineStep[];
+  reports?: Record<string, "irritant" | "allergie">;
 }) {
   return (
     <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
@@ -1399,8 +1433,10 @@ function RoutineBlock({
         <p className="text-sm text-muted-foreground">Aucune étape</p>
       ) : (
         <ol className="space-y-3">
-          {steps.map((s, i) => (
-            <li key={s.id} className="flex items-start gap-3">
+          {steps.map((s, i) => {
+            const reaction = reports[s.id];
+            return (
+            <li key={s.id} className={`flex items-start gap-3 rounded-xl p-1.5 -mx-1.5 ${reaction ? "bg-orange-50/60 dark:bg-orange-950/10" : ""}`}>
               <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-soft text-[10px] font-semibold text-primary">
                 {i + 1}
               </span>
@@ -1414,7 +1450,18 @@ function RoutineBlock({
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium leading-tight">{s.product}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-sm font-medium leading-tight">{s.product}</p>
+                  {reaction && (
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                      reaction === "allergie"
+                        ? "bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400"
+                        : "bg-orange-100 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400"
+                    }`}>
+                      {reaction === "allergie" ? "⚠ Allergie" : "⚠ Irritant"}
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-muted-foreground">{s.category}</p>
                 {s.instructions && (
                   <p className="mt-1 text-xs leading-relaxed text-muted-foreground/80">{s.instructions}</p>
@@ -1431,7 +1478,8 @@ function RoutineBlock({
                 )}
               </div>
             </li>
-          ))}
+          );
+          })}
         </ol>
       )}
     </div>

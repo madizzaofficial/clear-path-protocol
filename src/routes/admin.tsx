@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, getDoc, addDoc } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
-import { TrendingUp, Users, CheckCircle2, AlertCircle, AlertTriangle, Loader2, ClipboardList, Check, Search, Salad, Clock, Send, X, Flame, ChevronDown, ChevronUp } from "lucide-react";
+import { TrendingUp, Users, CheckCircle2, AlertCircle, AlertTriangle, Loader2, ClipboardList, Check, Search, Salad, Clock, Send, X, Flame, ChevronDown, ChevronUp, LayoutGrid, List } from "lucide-react";
 import { toast } from "sonner";
 import { course } from "@/lib/course-data";
 
@@ -54,6 +54,7 @@ function AdminPage() {
   const [quickNoteUid, setQuickNoteUid] = useState<string | null>(null);
   const [quickNoteText, setQuickNoteText] = useState("");
   const [sendingQuickNote, setSendingQuickNote] = useState(false);
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
   type IrritantEntry = { product: string; category: string; irritant: number; allergie: number; total: number; studentCount: number };
   const [irritantsData, setIrritantsData] = useState<IrritantEntry[]>([]);
@@ -298,6 +299,15 @@ function AdminPage() {
 
         {/* Controls */}
         <div className="mb-4 flex flex-wrap items-center gap-3">
+          {/* Grid/list toggle */}
+          <div className="flex rounded-xl bg-muted p-1">
+            <button onClick={() => setViewMode("list")} className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${viewMode === "list" ? "bg-card shadow-soft text-foreground" : "text-muted-foreground hover:text-foreground"}`} title="Liste">
+              <List className="h-4 w-4" />
+            </button>
+            <button onClick={() => setViewMode("grid")} className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${viewMode === "grid" ? "bg-card shadow-soft text-foreground" : "text-muted-foreground hover:text-foreground"}`} title="Grille">
+              <LayoutGrid className="h-4 w-4" />
+            </button>
+          </div>
           <SearchInput
             value={search}
             onChange={setSearch}
@@ -352,13 +362,13 @@ function AdminPage() {
           </select>
         </div>
 
-        {/* Students table — full width */}
-        <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
-          {loadingStudents ? (
-            <div className="flex items-center justify-center py-16">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            </div>
-          ) : (
+        {/* Students — list or grid */}
+        {loadingStudents ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        ) : viewMode === "list" ? (
+          <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -385,6 +395,8 @@ function AdminPage() {
                     const hasNutrition = nutritionSet.has(s.uid);
                     const done = progressMap.get(s.uid) ?? 0;
                     const pct = Math.round((done / TOTAL_LESSONS) * 100);
+                    const isInactive = s.lastSeen ? s.lastSeen < Date.now() - 3 * 86_400_000 : (s.enrolledAt ? s.enrolledAt < Date.now() - 3 * 86_400_000 : false);
+                    const reportCount = reportsMap.get(s.uid) ?? 0;
                     return (
                       <tr key={s.uid} className="hover:bg-muted/20 transition-colors">
                         <td className="px-4 py-3">
@@ -436,42 +448,31 @@ function AdminPage() {
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <div className="flex justify-center">
-                            {(reportsMap.get(s.uid) ?? 0) > 0 ? (
+                          <div className="flex items-center justify-center gap-1.5">
+                            {reportCount > 0 && (
                               <Link to="/admin/student/$uid" params={{ uid: s.uid }} search={{ tab: "routine" }}>
                                 <span className="flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">
-                                  <AlertTriangle className="h-3 w-3" />
-                                  {reportsMap.get(s.uid)}
+                                  <AlertTriangle className="h-3 w-3" />{reportCount}
                                 </span>
                               </Link>
-                            ) : (
-                              <span className="text-xs text-muted-foreground/40">—</span>
                             )}
+                            {isInactive && (
+                              <span title={`Inactif depuis ${s.lastSeen ? Math.floor((Date.now() - s.lastSeen) / 86_400_000) : "?"}j`} className="flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-600 dark:bg-red-950/40 dark:text-red-400">
+                                <Clock className="h-3 w-3" /> inactif
+                              </span>
+                            )}
+                            {reportCount === 0 && !isInactive && <span className="text-xs text-muted-foreground/40">—</span>}
                           </div>
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              onClick={() => openQuickNote(s.uid, s.displayName)}
-                              title="Envoyer une note"
-                              className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-                            >
+                            <button onClick={() => openQuickNote(s.uid, s.displayName)} title="Envoyer une note" className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:border-primary hover:text-primary">
                               <Send className="h-3.5 w-3.5" />
                             </button>
-                            <Link
-                              to="/admin/routines"
-                              search={{ uid: s.uid }}
-                              title={routineStatus === "none" ? "Créer routine" : "Éditer routine"}
-                              className="flex h-8 w-8 items-center justify-center rounded-xl bg-foreground text-background transition-opacity hover:opacity-80"
-                            >
+                            <Link to="/admin/routines" search={{ uid: s.uid }} title={routineStatus === "none" ? "Créer routine" : "Éditer routine"} className="flex h-8 w-8 items-center justify-center rounded-xl bg-foreground text-background transition-opacity hover:opacity-80">
                               <ClipboardList className="h-3.5 w-3.5" />
                             </Link>
-                            <Link
-                              to="/admin/nutrition"
-                              search={{ uid: s.uid }}
-                              title={hasNutrition ? "Éditer nutrition" : "Créer nutrition"}
-                              className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-card transition-colors hover:bg-muted"
-                            >
+                            <Link to="/admin/nutrition" search={{ uid: s.uid }} title={hasNutrition ? "Éditer nutrition" : "Créer nutrition"} className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-card transition-colors hover:bg-muted">
                               <Salad className="h-3.5 w-3.5" />
                             </Link>
                           </div>
@@ -482,14 +483,101 @@ function AdminPage() {
                 </tbody>
               </table>
             </div>
-          )}
-          {!loadingStudents && (
             <div className="border-t border-border/40 px-6 py-3 text-xs text-muted-foreground">
               {filteredStudents.length} élève{filteredStudents.length !== 1 ? "s" : ""}
               {filterStatus !== "all" || search.trim() ? ` sur ${students.length}` : ""}
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          /* ── Grid view ── */
+          <div>
+            {filteredStudents.length === 0 ? (
+              <p className="py-14 text-center text-sm text-muted-foreground">Aucun élève trouvé.</p>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredStudents.map((s) => {
+                  const initials = (s.displayName ?? s.email).split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+                  const routineStatus = routineStatusMap.get(s.uid) ?? "none";
+                  const hasNutrition = nutritionSet.has(s.uid);
+                  const done = progressMap.get(s.uid) ?? 0;
+                  const pct = Math.round((done / TOTAL_LESSONS) * 100);
+                  const isInactive = s.lastSeen ? s.lastSeen < Date.now() - 3 * 86_400_000 : (s.enrolledAt ? s.enrolledAt < Date.now() - 3 * 86_400_000 : false);
+                  const reportCount = reportsMap.get(s.uid) ?? 0;
+                  return (
+                    <div key={s.uid} className={`flex flex-col gap-4 rounded-3xl border bg-card p-5 shadow-soft transition-shadow hover:shadow-md ${isInactive ? "border-red-200 dark:border-red-900/40" : "border-border/60"}`}>
+                      <Link to="/admin/student/$uid" params={{ uid: s.uid }} className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-warm text-sm font-semibold">
+                          {initials}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold">{s.displayName ?? "—"}</p>
+                          <p className="truncate text-xs text-muted-foreground">{s.email}</p>
+                        </div>
+                      </Link>
+
+                      {/* Progress bar */}
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>Progression</span>
+                          <span className="tabular-nums">{done}/{TOTAL_LESSONS}</span>
+                        </div>
+                        <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                          <div className="h-full rounded-full bg-gradient-primary" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+
+                      {/* Chips */}
+                      <div className="flex flex-wrap gap-1.5">
+                        {s.enrolledAt && (
+                          <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">{formatDays(s.enrolledAt)}</span>
+                        )}
+                        {routineStatus === "sent" && (
+                          <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">Routine ✓</span>
+                        )}
+                        {routineStatus === "draft" && (
+                          <span className="rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">Brouillon</span>
+                        )}
+                        {hasNutrition && (
+                          <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">Nutrition ✓</span>
+                        )}
+                        {reportCount > 0 && (
+                          <span className="rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-semibold text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">
+                            ⚠ {reportCount} signalement{reportCount > 1 ? "s" : ""}
+                          </span>
+                        )}
+                        {isInactive && (
+                          <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-600 dark:bg-red-950/40 dark:text-red-400">
+                            Inactif &gt;3j
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex gap-2 border-t border-border/40 pt-3">
+                        <button onClick={() => openQuickNote(s.uid, s.displayName)} className="flex h-8 w-8 items-center justify-center rounded-xl border border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary">
+                          <Send className="h-3.5 w-3.5" />
+                        </button>
+                        <Link to="/admin/routines" search={{ uid: s.uid }} className="flex h-8 w-8 items-center justify-center rounded-xl bg-foreground text-background transition-opacity hover:opacity-80">
+                          <ClipboardList className="h-3.5 w-3.5" />
+                        </Link>
+                        <Link to="/admin/nutrition" search={{ uid: s.uid }} className="flex h-8 w-8 items-center justify-center rounded-xl border border-border transition-colors hover:bg-muted">
+                          <Salad className="h-3.5 w-3.5" />
+                        </Link>
+                        <Link to="/admin/student/$uid" params={{ uid: s.uid }} className="ml-auto flex h-8 items-center gap-1.5 rounded-xl border border-border px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted">
+                          Fiche élève
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            <p className="mt-4 text-xs text-muted-foreground">
+              {filteredStudents.length} élève{filteredStudents.length !== 1 ? "s" : ""}
+              {filterStatus !== "all" || search.trim() ? ` sur ${students.length}` : ""}
+            </p>
+          </div>
+        )}
       </main>
 
       {/* Quick note modal */}
