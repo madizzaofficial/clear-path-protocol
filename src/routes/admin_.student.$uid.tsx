@@ -8,11 +8,50 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Loader2, Check, Sun, Moon, ClipboardList,
   BookOpen, ChevronDown, Lock, Play, ImageOff, MessageSquare, Send, AlertTriangle,
-  Ban, UserCheck, Pencil, X, ShoppingCart, Package, Activity, Flame, CalendarDays,
+  Ban, UserCheck, Pencil, X, ShoppingCart, Package, Activity, Flame, CalendarDays, History,
 } from "lucide-react";
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+} from "recharts";
 import { course } from "@/lib/course-data";
 
-type Tab = "profil" | "routine" | "photos" | "progression" | "notes" | "suivi";
+type Tab = "profil" | "routine" | "photos" | "progression" | "notes" | "suivi" | "historique";
+
+type SkinStateHistoryEntry = {
+  id: string;
+  timestamp: number;
+  inflammationPct: number;
+  barrierPct: number;
+  acnePct: number;
+};
+
+type RoutineHistoryEntry = {
+  id: string;
+  timestamp: number;
+  isUpdate: boolean;
+  reasonTag: "initial" | "irritation" | "allergie" | "ajustement" | "rupture_stock" | "autre";
+  note: string;
+  am: { product: string; category: string }[];
+  pm: { product: string; category: string }[];
+};
+
+const REASON_TAG_LABELS: Record<string, string> = {
+  initial: "Routine initiale",
+  irritation: "Irritation produit",
+  allergie: "Allergie",
+  ajustement: "Ajustement protocole",
+  rupture_stock: "Rupture de stock",
+  autre: "Autre",
+};
+
+const REASON_TAG_COLORS: Record<string, string> = {
+  initial: "bg-primary/10 text-primary",
+  irritation: "bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-400",
+  allergie: "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400",
+  ajustement: "bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400",
+  rupture_stock: "bg-yellow-100 text-yellow-700 dark:bg-yellow-950/40 dark:text-yellow-400",
+  autre: "bg-muted text-muted-foreground",
+};
 
 export const Route = createFileRoute("/admin_/student/$uid")({
   head: () => ({ meta: [{ title: "Fiche élève — Protocole Clear" }] }),
@@ -135,6 +174,8 @@ function StudentPage() {
   const [checkins28Admin, setCheckins28Admin] = useState<Record<string, { am: string[]; pm: string[] }>>({});
   const [editingAdminSkinState, setEditingAdminSkinState] = useState(false);
   const [editingAdminCallDate, setEditingAdminCallDate] = useState(false);
+  const [skinStateHistory, setSkinStateHistory] = useState<SkinStateHistoryEntry[]>([]);
+  const [routineHistory, setRoutineHistory] = useState<RoutineHistoryEntry[]>([]);
   const { tab: initialTab } = Route.useSearch();
   const [tab, setTab] = useState<Tab>(initialTab ?? "profil");
   const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
@@ -188,6 +229,14 @@ function StudentPage() {
       checkinsSnap?.forEach((d: any) => { checkins28map[d.id] = d.data() as { am: string[]; pm: string[] }; });
       setCheckins28Admin(checkins28map);
 
+      // Load history subcollections (non-blocking)
+      getDocs(query(collection(db, "users", uid, "skin_state_history"), orderBy("timestamp", "asc")))
+        .then((snap) => setSkinStateHistory(snap.docs.map((d) => ({ id: d.id, ...d.data() } as SkinStateHistoryEntry))))
+        .catch(() => {});
+      getDocs(query(collection(db, "users", uid, "routine_history"), orderBy("timestamp", "desc")))
+        .then((snap) => setRoutineHistory(snap.docs.map((d) => ({ id: d.id, ...d.data() } as RoutineHistoryEntry))))
+        .catch(() => {});
+
       const initial = Object.fromEntries(course.chapters.map((c) => [c.id, true]));
       setOpenChapters(initial);
       setLoading(false);
@@ -219,6 +268,7 @@ function StudentPage() {
     { id: "suivi", label: "Suivi", icon: Activity },
     { id: "profil", label: "Profil peau", icon: BookOpen },
     { id: "routine", label: "Routine", icon: Sun },
+    { id: "historique", label: "Historique", icon: History },
     { id: "photos", label: "Photos", icon: ClipboardList },
     { id: "progression", label: "Progression", icon: Check },
     { id: "notes", label: "Notes", icon: MessageSquare },
@@ -311,6 +361,24 @@ function StudentPage() {
       const clean = JSON.parse(JSON.stringify(data));
       await setDoc(doc(db, "admin_skin_state", uid), clean, { merge: true });
       setSkinState(clean as AdminSkinState);
+
+      // Write snapshot to history
+      const historyEntry: SkinStateHistoryEntry = {
+        id: "",
+        timestamp: clean.updatedAt,
+        inflammationPct: clean.inflammationPct ?? 0,
+        barrierPct: clean.barrierPct ?? 0,
+        acnePct: clean.acnePct ?? 0,
+      };
+      addDoc(collection(db, "users", uid, "skin_state_history"), {
+        timestamp: clean.updatedAt,
+        inflammationPct: clean.inflammationPct ?? 0,
+        barrierPct: clean.barrierPct ?? 0,
+        acnePct: clean.acnePct ?? 0,
+      }).then((ref) => {
+        setSkinStateHistory((prev) => [...prev, { ...historyEntry, id: ref.id }]);
+      }).catch(() => {});
+
       toast.success("État & direction sauvegardés.");
     } catch {
       toast.error("Impossible de sauvegarder.");
@@ -604,6 +672,30 @@ function StudentPage() {
                   )}
                 </div>
               </div>
+
+              {/* Évolution métriques peau */}
+              {skinStateHistory.length >= 2 && (
+                <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                  <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Évolution métriques peau</p>
+                  <ResponsiveContainer width="100%" height={220}>
+                    <LineChart data={skinStateHistory.map((e) => ({
+                      date: new Date(e.timestamp).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }),
+                      Inflammation: e.inflammationPct,
+                      Barrière: e.barrierPct,
+                      Acné: e.acnePct,
+                    }))}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="oklch(var(--border))" />
+                      <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                      <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
+                      <Tooltip formatter={(v: number) => `${v}%`} />
+                      <Legend wrapperStyle={{ fontSize: 12 }} />
+                      <Line type="monotone" dataKey="Inflammation" stroke="#f97316" strokeWidth={2} dot={{ r: 3 }} />
+                      <Line type="monotone" dataKey="Barrière" stroke="#22c55e" strokeWidth={2} dot={{ r: 3 }} />
+                      <Line type="monotone" dataKey="Acné" stroke="#6366f1" strokeWidth={2} dot={{ r: 3 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
 
               {/* Row 3: Adhérence + Routine du jour */}
               <div className="grid gap-6 md:grid-cols-2">
@@ -934,6 +1026,59 @@ function StudentPage() {
               <div className="grid gap-6 md:grid-cols-2">
                 <RoutineBlock label="Matin" icon={Sun} steps={routine.am} />
                 <RoutineBlock label="Soir" icon={Moon} steps={routine.pm} />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Historique ──────────────────────────────────────────────────────── */}
+        {tab === "historique" && (
+          <div className="space-y-6">
+            {routineHistory.length === 0 ? (
+              <EmptyState icon="📋" title="Aucun historique" body="L'historique se construira à chaque envoi de routine." />
+            ) : (
+              <div className="relative space-y-0">
+                {/* Vertical line */}
+                <div className="absolute left-5 top-4 bottom-4 w-px bg-border/60" />
+                {routineHistory.map((entry, i) => (
+                  <div key={entry.id} className="relative flex gap-4 pb-6">
+                    {/* Dot */}
+                    <div className={`relative z-10 mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-background shadow-sm ${entry.isUpdate ? "bg-muted" : "bg-primary"}`}>
+                      {entry.isUpdate ? <History className="h-4 w-4 text-muted-foreground" /> : <Sun className="h-4 w-4 text-primary-foreground" />}
+                    </div>
+
+                    <div className="flex-1 rounded-2xl border border-border/60 bg-card p-4 shadow-soft">
+                      <div className="mb-2 flex flex-wrap items-center gap-2">
+                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${REASON_TAG_COLORS[entry.reasonTag] ?? REASON_TAG_COLORS.autre}`}>
+                          {REASON_TAG_LABELS[entry.reasonTag] ?? entry.reasonTag}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(entry.timestamp).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                        </span>
+                      </div>
+
+                      {entry.note && (
+                        <p className="mb-3 text-sm italic text-muted-foreground">"{entry.note}"</p>
+                      )}
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {[
+                          { label: "☀️ Matin", steps: entry.am },
+                          { label: "🌙 Soir", steps: entry.pm },
+                        ].map(({ label, steps }) => (
+                          <div key={label}>
+                            <p className="mb-1.5 text-xs font-semibold text-muted-foreground">{label} — {steps.length} étape{steps.length !== 1 ? "s" : ""}</p>
+                            <ul className="space-y-0.5">
+                              {steps.map((s, j) => (
+                                <li key={j} className="text-xs text-foreground/80">• {s.product}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>

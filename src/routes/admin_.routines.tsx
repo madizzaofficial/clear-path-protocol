@@ -7,7 +7,7 @@ import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { inngest } from "@/lib/inngest";
-import { collection, doc, getDocs, getDoc, setDoc } from "firebase/firestore";
+import { collection, doc, getDocs, getDoc, setDoc, addDoc, serverTimestamp } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
 import type { CatalogProduct } from "./admin_.products";
 import { motion, AnimatePresence } from "framer-motion";
@@ -41,6 +41,7 @@ import {
   Users,
   LayoutTemplate,
   BookmarkPlus,
+  X,
 } from "lucide-react";
 import {
   Dialog,
@@ -85,6 +86,16 @@ type SendEmailPayload = {
   am: RoutineStep[];
   pm: RoutineStep[];
   isUpdate?: boolean;
+};
+
+type RoutineChangeReason = "irritation" | "allergie" | "ajustement" | "rupture_stock" | "autre";
+
+const REASON_LABELS: Record<RoutineChangeReason, string> = {
+  irritation: "Irritation produit",
+  allergie: "Allergie",
+  ajustement: "Ajustement protocole",
+  rupture_stock: "Rupture de stock",
+  autre: "Autre",
 };
 
 import { CATEGORIES } from "@/lib/skincare-categories";
@@ -387,6 +398,9 @@ function RoutinesContent() {
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [templateSearch, setTemplateSearch] = useState("");
   const [pendingTemplate, setPendingTemplate] = useState<RoutineTemplate | null>(null);
+  const [showReasonModal, setShowReasonModal] = useState(false);
+  const [pendingReasonTag, setPendingReasonTag] = useState<RoutineChangeReason>("ajustement");
+  const [pendingReasonNote, setPendingReasonNote] = useState("");
 
   const { uid: preselectedUid } = Route.useSearch();
 
@@ -467,13 +481,26 @@ function RoutinesContent() {
     }
   }
 
-  async function handleSendEmail() {
+  function handleSendEmail() {
+    if (!routine || !selectedUser) return;
+    const isUpdate = !!(routine.sentAt);
+    if (isUpdate) {
+      // For updates, ask for a reason before sending
+      setPendingReasonTag("ajustement");
+      setPendingReasonNote("");
+      setShowReasonModal(true);
+    } else {
+      doSendEmail("initial" as RoutineChangeReason, "");
+    }
+  }
+
+  async function doSendEmail(reasonTag: RoutineChangeReason | "initial", reasonNote: string) {
     if (!routine || !selectedUser) return;
     setSending(true);
     setSendResult(null);
     setSendError(null);
+    const isUpdate = reasonTag !== "initial";
     try {
-      const isUpdate = !!(routine.sentAt);
       const toSave: StudentRoutine = {
         ...routine,
         status: "sent",
@@ -481,7 +508,6 @@ function RoutinesContent() {
         updatedAt: Date.now(),
       };
 
-      // Save to Firestore first — always succeeds regardless of email
       await setDoc(doc(db, "routines", selectedUser.uid), JSON.parse(JSON.stringify(toSave)));
       setRoutine(toSave);
       setRoutineStatusMap((prev) => {
@@ -490,7 +516,16 @@ function RoutinesContent() {
         return next;
       });
 
-      // Email + Inngest event — failure here doesn't roll back the save
+      // Write to history subcollection
+      await addDoc(collection(db, "users", selectedUser.uid, "routine_history"), {
+        timestamp: Date.now(),
+        isUpdate,
+        reasonTag,
+        note: reasonNote,
+        am: JSON.parse(JSON.stringify(routine.am)),
+        pm: JSON.parse(JSON.stringify(routine.pm)),
+      });
+
       await sendRoutineEmailFn({
         data: {
           email: selectedUser.email,
@@ -1197,6 +1232,59 @@ function RoutinesContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Reason modal — shown only when updating an existing routine */}
+      <Dialog open={showReasonModal} onOpenChange={(o) => { if (!o) setShowReasonModal(false); }}>
+        <DialogContent className="rounded-3xl sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display">Motif de la modification</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <p className="mb-2 text-sm text-muted-foreground">Pourquoi as-tu modifié cette routine ?</p>
+              <div className="flex flex-wrap gap-2">
+                {(Object.entries(REASON_LABELS) as [RoutineChangeReason, string][]).map(([tag, label]) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setPendingReasonTag(tag)}
+                    className={`rounded-xl px-3 py-1.5 text-xs font-medium transition-colors ${pendingReasonTag === tag ? "bg-primary text-primary-foreground" : "border border-border bg-muted/30 hover:bg-muted"}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium">Note <span className="text-muted-foreground font-normal">(optionnel)</span></label>
+              <textarea
+                autoComplete="off"
+                value={pendingReasonNote}
+                onChange={(e) => setPendingReasonNote(e.target.value)}
+                placeholder="ex. Le niacinamide était irritant, remplacé par…"
+                rows={2}
+                className="w-full resize-none rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <button
+              onClick={() => setShowReasonModal(false)}
+              className="flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted"
+            >
+              <X className="h-4 w-4" /> Annuler
+            </button>
+            <button
+              onClick={() => { setShowReasonModal(false); doSendEmail(pendingReasonTag, pendingReasonNote); }}
+              disabled={sending}
+              className="flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+            >
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              Confirmer l'envoi
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Save as template */}
       <Dialog open={showSaveTemplate} onOpenChange={setShowSaveTemplate}>

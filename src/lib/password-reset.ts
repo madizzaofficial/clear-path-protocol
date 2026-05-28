@@ -16,24 +16,26 @@ export const sendPasswordResetFn = createServerFn({ method: "POST" })
       return { ok: true };
     }
 
-    let admin: typeof import("firebase-admin");
+    let adminApp: typeof import("firebase-admin/app");
+    let adminAuth: typeof import("firebase-admin/auth");
     try {
-      admin = await import("firebase-admin");
+      adminApp = await import("firebase-admin/app");
+      adminAuth = await import("firebase-admin/auth");
     } catch (err) {
       console.error("[reset] firebase-admin import failed:", err);
       return { ok: true };
     }
 
-    if (!admin.default.apps.length) {
+    if (!adminApp.getApps().length) {
       const privateKey = privateKeyRaw.replace(/\\n/g, "\n");
-      admin.default.initializeApp({
-        credential: admin.default.credential.cert({ projectId, clientEmail, privateKey }),
+      adminApp.initializeApp({
+        credential: adminApp.cert({ projectId, clientEmail, privateKey }),
       });
     }
 
     let resetLink: string;
     try {
-      resetLink = await admin.default.auth().generatePasswordResetLink(email, {
+      resetLink = await adminAuth.getAuth().generatePasswordResetLink(email, {
         url: "https://app.protocole-clear.com/login",
       });
       console.log("[reset] link generated for", email);
