@@ -1,6 +1,5 @@
 import crypto from "node:crypto";
-import { db } from "./firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { getAdminDb } from "./firebase-admin";
 
 // ─── HTML escaping ────────────────────────────────────────────────────────────
 
@@ -180,17 +179,18 @@ async function _handleStripeWebhook(request: Request): Promise<Response> {
 
   // Idempotency — skip if this Stripe event was already processed
   const eventId = (event as any).id as string;
-  const eventRef = doc(db, "stripe_events_processed", eventId);
-  const eventSnap = await getDoc(eventRef);
-  if (eventSnap.exists()) return new Response("Already processed", { status: 200 });
+  const adminDb = getAdminDb();
+  const eventRef = adminDb.collection("stripe_events_processed").doc(eventId);
+  const eventSnap = await eventRef.get();
+  if (eventSnap.exists) return new Response("Already processed", { status: 200 });
 
   // Mark event as processed before doing any side effects
   const now = Date.now();
-  await setDoc(eventRef, { processedAt: now, sessionId: session.id as string });
+  await eventRef.set({ processedAt: now, sessionId: session.id as string });
 
   // Generate unique onboarding token (7 days expiry)
   const token = crypto.randomUUID();
-  await setDoc(doc(db, "onboarding_tokens", token), {
+  await adminDb.collection("onboarding_tokens").doc(token).set({
     createdAt: now,
     expiresAt: now + 7 * 24 * 60 * 60 * 1000,
     used: false,
