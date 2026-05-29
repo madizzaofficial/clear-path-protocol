@@ -1340,10 +1340,12 @@ export const INGREDIENT_ROLES = [
 ] as const;
 
 function splitInciList(raw: string): string[] {
-  // Normalise bullet variants → comma, then strip parenthetical synonyms like (WATER, EAU)
-  // before splitting so the inner commas don't create phantom tokens.
+  // Normalise bullet variants and " - " separators → comma, then strip parenthetical
+  // synonyms like (WATER, EAU) before splitting so inner commas don't create phantom tokens.
   const withoutParens = raw.replace(/\([^)]*\)/g, "");
-  const normalised = withoutParens.replace(/\s*[•·]\s*/g, ",");
+  const normalised = withoutParens
+    .replace(/\s*[•·]\s*/g, ",")
+    .replace(/\s+-\s+/g, ","); // handle "AQUA - GLYCERIN - ..." format
   return normalised
     .split(/(?<!\d),(?!\d)|\n|(?<!\d)\.\s+/)
     .map((t) => stripQuantity(t.trim().replace(/\.$/, "")))
