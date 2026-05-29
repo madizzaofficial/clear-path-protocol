@@ -144,7 +144,12 @@ async function _handleStripeWebhook(request: Request): Promise<Response> {
   const rawBody = await request.text();
   const sigHeader = request.headers.get("stripe-signature") ?? "";
 
+  console.log("[stripe-webhook] body length:", rawBody.length);
+  console.log("[stripe-webhook] sig header present:", sigHeader.length > 0);
+  console.log("[stripe-webhook] sig header prefix:", sigHeader.slice(0, 60));
+
   if (!verifyStripeSignature(rawBody, sigHeader, secret)) {
+    console.log("[stripe-webhook] signature mismatch — bodyLen:", rawBody.length, "secretLen:", secret.length);
     return new Response("Invalid signature", { status: 400 });
   }
 
