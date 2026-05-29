@@ -13,11 +13,12 @@ const inngestHandler = serve({
 });
 
 const inngestMiddleware = createMiddleware({ type: "request" }).server(
-  async ({ request, pathname, next }) => {
-    if (pathname === "/api/inngest") {
+  async ({ request, next }) => {
+    const path = new URL(request.url).pathname;
+    if (path === "/api/inngest") {
       return inngestHandler(request);
     }
-    if (pathname === "/api/stripe/webhook") {
+    if (path === "/api/stripe/webhook") {
       return handleStripeWebhook(request);
     }
     return next();
