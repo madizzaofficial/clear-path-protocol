@@ -24,15 +24,17 @@ function safeName(raw: string | null): string {
 
 const STRIPE_TOLERANCE_SECONDS = 300; // 5 minutes, Stripe's standard
 
-function verifyStripeSignature(rawBody: string, sigHeader: string, secret: string): boolean {
+function verifyStripeSignature(rawBody: string, sigHeader: string, secret: string, skipTimestamp = false): boolean {
   const parts = sigHeader.split(",");
   const timestamp = parts.find((p) => p.startsWith("t="))?.slice(2);
   const signature = parts.find((p) => p.startsWith("v1="))?.slice(3);
   if (!timestamp || !signature) return false;
 
-  // Reject replayed requests older than tolerance window
-  const age = Math.abs(Date.now() / 1000 - Number(timestamp));
-  if (age > STRIPE_TOLERANCE_SECONDS) return false;
+  // En prod, rejette les events rejoués trop anciens
+  if (!skipTimestamp) {
+    const age = Math.abs(Date.now() / 1000 - Number(timestamp));
+    if (age > STRIPE_TOLERANCE_SECONDS) return false;
+  }
 
   const expected = crypto
     .createHmac("sha256", secret)
@@ -145,7 +147,7 @@ async function _handleStripeWebhook(request: Request): Promise<Response> {
   const rawBody = await request.text();
   const sigHeader = request.headers.get("stripe-signature") ?? "";
 
-  if (!verifyStripeSignature(rawBody, sigHeader, secret)) {
+  if (!verifyStripeSignature(rawBody, sigHeader, secret, isTestMode)) {
     return new Response("Invalid signature", { status: 400 });
   }
 
