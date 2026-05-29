@@ -127,7 +127,16 @@ function buildInviteEmailHtml(firstName: string, inviteUrl: string): string {
 // ─── Webhook handler ──────────────────────────────────────────────────────────
 
 export async function handleStripeWebhook(request: Request): Promise<Response> {
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  try {
+    return await _handleStripeWebhook(request);
+  } catch (err) {
+    console.error("[stripe-webhook] unhandled error:", err);
+    return new Response("Internal error", { status: 500 });
+  }
+}
+
+async function _handleStripeWebhook(request: Request): Promise<Response> {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET_TEST ?? process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret) return new Response("Webhook secret missing", { status: 500 });
 
   const rawBody = await request.text();
