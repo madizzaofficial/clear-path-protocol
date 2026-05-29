@@ -4,6 +4,7 @@ import { serve } from "inngest/edge";
 import { renderErrorPage } from "./lib/error-page";
 import { inngest } from "./lib/inngest";
 import { welcomeSequence, intakeConfirmation, routineNotification } from "./lib/inngest-functions";
+import { handleStripeWebhook } from "./lib/stripe-webhook";
 
 const inngestHandler = serve({
   client: inngest,
@@ -15,6 +16,9 @@ const inngestMiddleware = createMiddleware({ type: "request" }).server(
   async ({ request, pathname, next }) => {
     if (pathname === "/api/inngest") {
       return inngestHandler(request);
+    }
+    if (pathname === "/api/stripe/webhook") {
+      return handleStripeWebhook(request);
     }
     return next();
   }

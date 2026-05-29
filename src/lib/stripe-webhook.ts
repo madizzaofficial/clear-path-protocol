@@ -1,0 +1,171 @@
+import crypto from "node:crypto";
+import { db } from "./firebase";
+import { doc, setDoc } from "firebase/firestore";
+
+// ─── Stripe signature verification ───────────────────────────────────────────
+
+function verifyStripeSignature(rawBody: string, sigHeader: string, secret: string): boolean {
+  const parts = sigHeader.split(",");
+  const timestamp = parts.find((p) => p.startsWith("t="))?.slice(2);
+  const signature = parts.find((p) => p.startsWith("v1="))?.slice(3);
+  if (!timestamp || !signature) return false;
+
+  const expected = crypto
+    .createHmac("sha256", secret)
+    .update(`${timestamp}.${rawBody}`)
+    .digest("hex");
+
+  try {
+    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+  } catch {
+    return false;
+  }
+}
+
+// ─── Invitation email ─────────────────────────────────────────────────────────
+
+function buildInviteEmailHtml(firstName: string, inviteUrl: string): string {
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Ton accès Protocole Clear</title>
+</head>
+<body style="margin:0;padding:0;background:#fdf8f3;font-family:'Helvetica Neue',Arial,sans-serif;">
+<div style="max-width:560px;margin:0 auto;padding:40px 20px;">
+
+  <!-- Logo -->
+  <div style="text-align:center;margin-bottom:32px;">
+    <img src="https://app.protocole-clear.com/logo_clear.png" alt="Protocole Clear" width="56" height="56"
+      style="border-radius:50%;display:block;margin:0 auto 12px;border:0;" />
+    <h1 style="font-family:Georgia,serif;color:#1a1a1a;margin:0;font-size:20px;font-weight:600;letter-spacing:-0.02em;">
+      Protocole Clear
+    </h1>
+  </div>
+
+  <!-- Main card -->
+  <div style="background:white;border-radius:24px;padding:36px 32px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+    <h2 style="font-family:Georgia,serif;color:#1a1a1a;margin:0 0 14px;font-size:24px;line-height:1.2;">
+      Bienvenue, ${firstName}&nbsp;! 🎉
+    </h2>
+    <p style="color:#555;margin:0 0 20px;line-height:1.7;font-size:15px;">
+      Ton accès au Protocole Clear est prêt.<br />
+      Clique sur le bouton ci-dessous pour créer ton compte et commencer ton bilan peau.
+    </p>
+    <p style="color:#888;margin:0 0 28px;line-height:1.65;font-size:14px;">
+      Une fois inscrit(e), ton coach analysera tes réponses et tes photos pour construire ta routine personnalisée.
+      Le suivi commence dès la validation de ton bilan.
+    </p>
+
+    <!-- CTA button -->
+    <div style="text-align:center;margin-bottom:24px;">
+      <a href="${inviteUrl}"
+        style="display:inline-block;background:#c97444;color:#fff;font-size:16px;font-weight:700;
+               text-decoration:none;padding:16px 40px;border-radius:100px;
+               box-shadow:0 4px 20px rgba(201,116,68,0.35);">
+        S'inscrire sur la plateforme →
+      </a>
+    </div>
+
+    <!-- Link fallback -->
+    <p style="color:#bbb;font-size:12px;text-align:center;margin:0;line-height:1.6;">
+      Si le bouton ne fonctionne pas, copie ce lien dans ton navigateur&nbsp;:<br />
+      <a href="${inviteUrl}" style="color:#c97444;word-break:break-all;">${inviteUrl}</a>
+    </p>
+  </div>
+
+  <!-- Info card -->
+  <div style="background:#fff8f4;border-radius:16px;padding:20px 24px;margin-bottom:12px;border:1px solid #f5e6d4;">
+    <p style="color:#c97444;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px;">
+      À savoir
+    </p>
+    <ul style="color:#777;font-size:13px;line-height:1.7;margin:0;padding:0 0 0 16px;">
+      <li>Ce lien est <strong>personnel</strong> et à usage unique — ne le partage pas.</li>
+      <li>Il est valable <strong>7 jours</strong>.</li>
+      <li>Si tu rencontres un problème, réponds directement à cet email.</li>
+    </ul>
+  </div>
+
+  <!-- Footer -->
+  <div style="text-align:center;padding-top:24px;">
+    <p style="color:#ccc;font-size:12px;margin:0;line-height:1.6;">
+      © 2025 Protocole Clear · protocole-clear.com<br />
+      Tu reçois cet email car tu as souscrit au Protocole Clear.
+    </p>
+  </div>
+
+</div>
+</body>
+</html>`;
+}
+
+// ─── Webhook handler ──────────────────────────────────────────────────────────
+
+export async function handleStripeWebhook(request: Request): Promise<Response> {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!secret) return new Response("Webhook secret missing", { status: 500 });
+
+  const rawBody = await request.text();
+  const sigHeader = request.headers.get("stripe-signature") ?? "";
+
+  if (!verifyStripeSignature(rawBody, sigHeader, secret)) {
+    return new Response("Invalid signature", { status: 400 });
+  }
+
+  let event: { type: string; data: { object: Record<string, unknown> } };
+  try {
+    event = JSON.parse(rawBody);
+  } catch {
+    return new Response("Invalid JSON", { status: 400 });
+  }
+
+  if (event.type !== "checkout.session.completed") {
+    return new Response("Ignored", { status: 200 });
+  }
+
+  const session = event.data.object;
+  const paymentStatus = session.payment_status as string;
+  if (paymentStatus !== "paid") return new Response("Not paid", { status: 200 });
+
+  const email = (session.customer_email ?? (session.customer_details as any)?.email) as string | null;
+  const fullName = (session.customer_details as any)?.name as string | null;
+  const firstName = fullName?.split(" ")[0] ?? "là";
+
+  if (!email) return new Response("No email", { status: 200 });
+
+  // Generate unique onboarding token (7 days expiry)
+  const token = crypto.randomUUID();
+  const now = Date.now();
+  await setDoc(doc(db, "onboarding_tokens", token), {
+    createdAt: now,
+    expiresAt: now + 7 * 24 * 60 * 60 * 1000,
+    used: false,
+    source: "stripe",
+    stripeSessionId: session.id as string,
+    buyerEmail: email,
+  });
+
+  const inviteUrl = `https://app.protocole-clear.com/start/${token}`;
+
+  // Send invitation email via Resend
+  const apiKey = process.env.RESEND_API_KEY;
+  if (apiKey) {
+    const from = (() => {
+      const r = process.env.RESEND_FROM ?? "onboarding@resend.dev";
+      return r.includes("<") ? r : `Protocole Clear <${r}>`;
+    })();
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from,
+        to: email,
+        subject: `${firstName}, ton accès Protocole Clear est prêt ✨`,
+        html: buildInviteEmailHtml(firstName, inviteUrl),
+      }),
+    }).catch(console.error);
+  }
+
+  return new Response("OK", { status: 200 });
+}
