@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { db } from "./firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 // ─── HTML escaping ────────────────────────────────────────────────────────────
 
@@ -20,13 +20,19 @@ function safeName(raw: string | null): string {
   return SAFE_NAME_RE.test(first) ? escapeHtml(first) : "là";
 }
 
-// ─── Stripe signature verification ───────────────────────────────────────────
+// ─── Stripe signature verification (with timestamp tolerance) ────────────────
+
+const STRIPE_TOLERANCE_SECONDS = 300; // 5 minutes, Stripe's standard
 
 function verifyStripeSignature(rawBody: string, sigHeader: string, secret: string): boolean {
   const parts = sigHeader.split(",");
   const timestamp = parts.find((p) => p.startsWith("t="))?.slice(2);
   const signature = parts.find((p) => p.startsWith("v1="))?.slice(3);
   if (!timestamp || !signature) return false;
+
+  // Reject replayed requests older than tolerance window
+  const age = Math.abs(Date.now() / 1000 - Number(timestamp));
+  if (age > STRIPE_TOLERANCE_SECONDS) return false;
 
   const expected = crypto
     .createHmac("sha256", secret)
@@ -152,15 +158,25 @@ export async function handleStripeWebhook(request: Request): Promise<Response> {
 
   if (!email) return new Response("No email", { status: 200 });
 
+  // Idempotency — skip if this Stripe event was already processed
+  const eventId = (event as any).id as string;
+  const eventRef = doc(db, "stripe_events_processed", eventId);
+  const eventSnap = await getDoc(eventRef);
+  if (eventSnap.exists()) return new Response("Already processed", { status: 200 });
+
+  // Mark event as processed before doing any side effects
+  const now = Date.now();
+  await setDoc(eventRef, { processedAt: now, sessionId: session.id as string });
+
   // Generate unique onboarding token (7 days expiry)
   const token = crypto.randomUUID();
-  const now = Date.now();
   await setDoc(doc(db, "onboarding_tokens", token), {
     createdAt: now,
     expiresAt: now + 7 * 24 * 60 * 60 * 1000,
     used: false,
     source: "stripe",
     stripeSessionId: session.id as string,
+    stripeEventId: eventId,
     buyerEmail: email,
   });
 
