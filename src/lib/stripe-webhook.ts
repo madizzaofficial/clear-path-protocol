@@ -2,6 +2,24 @@ import crypto from "node:crypto";
 import { db } from "./firebase";
 import { doc, setDoc } from "firebase/firestore";
 
+// ─── HTML escaping ────────────────────────────────────────────────────────────
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+const SAFE_NAME_RE = /^[\p{L}\p{M}'\- ]{1,40}$/u;
+
+function safeName(raw: string | null): string {
+  const first = raw?.split(" ")[0] ?? "";
+  return SAFE_NAME_RE.test(first) ? escapeHtml(first) : "là";
+}
+
 // ─── Stripe signature verification ───────────────────────────────────────────
 
 function verifyStripeSignature(rawBody: string, sigHeader: string, secret: string): boolean {
@@ -130,7 +148,7 @@ export async function handleStripeWebhook(request: Request): Promise<Response> {
 
   const email = (session.customer_email ?? (session.customer_details as any)?.email) as string | null;
   const fullName = (session.customer_details as any)?.name as string | null;
-  const firstName = fullName?.split(" ")[0] ?? "là";
+  const firstName = safeName(fullName);
 
   if (!email) return new Response("No email", { status: 200 });
 
