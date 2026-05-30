@@ -65,7 +65,13 @@ const deleteAuthUserFn = createServerFn({ method: "POST" })
     // 3. Block self-deletion
     if (callerUid === uid) throw new Error("Forbidden: cannot delete your own account");
 
-    await getAuth(app).deleteUser(uid);
+    try {
+      await getAuth(app).deleteUser(uid);
+    } catch (err: unknown) {
+      // If the Auth account was already deleted, treat as success and continue Firestore cleanup
+      const code = (err as { code?: string }).code;
+      if (code !== "auth/user-not-found") throw err;
+    }
     return { ok: true };
   });
 
@@ -417,26 +423,36 @@ function StudentPage() {
   async function handleDeleteAccount() {
     if (deleting) return;
     setDeleting(true);
+    setConfirmDeleteOpen(false);
     try {
       const callerToken = await auth.currentUser?.getIdToken();
       if (!callerToken) throw new Error("Non authentifié");
+
+      // Delete Firebase Auth account — ignores user-not-found (already deleted)
       await deleteAuthUserFn({ data: { uid, callerToken } });
-      await Promise.allSettled([
-        deleteDoc(doc(db, "users", uid)),
-        deleteDoc(doc(db, "intake_answers", uid)),
-        deleteDoc(doc(db, "routines", uid)),
-        deleteDoc(doc(db, "progress", uid)),
-        deleteDoc(doc(db, "routine_reports", uid)),
-        deleteDoc(doc(db, "admin_skin_state", uid)),
-      ]);
-      toast.success("Compte supprimé définitivement.");
-      navigate({ to: "/admin/tokens" });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Erreur inconnue";
-      console.error("[deleteAccount]", msg);
-      toast.error(`Impossible de supprimer le compte — ${msg}`);
-      setDeleting(false);
+      console.error("[deleteAccount] Auth error:", msg);
+      // Only block if it's an auth/permissions error, not a missing-user error
+      if (msg.includes("Unauthorized") || msg.includes("Forbidden")) {
+        toast.error(`Impossible de supprimer — ${msg}`);
+        setDeleting(false);
+        return;
+      }
     }
+
+    // Always clean Firestore regardless of Auth result
+    await Promise.allSettled([
+      deleteDoc(doc(db, "users", uid)),
+      deleteDoc(doc(db, "intake_answers", uid)),
+      deleteDoc(doc(db, "routines", uid)),
+      deleteDoc(doc(db, "progress", uid)),
+      deleteDoc(doc(db, "routine_reports", uid)),
+      deleteDoc(doc(db, "admin_skin_state", uid)),
+    ]);
+
+    toast.success("Compte supprimé définitivement.");
+    navigate({ to: "/admin/tokens" });
   }
 
   async function saveIntake() {
