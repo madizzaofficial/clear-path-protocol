@@ -28,8 +28,6 @@ export const ENDOCRINE_DISRUPTORS: Record<string, EDEntry> = {
   "SULISOBENZONE":               { severity: "high",   reason: "Filtre UV, PE suspecté (alias BP-4)",       description: "Alias de Benzophenone-4. Même profil PE suspecté." },
   "ETHYLHEXYL DIMETHYL PABA":    { severity: "high",   reason: "Filtre UV PABA, PE avéré",                  description: "Dérivé PABA. Propriétés œstrogéniques avérées et fort risque de photoallergie. Peaux concernées : peaux sensibles, réactives et acnéiques." },
   "OCTYL DIMETHYL PABA":         { severity: "high",   reason: "Filtre UV PABA, PE avéré",                  description: "Dérivé PABA. Œstrogénique et photoallergène. Peaux concernées : peaux sensibles." },
-  "DROMETRIZOLE TRISILOXANE":    { severity: "medium", reason: "Filtre UV, PE suspecté",                    description: "Filtre UV large spectre d'usage croissant dans les soins de jour. PE suspecté par précaution, données encore limitées. Peaux concernées : toutes." },
-
   // Parabènes
   "BUTYLPARABEN":                { severity: "high",   reason: "Parabène, PE avéré (SCCS)",                 description: "Conservateur parabène à chaîne longue, activité œstrogénique élevée. Interdit dans les produits bébé/enfant EU. Retrouvé dans certaines tumeurs du sein dans plusieurs études. Peaux concernées : toutes, surtout peaux à acné hormonale." },
   "ISOBUTYLPARABEN":             { severity: "high",   reason: "Parabène, PE avéré",                        description: "Isomère du butylparaben, profil PE similaire. Interdit dans les produits bébé EU. Peaux concernées : toutes, surtout peaux à acné hormonale." },
