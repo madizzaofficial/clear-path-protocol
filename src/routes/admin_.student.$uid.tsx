@@ -33,48 +33,39 @@ const deleteAuthUserFn = createServerFn({ method: "POST" })
   .handler(async (ctx) => {
     const { uid, callerToken } = ctx.data;
 
-    const projectId     = process.env.FIREBASE_PROJECT_ID;
-    const clientEmail   = process.env.FIREBASE_CLIENT_EMAIL;
-    const privateKeyRaw = process.env.FIREBASE_PRIVATE_KEY ?? "";
+    // Same env var pattern as firebase-admin.ts (base64-encoded service account JSON)
+    const encoded = process.env.FIREBASE_SERVICE_ACCOUNT;
+    if (!encoded) throw new Error("FIREBASE_SERVICE_ACCOUNT manquant");
 
-    if (!projectId || !clientEmail || !privateKeyRaw) {
-      throw new Error("Missing Firebase Admin env vars");
-    }
+    const { getApps, initializeApp, cert } = await import("firebase-admin/app");
+    const { getAuth }      = await import("firebase-admin/auth");
+    const { getFirestore } = await import("firebase-admin/firestore");
 
-    const adminApp       = await import("firebase-admin/app");
-    const adminAuth      = await import("firebase-admin/auth");
-    const adminFirestore = await import("firebase-admin/firestore");
+    // Named "admin" app — same as firebase-admin.ts, safe against hot-reload double-init
+    const app = getApps().find((a) => a.name === "admin")
+      ?? initializeApp(
+           { credential: cert(JSON.parse(Buffer.from(encoded, "base64").toString("utf8"))) },
+           "admin"
+         );
 
-    if (!adminApp.getApps().length) {
-      const privateKey = privateKeyRaw.replace(/\\n/g, "\n");
-      adminApp.initializeApp({
-        credential: adminApp.cert({ projectId, clientEmail, privateKey }),
-      });
-    }
-
-    // 1. Verify the caller's identity
+    // 1. Verify caller identity
     let callerUid: string;
     try {
-      const decoded = await adminAuth.getAuth().verifyIdToken(callerToken);
+      const decoded = await getAuth(app).verifyIdToken(callerToken);
       callerUid = decoded.uid;
     } catch {
       throw new Error("Unauthorized: invalid token");
     }
 
-    // 2. Verify caller is an admin (config/admins.uids[] — same check as client-side)
-    const configSnap = await adminFirestore.getFirestore()
-      .collection("config").doc("admins").get();
+    // 2. Check caller is admin via config/admins.uids[]
+    const configSnap = await getFirestore(app).collection("config").doc("admins").get();
     const adminUids: string[] = configSnap.data()?.uids ?? [];
-    if (!adminUids.includes(callerUid)) {
-      throw new Error("Forbidden: caller is not an admin");
-    }
+    if (!adminUids.includes(callerUid)) throw new Error("Forbidden: not an admin");
 
-    // 3. Prevent an admin from deleting their own account
-    if (callerUid === uid) {
-      throw new Error("Forbidden: cannot delete your own account");
-    }
+    // 3. Block self-deletion
+    if (callerUid === uid) throw new Error("Forbidden: cannot delete your own account");
 
-    await adminAuth.getAuth().deleteUser(uid);
+    await getAuth(app).deleteUser(uid);
     return { ok: true };
   });
 
@@ -428,7 +419,7 @@ function StudentPage() {
     setDeleting(true);
     try {
       const callerToken = await auth.currentUser?.getIdToken();
-      if (!callerToken) throw new Error("Not authenticated");
+      if (!callerToken) throw new Error("Non authentifié");
       await deleteAuthUserFn({ data: { uid, callerToken } });
       await Promise.allSettled([
         deleteDoc(doc(db, "users", uid)),
@@ -440,8 +431,10 @@ function StudentPage() {
       ]);
       toast.success("Compte supprimé définitivement.");
       navigate({ to: "/admin/tokens" });
-    } catch {
-      toast.error("Impossible de supprimer le compte.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Erreur inconnue";
+      console.error("[deleteAccount]", msg);
+      toast.error(`Impossible de supprimer le compte — ${msg}`);
       setDeleting(false);
     }
   }
@@ -624,7 +617,6 @@ function StudentPage() {
   }
 
   return (
-    <>
     <AppShell>
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-10">
         {/* Back */}
@@ -1694,10 +1686,9 @@ function StudentPage() {
         )}
 
       </main>
-    </AppShell>
 
-    {/* Confirmation suppression compte */}
-    <Dialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+      {/* Confirmation suppression compte — Dialog renders via portal, position in tree doesn't matter */}
+      <Dialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="text-destructive">Supprimer ce compte</DialogTitle>
@@ -1727,7 +1718,7 @@ function StudentPage() {
         </div>
       </DialogContent>
     </Dialog>
-    </>
+    </AppShell>
   );
 }
 
