@@ -468,6 +468,8 @@ function RoutinesContent() {
     setSendResult(null);
     setLoadingRoutine(true);
     setLoadingIntake(true);
+    // Signal immediately that the routine is being prepared
+    updateDoc(doc(db, "users", u.uid), { intakeStatus: "building" }).catch(() => {});
     try {
       const [routineSnap, intakeSnap] = await Promise.all([
         getDoc(doc(db, "routines", u.uid)),
@@ -492,8 +494,6 @@ function RoutinesContent() {
     try {
       const clean = JSON.parse(JSON.stringify(updated)) as StudentRoutine;
       await setDoc(doc(db, "routines", selectedUser.uid), clean);
-      // Signal to the student dashboard that the routine is being built
-      await updateDoc(doc(db, "users", selectedUser.uid), { intakeStatus: "building" });
       setRoutine(updated);
     } finally {
       setSaving(false);
