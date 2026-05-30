@@ -185,6 +185,51 @@ function MiniWeekDots({
   );
 }
 
+// ── Pending tips (shown while routine is not yet assigned) ────────────────────
+
+const PENDING_TIPS = [
+  {
+    icon: "🚫",
+    title: "Erreurs skincare fréquentes",
+    items: [
+      "Changer de produits trop souvent sans laisser le temps à la peau de s'adapter",
+      "Sur-nettoyer la peau (plus de 2× par jour) aggrave la sécrétion de sébum",
+      "Empiler des actifs incompatibles (rétinol + AHA + BHA ensemble)",
+      "Utiliser des produits trop agressifs sur une peau inflammée",
+    ],
+  },
+  {
+    icon: "✅",
+    title: "Routine de base safe pendant l'attente",
+    items: [
+      "Nettoyant doux matin et soir (pH neutre, sans SLS)",
+      "Hydratant non-comédogène léger",
+      "SPF 30+ tous les matins (même en intérieur)",
+      "Ne pas toucher, percer ou frotter les boutons",
+    ],
+  },
+  {
+    icon: "🧪",
+    title: "Mini guide des actifs",
+    items: [
+      "Niacinamide (5–10 %) : régule le sébum, réduit les rougeurs — bien toléré",
+      "Acide azélaïque : anti-inflammatoire, idéal peaux sensibles",
+      "BHA (acide salicylique) : désincruste les pores, 2–3×/semaine max",
+      "Évite le rétinol sans protocole adapté — irritant si mal introduit",
+    ],
+  },
+  {
+    icon: "❓",
+    title: "FAQ fréquentes",
+    items: [
+      "Ton protocole arrive dans 24–48 h après analyse de ton profil et de tes photos.",
+      "Tu recevras un e-mail dès que ta routine sera prête dans ton espace.",
+      "Si tu as des questions urgentes, envoie un message à ton coach.",
+      "Continue ta routine actuelle sans changer quoi que ce soit en attendant.",
+    ],
+  },
+];
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 function Suivi() {
@@ -329,6 +374,36 @@ function Suivi() {
             Bonjour, {firstName} 👋
           </p>
         )}
+
+        {!data.loading && (data.totalRoutineSteps ?? 0) === 0 && (
+          <section className="mb-8">
+            <div className="mb-4">
+              <h2 className="font-display text-xl font-semibold">En attendant ton protocole</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Ton analyse est en cours — 24 à 48 h. Voici quelques ressources utiles pendant l'attente.
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {PENDING_TIPS.map((tip) => (
+                <div key={tip.title} className="rounded-2xl border border-border/60 bg-card p-5">
+                  <div className="mb-3 flex items-center gap-3">
+                    <span className="text-2xl">{tip.icon}</span>
+                    <h3 className="font-semibold text-base">{tip.title}</h3>
+                  </div>
+                  <ul className="space-y-2">
+                    {tip.items.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/*
           Desktop 3-col grid:
             Col 1 row-1: Hero gradient  |  Col 2 row-1: État de ta peau  |  Col 3 rows 1-4: right sidebar wrapper

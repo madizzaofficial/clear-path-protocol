@@ -23,6 +23,7 @@ type TokenDoc = {
   used: boolean;
   usedBy?: string;
   usedAt?: number;
+  recipientName?: string;
 };
 
 type StudentDoc = {
@@ -46,6 +47,7 @@ function TokensPage() {
   const [loadingData, setLoadingData] = useState(true);
   const [generatingLink, setGeneratingLink] = useState(false);
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
+  const [recipientName, setRecipientName] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [revoking, setRevoking] = useState<Set<string>>(new Set());
   const [confirmRevoke, setConfirmRevoke] = useState<string | null>(null);
@@ -76,14 +78,17 @@ function TokensPage() {
     setGeneratingLink(true);
     const token = crypto.randomUUID();
     const now = Date.now();
+    const trimmedName = recipientName.trim();
     await setDoc(doc(db, "onboarding_tokens", token), {
       createdAt: now,
       expiresAt: now + 7 * 24 * 60 * 60 * 1000,
       used: false,
+      ...(trimmedName && { recipientName: trimmedName }),
     });
     const link = `${window.location.origin}/start/${token}`;
     setGeneratedLink(link);
-    setTokens((prev) => [{ id: token, createdAt: now, expiresAt: now + 7 * 86400000, used: false }, ...prev]);
+    setTokens((prev) => [{ id: token, createdAt: now, expiresAt: now + 7 * 86400000, used: false, ...(trimmedName && { recipientName: trimmedName }) }, ...prev]);
+    setRecipientName("");
     await navigator.clipboard.writeText(link).catch(() => {});
     setGeneratingLink(false);
   }
@@ -120,14 +125,23 @@ function TokensPage() {
               Créez des liens d'onboarding à usage unique valables 7 jours.
             </p>
           </div>
-          <button
-            onClick={generateLink}
-            disabled={generatingLink}
-            className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background shadow-elegant transition-all hover:opacity-90 disabled:opacity-60"
-          >
-            {generatingLink ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
-            Nouveau lien
-          </button>
+          <div className="flex items-center gap-3">
+            <input
+              type="text"
+              value={recipientName}
+              onChange={(e) => setRecipientName(e.target.value)}
+              placeholder="Prénom (optionnel)"
+              className="rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 w-40"
+            />
+            <button
+              onClick={generateLink}
+              disabled={generatingLink}
+              className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background shadow-elegant transition-all hover:opacity-90 disabled:opacity-60"
+            >
+              {generatingLink ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
+              Nouveau lien
+            </button>
+          </div>
         </header>
 
         {/* Generated link banner */}
@@ -218,6 +232,9 @@ function TokensPage() {
                         }`}>
                           {status === "active" ? "Actif" : status === "used" ? "Utilisé" : "Expiré"}
                         </span>
+                        {t.recipientName && (
+                          <span className="text-xs font-medium text-foreground">— {t.recipientName}</span>
+                        )}
                         {status === "active" && (
                           <span className="flex items-center gap-1 text-xs text-muted-foreground">
                             <Clock className="h-3 w-3" />

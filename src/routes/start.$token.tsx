@@ -12,6 +12,7 @@ import {
 } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
 import { inngest } from "@/lib/inngest";
 import {
@@ -54,18 +55,24 @@ export const Route = createFileRoute("/start/$token")({
 // ── Types & constants ─────────────────────────────────────────────────────────
 
 type IntakeAnswers = {
+  // Page 1-3
   skinType: string;
   acneTypes: string[];
   intensity: string;
-  currentRoutine: string; // auto-generated summary
-  routineDetails?: {
-    cleanser: boolean;
-    moisturizer: boolean;
-    spf: boolean;
-    actifs: boolean;
-    actifsDetails: string;
-  };
+  // Page 4 — Routine
+  usesCleanser: boolean;
+  usesMoisturizer: boolean;
+  usesSPF: boolean;
+  usesActives: boolean;
+  activeProductsList: string;
+  currentRoutine: string; // auto-generated summary for backward compat
+  // Page 5 — Historique
+  durationAcne: string;
+  previousTreatments: string[];
+  skinReactivity: string;
+  // Page 6 — Objectif
   mainGoal: string;
+  priorityGoal: string;
 };
 
 const SKIN_TYPES = [
@@ -89,19 +96,43 @@ const INTENSITY_OPTIONS = [
   { value: "severe", label: "Sévère", desc: "Inflammations fréquentes, étendues ou douloureuses" },
 ];
 
-const ROUTINE_QUESTIONS = [
-  { key: "cleanser",    label: "Utilises-tu un nettoyant ?" },
-  { key: "moisturizer", label: "Utilises-tu une crème hydratante ?" },
-  { key: "spf",         label: "Utilises-tu une protection solaire ?" },
-  { key: "actifs",      label: "Utilises-tu des actifs ? (sérum, BHA, niacinamide…)" },
-] as const;
+const ROUTINE_QUESTIONS: { key: "usesCleanser" | "usesMoisturizer" | "usesSPF" | "usesActives"; label: string }[] = [
+  { key: "usesCleanser",    label: "Utilises-tu un nettoyant ?" },
+  { key: "usesMoisturizer", label: "Utilises-tu une crème hydratante ?" },
+  { key: "usesSPF",         label: "Utilises-tu une protection solaire ?" },
+  { key: "usesActives",     label: "Utilises-tu des actifs ? (sérum, BHA, niacinamide…)" },
+];
+
+const DURATION_OPTIONS = [
+  { value: "moins_3mois", label: "Moins de 3 mois" },
+  { value: "3_12mois",    label: "3 à 12 mois" },
+  { value: "1_3ans",      label: "1 à 3 ans" },
+  { value: "plus_3ans",   label: "Plus de 3 ans" },
+];
+
+const TREATMENT_OPTIONS = [
+  { value: "retinoides",       label: "Rétinoïdes" },
+  { value: "benzoyl_peroxide", label: "Benzoyl peroxide" },
+  { value: "antibiotiques",    label: "Antibiotiques" },
+  { value: "aucun",            label: "Aucun" },
+  { value: "autre",            label: "Autre" },
+];
+
+const PRIORITY_GOAL_OPTIONS = [
+  { value: "boutons",     label: "Réduire les boutons actifs" },
+  { value: "cicatrices",  label: "Estomper les cicatrices / marques" },
+  { value: "teint",       label: "Unifier le teint" },
+  { value: "sensibilite", label: "Calmer la sensibilité" },
+];
 
 const STEPS = [
   "Type de peau",
-  "Type de boutons",
+  "Types d'acné",
   "Intensité",
   "Routine actuelle",
-  "Objectif",
+  "Historique",
+  "Ton objectif",
+  "Photos",
   "Créer ton compte",
 ];
 
@@ -164,21 +195,23 @@ function OnboardingPage() {
 
   const [tokenStatus, setTokenStatus] = useState<"checking" | "valid" | "invalid">("checking");
   const [showWelcome, setShowWelcome] = useState(true);
-  const [welcomeName, setWelcomeName] = useState("");
+  const [recipientName, setRecipientName] = useState("");
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<IntakeAnswers>({
     skinType: "",
     acneTypes: [],
     intensity: "",
+    usesCleanser: false,
+    usesMoisturizer: false,
+    usesSPF: false,
+    usesActives: false,
+    activeProductsList: "",
     currentRoutine: "",
+    durationAcne: "",
+    previousTreatments: [],
+    skinReactivity: "",
     mainGoal: "",
-  });
-  const [routineDetails, setRoutineDetails] = useState({
-    cleanser: false,
-    moisturizer: false,
-    spf: false,
-    actifs: false,
-    actifsDetails: "",
+    priorityGoal: "",
   });
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
@@ -203,6 +236,7 @@ function OnboardingPage() {
       if (!snap.exists() || snap.data().used || snap.data().expiresAt < Date.now()) {
         setTokenStatus("invalid");
       } else {
+        setRecipientName(snap.data().recipientName ?? "");
         setTokenStatus("valid");
       }
     });
@@ -264,19 +298,18 @@ function OnboardingPage() {
       photoUrls.push(await getDownloadURL(storageRef));
     }
 
-    // Auto-generate currentRoutine summary from routineDetails
+    // Auto-generate currentRoutine summary for backward compat
     const routineParts = [
-      routineDetails.cleanser && "Nettoyant",
-      routineDetails.moisturizer && "Hydratant",
-      routineDetails.spf && "SPF",
-      routineDetails.actifs && `Actifs${routineDetails.actifsDetails.trim() ? ` (${routineDetails.actifsDetails.trim()})` : ""}`,
+      answers.usesCleanser && "Nettoyant",
+      answers.usesMoisturizer && "Hydratant",
+      answers.usesSPF && "SPF",
+      answers.usesActives && `Actifs${answers.activeProductsList.trim() ? ` (${answers.activeProductsList.trim()})` : ""}`,
     ].filter(Boolean);
     const currentRoutineSummary = routineParts.length > 0 ? routineParts.join(" + ") : "Rien";
 
     await setDoc(doc(db, "intake_answers", fbUser.uid), {
       ...answers,
       currentRoutine: currentRoutineSummary,
-      routineDetails,
       mainGoal: answers.mainGoal.trim(),
       photoUrls,
       uid: fbUser.uid,
@@ -362,40 +395,58 @@ function OnboardingPage() {
     return (
       <div className="min-h-screen bg-background px-6 py-16">
         <div className="mx-auto max-w-md">
-          {/* Header */}
-          <div className="mb-10 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-10 text-center"
+          >
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-primary shadow-elegant">
               <Check className="h-7 w-7 text-primary-foreground" />
             </div>
             <h1 className="font-display text-3xl font-semibold tracking-tight">Ton protocole est en cours de création</h1>
             <p className="mt-3 text-muted-foreground leading-relaxed">
-              Nous analysons ton profil afin de construire une routine parfaitement adaptée à ta peau.
+              Nous analysons ton profil pour construire une routine parfaitement adaptée à ta peau.
             </p>
             <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-200 px-4 py-1.5 text-sm text-amber-700 font-medium">
               Délai estimé : 24 à 48 heures
             </div>
-          </div>
+          </motion.div>
 
-          {/* Process checklist */}
-          <div className="mb-10 rounded-3xl border border-border/60 bg-card p-6 space-y-4">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            className="mb-10 rounded-3xl border border-border/60 bg-card p-6 space-y-4"
+          >
             {[
               "Analyse de tes réponses",
               "Analyse de tes photos (si fournies)",
               "Construction de ta routine personnalisée",
               "Vérification des compatibilités produits",
-            ].map((item) => (
-              <div key={item} className="flex items-center gap-3">
+            ].map((item, i) => (
+              <motion.div
+                key={item}
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + i * 0.1, duration: 0.3 }}
+                className="flex items-center gap-3"
+              >
                 <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-soft">
                   <Check className="h-3.5 w-3.5 text-primary" />
                 </div>
                 <p className="text-sm font-medium">{item}</p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
 
-          {/* Video placeholder */}
           {/* EDIT: Remplace cette div par <video src="/onboarding-explainer.mp4" controls /> ou une iframe YouTube */}
-          <div className="mb-10 overflow-hidden rounded-3xl border border-border/60 bg-muted aspect-video flex items-center justify-center">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className="mb-10 overflow-hidden rounded-3xl border border-border/60 bg-muted aspect-video flex items-center justify-center"
+          >
             <div className="text-center space-y-2">
               <div className="h-12 w-12 rounded-full bg-primary-soft flex items-center justify-center mx-auto">
                 <ArrowRight className="h-5 w-5 text-primary" />
@@ -403,14 +454,17 @@ function OnboardingPage() {
               <p className="text-sm font-medium text-muted-foreground">[EDIT : Ajoute ta vidéo d'explication ici]</p>
               <p className="text-xs text-muted-foreground/60">Comment fonctionne la plateforme · 30–90 sec</p>
             </div>
-          </div>
+          </motion.div>
 
-          <button
+          <motion.button
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
             onClick={() => navigate({ to: "/welcome" })}
             className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-8 py-4 text-base font-semibold text-background shadow-elegant transition-all hover:opacity-90"
           >
             Accéder à mon espace <ArrowRight className="h-5 w-5" />
-          </button>
+          </motion.button>
         </div>
       </div>
     );
@@ -430,22 +484,9 @@ function OnboardingPage() {
             Bienvenue dans le Protocole Clear 👋
           </h1>
 
-          {/* Name input for personalization */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium mb-2">Ton prénom</label>
-            <input
-              autoComplete="given-name"
-              type="text"
-              value={welcomeName}
-              onChange={(e) => setWelcomeName(e.target.value)}
-              placeholder="Ex : Mehdi"
-              className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-
           <div className="space-y-4 text-base leading-relaxed text-muted-foreground mb-8">
             <p>
-              {welcomeName.trim() ? `Salut ${welcomeName.trim()},` : "Salut,"}
+              {recipientName ? `Salut ${recipientName} 👋,` : "Salut 👋,"}
             </p>
             <p>
               Je suis vraiment heureux de t'accueillir dans le Protocole Clear.
@@ -608,6 +649,7 @@ function OnboardingPage() {
         )}
 
         {/* Step 3 — Routine actuelle */}
+        {/* Step 3 — Routine actuelle */}
         {step === 3 && (
           <>
             <p className="mt-1 text-sm text-muted-foreground">Même si tu ne fais rien, c'est totalement OK.</p>
@@ -615,15 +657,15 @@ function OnboardingPage() {
             <p className="mt-2 text-muted-foreground">Dis-moi ce que tu utilises déjà au quotidien.</p>
             <div className="mt-8 space-y-4">
               {ROUTINE_QUESTIONS.map((q) => {
-                const val = routineDetails[q.key];
+                const val = answers[q.key];
                 return (
                   <div key={q.key} className="rounded-2xl border-2 border-border p-4 space-y-3">
                     <p className="font-semibold">{q.label}</p>
                     <div className="flex gap-3">
-                      {[true, false].map((choice) => (
+                      {([true, false] as const).map((choice) => (
                         <button
                           key={String(choice)}
-                          onClick={() => setRoutineDetails((d) => ({ ...d, [q.key]: choice }))}
+                          onClick={() => setAnswers((a) => ({ ...a, [q.key]: choice }))}
                           className={`flex-1 rounded-xl border-2 py-2 text-sm font-medium transition-all ${
                             val === choice
                               ? "border-primary bg-primary-soft text-primary"
@@ -637,14 +679,14 @@ function OnboardingPage() {
                   </div>
                 );
               })}
-              {routineDetails.actifs && (
+              {answers.usesActives && (
                 <div className="rounded-2xl border border-border p-4 space-y-2">
                   <p className="text-sm font-medium">Lesquels ? <span className="font-normal text-muted-foreground">(optionnel)</span></p>
                   <input
                     autoComplete="off"
                     type="text"
-                    value={routineDetails.actifsDetails}
-                    onChange={(e) => setRoutineDetails((d) => ({ ...d, actifsDetails: e.target.value }))}
+                    value={answers.activeProductsList}
+                    onChange={(e) => setAnswers((a) => ({ ...a, activeProductsList: e.target.value }))}
                     placeholder="Ex : niacinamide, BHA, vitamine C…"
                     className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
@@ -654,12 +696,144 @@ function OnboardingPage() {
           </>
         )}
 
-        {/* Step 4 — Objectif + Photos */}
+        {/* Step 4 — Historique acné */}
         {step === 4 && (
           <>
+            <p className="mt-1 text-sm text-muted-foreground">Ces informations m'aident à mieux comprendre ton profil.</p>
+            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Ton historique</h1>
+            <p className="mt-2 text-muted-foreground">Quelques questions sur ton parcours avec l'acné.</p>
+            <div className="mt-8 space-y-8">
+
+              {/* Duration */}
+              <div>
+                <p className="mb-3 text-sm font-semibold">Depuis combien de temps as-tu de l'acné ?</p>
+                <div className="space-y-2">
+                  {DURATION_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setAnswers((a) => ({ ...a, durationAcne: opt.value }))}
+                      className={`flex w-full items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all ${
+                        answers.durationAcne === opt.value ? "border-primary bg-primary-soft" : "border-border hover:border-primary/40"
+                      }`}
+                    >
+                      <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                        answers.durationAcne === opt.value ? "border-primary bg-primary" : "border-border"
+                      }`}>
+                        {answers.durationAcne === opt.value && <Check className="h-3 w-3 text-primary-foreground" />}
+                      </span>
+                      <p className="font-semibold">{opt.label}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Previous treatments */}
+              <div>
+                <p className="mb-3 text-sm font-semibold">As-tu déjà essayé des traitements ? <span className="font-normal text-muted-foreground">(plusieurs choix possibles)</span></p>
+                <div className="space-y-2">
+                  {TREATMENT_OPTIONS.map((opt) => {
+                    const sel = answers.previousTreatments.includes(opt.value);
+                    return (
+                      <button
+                        key={opt.value}
+                        onClick={() => setAnswers((a) => ({
+                          ...a,
+                          previousTreatments: sel
+                            ? a.previousTreatments.filter((v) => v !== opt.value)
+                            : [...a.previousTreatments, opt.value],
+                        }))}
+                        className={`flex w-full items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all ${
+                          sel ? "border-primary bg-primary-soft" : "border-border hover:border-primary/40"
+                        }`}
+                      >
+                        <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${
+                          sel ? "border-primary bg-primary" : "border-border"
+                        }`}>
+                          {sel && <Check className="h-3 w-3 text-primary-foreground" />}
+                        </span>
+                        <p className="font-semibold">{opt.label}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Skin reactivity */}
+              <div>
+                <p className="mb-3 text-sm font-semibold">Ta peau réagit-elle facilement aux nouveaux produits ?</p>
+                <div className="flex gap-3">
+                  {[{ value: "oui", label: "Oui, souvent" }, { value: "non", label: "Non, rarement" }].map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setAnswers((a) => ({ ...a, skinReactivity: opt.value }))}
+                      className={`flex-1 rounded-2xl border-2 py-3 text-sm font-semibold transition-all ${
+                        answers.skinReactivity === opt.value ? "border-primary bg-primary-soft text-primary" : "border-border hover:border-primary/40"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </>
+        )}
+
+        {/* Step 5 — Objectif */}
+        {step === 5 && (
+          <>
+            <p className="mt-1 text-sm text-muted-foreground">Plus c'est précis, mieux c'est.</p>
+            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Ton objectif</h1>
+            <p className="mt-2 text-muted-foreground">Qu'est-ce que tu veux améliorer en priorité ?</p>
+            <div className="mt-8 space-y-6">
+              <div>
+                <p className="mb-2 text-sm font-semibold">
+                  Décris ton objectif <span className="font-normal text-muted-foreground">(optionnel)</span>
+                </p>
+                <textarea
+                  placeholder="Ex. : Réduire mon acné kystique, retrouver un teint uniforme, arrêter les boutons sur le menton…"
+                  value={answers.mainGoal}
+                  onChange={(e) => setAnswers((a) => ({ ...a, mainGoal: e.target.value.slice(0, 1000) }))}
+                  maxLength={1000}
+                  className="min-h-28 w-full resize-none rounded-2xl border border-border bg-card p-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+                <p className="mt-1 text-right text-xs text-muted-foreground">{answers.mainGoal.length}/1000</p>
+              </div>
+              <div>
+                <p className="mb-3 text-sm font-semibold">
+                  Priorité principale <span className="font-normal text-muted-foreground">(optionnel)</span>
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {PRIORITY_GOAL_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setAnswers((a) => ({ ...a, priorityGoal: a.priorityGoal === opt.value ? "" : opt.value }))}
+                      className={`rounded-2xl border-2 py-3 px-4 text-sm font-semibold transition-all text-left ${
+                        answers.priorityGoal === opt.value ? "border-primary bg-primary-soft text-primary" : "border-border hover:border-primary/40"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Step 6 — Photos */}
+        {step === 6 && (
+          <>
             <p className="mt-1 text-sm text-muted-foreground">Optionnel, mais très utile pour affiner ton protocole.</p>
-            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Pour finir…</h1>
-            <p className="mt-2 text-muted-foreground">Deux dernières choses — toutes les deux optionnelles.</p>
+            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Photos de ta peau</h1>
+            <p className="mt-2 text-muted-foreground">
+              Envoie jusqu'à 3 photos de ton visage ou des zones concernées. Plus elles sont nettes, plus l'analyse sera précise.
+            </p>
+            <div className="mt-8 space-y-4">
+
+        {/* Step 4 — Photos section (repris de l'ancien step 4) */}
+        {/* NOTE: ce bloc est maintenant pour le SEUL step photos */}
             <div className="mt-8 space-y-8">
               <div>
                 <p className="mb-2 text-sm font-semibold">
@@ -742,7 +916,7 @@ function OnboardingPage() {
                   <input
                     type="text"
                     placeholder="Ton nom complet"
-                    value={name || welcomeName}
+                    value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
                     className="h-12 w-full rounded-2xl border border-border bg-card pl-11 pr-4 text-sm shadow-soft outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
