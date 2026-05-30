@@ -187,7 +187,12 @@ function MiniWeekDots({
 
 // ── Pending state ─────────────────────────────────────────────────────────────
 // EDIT: remplace par ton numéro WhatsApp (format international sans +)
-const WA_URL = `https://wa.me/33600000000?text=${encodeURIComponent("Bonjour Mehdi 👋\nJe suis membre du Protocole Clear et j'ai une question concernant mon suivi.")}`;
+const WA_PHONE = "33762688174";
+function buildWaUrl(firstName: string) {
+  const name = firstName || "membre";
+  const msg = `Bonjour Mehdi 👋\nJe m'appelle ${name} et je suis membre du Protocole Clear. J'ai une question concernant mon suivi.`;
+  return `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(msg)}`;
+}
 
 const PENDING_STEPS = [
   { label: "Questionnaire reçu",     done: true,  active: false },
@@ -397,7 +402,7 @@ function Suivi() {
                   Tu peux me contacter directement sur WhatsApp.
                 </p>
                 <a
-                  href={WA_URL}
+                  href={buildWaUrl(firstName)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
