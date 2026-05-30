@@ -1,15 +1,17 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, query, where, getDocs, addDoc, updateDoc, deleteField, orderBy, setDoc } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs, addDoc, updateDoc, deleteField, orderBy, setDoc, deleteDoc } from "firebase/firestore";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
   ArrowLeft, Loader2, Check, Sun, Moon, ClipboardList,
   BookOpen, ChevronDown, Lock, Play, ImageOff, MessageSquare, Send, AlertTriangle,
-  Ban, UserCheck, Pencil, X, ShoppingCart, Package, Activity, Flame, CalendarDays, History, Sparkles,
+  Ban, UserCheck, Pencil, X, ShoppingCart, Package, Activity, Flame, CalendarDays, History, Sparkles, Trash2,
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
   analyzeIntakeFn,
   analyzeIntakeFinalFn,
@@ -21,6 +23,37 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import { course } from "@/lib/course-data";
+
+// ── Server function — delete Firebase Auth user ───────────────────────────────
+
+const deleteAuthUserFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { uid: string }) => d)
+  .handler(async (ctx) => {
+    const { uid } = ctx.data;
+
+    const projectId     = process.env.FIREBASE_PROJECT_ID;
+    const clientEmail   = process.env.FIREBASE_CLIENT_EMAIL;
+    const privateKeyRaw = process.env.FIREBASE_PRIVATE_KEY ?? "";
+
+    if (!projectId || !clientEmail || !privateKeyRaw) {
+      throw new Error("Missing Firebase Admin env vars");
+    }
+
+    const adminApp  = await import("firebase-admin/app");
+    const adminAuth = await import("firebase-admin/auth");
+
+    if (!adminApp.getApps().length) {
+      const privateKey = privateKeyRaw.replace(/\\n/g, "\n");
+      adminApp.initializeApp({
+        credential: adminApp.cert({ projectId, clientEmail, privateKey }),
+      });
+    }
+
+    await adminAuth.getAuth().deleteUser(uid);
+    return { ok: true };
+  });
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 type Tab = "profil" | "routine" | "photos" | "progression" | "notes" | "suivi" | "historique";
 
@@ -177,6 +210,8 @@ function StudentPage() {
   const [savingSkinState, setSavingSkinState] = useState(false);
   const [resolvingReport, setResolvingReport] = useState<string | null>(null);
   const [isDisabling, setIsDisabling] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [editingIntake, setEditingIntake] = useState(false);
   const [intakeDraft, setIntakeDraft] = useState<IntakeAnswers>({});
   const [savingIntake, setSavingIntake] = useState(false);
@@ -363,6 +398,27 @@ function StudentPage() {
     }
   }
 
+  async function handleDeleteAccount() {
+    if (deleting) return;
+    setDeleting(true);
+    try {
+      await deleteAuthUserFn({ data: { uid } });
+      await Promise.allSettled([
+        deleteDoc(doc(db, "users", uid)),
+        deleteDoc(doc(db, "intake_answers", uid)),
+        deleteDoc(doc(db, "routines", uid)),
+        deleteDoc(doc(db, "progress", uid)),
+        deleteDoc(doc(db, "routine_reports", uid)),
+        deleteDoc(doc(db, "admin_skin_state", uid)),
+      ]);
+      toast.success("Compte supprimé définitivement.");
+      navigate({ to: "/admin/tokens" });
+    } catch {
+      toast.error("Impossible de supprimer le compte.");
+      setDeleting(false);
+    }
+  }
+
   async function saveIntake() {
     if (savingIntake) return;
     setSavingIntake(true);
@@ -541,6 +597,7 @@ function StudentPage() {
   }
 
   return (
+    <>
     <AppShell>
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-10">
         {/* Back */}
@@ -589,6 +646,13 @@ function StudentPage() {
                 <Ban className="h-4 w-4" />
               )}
               {profile?.disabled ? "Réactiver" : "Désactiver"}
+            </button>
+            <button
+              onClick={() => setConfirmDeleteOpen(true)}
+              className="flex items-center gap-2 rounded-full bg-destructive/10 px-4 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/20"
+            >
+              <Trash2 className="h-4 w-4" />
+              Supprimer
             </button>
             <Link
               to="/admin/routines"
@@ -1604,6 +1668,39 @@ function StudentPage() {
 
       </main>
     </AppShell>
+
+    {/* Confirmation suppression compte */}
+    <Dialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-destructive">Supprimer ce compte</DialogTitle>
+          <DialogDescription>
+            Cette action est <strong>irréversible</strong>. Le compte Firebase, les réponses d'onboarding, la routine et les données de progression seront supprimés définitivement.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="mt-2 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          <strong>{profile?.displayName ?? profile?.email}</strong> — {profile?.email}
+        </div>
+        <div className="mt-4 flex justify-end gap-3">
+          <button
+            onClick={() => setConfirmDeleteOpen(false)}
+            disabled={deleting}
+            className="rounded-full border border-border px-5 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50"
+          >
+            Annuler
+          </button>
+          <button
+            onClick={handleDeleteAccount}
+            disabled={deleting}
+            className="flex items-center gap-2 rounded-full bg-destructive px-5 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+          >
+            {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+            Supprimer définitivement
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
 
