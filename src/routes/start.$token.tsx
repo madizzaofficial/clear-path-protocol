@@ -831,29 +831,9 @@ function OnboardingPage() {
               Envoie jusqu'à 3 photos de ton visage ou des zones concernées. Plus elles sont nettes, plus l'analyse sera précise.
             </p>
             <div className="mt-8 space-y-4">
-
-        {/* Step 4 — Photos section (repris de l'ancien step 4) */}
-        {/* NOTE: ce bloc est maintenant pour le SEUL step photos */}
-            <div className="mt-8 space-y-8">
-              <div>
-                <p className="mb-2 text-sm font-semibold">
-                  Ton objectif principal{" "}
-                  <span className="font-normal text-muted-foreground">(optionnel)</span>
-                </p>
-                <textarea
-                  placeholder="Ex. : Réduire mon acné kystique, retrouver un teint uniforme…"
-                  value={answers.mainGoal}
-                  onChange={(e) => setAnswers((a) => ({ ...a, mainGoal: e.target.value.slice(0, 1000) }))}
-                  maxLength={1000}
-                  className="min-h-28 w-full resize-none rounded-2xl border border-border bg-card p-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-                <p className="mt-1 text-right text-xs text-muted-foreground">{answers.mainGoal.length}/1000</p>
-              </div>
-
               <div>
                 <p className="mb-1 text-sm font-semibold">
-                  Photos de ta peau{" "}
-                  <span className="font-normal text-muted-foreground">(optionnel · 3 max)</span>
+                  Photos <span className="font-normal text-muted-foreground">(optionnel · 3 max)</span>
                 </p>
                 <p className="mb-4 text-xs text-muted-foreground">
                   Aide ton coach à visualiser l'état de ta peau pour personnaliser ta routine.
@@ -899,8 +879,8 @@ function OnboardingPage() {
           </>
         )}
 
-        {/* Step 5 — Créer ton compte */}
-        {step === 5 && (
+        {/* Step 7 — Créer ton compte */}
+        {step === 7 && (
           <>
             <p className="mt-1 text-sm text-muted-foreground">Dernière étape avant ton analyse.</p>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Crée ton compte</h1>
@@ -1005,7 +985,7 @@ function OnboardingPage() {
         )}
 
         {/* Navigation — hidden on registration step */}
-        {step < 5 && (
+        {step < 7 && (
           <div className="mt-10 flex items-center justify-between">
             {step > 0 ? (
               <button
@@ -1028,9 +1008,9 @@ function OnboardingPage() {
         )}
 
         {/* Back button on registration step */}
-        {step === 5 && (
+        {step === 7 && (
           <button
-            onClick={() => setStep(4)}
+            onClick={() => setStep(6)}
             className="mt-6 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
           >
             <ChevronLeft className="h-4 w-4" /> Retour
