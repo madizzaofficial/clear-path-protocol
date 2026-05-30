@@ -55,25 +55,62 @@ export const Route = createFileRoute("/start/$token")({
 // ── Types & constants ─────────────────────────────────────────────────────────
 
 type IntakeAnswers = {
-  // Page 1-3
+  // Page 0 — Profil
+  ageRange: string;
+  gender: string;
+  hormonalCycleAcne: string;
+  // Page 1-2
   skinType: string;
   acneTypes: string[];
+  // Page 3 — Localisation
+  acneLocations: string[];
+  // Page 4
   intensity: string;
-  // Page 4 — Routine
+  // Page 5 — Routine
   usesCleanser: boolean;
   usesMoisturizer: boolean;
   usesSPF: boolean;
   usesActives: boolean;
   activeProductsList: string;
   currentRoutine: string; // auto-generated summary for backward compat
-  // Page 5 — Historique
+  // Page 6 — Historique
   durationAcne: string;
-  previousTreatments: string[];
+  previousTreatments: string; // free text
   skinReactivity: string;
-  // Page 6 — Objectif
+  // Page 7 — Objectif
   mainGoal: string;
   priorityGoal: string;
 };
+
+const AGE_RANGE_OPTIONS = [
+  { value: "moins_18",  label: "Moins de 18 ans" },
+  { value: "18_24",     label: "18 à 24 ans" },
+  { value: "25_34",     label: "25 à 34 ans" },
+  { value: "35_44",     label: "35 à 44 ans" },
+  { value: "45_plus",   label: "45 ans et plus" },
+];
+
+const GENDER_OPTIONS = [
+  { value: "homme",   label: "Homme" },
+  { value: "femme",   label: "Femme" },
+  { value: "nr",      label: "Préfère ne pas répondre" },
+];
+
+const HORMONAL_CYCLE_OPTIONS = [
+  { value: "oui",         label: "Oui" },
+  { value: "non",         label: "Non" },
+  { value: "je_sais_pas", label: "Je ne sais pas" },
+];
+
+const ACNE_LOCATION_OPTIONS = [
+  { value: "front",    label: "Front" },
+  { value: "nez",      label: "Nez" },
+  { value: "joues",    label: "Joues" },
+  { value: "menton",   label: "Menton" },
+  { value: "machoire", label: "Mâchoire" },
+  { value: "dos",      label: "Dos" },
+  { value: "torse",    label: "Torse" },
+];
 
 const SKIN_TYPES = [
   { value: "normale", label: "Normale", desc: "Ni trop grasse, ni trop sèche, peu de réactivité" },
@@ -110,13 +147,6 @@ const DURATION_OPTIONS = [
   { value: "plus_3ans",   label: "Plus de 3 ans" },
 ];
 
-const TREATMENT_OPTIONS = [
-  { value: "retinoides",       label: "Rétinoïdes" },
-  { value: "benzoyl_peroxide", label: "Benzoyl peroxide" },
-  { value: "antibiotiques",    label: "Antibiotiques" },
-  { value: "aucun",            label: "Aucun" },
-  { value: "autre",            label: "Autre" },
-];
 
 const PRIORITY_GOAL_OPTIONS = [
   { value: "boutons",     label: "Réduire les boutons actifs" },
@@ -126,8 +156,10 @@ const PRIORITY_GOAL_OPTIONS = [
 ];
 
 const STEPS = [
+  "Profil",
   "Type de peau",
   "Types d'acné",
+  "Localisation",
   "Intensité",
   "Routine actuelle",
   "Historique",
@@ -198,8 +230,12 @@ function OnboardingPage() {
   const [recipientName, setRecipientName] = useState("");
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<IntakeAnswers>({
+    ageRange: "",
+    gender: "",
+    hormonalCycleAcne: "",
     skinType: "",
     acneTypes: [],
+    acneLocations: [],
     intensity: "",
     usesCleanser: false,
     usesMoisturizer: false,
@@ -208,7 +244,7 @@ function OnboardingPage() {
     activeProductsList: "",
     currentRoutine: "",
     durationAcne: "",
-    previousTreatments: [],
+    previousTreatments: "",
     skinReactivity: "",
     mainGoal: "",
     priorityGoal: "",
@@ -251,6 +287,15 @@ function OnboardingPage() {
     }));
   }
 
+  function toggleAcneLocation(value: string) {
+    setAnswers((prev) => ({
+      ...prev,
+      acneLocations: prev.acneLocations.includes(value)
+        ? prev.acneLocations.filter((v) => v !== value)
+        : [...prev.acneLocations, value],
+    }));
+  }
+
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const incoming = Array.from(e.target.files ?? []).filter(
       (f) => f.type.startsWith("image/") && f.size <= 10 * 1024 * 1024
@@ -270,10 +315,11 @@ function OnboardingPage() {
   }
 
   function canAdvance(): boolean {
-    if (step === 0) return !!answers.skinType;
-    if (step === 1) return answers.acneTypes.length > 0;
-    if (step === 2) return !!answers.intensity;
-    if (step === 3) return true; // routine questions are all optional
+    if (step === 0) return !!answers.ageRange;
+    if (step === 1) return !!answers.skinType;
+    if (step === 2) return answers.acneTypes.length > 0;
+    if (step === 3) return true; // locations optional
+    if (step === 4) return !!answers.intensity;
     return true;
   }
 
@@ -542,8 +588,91 @@ function OnboardingPage() {
       <div className="mx-auto max-w-lg px-6 py-12">
         <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">{STEPS[step]}</p>
 
-        {/* Step 0 — Type de peau */}
+        {/* Step 0 — Profil */}
         {step === 0 && (
+          <>
+            <p className="mt-1 text-sm text-muted-foreground">Ces informations nous aident à mieux comprendre le contexte de ta peau.</p>
+            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Ton profil</h1>
+            <p className="mt-2 text-muted-foreground">Quelques informations rapides pour personnaliser ton protocole.</p>
+            <div className="mt-8 space-y-8">
+
+              {/* Âge */}
+              <div>
+                <p className="mb-3 text-sm font-semibold">Quel âge as-tu ?</p>
+                <div className="space-y-2">
+                  {AGE_RANGE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setAnswers((a) => ({ ...a, ageRange: opt.value }))}
+                      className={`flex w-full items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all ${
+                        answers.ageRange === opt.value ? "border-primary bg-primary-soft" : "border-border hover:border-primary/40"
+                      }`}
+                    >
+                      <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                        answers.ageRange === opt.value ? "border-primary bg-primary" : "border-border"
+                      }`}>
+                        {answers.ageRange === opt.value && <Check className="h-3 w-3 text-primary-foreground" />}
+                      </span>
+                      <p className="font-semibold">{opt.label}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Genre */}
+              <div>
+                <p className="mb-3 text-sm font-semibold">Sexe <span className="font-normal text-muted-foreground">(optionnel)</span></p>
+                <div className="space-y-2">
+                  {GENDER_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setAnswers((a) => ({ ...a, gender: a.gender === opt.value ? "" : opt.value, hormonalCycleAcne: a.gender === opt.value ? "" : a.hormonalCycleAcne }))}
+                      className={`flex w-full items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all ${
+                        answers.gender === opt.value ? "border-primary bg-primary-soft" : "border-border hover:border-primary/40"
+                      }`}
+                    >
+                      <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                        answers.gender === opt.value ? "border-primary bg-primary" : "border-border"
+                      }`}>
+                        {answers.gender === opt.value && <Check className="h-3 w-3 text-primary-foreground" />}
+                      </span>
+                      <p className="font-semibold">{opt.label}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Cycle hormonal — conditionnel */}
+              {answers.gender === "femme" && (
+                <div>
+                  <p className="mb-3 text-sm font-semibold">Penses-tu que ton acné varie selon ton cycle menstruel ?</p>
+                  <div className="space-y-2">
+                    {HORMONAL_CYCLE_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setAnswers((a) => ({ ...a, hormonalCycleAcne: a.hormonalCycleAcne === opt.value ? "" : opt.value }))}
+                        className={`flex w-full items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all ${
+                          answers.hormonalCycleAcne === opt.value ? "border-primary bg-primary-soft" : "border-border hover:border-primary/40"
+                        }`}
+                      >
+                        <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                          answers.hormonalCycleAcne === opt.value ? "border-primary bg-primary" : "border-border"
+                        }`}>
+                          {answers.hormonalCycleAcne === opt.value && <Check className="h-3 w-3 text-primary-foreground" />}
+                        </span>
+                        <p className="font-semibold">{opt.label}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+            </div>
+          </>
+        )}
+
+        {/* Step 1 — Type de peau */}
+        {step === 1 && (
           <>
             <p className="mt-1 text-sm text-muted-foreground">On commence par comprendre ta peau actuelle.</p>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Quel est ton type de peau ?</h1>
@@ -577,8 +706,8 @@ function OnboardingPage() {
           </>
         )}
 
-        {/* Step 1 — Type de boutons */}
-        {step === 1 && (
+        {/* Step 2 — Types d'acné */}
+        {step === 2 && (
           <>
             <p className="mt-1 text-sm text-muted-foreground">Tu peux sélectionner plusieurs réponses si besoin.</p>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Quel type de boutons as-tu ?</h1>
@@ -613,8 +742,38 @@ function OnboardingPage() {
           </>
         )}
 
-        {/* Step 2 — Intensité */}
-        {step === 2 && (
+        {/* Step 3 — Localisation */}
+        {step === 3 && (
+          <>
+            <p className="mt-1 text-sm text-muted-foreground">Certaines zones peuvent nous donner des informations utiles sur les causes possibles.</p>
+            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Localisation</h1>
+            <p className="mt-2 text-muted-foreground">Où se situe principalement ton acné ? <span className="text-muted-foreground/70">(plusieurs choix possibles)</span></p>
+            <div className="mt-8 space-y-3">
+              {ACNE_LOCATION_OPTIONS.map((opt) => {
+                const sel = answers.acneLocations.includes(opt.value);
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => toggleAcneLocation(opt.value)}
+                    className={`flex w-full items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all ${
+                      sel ? "border-primary bg-primary-soft" : "border-border hover:border-primary/40"
+                    }`}
+                  >
+                    <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${
+                      sel ? "border-primary bg-primary" : "border-border"
+                    }`}>
+                      {sel && <Check className="h-3 w-3 text-primary-foreground" />}
+                    </span>
+                    <p className="font-semibold">{opt.label}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        {/* Step 4 — Intensité */}
+        {step === 4 && (
           <>
             <p className="mt-1 text-sm text-muted-foreground">Sois simplement honnête avec ton ressenti.</p>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Quelle est l'intensité ?</h1>
@@ -648,9 +807,8 @@ function OnboardingPage() {
           </>
         )}
 
-        {/* Step 3 — Routine actuelle */}
-        {/* Step 3 — Routine actuelle */}
-        {step === 3 && (
+        {/* Step 5 — Routine actuelle */}
+        {step === 5 && (
           <>
             <p className="mt-1 text-sm text-muted-foreground">Même si tu ne fais rien, c'est totalement OK.</p>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Ta routine actuelle</h1>
@@ -696,8 +854,8 @@ function OnboardingPage() {
           </>
         )}
 
-        {/* Step 4 — Historique acné */}
-        {step === 4 && (
+        {/* Step 6 — Historique */}
+        {step === 6 && (
           <>
             <p className="mt-1 text-sm text-muted-foreground">Ces informations m'aident à mieux comprendre ton profil.</p>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Ton historique</h1>
@@ -727,61 +885,56 @@ function OnboardingPage() {
                 </div>
               </div>
 
-              {/* Previous treatments */}
-              <div>
-                <p className="mb-3 text-sm font-semibold">As-tu déjà essayé des traitements ? <span className="font-normal text-muted-foreground">(plusieurs choix possibles)</span></p>
-                <div className="space-y-2">
-                  {TREATMENT_OPTIONS.map((opt) => {
-                    const sel = answers.previousTreatments.includes(opt.value);
-                    return (
-                      <button
-                        key={opt.value}
-                        onClick={() => setAnswers((a) => ({
-                          ...a,
-                          previousTreatments: sel
-                            ? a.previousTreatments.filter((v) => v !== opt.value)
-                            : [...a.previousTreatments, opt.value],
-                        }))}
-                        className={`flex w-full items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all ${
-                          sel ? "border-primary bg-primary-soft" : "border-border hover:border-primary/40"
-                        }`}
-                      >
-                        <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${
-                          sel ? "border-primary bg-primary" : "border-border"
-                        }`}>
-                          {sel && <Check className="h-3 w-3 text-primary-foreground" />}
-                        </span>
-                        <p className="font-semibold">{opt.label}</p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
               {/* Skin reactivity */}
               <div>
                 <p className="mb-3 text-sm font-semibold">Ta peau réagit-elle facilement aux nouveaux produits ?</p>
-                <div className="flex gap-3">
-                  {[{ value: "oui", label: "Oui, souvent" }, { value: "non", label: "Non, rarement" }].map((opt) => (
+                <div className="space-y-2">
+                  {[
+                    { value: "oui",         label: "Oui" },
+                    { value: "non",         label: "Non" },
+                    { value: "je_sais_pas", label: "Je ne sais pas" },
+                  ].map((opt) => (
                     <button
                       key={opt.value}
-                      onClick={() => setAnswers((a) => ({ ...a, skinReactivity: opt.value }))}
-                      className={`flex-1 rounded-2xl border-2 py-3 text-sm font-semibold transition-all ${
-                        answers.skinReactivity === opt.value ? "border-primary bg-primary-soft text-primary" : "border-border hover:border-primary/40"
+                      onClick={() => setAnswers((a) => ({ ...a, skinReactivity: a.skinReactivity === opt.value ? "" : opt.value }))}
+                      className={`flex w-full items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all ${
+                        answers.skinReactivity === opt.value ? "border-primary bg-primary-soft" : "border-border hover:border-primary/40"
                       }`}
                     >
-                      {opt.label}
+                      <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                        answers.skinReactivity === opt.value ? "border-primary bg-primary" : "border-border"
+                      }`}>
+                        {answers.skinReactivity === opt.value && <Check className="h-3 w-3 text-primary-foreground" />}
+                      </span>
+                      <p className="font-semibold">{opt.label}</p>
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Previous treatments — free text */}
+              <div>
+                <p className="mb-2 text-sm font-semibold">
+                  As-tu déjà essayé des traitements contre l'acné ?{" "}
+                  <span className="font-normal text-muted-foreground">(optionnel)</span>
+                </p>
+                <p className="mb-3 text-xs text-muted-foreground">
+                  Ex : rétinoïdes, peroxyde de benzoyle, antibiotiques, isotrétinoïne, aucun…
+                </p>
+                <textarea
+                  placeholder="Décris librement ce que tu as essayé…"
+                  value={answers.previousTreatments}
+                  onChange={(e) => setAnswers((a) => ({ ...a, previousTreatments: e.target.value }))}
+                  className="min-h-24 w-full resize-none rounded-2xl border border-border bg-card p-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
               </div>
 
             </div>
           </>
         )}
 
-        {/* Step 5 — Objectif */}
-        {step === 5 && (
+        {/* Step 7 — Objectif */}
+        {step === 7 && (
           <>
             <p className="mt-1 text-sm text-muted-foreground">Plus c'est précis, mieux c'est.</p>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Ton objectif</h1>
@@ -822,8 +975,8 @@ function OnboardingPage() {
           </>
         )}
 
-        {/* Step 6 — Photos */}
-        {step === 6 && (
+        {/* Step 8 — Photos */}
+        {step === 8 && (
           <>
             <p className="mt-1 text-sm text-muted-foreground">Optionnel, mais très utile pour affiner ton protocole.</p>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Photos de ta peau</h1>
@@ -879,8 +1032,8 @@ function OnboardingPage() {
           </>
         )}
 
-        {/* Step 7 — Créer ton compte */}
-        {step === 7 && (
+        {/* Step 9 — Créer ton compte */}
+        {step === 9 && (
           <>
             <p className="mt-1 text-sm text-muted-foreground">Dernière étape avant ton analyse.</p>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Crée ton compte</h1>
@@ -985,7 +1138,7 @@ function OnboardingPage() {
         )}
 
         {/* Navigation — hidden on registration step */}
-        {step < 7 && (
+        {step < 9 && (
           <div className="mt-10 flex items-center justify-between">
             {step > 0 ? (
               <button
@@ -1008,9 +1161,9 @@ function OnboardingPage() {
         )}
 
         {/* Back button on registration step */}
-        {step === 7 && (
+        {step === 9 && (
           <button
-            onClick={() => setStep(6)}
+            onClick={() => setStep(8)}
             className="mt-6 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
           >
             <ChevronLeft className="h-4 w-4" /> Retour
