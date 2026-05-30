@@ -188,7 +188,7 @@ function MiniWeekDots({
 // ── Pending state — shown when no routine is assigned yet ────────────────────
 
 // EDIT: remplace ce numéro par ton numéro WhatsApp au format international (sans +)
-const WHATSAPP_NUMBER = "33600000000";
+const WHATSAPP_NUMBER = "33762688174";
 const WHATSAPP_MESSAGE = encodeURIComponent(
   "Bonjour Mehdi 👋\nJe suis membre du Protocole Clear et j'ai une question concernant mon suivi."
 );
@@ -354,7 +354,7 @@ function Suivi() {
             {/* Carte principale */}
             <div className="rounded-3xl border border-border/60 bg-card p-7 shadow-soft">
               <h2 className="font-display text-2xl font-semibold tracking-tight">
-                Ton protocole est en préparation
+                Ta routine est en préparation
               </h2>
               <p className="mt-3 leading-relaxed text-muted-foreground">
                 Ton questionnaire a bien été reçu. Je suis actuellement en train d'analyser ton profil

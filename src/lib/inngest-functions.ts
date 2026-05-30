@@ -88,21 +88,40 @@ export const intakeConfirmation = inngest.createFunction(
     await step.run("send-confirmation", () =>
       sendEmail(
         email,
-        "Ton bilan peau a bien été reçu 🎉",
-        `
-        <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#111">
-          <h1 style="font-size:24px;font-weight:700;margin:0 0 12px">Bilan reçu, ${firstName} !</h1>
-          <p style="color:#555;line-height:1.6;margin:0 0 24px">
-            Nous avons bien reçu tes réponses. Ton coach va maintenant préparer ta routine AM/PM personnalisée — tu recevras une notification dès qu'elle sera prête.
-          </p>
-          <p style="color:#555;line-height:1.6;margin:0 0 24px">
-            En attendant, tu peux commencer les leçons du protocole depuis ton tableau de bord.
-          </p>
-          <a href="https://app.protocole-clear.com/" style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:14px 28px;border-radius:9999px;font-weight:600;font-size:15px">
-            Accéder à mon tableau de bord →
-          </a>
-        </div>
-        `,
+        `Nous avons bien reçu tes informations, ${firstName} ✅`,
+        `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#faf9f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <div style="max-width:560px;margin:40px auto;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.06);">
+    <div style="background:linear-gradient(135deg,#f5e6da 0%,#faf0e8 100%);padding:40px 40px 32px;">
+      <p style="margin:0 0 8px;font-size:12px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:#c4724b;">Protocole Clear</p>
+      <h1 style="margin:0;font-size:26px;font-weight:700;color:#1a1a1a;letter-spacing:-0.5px;">Ton questionnaire a bien été reçu</h1>
+    </div>
+    <div style="padding:36px 40px;">
+      <p style="margin:0 0 16px;font-size:15px;line-height:1.65;color:#444;">Bonjour ${firstName},</p>
+      <p style="margin:0 0 16px;font-size:15px;line-height:1.65;color:#444;">
+        Nous avons bien reçu ton questionnaire et tes éventuelles photos. Je vais maintenant analyser ton profil afin de construire une routine adaptée à ta peau.
+      </p>
+      <div style="background:#fffbf0;border:1px solid #f0d090;border-radius:12px;padding:14px 18px;margin:0 0 24px;">
+        <p style="margin:0;font-size:14px;font-weight:600;color:#92600a;">⏱ Temps estimé : 24 à 48 heures</p>
+      </div>
+      <p style="margin:0 0 28px;font-size:15px;line-height:1.65;color:#444;">
+        Tu recevras un e-mail dès que ta routine sera disponible dans ton espace. Pas besoin de faire quoi que ce soit d'autre pour l'instant.
+      </p>
+      <div style="text-align:center;margin:0 0 32px;">
+        <a href="https://app.protocole-clear.com/suivi" style="display:inline-block;background:#1a1a1a;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:9999px;font-size:15px;font-weight:600;letter-spacing:0.02em;">
+          Accéder à mon espace →
+        </a>
+      </div>
+      <p style="margin:0;font-size:13px;line-height:1.6;color:#888;">Si tu as une question, tu peux répondre directement à cet email ou me contacter sur WhatsApp.</p>
+    </div>
+    <div style="border-top:1px solid #f0ece8;padding:20px 40px;text-align:center;">
+      <p style="margin:0;font-size:12px;color:#aaa;">Protocole Clear · <a href="https://app.protocole-clear.com" style="color:#c4724b;text-decoration:none;">app.protocole-clear.com</a></p>
+    </div>
+  </div>
+</body>
+</html>`,
       )
     );
 
