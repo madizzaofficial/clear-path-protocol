@@ -7,7 +7,7 @@ import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { inngest } from "@/lib/inngest";
-import { collection, doc, getDocs, getDoc, setDoc, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, doc, getDocs, getDoc, setDoc, addDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
 import type { CatalogProduct } from "./admin_.products";
 import { motion, AnimatePresence } from "framer-motion";
@@ -492,6 +492,8 @@ function RoutinesContent() {
     try {
       const clean = JSON.parse(JSON.stringify(updated)) as StudentRoutine;
       await setDoc(doc(db, "routines", selectedUser.uid), clean);
+      // Signal to the student dashboard that the routine is being built
+      await updateDoc(doc(db, "users", selectedUser.uid), { intakeStatus: "building" });
       setRoutine(updated);
     } finally {
       setSaving(false);

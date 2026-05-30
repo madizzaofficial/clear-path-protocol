@@ -3,7 +3,7 @@ import { AppShell } from "@/components/AppShell";
 import { allLessons } from "@/lib/course-data";
 import {
   BookOpen, Camera, CalendarDays, MessageSquare, ChevronRight, Loader2,
-  Sparkles, Phone, Check, Sun, Moon, UserCircle,
+  Sparkles, Check, Sun, Moon, UserCircle,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
@@ -54,6 +54,7 @@ type SuiviData = {
   skinType: string | null;
   acneTypes: string[] | null;
   intensity: string | null;
+  intakeStatus: string | null;
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -195,11 +196,11 @@ function buildWaUrl(firstName: string) {
 }
 
 const PENDING_STEPS = [
-  { label: "Questionnaire reçu",     done: true,  active: false },
-  { label: "Photos reçues",          done: true,  active: false },
-  { label: "Analyse en cours",       done: false, active: true  },
-  { label: "Routine en préparation", done: false, active: false },
-  { label: "Routine disponible",     done: false, active: false },
+  { label: "Questionnaire reçu",     done: true  },
+  { label: "Photos reçues",          done: true  },
+  { label: "Analyse en cours",       done: false },
+  { label: "Routine en préparation", done: false },
+  { label: "Routine disponible",     done: false },
 ];
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -223,6 +224,7 @@ function Suivi() {
     skinType: null,
     acneTypes: null,
     intensity: null,
+    intakeStatus: null,
   });
 
   useEffect(() => {
@@ -298,6 +300,7 @@ function Suivi() {
         skinType: intakeSnap?.exists() ? (intakeSnap.data().skinType ?? null) : null,
         acneTypes: intakeSnap?.exists() ? (intakeSnap.data().acneTypes ?? null) : null,
         intensity: intakeSnap?.exists() ? (intakeSnap.data().intensity ?? null) : null,
+        intakeStatus: userSnap?.exists() ? (userSnap.data().intakeStatus ?? null) : null,
       });
     }
     load().catch(() => setData((d) => ({ ...d, loading: false })));
@@ -306,7 +309,11 @@ function Suivi() {
   const {
     loading, skinState, completedLessons, enrolledAt, totalRoutineSteps, amSteps, pmSteps,
     checkins28, adherencePct, adherenceDays, streak, latestNote, photos, skinType, acneTypes, intensity,
+    intakeStatus,
   } = data;
+
+  // Active step index: 3 = "Routine en préparation" when admin starts building, else 2 = "Analyse en cours"
+  const pendingActiveIdx = intakeStatus === "building" ? 3 : 2;
 
   const lessons = allLessons();
   const done = completedLessons.length;
@@ -363,24 +370,27 @@ function Suivi() {
                 Temps estimé : 24 à 48 heures
               </div>
               <div className="mt-7 space-y-3">
-                {PENDING_STEPS.map((s, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    {s.done ? (
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100">
-                        <Check className="h-3.5 w-3.5 text-emerald-600" />
-                      </div>
-                    ) : s.active ? (
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-primary-soft">
-                        <Loader2 className="h-3 w-3 animate-spin text-primary" />
-                      </div>
-                    ) : (
-                      <div className="h-6 w-6 shrink-0 rounded-full border-2 border-border bg-muted" />
-                    )}
-                    <p className={`text-sm ${s.done ? "font-medium" : s.active ? "font-medium text-primary" : "text-muted-foreground"}`}>
-                      {s.label}
-                    </p>
-                  </div>
-                ))}
+                {PENDING_STEPS.map((s, i) => {
+                  const isActive = !s.done && i === pendingActiveIdx;
+                  return (
+                    <div key={i} className="flex items-center gap-3">
+                      {s.done ? (
+                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+                          <Check className="h-3.5 w-3.5 text-emerald-600" />
+                        </div>
+                      ) : isActive ? (
+                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-primary-soft">
+                          <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                        </div>
+                      ) : (
+                        <div className="h-6 w-6 shrink-0 rounded-full border-2 border-border bg-muted" />
+                      )}
+                      <p className={`text-sm ${s.done ? "font-medium" : isActive ? "font-medium text-primary" : "text-muted-foreground"}`}>
+                        {s.label}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -506,9 +516,17 @@ function Suivi() {
                 <p className="text-sm text-muted-foreground">Ton prochain point coaching sera bientôt fixé.</p>
               )}
             </div>
-            <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/20">
-              <Phone className="h-4 w-4" /> Contacter le coach
-            </button>
+            <a
+              href={buildWaUrl(firstName)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            >
+              <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+              </svg>
+              Contacter Mehdi sur WhatsApp
+            </a>
           </div>
 
           {/* ── Right sidebar wrapper ── col-3, rows 2-4, flex-col packed ── */}
