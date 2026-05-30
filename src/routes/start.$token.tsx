@@ -438,79 +438,99 @@ function OnboardingPage() {
   }
 
   if (submitted) {
+    const CHECKLIST = [
+      { label: "Questionnaire reçu",       done: true },
+      { label: "Photos reçues (si fournies)", done: true },
+      { label: "Analyse du profil en cours",  done: false },
+      { label: "Construction du protocole",   done: false },
+      { label: "Livraison dans ton espace",   done: false },
+    ];
     return (
       <div className="min-h-screen bg-background px-6 py-16">
         <div className="mx-auto max-w-md">
+
+          {/* Header */}
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-10 text-center"
+            transition={{ duration: 0.45 }}
+            className="mb-8"
           >
-            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-primary shadow-elegant">
-              <Check className="h-7 w-7 text-primary-foreground" />
+            <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-primary shadow-elegant">
+              <Check className="h-6 w-6 text-primary-foreground" />
             </div>
-            <h1 className="font-display text-3xl font-semibold tracking-tight">Ton protocole est en cours de création</h1>
-            <p className="mt-3 text-muted-foreground leading-relaxed">
-              Nous analysons ton profil pour construire une routine parfaitement adaptée à ta peau.
+            <h1 className="font-display text-3xl font-semibold tracking-tight leading-tight">
+              Merci pour ta confiance 👋
+            </h1>
+            <p className="mt-4 leading-relaxed text-muted-foreground">
+              Nous avons bien reçu ton questionnaire et tes éventuelles photos.
+              Je vais maintenant analyser ton profil afin de construire un protocole adapté à ta peau.
             </p>
-            <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-200 px-4 py-1.5 text-sm text-amber-700 font-medium">
-              Délai estimé : 24 à 48 heures
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-sm font-medium text-amber-700">
+              Temps estimé : 24 à 48 heures
             </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Tu recevras un e-mail dès que ta routine sera disponible dans ton espace.
+            </p>
           </motion.div>
 
+          {/* Checklist */}
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.4 }}
-            className="mb-10 rounded-3xl border border-border/60 bg-card p-6 space-y-4"
+            transition={{ delay: 0.18, duration: 0.4 }}
+            className="mb-8 rounded-2xl border border-border/60 bg-card p-5 space-y-3"
           >
-            {[
-              "Analyse de tes réponses",
-              "Analyse de tes photos (si fournies)",
-              "Construction de ta routine personnalisée",
-              "Vérification des compatibilités produits",
-            ].map((item, i) => (
+            {CHECKLIST.map((item, i) => (
               <motion.div
-                key={item}
-                initial={{ opacity: 0, x: -12 }}
+                key={item.label}
+                initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + i * 0.1, duration: 0.3 }}
+                transition={{ delay: 0.25 + i * 0.07, duration: 0.28 }}
                 className="flex items-center gap-3"
               >
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-soft">
-                  <Check className="h-3.5 w-3.5 text-primary" />
-                </div>
-                <p className="text-sm font-medium">{item}</p>
+                {item.done ? (
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+                    <Check className="h-3.5 w-3.5 text-emerald-600" />
+                  </div>
+                ) : (
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-border bg-muted">
+                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+                <p className={`text-sm ${item.done ? "font-medium" : "text-muted-foreground"}`}>
+                  {item.label}
+                </p>
               </motion.div>
             ))}
           </motion.div>
 
-          {/* EDIT: Remplace cette div par <video src="/onboarding-explainer.mp4" controls /> ou une iframe YouTube */}
+          {/* Vidéo — remplace la div par <video> ou une iframe une fois la vidéo disponible */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.7 }}
-            className="mb-10 overflow-hidden rounded-3xl border border-border/60 bg-muted aspect-video flex items-center justify-center"
+            transition={{ delay: 0.6 }}
+            className="mb-8 aspect-video overflow-hidden rounded-2xl border border-border/60 bg-muted flex items-center justify-center"
           >
-            <div className="text-center space-y-2">
-              <div className="h-12 w-12 rounded-full bg-primary-soft flex items-center justify-center mx-auto">
-                <ArrowRight className="h-5 w-5 text-primary" />
-              </div>
-              <p className="text-sm font-medium text-muted-foreground">[EDIT : Ajoute ta vidéo d'explication ici]</p>
-              <p className="text-xs text-muted-foreground/60">Comment fonctionne la plateforme · 30–90 sec</p>
+            <div className="text-center space-y-2 px-6">
+              <p className="text-sm font-medium text-muted-foreground">Vidéo de bienvenue</p>
+              <p className="text-xs text-muted-foreground/60">
+                Ce qui se passe maintenant · Délai estimé · Comment accéder à ta routine
+              </p>
             </div>
           </motion.div>
 
+          {/* CTA */}
           <motion.button
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            onClick={() => navigate({ to: "/welcome" })}
+            transition={{ delay: 0.75 }}
+            onClick={() => navigate({ to: "/suivi" })}
             className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-8 py-4 text-base font-semibold text-background shadow-elegant transition-all hover:opacity-90"
           >
             Accéder à mon espace <ArrowRight className="h-5 w-5" />
           </motion.button>
+
         </div>
       </div>
     );
