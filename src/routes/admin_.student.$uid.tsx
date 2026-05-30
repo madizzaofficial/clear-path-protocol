@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
-import { db } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
 import { doc, getDoc, collection, query, where, getDocs, addDoc, updateDoc, deleteField, orderBy, setDoc, deleteDoc } from "firebase/firestore";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -25,11 +25,13 @@ import {
 import { course } from "@/lib/course-data";
 
 // ── Server function — delete Firebase Auth user ───────────────────────────────
+// callerToken: Firebase ID token of the admin making the request.
+// The handler verifies it, checks admin role in Firestore, and blocks self-deletion.
 
 const deleteAuthUserFn = createServerFn({ method: "POST" })
-  .inputValidator((d: { uid: string }) => d)
+  .inputValidator((d: { uid: string; callerToken: string }) => d)
   .handler(async (ctx) => {
-    const { uid } = ctx.data;
+    const { uid, callerToken } = ctx.data;
 
     const projectId     = process.env.FIREBASE_PROJECT_ID;
     const clientEmail   = process.env.FIREBASE_CLIENT_EMAIL;
@@ -39,14 +41,37 @@ const deleteAuthUserFn = createServerFn({ method: "POST" })
       throw new Error("Missing Firebase Admin env vars");
     }
 
-    const adminApp  = await import("firebase-admin/app");
-    const adminAuth = await import("firebase-admin/auth");
+    const adminApp       = await import("firebase-admin/app");
+    const adminAuth      = await import("firebase-admin/auth");
+    const adminFirestore = await import("firebase-admin/firestore");
 
     if (!adminApp.getApps().length) {
       const privateKey = privateKeyRaw.replace(/\\n/g, "\n");
       adminApp.initializeApp({
         credential: adminApp.cert({ projectId, clientEmail, privateKey }),
       });
+    }
+
+    // 1. Verify the caller's identity
+    let callerUid: string;
+    try {
+      const decoded = await adminAuth.getAuth().verifyIdToken(callerToken);
+      callerUid = decoded.uid;
+    } catch {
+      throw new Error("Unauthorized: invalid token");
+    }
+
+    // 2. Verify caller is an admin (config/admins.uids[] — same check as client-side)
+    const configSnap = await adminFirestore.getFirestore()
+      .collection("config").doc("admins").get();
+    const adminUids: string[] = configSnap.data()?.uids ?? [];
+    if (!adminUids.includes(callerUid)) {
+      throw new Error("Forbidden: caller is not an admin");
+    }
+
+    // 3. Prevent an admin from deleting their own account
+    if (callerUid === uid) {
+      throw new Error("Forbidden: cannot delete your own account");
     }
 
     await adminAuth.getAuth().deleteUser(uid);
@@ -402,7 +427,9 @@ function StudentPage() {
     if (deleting) return;
     setDeleting(true);
     try {
-      await deleteAuthUserFn({ data: { uid } });
+      const callerToken = await auth.currentUser?.getIdToken();
+      if (!callerToken) throw new Error("Not authenticated");
+      await deleteAuthUserFn({ data: { uid, callerToken } });
       await Promise.allSettled([
         deleteDoc(doc(db, "users", uid)),
         deleteDoc(doc(db, "intake_answers", uid)),
