@@ -54,12 +54,7 @@ function UserMenu() {
               <FlaskConical className="mr-2 h-4 w-4" /> Analyseur INCI
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2">
-            <Link to="/faq">
-              <HelpCircle className="mr-2 h-4 w-4" /> FAQ
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2">
+<DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2">
             <Link to="/profile">
               <UserCircle className="mr-2 h-4 w-4" /> Mon profil
             </Link>
@@ -89,6 +84,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/products", label: "Routine", icon: Sparkles },
     { to: "/journal", label: "Journal", icon: Camera },
     { to: "/course", label: "Protocole", icon: BookOpen },
+    { to: "/faq", label: "FAQ", icon: HelpCircle },
     ...(isAdmin ? [{ to: "/admin", label: "Admin", icon: ShieldCheck }] : []),
   ] as const;
 
