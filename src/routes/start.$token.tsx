@@ -67,12 +67,9 @@ type IntakeAnswers = {
   // Page 4
   intensity: string;
   // Page 5 — Routine
-  usesCleanser: boolean;
-  usesMoisturizer: boolean;
-  usesSPF: boolean;
-  usesActives: boolean;
-  activeProductsList: string;
-  currentRoutine: string; // auto-generated summary for backward compat
+  hasRoutine: string; // "oui" | "non"
+  currentProducts: string; // free text, if hasRoutine === "oui"
+  currentRoutine: string; // backward compat — dérivé de hasRoutine + currentProducts
   // Page 6 — Historique
   durationAcne: string;
   previousTreatments: string; // free text
@@ -133,12 +130,6 @@ const INTENSITY_OPTIONS = [
   { value: "severe", label: "Sévère", desc: "Inflammations fréquentes, étendues ou douloureuses" },
 ];
 
-const ROUTINE_QUESTIONS: { key: "usesCleanser" | "usesMoisturizer" | "usesSPF" | "usesActives"; label: string }[] = [
-  { key: "usesCleanser",    label: "Utilises-tu un nettoyant ?" },
-  { key: "usesMoisturizer", label: "Utilises-tu une crème hydratante ?" },
-  { key: "usesSPF",         label: "Utilises-tu une protection solaire ?" },
-  { key: "usesActives",     label: "Utilises-tu des actifs ? (sérum, BHA, niacinamide…)" },
-];
 
 const DURATION_OPTIONS = [
   { value: "moins_3mois", label: "Moins de 3 mois" },
@@ -237,11 +228,8 @@ function OnboardingPage() {
     acneTypes: [],
     acneLocations: [],
     intensity: "",
-    usesCleanser: false,
-    usesMoisturizer: false,
-    usesSPF: false,
-    usesActives: false,
-    activeProductsList: "",
+    hasRoutine: "",
+    currentProducts: "",
     currentRoutine: "",
     durationAcne: "",
     previousTreatments: "",
@@ -344,14 +332,9 @@ function OnboardingPage() {
       photoUrls.push(await getDownloadURL(storageRef));
     }
 
-    // Auto-generate currentRoutine summary for backward compat
-    const routineParts = [
-      answers.usesCleanser && "Nettoyant",
-      answers.usesMoisturizer && "Hydratant",
-      answers.usesSPF && "SPF",
-      answers.usesActives && `Actifs${answers.activeProductsList.trim() ? ` (${answers.activeProductsList.trim()})` : ""}`,
-    ].filter(Boolean);
-    const currentRoutineSummary = routineParts.length > 0 ? routineParts.join(" + ") : "Rien";
+    const currentRoutineSummary = answers.hasRoutine === "oui"
+      ? answers.currentProducts.trim() || "Oui (produits non précisés)"
+      : "Aucune routine actuelle";
 
     await setDoc(doc(db, "intake_answers", fbUser.uid), {
       ...answers,
@@ -876,44 +859,49 @@ function OnboardingPage() {
           <>
             <p className="mt-1 text-sm text-muted-foreground">Même si tu ne fais rien, c'est totalement OK.</p>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Ta routine actuelle</h1>
-            <p className="mt-2 text-muted-foreground">Dis-moi ce que tu utilises déjà au quotidien.</p>
-            <div className="mt-8 space-y-4">
-              {ROUTINE_QUESTIONS.map((q) => {
-                const val = answers[q.key];
-                return (
-                  <div key={q.key} className="rounded-2xl border-2 border-border p-4 space-y-3">
-                    <p className="font-semibold">{q.label}</p>
-                    <div className="flex gap-3">
-                      {([true, false] as const).map((choice) => (
-                        <button
-                          key={String(choice)}
-                          onClick={() => setAnswers((a) => ({ ...a, [q.key]: choice }))}
-                          className={`flex-1 rounded-xl border-2 py-2 text-sm font-medium transition-all ${
-                            val === choice
-                              ? "border-primary bg-primary-soft text-primary"
-                              : "border-border hover:border-primary/40"
-                          }`}
-                        >
-                          {choice ? "Oui" : "Non"}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-              {answers.usesActives && (
-                <div className="rounded-2xl border border-border p-4 space-y-2">
-                  <p className="text-sm font-medium">Lesquels ? <span className="font-normal text-muted-foreground">(optionnel)</span></p>
-                  <input
+            <p className="mt-2 text-muted-foreground">On veut comprendre ton point de départ.</p>
+            <div className="mt-8 space-y-5">
+
+              {/* Oui / Non */}
+              <div>
+                <p className="mb-3 font-semibold">As-tu une routine skincare en ce moment ?</p>
+                <div className="flex gap-3">
+                  {(["oui", "non"] as const).map((val) => (
+                    <button
+                      key={val}
+                      onClick={() => setAnswers((a) => ({ ...a, hasRoutine: a.hasRoutine === val ? "" : val, currentProducts: val === "non" ? "" : a.currentProducts }))}
+                      className={`flex-1 rounded-2xl border-2 py-3 text-sm font-semibold capitalize transition-all ${
+                        answers.hasRoutine === val
+                          ? "border-primary bg-primary-soft text-primary"
+                          : "border-border hover:border-primary/40"
+                      }`}
+                    >
+                      {val === "oui" ? "Oui" : "Non"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Champ produits — conditionnel */}
+              {answers.hasRoutine === "oui" && (
+                <div>
+                  <p className="mb-2 text-sm font-semibold">
+                    Quels produits utilises-tu ?{" "}
+                    <span className="font-normal text-muted-foreground">(optionnel)</span>
+                  </p>
+                  <p className="mb-3 text-xs text-muted-foreground">
+                    Ex : nettoyant CeraVe matin + soir, crème La Roche-Posay, SPF Altruist, sérum niacinamide…
+                  </p>
+                  <textarea
                     autoComplete="off"
-                    type="text"
-                    value={answers.activeProductsList}
-                    onChange={(e) => setAnswers((a) => ({ ...a, activeProductsList: e.target.value }))}
-                    placeholder="Ex : niacinamide, BHA, vitamine C…"
-                    className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    value={answers.currentProducts}
+                    onChange={(e) => setAnswers((a) => ({ ...a, currentProducts: e.target.value }))}
+                    placeholder="Décris librement ce que tu utilises au quotidien…"
+                    className="min-h-32 w-full resize-none rounded-2xl border border-border bg-card p-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               )}
+
             </div>
           </>
         )}
