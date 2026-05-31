@@ -50,6 +50,10 @@ function AdminPage() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "sent" | "draft" | "none">("all");
   const [filterInactive, setFilterInactive] = useState(false);
+  const [hideAdmins, setHideAdmins] = useState<boolean>(() => {
+    try { return localStorage.getItem("admin-hide-admins") !== "false"; } catch { return true; }
+  });
+  const [adminUids, setAdminUids] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState<"name" | "email" | "status">("name");
   const [quickNoteUid, setQuickNoteUid] = useState<string | null>(null);
   const [quickNoteText, setQuickNoteText] = useState("");
@@ -70,14 +74,16 @@ function AdminPage() {
     async function fetchStudents() {
       setLoadingStudents(true);
       try {
-        const [usersSnap, routinesSnap, nutritionSnap, reportsSnap] = await Promise.all([
+        const [usersSnap, routinesSnap, nutritionSnap, reportsSnap, adminsSnap] = await Promise.all([
           getDocs(collection(db, "users")),
           getDocs(collection(db, "routines")),
           getDocs(collection(db, "nutrition")),
           getDocs(collection(db, "routine_reports")),
+          getDoc(doc(db, "config", "admins")),
         ]);
         const docs = usersSnap.docs.map((d) => d.data() as StudentDoc);
         setStudents(docs);
+        setAdminUids(new Set(adminsSnap.exists() ? (adminsSnap.data().uids ?? []) : []));
 
         const rMap = new Map<string, "sent" | "draft">();
         routinesSnap.docs.forEach((d) => rMap.set(d.id, (d.data() as { status: "sent" | "draft" }).status));
@@ -146,6 +152,7 @@ function AdminPage() {
   const filteredStudents = useMemo(() => {
     const cutoff = Date.now() - INACTIVE_THRESHOLD;
     let result = students;
+    if (hideAdmins) result = result.filter((s) => !adminUids.has(s.uid));
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter((s) => s.displayName?.toLowerCase().includes(q) || s.email.toLowerCase().includes(q));
@@ -167,7 +174,7 @@ function AdminPage() {
       }
       return (a.displayName ?? a.email).localeCompare(b.displayName ?? b.email);
     });
-  }, [students, search, filterStatus, filterInactive, sortBy, routineStatusMap]);
+  }, [students, search, filterStatus, filterInactive, hideAdmins, adminUids, sortBy, routineStatusMap]);
 
   if (loading || !user) {
     return (
@@ -350,6 +357,20 @@ function AdminPage() {
           >
             <Clock className="h-3.5 w-3.5" />
             Inactif &gt; 7j
+          </button>
+          <button
+            onClick={() => {
+              const next = !hideAdmins;
+              setHideAdmins(next);
+              try { localStorage.setItem("admin-hide-admins", String(next)); } catch {}
+            }}
+            className={`flex h-10 items-center gap-2 rounded-2xl border px-4 text-sm font-medium transition-colors ${
+              hideAdmins
+                ? "border-border bg-card text-muted-foreground hover:text-foreground"
+                : "border-primary bg-primary-soft text-primary"
+            }`}
+          >
+            {hideAdmins ? "Élèves seulement" : "Tous (admins inclus)"}
           </button>
           <select
             value={sortBy}
