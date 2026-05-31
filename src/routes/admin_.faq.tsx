@@ -72,11 +72,24 @@ function AdminFaqPage() {
 
   const [published, setPublished] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const categoryRef = useRef<HTMLDivElement>(null);
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   const sensors = useSensors(useSensor(PointerSensor));
+
+  // Close category dropdown on outside click
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (categoryRef.current && !categoryRef.current.contains(e.target as Node)) {
+        setShowCategoryDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) navigate({ to: "/admin" });
@@ -112,6 +125,13 @@ function AdminFaqPage() {
   }, [user, isAdmin]);
 
   const existingCategories = [...new Set(entries.map((e) => e.category).filter(Boolean))];
+
+  const filteredCategories = existingCategories.filter((c) =>
+    c.toLowerCase().includes(category.toLowerCase())
+  );
+  const isNewCategory = category.trim() !== "" && !existingCategories.some(
+    (c) => c.toLowerCase() === category.trim().toLowerCase()
+  );
 
   function loadBlocksForEntry(entry: FAQEntry) {
     if (entry.blocks && entry.blocks.length > 0) return entry.blocks;
@@ -334,19 +354,59 @@ function AdminFaqPage() {
               />
             </div>
 
-            {/* Category */}
-            <div className="space-y-1.5">
+            {/* Category — combobox */}
+            <div className="space-y-1.5" ref={categoryRef}>
               <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Catégorie</label>
-              <input
-                list="faq-categories"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder="ex: Produits, Routine, Résultats…"
-                className="w-full rounded-2xl border border-border bg-background px-4 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-              />
-              <datalist id="faq-categories">
-                {existingCategories.map((c) => <option key={c} value={c} />)}
-              </datalist>
+              <div className="relative">
+                <input
+                  value={category}
+                  onChange={(e) => { setCategory(e.target.value); setShowCategoryDropdown(true); }}
+                  onFocus={() => setShowCategoryDropdown(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      setShowCategoryDropdown(false);
+                    }
+                    if (e.key === "Escape") setShowCategoryDropdown(false);
+                  }}
+                  placeholder="ex: Produits, Routine, Résultats…"
+                  className="w-full rounded-2xl border border-border bg-background px-4 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+                {showCategoryDropdown && (filteredCategories.length > 0 || isNewCategory) && (
+                  <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-2xl border border-border/60 bg-card shadow-elegant">
+                    {filteredCategories.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => { setCategory(c); setShowCategoryDropdown(false); }}
+                        className={`flex w-full items-center px-4 py-2.5 text-left text-sm transition-colors hover:bg-muted ${
+                          c.toLowerCase() === category.trim().toLowerCase() ? "font-semibold text-primary" : ""
+                        }`}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                    {isNewCategory && (
+                      <button
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => { setCategory(category.trim()); setShowCategoryDropdown(false); }}
+                        className="flex w-full items-center gap-2 border-t border-border/40 px-4 py-2.5 text-left text-sm text-primary transition-colors hover:bg-primary-soft"
+                      >
+                        <Plus className="h-3.5 w-3.5 shrink-0" />
+                        Ajouter <span className="font-semibold">"{category.trim()}"</span>
+                        <span className="ml-auto text-xs text-muted-foreground">↵ Entrée</span>
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+              {isNewCategory && (
+                <p className="text-xs text-muted-foreground">
+                  Nouvelle catégorie — sera créée à la sauvegarde.
+                </p>
+              )}
             </div>
 
             {/* Type selector */}
