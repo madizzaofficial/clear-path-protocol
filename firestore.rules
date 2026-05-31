@@ -166,6 +166,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ── FAQ (questions & réponses visibles par tous les membres) ─────────────
+    match /faq/{entryId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
     // Deny everything else by default
     match /{document=**} {
       allow read, write: if false;
