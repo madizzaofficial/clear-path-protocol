@@ -25,6 +25,8 @@ type IntakeAnswers = {
   acneTypes: string[];
   intensity: string;
   currentRoutine: string;
+  hadReactions: "oui" | "non" | "";
+  reactionDetails: string;
   mainGoal: string;
 };
 
@@ -96,7 +98,7 @@ const CURRENT_ROUTINE_OPTIONS = [
   "Nettoyant + Crème hydratante + SPF + Sérum",
 ];
 
-const STEPS = ["Type de peau", "Type de boutons", "Intensité", "Routine actuelle", "Objectif"];
+const STEPS = ["Type de peau", "Type de boutons", "Intensité", "Routine actuelle", "Réactions passées", "Objectif"];
 
 function IntakePage() {
   const { user, loading } = useAuth();
@@ -112,6 +114,8 @@ function IntakePage() {
     acneTypes: [],
     intensity: "",
     currentRoutine: "",
+    hadReactions: "",
+    reactionDetails: "",
     mainGoal: "",
   });
 
@@ -159,7 +163,8 @@ function IntakePage() {
     if (step === 1) return answers.acneTypes.length > 0;
     if (step === 2) return !!answers.intensity;
     if (step === 3) return !!answers.currentRoutine;
-    if (step === 4) return true;
+    if (step === 4) return !!answers.hadReactions;
+    if (step === 5) return true;
     return false;
   }
 
@@ -375,6 +380,51 @@ function IntakePage() {
         )}
 
         {step === 4 && (
+          <>
+            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">
+              As-tu déjà réagi à des produits ?
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              Allergies, fortes irritations, brûlures — même si c'est ancien.
+            </p>
+            <div className="mt-8 space-y-3">
+              {(["non", "oui"] as const).map((val) => (
+                <button
+                  key={val}
+                  onClick={() => setAnswers((a) => ({ ...a, hadReactions: val, reactionDetails: val === "non" ? "" : a.reactionDetails }))}
+                  className={`flex w-full items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all ${
+                    answers.hadReactions === val
+                      ? "border-primary bg-primary-soft"
+                      : "border-border hover:border-primary/40"
+                  }`}
+                >
+                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                    answers.hadReactions === val ? "border-primary bg-primary" : "border-border"
+                  }`}>
+                    {answers.hadReactions === val && <Check className="h-3 w-3 text-primary-foreground" />}
+                  </span>
+                  <p className="font-semibold capitalize">{val}</p>
+                </button>
+              ))}
+            </div>
+
+            {answers.hadReactions === "oui" && (
+              <div className="mt-6">
+                <p className="mb-2 text-sm font-semibold">Note les produits qui t'ont fait des réactions</p>
+                <textarea
+                  placeholder="Ex. : crème X → brûlures, sérum à la niacinamide → rougeurs intenses…"
+                  value={answers.reactionDetails}
+                  onChange={(e) => setAnswers((a) => ({ ...a, reactionDetails: e.target.value.slice(0, 1000) }))}
+                  maxLength={1000}
+                  className="min-h-32 w-full resize-none rounded-2xl border border-border bg-card p-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+                <p className="mt-1 text-right text-xs text-muted-foreground">{answers.reactionDetails.length}/1000</p>
+              </div>
+            )}
+          </>
+        )}
+
+        {step === 5 && (
           <>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Pour finir…</h1>
             <p className="mt-2 text-muted-foreground">Deux dernières choses — toutes les deux optionnelles.</p>
