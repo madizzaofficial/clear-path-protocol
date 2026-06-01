@@ -15,6 +15,53 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
 type UserPayload = { uid: string; email: string; firstName: string };
 
 
+// ── new-student-admin-alert ──────────────────────────────────────────────────
+// Notifie support@ dès qu'un nouvel élève s'inscrit.
+
+export const newStudentAdminAlert = inngest.createFunction(
+  { id: "new-student-admin-alert", triggers: [{ event: "user/signed.up" }] },
+  async ({ event, step }: { event: { data: UserPayload }; step: any }) => {
+    const { uid, email, firstName } = event.data;
+    await step.run("notify-admin-signup", () =>
+      sendEmail(
+        "support@protocole-clear.com",
+        `Nouvel élève inscrit — ${firstName}`,
+        `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#FFF9F1;font-family:'Helvetica Neue',Arial,sans-serif;">
+<div style="max-width:560px;margin:0 auto;padding:40px 20px;background:#FFF9F1;">
+
+  <div style="text-align:center;margin-bottom:32px;">
+    <img src="https://app.protocole-clear.com/logo_clear.png" alt="Protocole Clear" width="56" height="56" style="border-radius:50%;display:block;margin:0 auto 12px;border:0;" />
+    <h1 style="font-family:Georgia,serif;color:#1a1a1a;margin:0;font-size:20px;font-weight:600;letter-spacing:-0.02em;">Protocole Clear</h1>
+  </div>
+
+  <div style="background:white;border-radius:24px;padding:28px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+    <h2 style="font-family:Georgia,serif;color:#1a1a1a;margin:0 0 10px;font-size:20px;">Nouvel élève inscrit 🎉</h2>
+    <table style="width:100%;border-collapse:collapse;margin-top:12px;">
+      <tr><td style="padding:8px 0;color:#888;font-size:14px;width:100px;">Nom</td><td style="padding:8px 0;font-size:14px;font-weight:600;color:#1a1a1a;">${firstName}</td></tr>
+      <tr><td style="padding:8px 0;color:#888;font-size:14px;">Email</td><td style="padding:8px 0;font-size:14px;color:#1a1a1a;">${email}</td></tr>
+    </table>
+  </div>
+
+  <div style="background:white;border-radius:24px;padding:24px 28px;margin-bottom:28px;box-shadow:0 1px 4px rgba(0,0,0,0.06);text-align:center;">
+    <a href="https://app.protocole-clear.com/admin/student/${uid}" style="display:inline-block;background:#1a1a1a;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:9999px;font-size:15px;font-weight:600;letter-spacing:0.02em;">
+      Voir le profil élève →
+    </a>
+  </div>
+
+  <p style="text-align:center;color:#ccc;font-size:12px;margin:0;">
+    Cet email a été envoyé via <strong style="color:#c4724b;">Protocole Clear</strong>.
+  </p>
+</div>
+</body>
+</html>`,
+      )
+    );
+  },
+);
+
 // ── intake-confirmation ──────────────────────────────────────────────────────
 // Sends a confirmation email immediately when a user submits their intake form.
 

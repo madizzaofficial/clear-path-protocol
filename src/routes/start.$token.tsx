@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { db, storage } from "@/lib/firebase";
 import { auth } from "@/lib/firebase";
-import { doc, getDoc, setDoc, runTransaction } from "firebase/firestore";
+import { doc, getDoc, setDoc, runTransaction, collection, addDoc } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
   updateProfile,
@@ -365,6 +365,17 @@ function OnboardingPage() {
 
     const firstName = displayName.split(" ")[0] || fbUser.email?.split("@")[0] || "";
     const eventPayload = { uid: fbUser.uid, email: fbUser.email ?? "", firstName };
+
+    // Notification admin
+    addDoc(collection(db, "admin_notifications"), {
+      type: "new_student",
+      studentUid: fbUser.uid,
+      studentName: displayName,
+      studentEmail: fbUser.email ?? "",
+      read: false,
+      createdAt: Date.now(),
+    }).catch(() => {});
+
     triggerSignUpFn({ data: eventPayload }).catch(() => {});
     triggerIntakeFn({ data: eventPayload }).catch(() => {});
   }

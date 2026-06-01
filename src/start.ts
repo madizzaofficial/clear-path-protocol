@@ -3,12 +3,12 @@ import { serve } from "inngest/edge";
 
 import { renderErrorPage } from "./lib/error-page";
 import { inngest } from "./lib/inngest";
-import { intakeConfirmation, routineNotification } from "./lib/inngest-functions";
+import { newStudentAdminAlert, intakeConfirmation, routineNotification } from "./lib/inngest-functions";
 import { handleStripeWebhook } from "./lib/stripe-webhook";
 
 const inngestHandler = serve({
   client: inngest,
-  functions: [intakeConfirmation, routineNotification],
+  functions: [newStudentAdminAlert, intakeConfirmation, routineNotification],
   servePath: "/api/inngest",
 });
 

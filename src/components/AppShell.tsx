@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Home, BookOpen, Sparkles, ShieldCheck, User, LogOut, UserCircle, Camera, Moon, Sun, HelpCircle, FlaskConical } from "lucide-react";
+import { Home, BookOpen, Sparkles, ShieldCheck, User, LogOut, UserCircle, Camera, Moon, Sun, HelpCircle, FlaskConical, Bell } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 import { ReactNode } from "react";
 import {
@@ -10,10 +10,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/use-auth";
+import { AdminBell } from "@/components/AdminBell";
 
 
 function UserMenu() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { theme, toggle } = useTheme();
 
@@ -59,6 +60,13 @@ function UserMenu() {
               <UserCircle className="mr-2 h-4 w-4" /> Mon profil
             </Link>
           </DropdownMenuItem>
+          {isAdmin && (
+            <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2">
+              <Link to="/admin/notifications">
+                <Bell className="mr-2 h-4 w-4" /> Notifications
+              </Link>
+            </DropdownMenuItem>
+          )}
         </div>
         <DropdownMenuSeparator />
         <div className="p-1">
@@ -118,6 +126,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             })}
           </nav>
           <div className="flex items-center gap-2">
+            {isAdmin && <AdminBell />}
             <UserMenu />
           </div>
         </div>
