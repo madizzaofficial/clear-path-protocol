@@ -34,8 +34,8 @@ export const intakeConfirmation = inngest.createFunction(
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Bilan reçu — Protocole Clear</title>
 </head>
-<body style="margin:0;padding:0;background:#fdf8f3;font-family:'Helvetica Neue',Arial,sans-serif;">
-<div style="max-width:560px;margin:0 auto;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#FFF9F1;font-family:'Helvetica Neue',Arial,sans-serif;">
+<div style="max-width:560px;margin:0 auto;padding:40px 20px;background:#FFF9F1;">
 
   <!-- Logo -->
   <div style="text-align:center;margin-bottom:32px;">
