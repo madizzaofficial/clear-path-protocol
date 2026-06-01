@@ -14,6 +14,19 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
 
 type UserPayload = { uid: string; email: string; firstName: string };
 
+function esc(s: string): string {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function safeUid(uid: string): string {
+  return /^[A-Za-z0-9]+$/.test(uid) ? uid : "";
+}
+
 
 // ── new-student-admin-alert ──────────────────────────────────────────────────
 // Notifie support@ dès qu'un nouvel élève s'inscrit.
@@ -25,7 +38,7 @@ export const newStudentAdminAlert = inngest.createFunction(
     await step.run("notify-admin-signup", () =>
       sendEmail(
         "support@protocole-clear.com",
-        `Nouvel élève inscrit — ${firstName}`,
+        `Nouvel élève inscrit — ${esc(firstName)}`,
         `<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
@@ -40,13 +53,13 @@ export const newStudentAdminAlert = inngest.createFunction(
   <div style="background:#ffffff !important;border-radius:24px;padding:28px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
     <h2 style="font-family:Georgia,serif;color:#1a1a1a;margin:0 0 10px;font-size:20px;">Nouvel élève inscrit 🎉</h2>
     <table style="width:100%;border-collapse:collapse;margin-top:12px;">
-      <tr><td style="padding:8px 0;color:#888;font-size:14px;width:100px;">Nom</td><td style="padding:8px 0;font-size:14px;font-weight:600;color:#1a1a1a;">${firstName}</td></tr>
-      <tr><td style="padding:8px 0;color:#888;font-size:14px;">Email</td><td style="padding:8px 0;font-size:14px;color:#1a1a1a;">${email}</td></tr>
+      <tr><td style="padding:8px 0;color:#888;font-size:14px;width:100px;">Nom</td><td style="padding:8px 0;font-size:14px;font-weight:600;color:#1a1a1a;">${esc(firstName)}</td></tr>
+      <tr><td style="padding:8px 0;color:#888;font-size:14px;">Email</td><td style="padding:8px 0;font-size:14px;color:#1a1a1a;">${esc(email)}</td></tr>
     </table>
   </div>
 
   <div style="background:#ffffff !important;border-radius:24px;padding:24px 28px;margin-bottom:28px;box-shadow:0 1px 4px rgba(0,0,0,0.06);text-align:center;">
-    <a href="https://app.protocole-clear.com/admin/student/${uid}" style="display:inline-block;background:#1a1a1a;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:9999px;font-size:15px;font-weight:600;letter-spacing:0.02em;">
+    <a href="https://app.protocole-clear.com/admin/student/${safeUid(uid)}" style="display:inline-block;background:#1a1a1a;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:9999px;font-size:15px;font-weight:600;letter-spacing:0.02em;">
       Voir le profil élève →
     </a>
   </div>
@@ -73,7 +86,7 @@ export const intakeConfirmation = inngest.createFunction(
     await step.run("send-confirmation", () =>
       sendEmail(
         email,
-        `Nous avons bien reçu tes informations, ${firstName} ✅`,
+        `Nous avons bien reçu tes informations, ${esc(firstName)} ✅`,
         `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -95,7 +108,7 @@ export const intakeConfirmation = inngest.createFunction(
 
   <!-- Message principal -->
   <div style="background:#ffffff !important;border-radius:24px;padding:28px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
-    <h2 style="font-family:Georgia,serif;color:#1a1a1a;margin:0 0 10px;font-size:22px;">Bonjour ${firstName} !</h2>
+    <h2 style="font-family:Georgia,serif;color:#1a1a1a;margin:0 0 10px;font-size:22px;">Bonjour ${esc(firstName)} !</h2>
     <p style="color:#555;margin:0;line-height:1.65;font-size:15px;">
       Nous avons bien reçu ton questionnaire et tes éventuelles photos. Je vais maintenant analyser ton profil afin de construire une routine adaptée à ta peau.
     </p>
@@ -141,15 +154,15 @@ export const intakeConfirmation = inngest.createFunction(
       await step.run("notify-admin-intake", () =>
         sendEmail(
           adminEmail,
-          `Nouveau bilan reçu — ${firstName}`,
+          `Nouveau bilan reçu — ${esc(firstName)}`,
           `
           <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#111">
             <h1 style="font-size:22px;font-weight:700;margin:0 0 16px">Nouveau bilan peau soumis</h1>
             <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
-              <tr><td style="padding:8px 0;color:#888;font-size:14px;width:120px;">Élève</td><td style="padding:8px 0;font-size:14px;font-weight:600;">${firstName}</td></tr>
-              <tr><td style="padding:8px 0;color:#888;font-size:14px;">Email</td><td style="padding:8px 0;font-size:14px;">${email}</td></tr>
+              <tr><td style="padding:8px 0;color:#888;font-size:14px;width:120px;">Élève</td><td style="padding:8px 0;font-size:14px;font-weight:600;">${esc(firstName)}</td></tr>
+              <tr><td style="padding:8px 0;color:#888;font-size:14px;">Email</td><td style="padding:8px 0;font-size:14px;">${esc(email)}</td></tr>
             </table>
-            <a href="https://app.protocole-clear.com/admin/student/${uid}" style="display:inline-block;background:#c4724b;color:#fff;text-decoration:none;padding:12px 24px;border-radius:9999px;font-weight:600;font-size:14px;">
+            <a href="https://app.protocole-clear.com/admin/student/${safeUid(uid)}" style="display:inline-block;background:#c4724b;color:#fff;text-decoration:none;padding:12px 24px;border-radius:9999px;font-weight:600;font-size:14px;">
               Voir le profil élève →
             </a>
           </div>
@@ -174,10 +187,10 @@ export const routineNotification = inngest.createFunction(
     await step.run("send-week1-checkin", () =>
       sendEmail(
         email,
-        `${firstName}, une semaine avec ta routine — comment ça se passe ?`,
+        `${esc(firstName)}, une semaine avec ta routine — comment ça se passe ?`,
         `
         <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#111">
-          <h1 style="font-size:24px;font-weight:700;margin:0 0 12px">7 jours de routine, ${firstName} 🌟</h1>
+          <h1 style="font-size:24px;font-weight:700;margin:0 0 12px">7 jours de routine, ${esc(firstName)} 🌟</h1>
           <p style="color:#555;line-height:1.6;margin:0 0 16px">
             Il y a une semaine, tu as reçu ta routine personnalisée. La régularité est la clé : même les petits changements quotidiens font une différence visible sur le long terme.
           </p>

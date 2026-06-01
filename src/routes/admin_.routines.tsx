@@ -203,8 +203,8 @@ const sendRoutineEmailFn = createServerFn({ method: "POST" })
         from: (() => { const r = process.env.RESEND_FROM ?? "onboarding@resend.dev"; return r.includes("<") ? r : `Protocole Clear <${r}>`; })(),
         to: data.email,
         subject: data.isUpdate
-          ? `${firstName}, ta routine a été mise à jour ✨`
-          : `${firstName}, ta routine personnalisée est prête ✨`,
+          ? `${escapeHtml(firstName)}, ta routine a été mise à jour ✨`
+          : `${escapeHtml(firstName)}, ta routine personnalisée est prête ✨`,
         html,
       }),
     });
@@ -285,7 +285,7 @@ function buildEmailHtml(firstName: string, am: RoutineStep[], pm: RoutineStep[],
 
   <!-- Greeting -->
   <div style="background:white;border-radius:24px;padding:28px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
-    <h2 style="font-family:Georgia,serif;color:#1a1a1a;margin:0 0 10px;font-size:22px;">Bonjour ${firstName} !</h2>
+    <h2 style="font-family:Georgia,serif;color:#1a1a1a;margin:0 0 10px;font-size:22px;">Bonjour ${escapeHtml(firstName)} !</h2>
     <p style="color:#555;margin:0;line-height:1.65;font-size:15px;">
       ${isUpdate
         ? "Ta routine personnalisée vient d'être mise à jour. Voici ta nouvelle routine telle que modifiée par ton coach."
