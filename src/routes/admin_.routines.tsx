@@ -269,10 +269,13 @@ function buildEmailHtml(firstName: string, am: RoutineStep[], pm: RoutineStep[],
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light">
 <title>Ta routine Protocole Clear</title>
+<style>:root{color-scheme:light only;}</style>
 </head>
-<body style="margin:0;padding:0;background:#FFF9F1;font-family:'Helvetica Neue',Arial,sans-serif;">
-<div style="max-width:560px;margin:0 auto;padding:40px 20px;background:#FFF9F1;">
+<body style="margin:0;padding:0;background:#FFF9F1 !important;font-family:'Helvetica Neue',Arial,sans-serif;color:#1a1a1a !important;">
+<div style="max-width:560px;margin:0 auto;padding:40px 20px;background:#FFF9F1 !important;">
 
   <!-- Logo -->
   <div style="text-align:center;margin-bottom:32px;">

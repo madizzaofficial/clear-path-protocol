@@ -37,7 +37,7 @@ export const newStudentAdminAlert = inngest.createFunction(
     <h1 style="font-family:Georgia,serif;color:#1a1a1a;margin:0;font-size:20px;font-weight:600;letter-spacing:-0.02em;">Protocole Clear</h1>
   </div>
 
-  <div style="background:white;border-radius:24px;padding:28px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+  <div style="background:#ffffff !important;border-radius:24px;padding:28px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
     <h2 style="font-family:Georgia,serif;color:#1a1a1a;margin:0 0 10px;font-size:20px;">Nouvel élève inscrit 🎉</h2>
     <table style="width:100%;border-collapse:collapse;margin-top:12px;">
       <tr><td style="padding:8px 0;color:#888;font-size:14px;width:100px;">Nom</td><td style="padding:8px 0;font-size:14px;font-weight:600;color:#1a1a1a;">${firstName}</td></tr>
@@ -45,7 +45,7 @@ export const newStudentAdminAlert = inngest.createFunction(
     </table>
   </div>
 
-  <div style="background:white;border-radius:24px;padding:24px 28px;margin-bottom:28px;box-shadow:0 1px 4px rgba(0,0,0,0.06);text-align:center;">
+  <div style="background:#ffffff !important;border-radius:24px;padding:24px 28px;margin-bottom:28px;box-shadow:0 1px 4px rgba(0,0,0,0.06);text-align:center;">
     <a href="https://app.protocole-clear.com/admin/student/${uid}" style="display:inline-block;background:#1a1a1a;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:9999px;font-size:15px;font-weight:600;letter-spacing:0.02em;">
       Voir le profil élève →
     </a>
@@ -79,10 +79,13 @@ export const intakeConfirmation = inngest.createFunction(
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light">
 <title>Bilan reçu — Protocole Clear</title>
+<style>:root{color-scheme:light only;}</style>
 </head>
-<body style="margin:0;padding:0;background:#FFF9F1;font-family:'Helvetica Neue',Arial,sans-serif;">
-<div style="max-width:560px;margin:0 auto;padding:40px 20px;background:#FFF9F1;">
+<body style="margin:0;padding:0;background:#FFF9F1 !important;font-family:'Helvetica Neue',Arial,sans-serif;color:#1a1a1a !important;">
+<div style="max-width:560px;margin:0 auto;padding:40px 20px;background:#FFF9F1 !important;">
 
   <!-- Logo -->
   <div style="text-align:center;margin-bottom:32px;">
@@ -91,7 +94,7 @@ export const intakeConfirmation = inngest.createFunction(
   </div>
 
   <!-- Message principal -->
-  <div style="background:white;border-radius:24px;padding:28px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+  <div style="background:#ffffff !important;border-radius:24px;padding:28px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
     <h2 style="font-family:Georgia,serif;color:#1a1a1a;margin:0 0 10px;font-size:22px;">Bonjour ${firstName} !</h2>
     <p style="color:#555;margin:0;line-height:1.65;font-size:15px;">
       Nous avons bien reçu ton questionnaire et tes éventuelles photos. Je vais maintenant analyser ton profil afin de construire une routine adaptée à ta peau.
@@ -99,7 +102,7 @@ export const intakeConfirmation = inngest.createFunction(
   </div>
 
   <!-- Délai -->
-  <div style="background:white;border-radius:24px;padding:24px 28px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+  <div style="background:#ffffff !important;border-radius:24px;padding:24px 28px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
     <table cellpadding="0" cellspacing="0">
       <tr>
         <td style="padding-right:14px;">
@@ -114,7 +117,7 @@ export const intakeConfirmation = inngest.createFunction(
   </div>
 
   <!-- CTA -->
-  <div style="background:white;border-radius:24px;padding:24px 28px;margin-bottom:28px;box-shadow:0 1px 4px rgba(0,0,0,0.06);text-align:center;">
+  <div style="background:#ffffff !important;border-radius:24px;padding:24px 28px;margin-bottom:28px;box-shadow:0 1px 4px rgba(0,0,0,0.06);text-align:center;">
     <p style="color:#555;font-size:14px;margin:0 0 16px;line-height:1.5;">En attendant, tu peux accéder à ton espace et découvrir le programme.</p>
     <a href="https://app.protocole-clear.com" style="display:inline-block;background:#1a1a1a;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:9999px;font-size:15px;font-weight:600;letter-spacing:0.02em;">
       Accéder à mon espace →
