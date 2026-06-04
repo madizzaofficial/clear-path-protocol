@@ -35,6 +35,7 @@ export type RoutineStep = {
   order: number;
   category: string;
   product: string;
+  brand?: string;
   instructions: string;
   imageUrl?: string;
   purchaseUrl?: string;
@@ -53,6 +54,7 @@ export type ExtraBlock = {
 export type StepSaveData = {
   category: string;
   product: string;
+  brand?: string;
   instructions: string;
   imageUrl?: string;
   purchaseUrl?: string;
@@ -106,6 +108,9 @@ export function SortableStep({
         <p className="mt-1 text-sm font-semibold">
           {step.product || <span className="italic text-muted-foreground">—</span>}
         </p>
+        {step.brand && (
+          <p className="text-xs text-muted-foreground">{step.brand}</p>
+        )}
         {step.instructions && (
           <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{step.instructions}</p>
         )}
@@ -160,6 +165,7 @@ export function StepDialog({
 }) {
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
   const [product, setProduct] = useState("");
+  const [brand, setBrand] = useState("");
   const [instructions, setInstructions] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [purchaseUrl, setPurchaseUrl] = useState("");
@@ -184,6 +190,7 @@ export function StepDialog({
     if (step) {
       setCategory(step.category || CATEGORIES[0]);
       setProduct(step.product);
+      setBrand(step.brand ?? "");
       setInstructions(step.instructions);
       setImageUrl(step.imageUrl ?? "");
       setPurchaseUrl(step.purchaseUrl ?? "");
@@ -201,6 +208,7 @@ export function StepDialog({
   function fillFromCatalog(p: CatalogProduct) {
     setCategory(p.category);
     setProduct(p.name);
+    setBrand(p.brand ?? "");
     setInstructions(p.instructions);
     setImageUrl(p.imageUrl ?? "");
     setPurchaseUrl(p.purchaseLinks?.[0]?.url ?? p.purchaseUrl ?? "");
@@ -260,47 +268,16 @@ export function StepDialog({
                     onChange={setCatalogSearch}
                     placeholder="Rechercher dans le catalogue…"
                     inputClassName="h-9 w-full rounded-xl border border-border bg-background pl-9 pr-3 text-sm outline-none focus:border-primary"
-                    suggestions={
-                      catalogSearch.trim()
-                        ? catalogResults.slice(0, 6).map((p) => ({
-                            id: p.id,
-                            label: p.name,
-                            sublabel: p.category,
-                            onSelect: () => fillFromCatalog(p),
-                          }))
-                        : []
-                    }
+                    showWhenEmpty
+                    clearOnSelect={false}
+                    suggestions={catalogResults.map((p) => ({
+                      id: p.id,
+                      label: p.name,
+                      sublabel: p.brand ? `${p.brand} · ${p.category}` : p.category,
+                      imageUrl: p.imageUrl,
+                      onSelect: () => fillFromCatalog(p),
+                    }))}
                   />
-                  <ul className="mt-2 max-h-44 space-y-0.5 overflow-y-auto">
-                    {catalogResults.length === 0 ? (
-                      <li className="py-3 text-center text-xs text-muted-foreground">Aucun résultat</li>
-                    ) : (
-                      catalogResults.map((p) => (
-                        <li key={p.id}>
-                          <button
-                            type="button"
-                            onClick={() => fillFromCatalog(p)}
-                            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors hover:bg-background"
-                          >
-                            {p.imageUrl ? (
-                              <img
-                                src={p.imageUrl}
-                                className="h-8 w-8 shrink-0 rounded-lg border border-border object-contain"
-                              />
-                            ) : (
-                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-muted">
-                                <Package className="h-3.5 w-3.5 text-muted-foreground" />
-                              </div>
-                            )}
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-medium">{p.name}</p>
-                              <p className="text-xs text-muted-foreground">{p.category}</p>
-                            </div>
-                          </button>
-                        </li>
-                      ))
-                    )}
-                  </ul>
                 </div>
               )}
             </div>
@@ -320,10 +297,22 @@ export function StepDialog({
             <div>
               <label className="mb-2 block text-sm font-medium text-foreground/80">Produit</label>
               <input
-
-                autoComplete="off"                value={product}
+                autoComplete="off"
+                value={product}
                 onChange={(e) => setProduct(e.target.value)}
-                placeholder="ex. CeraVe Hydrating Cleanser"
+                placeholder="ex. Hydrating Cleanser"
+                className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-foreground/80">
+                Marque <span className="font-normal text-muted-foreground">(optionnelle)</span>
+              </label>
+              <input
+                autoComplete="off"
+                value={brand}
+                onChange={(e) => setBrand(e.target.value)}
+                placeholder="ex. CeraVe"
                 className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -454,6 +443,7 @@ export function StepDialog({
               onSaveToCatalog({
                 category,
                 product,
+                brand: brand.trim() || undefined,
                 instructions,
                 imageUrl: imageUrl.trim() || undefined,
                 purchaseUrl: purchaseUrl.trim() || undefined,
@@ -477,6 +467,7 @@ export function StepDialog({
               onSave({
                 category,
                 product,
+                brand: brand.trim() || undefined,
                 instructions,
                 imageUrl: imageUrl.trim() || undefined,
                 purchaseUrl: purchaseUrl.trim() || undefined,

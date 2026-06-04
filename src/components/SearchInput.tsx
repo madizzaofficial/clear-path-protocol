@@ -5,6 +5,7 @@ export type SearchSuggestion = {
   id: string;
   label: string;
   sublabel?: string;
+  imageUrl?: string;
   onSelect: () => void;
 };
 
@@ -18,16 +19,19 @@ type Props = {
   icon?: ElementType;
   clearOnSelect?: boolean;
   onEnter?: () => void;
+  /** Si true, affiche les suggestions même quand le champ est vide (utile pour les listes par défaut) */
+  showWhenEmpty?: boolean;
 };
 
-export function SearchInput({ value, onChange, suggestions, placeholder, className, inputClassName, icon, clearOnSelect = true, onEnter }: Props) {
+export function SearchInput({ value, onChange, suggestions, placeholder, className, inputClassName, icon, clearOnSelect = true, onEnter, showWhenEmpty = false }: Props) {
   const Icon = icon ?? Search;
   const [open, setOpen] = useState(false);
   const [cursor, setCursor] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const visible = open && value.trim().length > 0 && suggestions.length > 0;
-  const capped = suggestions.slice(0, 6);
+  const hasContent = showWhenEmpty ? true : value.trim().length > 0;
+  const visible = open && hasContent && suggestions.length > 0;
+  const capped = suggestions.slice(0, 8);
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (!visible) return;
@@ -71,12 +75,25 @@ export function SearchInput({ value, onChange, suggestions, placeholder, classNa
                 type="button"
                 onMouseDown={(e) => { e.preventDefault(); s.onSelect(); setOpen(false); setCursor(-1); if (clearOnSelect) onChange(""); }}
                 onMouseEnter={() => setCursor(i)}
-                className={`flex w-full flex-col px-4 py-2.5 text-left transition-colors ${
+                className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${
                   cursor === i ? "bg-primary-soft" : "hover:bg-muted/50"
                 }`}
               >
-                <span className="text-sm font-medium">{s.label}</span>
-                {s.sublabel && <span className="text-xs text-muted-foreground">{s.sublabel}</span>}
+                {s.imageUrl ? (
+                  <img
+                    src={s.imageUrl}
+                    alt={s.label}
+                    className="h-9 w-9 shrink-0 rounded-lg border border-border object-contain"
+                  />
+                ) : (
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-[10px] font-semibold text-muted-foreground uppercase">
+                    {s.label.slice(0, 2)}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <span className="block truncate text-sm font-medium">{s.label}</span>
+                  {s.sublabel && <span className="block truncate text-xs text-muted-foreground">{s.sublabel}</span>}
+                </div>
               </button>
             </li>
           ))}
