@@ -425,7 +425,11 @@ function RoutinesContent() {
   const { uid: preselectedUid } = Route.useSearch();
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(PointerSensor, {
+      // delay: un clic rapide (<150ms) ne déclenche jamais le drag
+      // ce qui laisse les boutons à l'intérieur des steps fonctionner normalement
+      activationConstraint: { delay: 150, tolerance: 5 },
+    }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
