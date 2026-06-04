@@ -294,6 +294,38 @@ export function StepDialog({
                 ))}
               </select>
             </div>
+            {/* Raccourci nettoyage à l'eau */}
+            {(category === "Nettoyant" || category === "Démaquillant") ? (
+              <button
+                type="button"
+                onClick={() => {
+                  const isWater = product === "Eau" && instructions.includes("rincer");
+                  if (isWater) {
+                    setProduct("");
+                    setInstructions("");
+                    setBrand("");
+                  } else {
+                    setProduct("Eau");
+                    setBrand("");
+                    setInstructions("Se rincer le visage à l'eau tiède, sans savon ni nettoyant.");
+                    setImageUrl("");
+                    setPurchaseUrl("");
+                  }
+                }}
+                className={`flex w-full items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left text-sm font-medium transition-all ${
+                  product === "Eau" && instructions.includes("rincer")
+                    ? "border-primary bg-primary-soft text-primary"
+                    : "border-border hover:border-primary/40"
+                }`}
+              >
+                <span className="text-lg">💧</span>
+                <span>Nettoyage à l'eau uniquement</span>
+                {product === "Eau" && instructions.includes("rincer") && (
+                  <span className="ml-auto text-xs font-normal text-primary">sélectionné</span>
+                )}
+              </button>
+            ) : null}
+
             <div>
               <label className="mb-2 block text-sm font-medium text-foreground/80">Produit</label>
               <input
