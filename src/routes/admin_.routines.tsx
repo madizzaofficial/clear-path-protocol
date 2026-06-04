@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { StudentPicker } from "@/components/StudentPicker";
 import { SortableStep, StepDialog } from "@/components/RoutineStepEditor";
-import type { RoutineStep, ExtraBlock } from "@/components/RoutineStepEditor";
+import type { RoutineStep, ExtraBlock, StepSaveData } from "@/components/RoutineStepEditor";
 import { createServerFn } from "@tanstack/react-start";
 import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
@@ -593,13 +593,7 @@ function RoutinesContent() {
     saveRoutine(updated);
   }
 
-  function handleSaveStep(data: {
-    category: string;
-    product: string;
-    instructions: string;
-    imageUrl?: string;
-    purchaseUrl?: string;
-  }) {
+  function handleSaveStep(data: StepSaveData) {
     if (!routine) return;
     let updated: StudentRoutine;
     if (editingExtrasBlockId !== null) {
@@ -624,13 +618,7 @@ function RoutinesContent() {
     saveRoutine(updated);
   }
 
-  async function handleSaveToCatalog(data: {
-    category: string;
-    product: string;
-    instructions: string;
-    imageUrl?: string;
-    purchaseUrl?: string;
-  }) {
+  async function handleSaveToCatalog(data: StepSaveData) {
     setSavingToCatalog(true);
     try {
       const existing = catalogProducts.find(
@@ -643,9 +631,11 @@ function RoutinesContent() {
         id,
         name: data.product.trim(),
         category: data.category,
+        brand: data.brand?.trim() || undefined,
         instructions: data.instructions,
         imageUrl: data.imageUrl,
         purchaseUrl: data.purchaseUrl,
+        inciAnalysis: data.inciAnalysis,
         verified: existing?.verified ?? true,
         createdAt: existing?.createdAt ?? Date.now(),
         updatedAt: Date.now(),
