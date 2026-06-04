@@ -203,7 +203,7 @@ export function StepDialog({
     setProduct(p.name);
     setInstructions(p.instructions);
     setImageUrl(p.imageUrl ?? "");
-    setPurchaseUrl(p.purchaseUrl ?? "");
+    setPurchaseUrl(p.purchaseLinks?.[0]?.url ?? p.purchaseUrl ?? "");
     setStepInciAnalysis(p.inciAnalysis);
     setCatalogSearch("");
     setShowCatalogPicker(false);
