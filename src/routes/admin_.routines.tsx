@@ -422,6 +422,9 @@ function RoutinesContent() {
   const [aiReasoningOpen, setAiReasoningOpen] = useState(false);
   const [pendingAiRoutine, setPendingAiRoutine] = useState<RoutineSuggestion | null>(null);
 
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewIsUpdate, setPreviewIsUpdate] = useState(false);
+
   const { uid: preselectedUid } = Route.useSearch();
 
   const sensors = useSensors(
@@ -510,8 +513,13 @@ function RoutinesContent() {
   function handleSendEmail() {
     if (!routine || !selectedUser) return;
     const isUpdate = !!(routine.sentAt);
-    if (isUpdate) {
-      // For updates, ask for a reason before sending
+    setPreviewIsUpdate(isUpdate);
+    setShowPreviewModal(true);
+  }
+
+  function handleConfirmPreview() {
+    setShowPreviewModal(false);
+    if (previewIsUpdate) {
       setPendingReasonTag("ajustement");
       setPendingReasonNote("");
       setShowReasonModal(true);
@@ -1329,6 +1337,47 @@ function RoutinesContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Email preview modal — shown before sending */}
+      <Dialog open={showPreviewModal} onOpenChange={(o) => { if (!o) setShowPreviewModal(false); }}>
+        <DialogContent className="rounded-3xl sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-display">
+              Prévisualisation — ce que recevra {selectedUser?.displayName?.split(" ")[0] ?? selectedUser?.email}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="overflow-hidden rounded-2xl border border-border" style={{ height: 480 }}>
+            {routine && selectedUser && (
+              <iframe
+                srcDoc={buildEmailHtml(
+                  selectedUser.displayName?.split(" ")[0] ?? selectedUser.email.split("@")[0],
+                  routine.am,
+                  routine.pm,
+                  previewIsUpdate,
+                )}
+                title="Prévisualisation email"
+                className="h-full w-full"
+                sandbox="allow-same-origin"
+              />
+            )}
+          </div>
+          <DialogFooter className="gap-2">
+            <button
+              onClick={() => setShowPreviewModal(false)}
+              className="flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted"
+            >
+              <X className="h-4 w-4" /> Annuler
+            </button>
+            <button
+              onClick={handleConfirmPreview}
+              className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2 text-sm font-semibold text-background"
+            >
+              <Send className="h-4 w-4" />
+              {previewIsUpdate ? "Confirmer et préciser la raison →" : "Confirmer et envoyer"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Reason modal — shown only when updating an existing routine */}
       <Dialog open={showReasonModal} onOpenChange={(o) => { if (!o) setShowReasonModal(false); }}>
