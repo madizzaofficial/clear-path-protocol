@@ -6,11 +6,11 @@ import {
   collection,
   query,
   orderBy,
+  where,
   limit,
   onSnapshot,
   doc,
   updateDoc,
-  deleteDoc,
 } from "firebase/firestore";
 
 type AdminNotification = {
@@ -41,6 +41,8 @@ export function AdminBell() {
   useEffect(() => {
     const q = query(
       collection(db, "admin_notifications"),
+      where("hidden", "!=", true),
+      orderBy("hidden"),
       orderBy("createdAt", "desc"),
       limit(20)
     );
@@ -69,7 +71,7 @@ export function AdminBell() {
   }
 
   async function clearAll() {
-    await Promise.all(notifs.map((n) => deleteDoc(doc(db, "admin_notifications", n.id))));
+    await Promise.all(notifs.map((n) => updateDoc(doc(db, "admin_notifications", n.id), { hidden: true, read: true })));
   }
 
   return (

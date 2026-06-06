@@ -7,6 +7,7 @@ import {
   collection,
   query,
   orderBy,
+  where,
   onSnapshot,
   doc,
   updateDoc,
@@ -47,7 +48,7 @@ function NotificationsPage() {
 
   useEffect(() => {
     if (!isAdmin) return;
-    const q = query(collection(db, "admin_notifications"), orderBy("createdAt", "desc"));
+    const q = query(collection(db, "admin_notifications"), where("hidden", "!=", true), orderBy("hidden"), orderBy("createdAt", "desc"));
     return onSnapshot(q, (snap) => {
       setNotifs(snap.docs.map((d) => ({ id: d.id, ...d.data() } as AdminNotification)));
     });
