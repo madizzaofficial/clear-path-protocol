@@ -10,7 +10,7 @@ import {
   onSnapshot,
   doc,
   updateDoc,
-  where,
+  deleteDoc,
 } from "firebase/firestore";
 
 type AdminNotification = {
@@ -68,6 +68,10 @@ export function AdminBell() {
     await Promise.all(notifs.filter((n) => !n.read).map((n) => markRead(n.id)));
   }
 
+  async function clearAll() {
+    await Promise.all(notifs.map((n) => deleteDoc(doc(db, "admin_notifications", n.id))));
+  }
+
   return (
     <div ref={ref} className="relative">
       <button
@@ -86,14 +90,18 @@ export function AdminBell() {
         <div className="absolute right-0 top-11 z-50 w-80 rounded-2xl border border-border/60 bg-background shadow-elegant">
           <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
             <p className="text-sm font-semibold">Notifications</p>
-            {unread > 0 && (
-              <button
-                onClick={markAllRead}
-                className="text-xs text-primary hover:underline"
-              >
-                Tout marquer lu
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {unread > 0 && (
+                <button onClick={markAllRead} className="text-xs text-primary hover:underline">
+                  Tout marquer lu
+                </button>
+              )}
+              {notifs.length > 0 && (
+                <button onClick={clearAll} className="text-xs text-muted-foreground hover:text-destructive hover:underline">
+                  Effacer tout
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="max-h-72 overflow-y-auto">
