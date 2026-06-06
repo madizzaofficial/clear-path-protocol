@@ -7,7 +7,6 @@ import {
   collection,
   query,
   orderBy,
-  where,
   onSnapshot,
   doc,
   updateDoc,
@@ -27,19 +26,20 @@ type AdminNotification = {
   studentEmail: string;
   studentUid: string;
   read: boolean;
+  hidden?: boolean;
   createdAt: number;
 };
 
-function timeAgo(ts: number): string {
-  const diff = Date.now() - ts;
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return "à l'instant";
-  if (m < 60) return `il y a ${m} min`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `il y a ${h}h`;
-  const d = Math.floor(h / 24);
-  if (d < 30) return `il y a ${d}j`;
-  return new Date(ts).toLocaleDateString("fr-FR");
+function formatDateTime(ts: number): string {
+  const d = new Date(ts);
+  const today = new Date();
+  const isToday = d.toDateString() === today.toDateString();
+  const time = d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  if (isToday) return `Aujourd'hui à ${time}`;
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  if (d.toDateString() === yesterday.toDateString()) return `Hier à ${time}`;
+  return `${d.toLocaleDateString("fr-FR", { day: "numeric", month: "long" })} à ${time}`;
 }
 
 function NotificationsPage() {
@@ -48,7 +48,7 @@ function NotificationsPage() {
 
   useEffect(() => {
     if (!isAdmin) return;
-    const q = query(collection(db, "admin_notifications"), where("hidden", "!=", true), orderBy("hidden"), orderBy("createdAt", "desc"));
+    const q = query(collection(db, "admin_notifications"), orderBy("createdAt", "desc"));
     return onSnapshot(q, (snap) => {
       setNotifs(snap.docs.map((d) => ({ id: d.id, ...d.data() } as AdminNotification)));
     });
@@ -62,7 +62,7 @@ function NotificationsPage() {
     await Promise.all(notifs.filter((n) => !n.read).map((n) => markRead(n.id)));
   }
 
-  const unread = notifs.filter((n) => !n.read).length;
+  const unread = notifs.filter((n) => !n.read && !n.hidden).length;
 
   return (
     <AdminShell>
@@ -99,6 +99,7 @@ function NotificationsPage() {
               <div
                 key={n.id}
                 className={`flex items-start gap-4 rounded-2xl border p-4 transition-colors ${
+                  n.hidden ? "border-border/40 bg-muted/20 opacity-50" :
                   !n.read ? "border-primary/20 bg-primary-soft/20" : "border-border/60 bg-card"
                 }`}
               >
@@ -106,12 +107,20 @@ function NotificationsPage() {
                   🎓
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium leading-tight">
-                    Nouvel élève inscrit — {n.studentName || n.studentEmail}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium leading-tight">
+                      Nouvel élève inscrit — {n.studentName || n.studentEmail}
+                    </p>
+                    {n.hidden && (
+                      <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">Effacée</span>
+                    )}
+                    {!n.hidden && !n.read && (
+                      <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">Non lue</span>
+                    )}
+                  </div>
                   <p className="mt-0.5 truncate text-sm text-muted-foreground">{n.studentEmail}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-3">
-                    <span className="text-xs text-muted-foreground">{timeAgo(n.createdAt)}</span>
+                    <span className="text-xs text-muted-foreground">{formatDateTime(n.createdAt)}</span>
                     <Link
                       to="/admin/student/$uid"
                       params={{ uid: n.studentUid }}
@@ -119,7 +128,7 @@ function NotificationsPage() {
                     >
                       Voir le profil →
                     </Link>
-                    {!n.read && (
+                    {!n.hidden && !n.read && (
                       <button
                         onClick={() => markRead(n.id)}
                         className="text-xs text-muted-foreground hover:text-foreground hover:underline"
@@ -129,7 +138,7 @@ function NotificationsPage() {
                     )}
                   </div>
                 </div>
-                {!n.read && (
+                {!n.hidden && !n.read && (
                   <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
                 )}
               </div>
