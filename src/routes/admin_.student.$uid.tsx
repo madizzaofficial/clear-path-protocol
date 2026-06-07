@@ -806,7 +806,7 @@ function StudentPage() {
           const barPct = skinState?.barrierPct ?? 0;
           const acnPct = skinState?.acnePct ?? 0;
           const infDesc = infPct >= 67 ? "Active" : infPct >= 34 ? "Modérée" : "Sous contrôle";
-          const barDesc = barPct >= 67 ? "Excellente" : barPct >= 34 ? "En cours" : "Compromise";
+          const barDesc = barPct >= 67 ? "Compromise" : barPct >= 34 ? "En cours" : "Excellente";
           const acnDesc = acnPct >= 67 ? "Active" : acnPct >= 34 ? "Modérée" : "Contrôlée";
 
           return (
@@ -952,7 +952,7 @@ function StudentPage() {
                     <div className="space-y-4">
                       {([
                         { key: "inflammationPct" as const, label: "🔥 Inflammation", hint: "0 = absente → 100 = sévère" },
-                        { key: "barrierPct" as const, label: "🧱 Barrière cutanée", hint: "0 = compromise → 100 = excellente" },
+                        { key: "barrierPct" as const, label: "🧱 Barrière cutanée", hint: "0 = excellente → 100 = compromise" },
                         { key: "acnePct" as const, label: "🧴 Acné", hint: "0 = contrôlée → 100 = sévère" },
                       ]).map(({ key, label, hint }) => (
                         <div key={key}>
@@ -1005,7 +1005,7 @@ function StudentPage() {
                     <div className="space-y-3">
                       <div className="grid grid-cols-3 gap-2">
                         <AdminCircleMetric label="Inflammation" emoji="🔥" pct={infPct} inverted description={infDesc} />
-                        <AdminCircleMetric label="Barrière" emoji="🧱" pct={barPct} description={barDesc} />
+                        <AdminCircleMetric label="Barrière" emoji="🧱" pct={barPct} inverted description={barDesc} />
                         <AdminCircleMetric label="Acné" emoji="🧴" pct={acnPct} inverted description={acnDesc} />
                       </div>
                       {skinState.currentPhase && (
@@ -1562,7 +1562,7 @@ function StudentPage() {
                           </p>
                           <div className="grid grid-cols-3 gap-2">
                             <AdminCircleMetric label="Inflammation" emoji="🔥" pct={entry.inflammationPct} inverted description={infDesc} />
-                            <AdminCircleMetric label="Barrière cutanée" emoji="🧱" pct={entry.barrierPct} description={barDesc} />
+                            <AdminCircleMetric label="Barrière cutanée" emoji="🧱" pct={entry.barrierPct} inverted description={barDesc} />
                             <AdminCircleMetric label="Acné" emoji="🧴" pct={entry.acnePct} inverted description={acnDesc} />
                           </div>
                         </div>

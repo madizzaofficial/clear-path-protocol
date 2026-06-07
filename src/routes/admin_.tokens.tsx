@@ -1,10 +1,69 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
 import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
-import { db } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
 import { collection, getDocs, doc, setDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { Link2, Copy, Check, Loader2, Clock, User, Ban, X } from "lucide-react";
+import { Link2, Copy, Check, Loader2, Clock, User, Ban, X, UserPlus } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+// ── Server function — create a student account ────────────────────────────────
+
+const createStudentFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { email: string; password: string; displayName: string; callerToken: string }) => d)
+  .handler(async (ctx) => {
+    const encoded = process.env.FIREBASE_SERVICE_ACCOUNT;
+    if (!encoded) throw new Error("FIREBASE_SERVICE_ACCOUNT manquant");
+
+    const { getApps: _getApps, initializeApp: _initApp, cert: _cert } = await import("firebase-admin/app");
+    const { getAuth: _getAuth } = await import("firebase-admin/auth");
+    const { getFirestore: _getFs } = await import("firebase-admin/firestore");
+
+    const adminApp = _getApps().find((a) => a.name === "admin")
+      ?? _initApp({ credential: _cert(JSON.parse(Buffer.from(encoded, "base64").toString("utf8"))) }, "admin");
+
+    const adminAuth = _getAuth(adminApp);
+    const adminDb = _getFs(adminApp);
+
+    // 1. Verify caller
+    let callerUid: string;
+    try {
+      const decoded = await adminAuth.verifyIdToken(ctx.data.callerToken);
+      callerUid = decoded.uid;
+    } catch {
+      throw new Error("Unauthorized: invalid token");
+    }
+
+    // 2. Check caller is admin
+    const configSnap = await adminDb.collection("config").doc("admins").get();
+    const adminUids: string[] = configSnap.data()?.uids ?? [];
+    if (!adminUids.includes(callerUid)) throw new Error("Forbidden: not an admin");
+
+    const { email, password, displayName } = ctx.data;
+    const userRecord = await adminAuth.createUser({ email, password, displayName });
+    const uid = userRecord.uid;
+
+    await adminDb.collection("users").doc(uid).create({
+      uid,
+      email,
+      displayName,
+      photoURL: null,
+      enrolledAt: Date.now(),
+      welcomeSeen: false,
+    });
+
+    await adminDb.collection("admin_notifications").add({
+      type: "new_student",
+      studentUid: uid,
+      studentName: displayName,
+      studentEmail: email,
+      read: false,
+      createdAt: Date.now(),
+    });
+
+    return { uid };
+  });
 
 export const Route = createFileRoute("/admin_/tokens")({
   head: () => ({
@@ -51,6 +110,14 @@ function TokensPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [revoking, setRevoking] = useState<Set<string>>(new Set());
   const [confirmRevoke, setConfirmRevoke] = useState<string | null>(null);
+
+  // Manual student creation
+  const [showAddStudent, setShowAddStudent] = useState(false);
+  const [addName, setAddName] = useState("");
+  const [addEmail, setAddEmail] = useState("");
+  const [addPassword, setAddPassword] = useState("");
+  const [addError, setAddError] = useState("");
+  const [addLoading, setAddLoading] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -101,6 +168,26 @@ function TokensPage() {
     setConfirmRevoke(null);
   }
 
+  async function addStudent(e: React.FormEvent) {
+    e.preventDefault();
+    setAddError("");
+    setAddLoading(true);
+    try {
+      const callerToken = await auth.currentUser?.getIdToken();
+      if (!callerToken) throw new Error("Non authentifié");
+      const { uid } = await createStudentFn({
+        data: { email: addEmail.trim(), password: addPassword, displayName: addName.trim(), callerToken },
+      });
+      setShowAddStudent(false);
+      setAddName(""); setAddEmail(""); setAddPassword("");
+      navigate({ to: "/admin/student/$uid", params: { uid } });
+    } catch (err: any) {
+      setAddError(err?.message ?? "Erreur inconnue");
+    } finally {
+      setAddLoading(false);
+    }
+  }
+
   async function copyLink(link: string, id: string) {
     await navigator.clipboard.writeText(link).catch(() => {});
     setCopiedId(id);
@@ -140,6 +227,13 @@ function TokensPage() {
             >
               {generatingLink ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
               Nouveau lien
+            </button>
+            <button
+              onClick={() => setShowAddStudent(true)}
+              className="flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-medium shadow-soft transition-all hover:bg-muted"
+            >
+              <UserPlus className="h-4 w-4" />
+              Ajouter manuellement
             </button>
           </div>
         </header>
@@ -309,6 +403,71 @@ function TokensPage() {
         </div>
 
       </main>
+
+      {/* Add student manually */}
+      <Dialog open={showAddStudent} onOpenChange={setShowAddStudent}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl">Ajouter un élève manuellement</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={addStudent} className="mt-4 flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium">Nom complet</label>
+              <input
+                type="text"
+                required
+                value={addName}
+                onChange={(e) => setAddName(e.target.value)}
+                placeholder="Prénom Nom"
+                className="rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium">Email</label>
+              <input
+                type="email"
+                required
+                value={addEmail}
+                onChange={(e) => setAddEmail(e.target.value)}
+                placeholder="eleve@email.com"
+                className="rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium">Mot de passe temporaire</label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={addPassword}
+                onChange={(e) => setAddPassword(e.target.value)}
+                placeholder="Min. 6 caractères"
+                className="rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+              <p className="text-xs text-muted-foreground">L'élève pourra le changer depuis son profil.</p>
+            </div>
+            {addError && <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{addError}</p>}
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowAddStudent(false)}
+                className="rounded-xl border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                disabled={addLoading}
+                className="flex items-center gap-2 rounded-xl bg-foreground px-5 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-60"
+              >
+                {addLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+                Créer le compte
+              </button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
     </AdminShell>
   );
 }
