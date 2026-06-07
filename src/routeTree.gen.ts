@@ -38,6 +38,7 @@ import { Route as AdminCourseEditorRouteImport } from './routes/admin_.course-ed
 import { Route as AdminAdminsRouteImport } from './routes/admin_.admins'
 import { Route as AdminTemplatesIndexRouteImport } from './routes/admin_.templates.index'
 import { Route as AdminTemplatesTemplateIdRouteImport } from './routes/admin_.templates.$templateId'
+import { Route as AdminStudentNewRouteImport } from './routes/admin_.student.new'
 import { Route as AdminStudentUidRouteImport } from './routes/admin_.student.$uid'
 
 const WelcomeRoute = WelcomeRouteImport.update({
@@ -186,6 +187,11 @@ const AdminTemplatesTemplateIdRoute =
     path: '/$templateId',
     getParentRoute: () => AdminTemplatesRoute,
   } as any)
+const AdminStudentNewRoute = AdminStudentNewRouteImport.update({
+  id: '/admin_/student/new',
+  path: '/admin/student/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminStudentUidRoute = AdminStudentUidRouteImport.update({
   id: '/admin_/student/$uid',
   path: '/admin/student/$uid',
@@ -221,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
   '/admin/student/$uid': typeof AdminStudentUidRoute
+  '/admin/student/new': typeof AdminStudentNewRoute
   '/admin/templates/$templateId': typeof AdminTemplatesTemplateIdRoute
   '/admin/templates/': typeof AdminTemplatesIndexRoute
 }
@@ -252,6 +259,7 @@ export interface FileRoutesByTo {
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
   '/admin/student/$uid': typeof AdminStudentUidRoute
+  '/admin/student/new': typeof AdminStudentNewRoute
   '/admin/templates/$templateId': typeof AdminTemplatesTemplateIdRoute
   '/admin/templates': typeof AdminTemplatesIndexRoute
 }
@@ -285,6 +293,7 @@ export interface FileRoutesById {
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/start/$token': typeof StartTokenRoute
   '/admin_/student/$uid': typeof AdminStudentUidRoute
+  '/admin_/student/new': typeof AdminStudentNewRoute
   '/admin_/templates/$templateId': typeof AdminTemplatesTemplateIdRoute
   '/admin_/templates/': typeof AdminTemplatesIndexRoute
 }
@@ -319,6 +328,7 @@ export interface FileRouteTypes {
     | '/lesson/$lessonId'
     | '/start/$token'
     | '/admin/student/$uid'
+    | '/admin/student/new'
     | '/admin/templates/$templateId'
     | '/admin/templates/'
   fileRoutesByTo: FileRoutesByTo
@@ -350,6 +360,7 @@ export interface FileRouteTypes {
     | '/lesson/$lessonId'
     | '/start/$token'
     | '/admin/student/$uid'
+    | '/admin/student/new'
     | '/admin/templates/$templateId'
     | '/admin/templates'
   id:
@@ -382,6 +393,7 @@ export interface FileRouteTypes {
     | '/lesson/$lessonId'
     | '/start/$token'
     | '/admin_/student/$uid'
+    | '/admin_/student/new'
     | '/admin_/templates/$templateId'
     | '/admin_/templates/'
   fileRoutesById: FileRoutesById
@@ -415,6 +427,7 @@ export interface RootRouteChildren {
   LessonLessonIdRoute: typeof LessonLessonIdRoute
   StartTokenRoute: typeof StartTokenRoute
   AdminStudentUidRoute: typeof AdminStudentUidRoute
+  AdminStudentNewRoute: typeof AdminStudentNewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -622,6 +635,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTemplatesTemplateIdRouteImport
       parentRoute: typeof AdminTemplatesRoute
     }
+    '/admin_/student/new': {
+      id: '/admin_/student/new'
+      path: '/admin/student/new'
+      fullPath: '/admin/student/new'
+      preLoaderRoute: typeof AdminStudentNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin_/student/$uid': {
       id: '/admin_/student/$uid'
       path: '/admin/student/$uid'
@@ -675,6 +695,7 @@ const rootRouteChildren: RootRouteChildren = {
   LessonLessonIdRoute: LessonLessonIdRoute,
   StartTokenRoute: StartTokenRoute,
   AdminStudentUidRoute: AdminStudentUidRoute,
+  AdminStudentNewRoute: AdminStudentNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, getDoc, addDoc } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
-import { TrendingUp, Users, CheckCircle2, AlertCircle, AlertTriangle, Loader2, ClipboardList, Check, Search, Salad, Clock, Send, X, Flame, ChevronDown, ChevronUp, LayoutGrid, List } from "lucide-react";
+import { TrendingUp, Users, CheckCircle2, AlertCircle, AlertTriangle, Loader2, ClipboardList, Check, Search, Salad, Clock, Send, X, Flame, ChevronDown, ChevronUp, LayoutGrid, List, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { course } from "@/lib/course-data";
 
@@ -226,10 +226,19 @@ function AdminPage() {
   return (
     <AdminShell>
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
-        <header className="mb-10">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>
-          <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight md:text-5xl">Dashboard coach</h1>
-          <p className="mt-2 text-muted-foreground">Suivez les protocoles, intervenez tôt, célébrez les résultats.</p>
+        <header className="mb-10 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>
+            <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight md:text-5xl">Dashboard coach</h1>
+            <p className="mt-2 text-muted-foreground">Suivez les protocoles, intervenez tôt, célébrez les résultats.</p>
+          </div>
+          <Link
+            to="/admin/student/new"
+            className="flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-medium shadow-soft transition-all hover:bg-muted"
+          >
+            <UserPlus className="h-4 w-4" />
+            Nouvel élève
+          </Link>
         </header>
 
         {/* Stats */}
