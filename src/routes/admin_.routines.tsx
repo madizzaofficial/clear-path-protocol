@@ -45,6 +45,7 @@ import {
   Sparkles,
   ChevronDown,
   ChevronUp,
+  CalendarDays,
 } from "lucide-react";
 import {
   Dialog,
@@ -424,6 +425,7 @@ function RoutinesContent() {
 
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewIsUpdate, setPreviewIsUpdate] = useState(false);
+  const [showPlanning, setShowPlanning] = useState(false);
 
   const { uid: preselectedUid } = Route.useSearch();
 
@@ -1125,6 +1127,64 @@ function RoutinesContent() {
                       >
                         <Plus className="h-4 w-4" /> Ajouter un bloc « En cas de »
                       </button>
+                    </div>
+                  )}
+
+                  {/* ── Planning semaine par semaine ────────────────────────── */}
+                  {routine && (routine.am.length > 0 || routine.pm.length > 0) && (
+                    <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
+                      <button
+                        onClick={() => setShowPlanning((v) => !v)}
+                        className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-muted/40"
+                      >
+                        <CalendarDays className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-semibold">Planning semaine par semaine</span>
+                        <span className="ml-auto text-xs text-muted-foreground">Lecture seule — éditer via les étapes</span>
+                        {showPlanning ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                      </button>
+                      {showPlanning && (
+                        <div className="border-t border-border/60 divide-y divide-border/40">
+                          {Array.from({ length: 12 }, (_, i) => i + 1).map((week) => {
+                            const amSteps = routine.am.filter((s) => (s.startWeek ?? 1) <= week);
+                            const pmSteps = routine.pm.filter((s) => (s.startWeek ?? 1) <= week);
+                            const newAm = routine.am.filter((s) => (s.startWeek ?? 1) === week);
+                            const newPm = routine.pm.filter((s) => (s.startWeek ?? 1) === week);
+                            const hasNew = newAm.length > 0 || newPm.length > 0;
+                            const isFirstWeekWithContent = week === 1 || (
+                              routine.am.some((s) => (s.startWeek ?? 1) === week) ||
+                              routine.pm.some((s) => (s.startWeek ?? 1) === week)
+                            );
+                            if (amSteps.length === 0 && pmSteps.length === 0) return null;
+                            return (
+                              <div key={week} className={`px-5 py-4 ${hasNew ? "bg-amber-50/40 dark:bg-amber-950/10" : ""}`}>
+                                <div className="mb-2 flex items-center gap-2">
+                                  <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${hasNew ? "bg-amber-400 text-white" : "bg-muted text-muted-foreground"}`}>
+                                    {week}
+                                  </span>
+                                  <span className="text-sm font-semibold">Semaine {week}</span>
+                                  {hasNew && (
+                                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                                      ✨ {newAm.length + newPm.length} nouveau{newAm.length + newPm.length > 1 ? "x" : ""}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex flex-wrap gap-1.5 pl-8">
+                                  {amSteps.map((s) => (
+                                    <span key={s.id} className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium ${(s.startWeek ?? 1) === week ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" : "bg-muted/60 text-muted-foreground"}`}>
+                                      ☀️ {s.product}
+                                    </span>
+                                  ))}
+                                  {pmSteps.map((s) => (
+                                    <span key={s.id} className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium ${(s.startWeek ?? 1) === week ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" : "bg-muted/60 text-muted-foreground"}`}>
+                                      🌙 {s.product}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   )}
 

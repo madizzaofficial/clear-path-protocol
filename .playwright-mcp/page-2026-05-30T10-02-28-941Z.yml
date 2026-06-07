@@ -1,0 +1,321 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - link:
+            - /url: /
+          - link "SkinSort Logo" [ref=e8] [cursor=pointer]:
+            - /url: /
+            - img "SkinSort Logo" [ref=e9]
+        - generic [ref=e14]:
+          - generic:
+            - img
+          - textbox "Find products & brands" [ref=e15]
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - link "Explore" [ref=e18] [cursor=pointer]:
+              - /url: /products
+              - text: Explore
+              - img [ref=e19]
+            - button "Tools" [ref=e21] [cursor=pointer]:
+              - text: Tools
+              - img [ref=e22]
+          - generic [ref=e24]:
+            - button "Get the app" [ref=e25] [cursor=pointer]:
+              - text: Get the app
+              - img [ref=e26]
+            - button "Try SkinSort today" [ref=e29] [cursor=pointer]
+  - generic [ref=e34]:
+    - generic [ref=e36]:
+      - generic [ref=e37]:
+        - link "Ingredients" [ref=e38] [cursor=pointer]:
+          - /url: /ingredients
+        - text: /
+      - link "Isopropyl Myristate" [ref=e40] [cursor=pointer]:
+        - /url: /ingredients/isopropyl-myristate
+    - article [ref=e41]:
+      - generic [ref=e42]:
+        - img [ref=e43]
+        - generic [ref=e46]: Very Disliked
+      - heading "Isopropyl Myristate" [level=1] [ref=e47]
+      - generic [ref=e52]:
+        - button "May cause Acne" [ref=e54] [cursor=pointer]:
+          - img [ref=e55]
+          - text: May cause Acne
+        - button "Can worsen Oily Skin" [ref=e57] [cursor=pointer]:
+          - img [ref=e58]
+          - text: Can worsen Oily Skin
+        - button "May feed Fungal Acne" [ref=e60] [cursor=pointer]:
+          - img [ref=e61]
+          - text: May feed Fungal Acne
+      - generic [ref=e62]:
+        - generic [ref=e63]:
+          - heading "Explained" [level=2] [ref=e64]
+          - generic [ref=e66]:
+            - paragraph [ref=e67]:
+              - text: Isopropyl Myristate is an emollient, thickening agent, and texture enhancer. It is created from
+              - link "isopropyl alcohol" [ref=e68] [cursor=pointer]:
+                - /url: https://skinsort.com/ingredients/isopropyl-alcohol
+              - text: and
+              - link "myristic acid" [ref=e69] [cursor=pointer]:
+                - /url: https://skinsort.com/ingredients/myristic-acid
+              - text: .
+            - paragraph [ref=e70]: It is used to help other ingredients be better absorbed. It is also an emollient and may help soften and hydrate the skin.
+            - paragraph [ref=e71]: The comedogenic rating of this ingredient depends on the concentration. Lower amounts results in a lower rating.
+            - paragraph [ref=e72]: Isopropyl Myristate may not be fungal acne safe. It can potentially worsen acne prone skin.
+          - paragraph [ref=e73]:
+            - text: See all
+            - link "3,505 products" [ref=e74] [cursor=pointer]:
+              - /url: /products/products-with-isopropyl-myristate
+            - text: with Isopropyl Myristate
+          - generic [ref=e75]:
+            - generic [ref=e76]:
+              - text: Comedogenic Rating
+              - link [ref=e77] [cursor=pointer]:
+                - /url: /blog/comedogenic-irritancy-ratings-explained
+                - img [ref=e78]
+              - generic [ref=e80]: 3-5
+            - generic [ref=e81]:
+              - text: Irritancy Rating
+              - link [ref=e82] [cursor=pointer]:
+                - /url: /blog/comedogenic-irritancy-ratings-explained
+                - img [ref=e83]
+              - generic [ref=e85]: "3"
+            - generic [ref=e86]:
+              - text: Users who like it
+              - generic [ref=e87]: 1%
+            - generic [ref=e88]:
+              - text: Users who avoid it
+              - generic [ref=e89]: 99%
+          - generic [ref=e90]:
+            - heading "What it does" [level=2] [ref=e91]
+            - generic [ref=e92]:
+              - generic [ref=e93] [cursor=pointer]: Emollient
+              - generic [ref=e94] [cursor=pointer]: Masking
+            - heading "Prevalence" [level=2] [ref=e95]
+            - generic [ref=e96]:
+              - generic [ref=e97]:
+                - generic [ref=e98]:
+                  - text: Uncommon
+                  - generic [ref=e99]: Percentage of products that contain it
+                - generic [ref=e100]: 2.7%
+              - generic [ref=e101]:
+                - text: Top categories
+                - generic [ref=e102]:
+                  - generic [ref=e103]: Makeup
+                  - generic [ref=e104]: Moisturizers
+                  - generic [ref=e105]: Sunscreens
+              - generic [ref=e106]:
+                - generic [ref=e107]:
+                  - text: Position
+                  - generic [ref=e108]: Predominant list placement
+                - generic [ref=e109]: Top 25%
+              - generic [ref=e110]:
+                - generic [ref=e111]:
+                  - text: Concentration
+                  - generic [ref=e112]: Concentrations we've seen
+                - generic [ref=e113]: 0% to 3%
+        - heading "References" [level=2] [ref=e114]
+        - generic [ref=e115]:
+          - link "pubchem.ncbi.nlm.nih.gov" [ref=e116] [cursor=pointer]:
+            - /url: https://pubchem.ncbi.nlm.nih.gov/compound/Isopropyl-myristate
+            - text: pubchem.ncbi.nlm.nih.gov
+            - img [ref=e117]
+          - link "www.sciencedirect.com" [ref=e119] [cursor=pointer]:
+            - /url: https://www.sciencedirect.com/science/article/pii/S0005273617300378?via%3Dihub
+            - text: www.sciencedirect.com
+            - img [ref=e120]
+        - generic [ref=e122]:
+          - heading "Products with Isopropyl Myristate" [level=2] [ref=e123]
+          - generic [ref=e124]:
+            - 'link "Dermal Dermol 500 Lotion Dermal Dermol 500 Lotion Body Lotion Concentration: 2.5%" [ref=e126] [cursor=pointer]':
+              - /url: /products/dermal/dermol-500-lotion
+              - img "Dermal Dermol 500 Lotion" [ref=e127]
+              - generic [ref=e128]:
+                - generic [ref=e129]: Dermal
+                - generic [ref=e130]: Dermol 500 Lotion
+              - generic [ref=e131]: Body Lotion
+              - generic [ref=e132]: "Concentration: 2.5%"
+            - 'link "Soulflower Broad Spectrum Sunscreen SPF 50+ Soulflower Broad Spectrum Sunscreen SPF 50+ Sunscreen Concentration: 0.2%" [ref=e134] [cursor=pointer]':
+              - /url: /products/soulflower/broad-spectrum-sunscreen-spf-50
+              - img "Soulflower Broad Spectrum Sunscreen SPF 50+" [ref=e135]
+              - generic [ref=e136]:
+                - generic [ref=e137]: Soulflower
+                - generic [ref=e138]: Broad Spectrum Sunscreen SPF 50+
+              - generic [ref=e139]: Sunscreen
+              - generic [ref=e140]: "Concentration: 0.2%"
+            - link "CeraVe Resurfacing Retinol Serum USA CeraVe Resurfacing Retinol Serum Serum" [ref=e142] [cursor=pointer]:
+              - /url: /products/cerave/resurfacing-retinol-serum
+              - img "CeraVe Resurfacing Retinol Serum USA" [ref=e143]
+              - generic [ref=e144]:
+                - generic [ref=e145]: CeraVe
+                - generic [ref=e146]: Resurfacing Retinol Serum
+              - generic [ref=e147]: Serum
+            - link "MediCube PDRN Pink Peptide Serum Salmon DNA MediCube PDRN Pink Peptide Serum Serum" [ref=e149] [cursor=pointer]:
+              - /url: /products/medicube/pdrn-pink-peptide-serum
+              - img "MediCube PDRN Pink Peptide Serum Salmon DNA" [ref=e150]
+              - generic [ref=e151]:
+                - generic [ref=e152]: MediCube
+                - generic [ref=e153]: PDRN Pink Peptide Serum
+              - generic [ref=e154]: Serum
+            - link "Retin-A (Tretinoin) Retin-A 0.025% (Tretinoin) Retin-A (Tretinoin) Retin-A 0.025% (Tretinoin) Prescription" [ref=e156] [cursor=pointer]:
+              - /url: /products/retin-a-tretinoin/retin-a-0-025-tretinoin
+              - img "Retin-A (Tretinoin) Retin-A 0.025% (Tretinoin)" [ref=e157]
+              - generic [ref=e158]:
+                - generic [ref=e159]: Retin-A (Tretinoin)
+                - generic [ref=e160]: Retin-A 0.025% (Tretinoin)
+              - generic [ref=e161]: Prescription
+            - link "La Roche-Posay Anthelios Invisible Fluid Facial Sunscreen SPF50+ La Roche-Posay Anthelios Invisible Fluid Facial Sunscreen SPF50+ Sunscreen" [ref=e163] [cursor=pointer]:
+              - /url: /products/la-roche-posay/anthelios-invisible-fluid-facial-sunscreen-spf50
+              - img "La Roche-Posay Anthelios Invisible Fluid Facial Sunscreen SPF50+" [ref=e164]
+              - generic [ref=e165]:
+                - generic [ref=e166]: La Roche-Posay
+                - generic [ref=e167]: Anthelios Invisible Fluid Facial Sunscreen SPF50+
+              - generic [ref=e168]: Sunscreen
+            - link "Retin-A (Tretinoin) Retin-A (Tretinoin) Cream 0.05% Retin-A (Tretinoin) Retin-A (Tretinoin) Cream 0.05% Prescription" [ref=e170] [cursor=pointer]:
+              - /url: /products/retin-a-tretinoin/retin-a-tretinoin-cream-0-05
+              - img "Retin-A (Tretinoin) Retin-A (Tretinoin) Cream 0.05%" [ref=e171]
+              - generic [ref=e172]:
+                - generic [ref=e173]: Retin-A (Tretinoin)
+                - generic [ref=e174]: Retin-A (Tretinoin) Cream 0.05%
+              - generic [ref=e175]: Prescription
+            - link "Bayer Skinoren 20% Cream Sweden Bayer Skinoren 20% Cream Prescription" [ref=e177] [cursor=pointer]:
+              - /url: /products/bayer/skinoren-20-cream
+              - img "Bayer Skinoren 20% Cream Sweden" [ref=e178]
+              - generic [ref=e179]:
+                - generic [ref=e180]: Bayer
+                - generic [ref=e181]: Skinoren 20% Cream
+              - generic [ref=e182]: Prescription
+            - link "Prequel Half & Half Peptides & Ceramides Fluid Moisturizer Prequel Half & Half Peptides & Ceramides Fluid Moisturizer General Moisturizer" [ref=e184] [cursor=pointer]:
+              - /url: /products/prequel/half-half-peptides-ceramides-fluid-moisturizer
+              - img "Prequel Half & Half Peptides & Ceramides Fluid Moisturizer" [ref=e185]
+              - generic [ref=e186]:
+                - generic [ref=e187]: Prequel
+                - generic [ref=e188]: Half & Half Peptides & Ceramides Fluid Moisturizer
+              - generic [ref=e189]: General Moisturizer
+            - link "Taro Tretinoin Cream 0.1% Taro Tretinoin Cream 0.1% Prescription" [ref=e191] [cursor=pointer]:
+              - /url: /products/taro/tretinoin-cream-0-1
+              - img "Taro Tretinoin Cream 0.1%" [ref=e192]
+              - generic [ref=e193]:
+                - generic [ref=e194]: Taro
+                - generic [ref=e195]: Tretinoin Cream 0.1%
+              - generic [ref=e196]: Prescription
+            - link "Kosé Softymo Speedy Cleansing Oil Kosé Softymo Speedy Cleansing Oil Makeup Remover" [ref=e198] [cursor=pointer]:
+              - /url: /products/kose-cosmeport/softymo-speedy-cleansing-oil
+              - img "Kosé Softymo Speedy Cleansing Oil" [ref=e199]
+              - generic [ref=e200]:
+                - generic [ref=e201]: Kosé
+                - generic [ref=e202]: Softymo Speedy Cleansing Oil
+              - generic [ref=e203]: Makeup Remover
+            - link "CeraVe Skin Renewing Vitamin C Serum CeraVe Skin Renewing Vitamin C Serum Serum" [ref=e205] [cursor=pointer]:
+              - /url: /products/cerave/renewing-vitamin-c-face-serum-with-hyaluronic-acid
+              - img "CeraVe Skin Renewing Vitamin C Serum" [ref=e206]
+              - generic [ref=e207]:
+                - generic [ref=e208]: CeraVe
+                - generic [ref=e209]: Skin Renewing Vitamin C Serum
+              - generic [ref=e210]: Serum
+          - link "More products with this ingredient" [ref=e212] [cursor=pointer]:
+            - /url: /products/products-with-isopropyl-myristate
+      - heading "CosIng Data" [level=2] [ref=e213]
+      - generic [ref=e214]:
+        - generic [ref=e215]:
+          - text: CosIng ID
+          - generic [ref=e216]: "34699"
+        - generic [ref=e217]:
+          - text: INCI Name
+          - generic [ref=e218]: ISOPROPYL MYRISTATE
+        - generic [ref=e219]:
+          - text: INN Name
+          - generic [ref=e220]: isopropyl myristate
+        - generic [ref=e221]:
+          - text: "EC #"
+          - generic [ref=e222]: 203-751-4
+        - generic [ref=e223]:
+          - text: Ph. Eur. Name
+          - generic [ref=e224]: isopropylis myristas
+        - generic [ref=e225]:
+          - text: All Functions
+          - generic [ref=e226]: Binding, Emollient, Masking, Perfuming
+  - contentinfo [ref=e228]:
+    - generic [ref=e229]:
+      - generic [ref=e230]:
+        - generic [ref=e232]:
+          - link "SkinSort Logo" [ref=e233] [cursor=pointer]:
+            - /url: /
+            - img "SkinSort Logo"
+          - generic [ref=e234]: Get the app
+          - generic [ref=e235]:
+            - link "Get SkinSort on the App Store" [ref=e236] [cursor=pointer]:
+              - /url: https://apps.apple.com/app/apple-store/id6478040418?pt=126899204&ct=Web%20Footer&mt=8
+              - img "Get SkinSort on the App Store" [ref=e237]
+            - link "Get SkinSort on Google Play":
+              - /url: https://play.google.com/store/apps/details?id=com.skinsort&utm_source=skinsort.com&utm_medium=web&utm_campaign=WebFooter
+              - img "Get SkinSort on Google Play"
+          - generic [ref=e238]: Connect with us
+          - generic [ref=e239]:
+            - link [ref=e240] [cursor=pointer]:
+              - /url: https://instagram.com/skinsort
+              - img [ref=e241]
+            - link [ref=e245] [cursor=pointer]:
+              - /url: https://www.tiktok.com/@skinsort/
+              - img [ref=e246]
+            - link [ref=e249] [cursor=pointer]:
+              - /url: https://www.facebook.com/skinsort/
+              - img [ref=e250]
+            - link [ref=e253] [cursor=pointer]:
+              - /url: https://twitter.com/SkinSortHQ
+              - img [ref=e254]
+        - generic [ref=e258]:
+          - generic [ref=e259]: Tools
+          - link "Routine Creator" [ref=e260] [cursor=pointer]:
+            - /url: /routine
+          - link "Ingredient Checker" [ref=e261] [cursor=pointer]:
+            - /url: /ingredient-analyzer
+          - link "Compare Products" [ref=e262] [cursor=pointer]:
+            - /url: /compare
+          - link "Skincare Dupes" [ref=e263] [cursor=pointer]:
+            - /url: /dupes
+          - link "Fungal Acne Checker" [ref=e264] [cursor=pointer]:
+            - /url: /fungal-acne-checker
+          - link "Pore Clogging Checker" [ref=e265] [cursor=pointer]:
+            - /url: /pore-clogging-checker
+          - link "Seb Derm Checker" [ref=e266] [cursor=pointer]:
+            - /url: /seb-derm-checker
+        - generic [ref=e267]:
+          - generic [ref=e268]: Info
+          - link "Skincare Guides" [ref=e269] [cursor=pointer]:
+            - /url: /learn
+          - link "Browse Products" [ref=e270] [cursor=pointer]:
+            - /url: /products
+          - link "Browse Brands" [ref=e271] [cursor=pointer]:
+            - /url: /brands
+          - link "Ingredients Dictionary" [ref=e272] [cursor=pointer]:
+            - /url: /ingredients
+          - link "Submit a Product" [ref=e273] [cursor=pointer]:
+            - /url: /submissions/new
+          - link "Submit a Brand" [ref=e274] [cursor=pointer]:
+            - /url: /brand-submissions/new
+        - generic [ref=e275]:
+          - generic [ref=e276]: SkinSort
+          - link "About" [ref=e277] [cursor=pointer]:
+            - /url: /about
+          - link "Support" [ref=e278] [cursor=pointer]:
+            - /url: /support
+          - link "Contact Us" [ref=e279] [cursor=pointer]:
+            - /url: /contact
+          - link "Terms of Service" [ref=e280] [cursor=pointer]:
+            - /url: /terms-of-service
+          - link "Affiliate Disclosure" [ref=e281] [cursor=pointer]:
+            - /url: /affiliate-disclosure
+          - link "Privacy Policy" [ref=e282] [cursor=pointer]:
+            - /url: /privacy-policy
+        - generic [ref=e284]:
+          - generic [ref=e285]: Alternative to
+          - link "CosDNA" [ref=e286] [cursor=pointer]:
+            - /url: /alternative/cosdna
+          - link "SkinCarisma" [ref=e287] [cursor=pointer]:
+            - /url: /alternative/skincarisma
+      - generic [ref=e288]: Made with 💜 from around the world
+      - link "© 2026 SkinSort" [ref=e291] [cursor=pointer]:
+        - /url: /

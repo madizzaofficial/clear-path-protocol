@@ -1,0 +1,727 @@
+{
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/.lovable/project.json": {
+    "mtime": 1778428541.8032644,
+    "ast_hash": "c8624bc3fa80a54f017d34d702071bc4",
+    "semantic_hash": "c8624bc3fa80a54f017d34d702071bc4"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/backend/scripts/set_admin.py": {
+    "mtime": 1778852404.5265203,
+    "ast_hash": "4d2fa61cbf5bc5b80622eeb1930a5d91",
+    "semantic_hash": "4d2fa61cbf5bc5b80622eeb1930a5d91"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/backend/server.py": {
+    "mtime": 1778428541.8038688,
+    "ast_hash": "7f5abc1983ab022ee1ab8adeac06a3a5",
+    "semantic_hash": "7f5abc1983ab022ee1ab8adeac06a3a5"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/backend/tests/test_lumen_api.py": {
+    "mtime": 1778428541.8039975,
+    "ast_hash": "2cc865e5f98a0572510bf30254874e4a",
+    "semantic_hash": "2cc865e5f98a0572510bf30254874e4a"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/backend/tests/test_lumen_iter2.py": {
+    "mtime": 1778428541.8043208,
+    "ast_hash": "ad5679135c66b8994e6e8c05eb011c65",
+    "semantic_hash": "ad5679135c66b8994e6e8c05eb011c65"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/backend/tests/test_lumen_iter4.py": {
+    "mtime": 1778428541.8044693,
+    "ast_hash": "4ba81ff1b9fb94c83713b7bdf3381aba",
+    "semantic_hash": "4ba81ff1b9fb94c83713b7bdf3381aba"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/components.json": {
+    "mtime": 1778428541.8048792,
+    "ast_hash": "30d3d035361ce807021f5c54620962e9",
+    "semantic_hash": "30d3d035361ce807021f5c54620962e9"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/cors.json": {
+    "mtime": 1778774208.850462,
+    "ast_hash": "7415b7256a74931e1fd7b15ae9f53384",
+    "semantic_hash": "7415b7256a74931e1fd7b15ae9f53384"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/eslint.config.js": {
+    "mtime": 1778428541.8049529,
+    "ast_hash": "345bdd57e188e0e4525edcd00e5003f5",
+    "semantic_hash": "345bdd57e188e0e4525edcd00e5003f5"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/firebase.json": {
+    "mtime": 1778499746.525501,
+    "ast_hash": "2d6eaea96e1ef3f3e375e7f541c9a59f",
+    "semantic_hash": "2d6eaea96e1ef3f3e375e7f541c9a59f"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/package.json": {
+    "mtime": 1780135147.253424,
+    "ast_hash": "be4dc4a96f8770d026302c36c04e3c19",
+    "semantic_hash": "be4dc4a96f8770d026302c36c04e3c19"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/public/manifest.json": {
+    "mtime": 1778513761.9523678,
+    "ast_hash": "600feee592ce08789421ab0f05dd7259",
+    "semantic_hash": "600feee592ce08789421ab0f05dd7259"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/public/sw.js": {
+    "mtime": 1778959109.2055135,
+    "ast_hash": "9918c9a567737f907a512745fa280f6b",
+    "semantic_hash": "9918c9a567737f907a512745fa280f6b"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/scripts/bulk-delete-users.mjs": {
+    "mtime": 1780255718.0893338,
+    "ast_hash": "cb3d8bceb3541bd36746bfb7c51f2081",
+    "semantic_hash": "cb3d8bceb3541bd36746bfb7c51f2081"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/scripts/export-ingredients-for-review.mjs": {
+    "mtime": 1780133103.3185575,
+    "ast_hash": "725b2402379987446342d68edbdea2a4",
+    "semantic_hash": "725b2402379987446342d68edbdea2a4"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/scripts/export_firebase_ingredients.py": {
+    "mtime": 1779835114.1457121,
+    "ast_hash": "e94e13dfe310ba70671e0533c01431f4",
+    "semantic_hash": "e94e13dfe310ba70671e0533c01431f4"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/scripts/ingredients-inci-v2.json": {
+    "mtime": 1779923034.848178,
+    "ast_hash": "7014f9da48e6c1f9be659d12490cfcbd",
+    "semantic_hash": "7014f9da48e6c1f9be659d12490cfcbd"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/scripts/ingredients-inci-v2.ts": {
+    "mtime": 1779834689.0055995,
+    "ast_hash": "4be98396900ba1f3304a55425bd3083e",
+    "semantic_hash": "4be98396900ba1f3304a55425bd3083e"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/scripts/ingredients-inci.json": {
+    "mtime": 1779408425.7901754,
+    "ast_hash": "ee4ed2f171811ca3106297c11dbe9078",
+    "semantic_hash": "ee4ed2f171811ca3106297c11dbe9078"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/scripts/prepare-vercel.mjs": {
+    "mtime": 1778516666.0816681,
+    "ast_hash": "7d413168af91003a2535109be971a675",
+    "semantic_hash": "7d413168af91003a2535109be971a675"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/scripts/scrape-skinsort.mjs": {
+    "mtime": 1780135514.7071624,
+    "ast_hash": "5164ad8d00b4806985a1c4beea7a8fe6",
+    "semantic_hash": "5164ad8d00b4806985a1c4beea7a8fe6"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/scripts/scrape_incidecoder.py": {
+    "mtime": 1779407672.5211544,
+    "ast_hash": "2d0d5ac6a64ecfed75be2273d8c6f1b2",
+    "semantic_hash": "2d0d5ac6a64ecfed75be2273d8c6f1b2"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/scripts/scrape_incidecoder_v2.py": {
+    "mtime": 1779833016.7007165,
+    "ast_hash": "9a469391363de926c15cc92152581047",
+    "semantic_hash": "9a469391363de926c15cc92152581047"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/scripts/skinsort-results.json": {
+    "mtime": 1780135819.6962554,
+    "ast_hash": "10b266f575309c58abb607d68a43882e",
+    "semantic_hash": "10b266f575309c58abb607d68a43882e"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/AdminShell.tsx": {
+    "mtime": 1779405651.38771,
+    "ast_hash": "d683b74f308dc8dfd50e00fb549f7e98",
+    "semantic_hash": "d683b74f308dc8dfd50e00fb549f7e98"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/AppShell.tsx": {
+    "mtime": 1780222457.0186465,
+    "ast_hash": "232304b1105b9a5a4010cc4316c62627",
+    "semantic_hash": "232304b1105b9a5a4010cc4316c62627"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/IngredientAnalyzer.tsx": {
+    "mtime": 1780003731.9122,
+    "ast_hash": "f1d517aea39a077892c202fa0495d95d",
+    "semantic_hash": "f1d517aea39a077892c202fa0495d95d"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/LiveBarcodeScanner.tsx": {
+    "mtime": 1779575445.2322326,
+    "ast_hash": "4999a9889ac78c80d9f0ad4aabedd293",
+    "semantic_hash": "4999a9889ac78c80d9f0ad4aabedd293"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/PwaInstallBanner.tsx": {
+    "mtime": 1778958909.266193,
+    "ast_hash": "168b31875a404bd91475db4ba1dd5d3e",
+    "semantic_hash": "168b31875a404bd91475db4ba1dd5d3e"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/RoutineStepEditor.tsx": {
+    "mtime": 1780000205.6203337,
+    "ast_hash": "123668b798e8f95643e5df18ecde6780",
+    "semantic_hash": "123668b798e8f95643e5df18ecde6780"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/SearchInput.tsx": {
+    "mtime": 1778928405.9385426,
+    "ast_hash": "3c899d9191a81bd810ab806ddbe0dadc",
+    "semantic_hash": "3c899d9191a81bd810ab806ddbe0dadc"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/StudentPicker.tsx": {
+    "mtime": 1778967113.0413773,
+    "ast_hash": "998078998305c79805860e3f92835256",
+    "semantic_hash": "998078998305c79805860e3f92835256"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/accordion.tsx": {
+    "mtime": 1778428541.8061895,
+    "ast_hash": "1152021ea2d7f6dbffa8a9c49b4fc657",
+    "semantic_hash": "1152021ea2d7f6dbffa8a9c49b4fc657"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/alert-dialog.tsx": {
+    "mtime": 1779662512.0898094,
+    "ast_hash": "0117ec408558f34458285204cac0382f",
+    "semantic_hash": "0117ec408558f34458285204cac0382f"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/alert.tsx": {
+    "mtime": 1778428541.8063672,
+    "ast_hash": "f993d7e96b1e25ce50e68ed97e11d2a8",
+    "semantic_hash": "f993d7e96b1e25ce50e68ed97e11d2a8"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/aspect-ratio.tsx": {
+    "mtime": 1778428541.8064544,
+    "ast_hash": "c5c364545e1b25a94e9e752cd67ad048",
+    "semantic_hash": "c5c364545e1b25a94e9e752cd67ad048"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/avatar.tsx": {
+    "mtime": 1778428541.8065593,
+    "ast_hash": "72989cd32f72c4122802540ef32525a5",
+    "semantic_hash": "72989cd32f72c4122802540ef32525a5"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/badge.tsx": {
+    "mtime": 1778428541.8066366,
+    "ast_hash": "81cade001fc4260f9943e18dcd79449b",
+    "semantic_hash": "81cade001fc4260f9943e18dcd79449b"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/breadcrumb.tsx": {
+    "mtime": 1778428541.8067074,
+    "ast_hash": "bb9ac254f12662b20d5d50b84308bf3a",
+    "semantic_hash": "bb9ac254f12662b20d5d50b84308bf3a"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/button.tsx": {
+    "mtime": 1778428541.8067858,
+    "ast_hash": "434e2246779e00db69f6440214b55294",
+    "semantic_hash": "434e2246779e00db69f6440214b55294"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/calendar.tsx": {
+    "mtime": 1778428541.8068767,
+    "ast_hash": "415d91d7006d4cc654e27620fca340f6",
+    "semantic_hash": "415d91d7006d4cc654e27620fca340f6"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/card.tsx": {
+    "mtime": 1778428541.8069634,
+    "ast_hash": "d6c48ea36221b9cdc3576d305d12d5d5",
+    "semantic_hash": "d6c48ea36221b9cdc3576d305d12d5d5"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/carousel.tsx": {
+    "mtime": 1778428541.8070416,
+    "ast_hash": "e324c68ae00cd5aed49317638abd429a",
+    "semantic_hash": "e324c68ae00cd5aed49317638abd429a"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/chart.tsx": {
+    "mtime": 1778428541.8072631,
+    "ast_hash": "6a3baf94f2e89f1f97d4d7a28f3622d2",
+    "semantic_hash": "6a3baf94f2e89f1f97d4d7a28f3622d2"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/checkbox.tsx": {
+    "mtime": 1778428541.807331,
+    "ast_hash": "142bf28afc40346e352be4b29aad7d55",
+    "semantic_hash": "142bf28afc40346e352be4b29aad7d55"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/collapsible.tsx": {
+    "mtime": 1778428541.8074162,
+    "ast_hash": "767631bbc344945c236f185f4078d71d",
+    "semantic_hash": "767631bbc344945c236f185f4078d71d"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/command.tsx": {
+    "mtime": 1778428541.8075325,
+    "ast_hash": "014782599cc838b021ec68b07ad4ea02",
+    "semantic_hash": "014782599cc838b021ec68b07ad4ea02"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/context-menu.tsx": {
+    "mtime": 1778428541.8077006,
+    "ast_hash": "e9d689beb53d9adb63165bfe64838bf6",
+    "semantic_hash": "e9d689beb53d9adb63165bfe64838bf6"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/dialog.tsx": {
+    "mtime": 1779662505.7320008,
+    "ast_hash": "7359beb01c7ee70b86def3d378d314a5",
+    "semantic_hash": "7359beb01c7ee70b86def3d378d314a5"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/drawer.tsx": {
+    "mtime": 1778428541.8079233,
+    "ast_hash": "8be333e8fd8e42576b1b5f72f07f4337",
+    "semantic_hash": "8be333e8fd8e42576b1b5f72f07f4337"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/dropdown-menu.tsx": {
+    "mtime": 1778428541.80805,
+    "ast_hash": "32156e221f3473280114c80fdb818829",
+    "semantic_hash": "32156e221f3473280114c80fdb818829"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/form.tsx": {
+    "mtime": 1778428541.8081214,
+    "ast_hash": "1b0aa6302b9017ea2a1307c22a1d2983",
+    "semantic_hash": "1b0aa6302b9017ea2a1307c22a1d2983"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/hover-card.tsx": {
+    "mtime": 1778428541.8081813,
+    "ast_hash": "1442794c5ca2a78d69e4e613b315ed3d",
+    "semantic_hash": "1442794c5ca2a78d69e4e613b315ed3d"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/input-otp.tsx": {
+    "mtime": 1778428541.80827,
+    "ast_hash": "58cff10c8942cac8483c0bcd65d39d3c",
+    "semantic_hash": "58cff10c8942cac8483c0bcd65d39d3c"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/input.tsx": {
+    "mtime": 1778428541.8083606,
+    "ast_hash": "1d4cc52a4cd8afb3e18e45bda942bb8a",
+    "semantic_hash": "1d4cc52a4cd8afb3e18e45bda942bb8a"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/label.tsx": {
+    "mtime": 1778428541.8084283,
+    "ast_hash": "7e35df4ca8edd0835efd97ca7937ef92",
+    "semantic_hash": "7e35df4ca8edd0835efd97ca7937ef92"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/menubar.tsx": {
+    "mtime": 1778428541.8086514,
+    "ast_hash": "5870465653e12c3d0e35a2fad6f9faa9",
+    "semantic_hash": "5870465653e12c3d0e35a2fad6f9faa9"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/navigation-menu.tsx": {
+    "mtime": 1778428541.8087387,
+    "ast_hash": "169a6451373dc5e17c1b3da2e646d0f2",
+    "semantic_hash": "169a6451373dc5e17c1b3da2e646d0f2"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/pagination.tsx": {
+    "mtime": 1778428541.808813,
+    "ast_hash": "fac6cdbb4bbf78b273d85cd36d6cbb49",
+    "semantic_hash": "fac6cdbb4bbf78b273d85cd36d6cbb49"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/popover.tsx": {
+    "mtime": 1778428541.809408,
+    "ast_hash": "f18aa1da2144f25ee60795c539c51bcd",
+    "semantic_hash": "f18aa1da2144f25ee60795c539c51bcd"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/progress.tsx": {
+    "mtime": 1778428541.8094745,
+    "ast_hash": "55c462e5c9dd678dcf2c0c510b014ac4",
+    "semantic_hash": "55c462e5c9dd678dcf2c0c510b014ac4"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/radio-group.tsx": {
+    "mtime": 1778428541.8095407,
+    "ast_hash": "357bc630a588800655147312e167ac54",
+    "semantic_hash": "357bc630a588800655147312e167ac54"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/resizable.tsx": {
+    "mtime": 1778428541.8096023,
+    "ast_hash": "d9fcb9203c749fcab4e125a99bb12a86",
+    "semantic_hash": "d9fcb9203c749fcab4e125a99bb12a86"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/scroll-area.tsx": {
+    "mtime": 1778428541.8096724,
+    "ast_hash": "87b65d3eb26f2b02ff35a7acea585ba5",
+    "semantic_hash": "87b65d3eb26f2b02ff35a7acea585ba5"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/select.tsx": {
+    "mtime": 1778428541.8097672,
+    "ast_hash": "ec00ac14b94b6272d12a6ae6c380aa9c",
+    "semantic_hash": "ec00ac14b94b6272d12a6ae6c380aa9c"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/separator.tsx": {
+    "mtime": 1778428541.809834,
+    "ast_hash": "433d163c4ffa00b59398a0c293198b5e",
+    "semantic_hash": "433d163c4ffa00b59398a0c293198b5e"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/sheet.tsx": {
+    "mtime": 1778428541.809917,
+    "ast_hash": "f9dab8daf0021ef0481f3913acb1dc4e",
+    "semantic_hash": "f9dab8daf0021ef0481f3913acb1dc4e"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/sidebar.tsx": {
+    "mtime": 1778428541.810001,
+    "ast_hash": "1569d08f4b4c4e139d4b6d070f0e05e3",
+    "semantic_hash": "1569d08f4b4c4e139d4b6d070f0e05e3"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/skeleton.tsx": {
+    "mtime": 1778428541.8100765,
+    "ast_hash": "41b182e6e2fc3805960d41e767d4a972",
+    "semantic_hash": "41b182e6e2fc3805960d41e767d4a972"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/slider.tsx": {
+    "mtime": 1778428541.8101404,
+    "ast_hash": "4752f1bfa26426988d325599e01c335b",
+    "semantic_hash": "4752f1bfa26426988d325599e01c335b"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/sonner.tsx": {
+    "mtime": 1778428541.8102043,
+    "ast_hash": "97f59f60be3413196d095fcbf7383216",
+    "semantic_hash": "97f59f60be3413196d095fcbf7383216"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/switch.tsx": {
+    "mtime": 1778428541.810265,
+    "ast_hash": "82f5d8b0c59bb7ff305caa9f502e79ff",
+    "semantic_hash": "82f5d8b0c59bb7ff305caa9f502e79ff"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/table.tsx": {
+    "mtime": 1778428541.8103254,
+    "ast_hash": "7cc889989d53894b659903c73aded96e",
+    "semantic_hash": "7cc889989d53894b659903c73aded96e"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/tabs.tsx": {
+    "mtime": 1778428541.810397,
+    "ast_hash": "e3558f35f8b847fee9f67da1120a7bce",
+    "semantic_hash": "e3558f35f8b847fee9f67da1120a7bce"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/textarea.tsx": {
+    "mtime": 1778428541.8104537,
+    "ast_hash": "c7aad96fb9545210d53135a96c76ed6b",
+    "semantic_hash": "c7aad96fb9545210d53135a96c76ed6b"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/toggle-group.tsx": {
+    "mtime": 1778428541.8105154,
+    "ast_hash": "ac26383acf721d116ca8e3ab5c5355d5",
+    "semantic_hash": "ac26383acf721d116ca8e3ab5c5355d5"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/toggle.tsx": {
+    "mtime": 1778428541.81057,
+    "ast_hash": "b98a69052f115695d2a9455da07632be",
+    "semantic_hash": "b98a69052f115695d2a9455da07632be"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/components/ui/tooltip.tsx": {
+    "mtime": 1778428541.8106306,
+    "ast_hash": "67d71db5a1ab935695d1def497f5b8a6",
+    "semantic_hash": "67d71db5a1ab935695d1def497f5b8a6"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/hooks/use-auth.tsx": {
+    "mtime": 1779472723.9975748,
+    "ast_hash": "b9139b79629b710547767b145b874558",
+    "semantic_hash": "b9139b79629b710547767b145b874558"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/hooks/use-mobile.tsx": {
+    "mtime": 1778428541.811468,
+    "ast_hash": "c0a0bdd4638c391a1dd06ac82074e60b",
+    "semantic_hash": "c0a0bdd4638c391a1dd06ac82074e60b"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/hooks/use-theme.tsx": {
+    "mtime": 1778867030.2455611,
+    "ast_hash": "2863db8df6fd1018f79e9c00e96f317c",
+    "semantic_hash": "2863db8df6fd1018f79e9c00e96f317c"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/ai-analysis.ts": {
+    "mtime": 1780003714.1881316,
+    "ast_hash": "46e0f50e92280431cf50a7141dc3eb70",
+    "semantic_hash": "46e0f50e92280431cf50a7141dc3eb70"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/ai-coach.ts": {
+    "mtime": 1780003505.342177,
+    "ast_hash": "eeffc5d6a74d43dd98870197ce44a644",
+    "semantic_hash": "eeffc5d6a74d43dd98870197ce44a644"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/cosmetic-ingredients.ts": {
+    "mtime": 1780133073.9435487,
+    "ast_hash": "2c068343481640bf855a8106e5ce8987",
+    "semantic_hash": "2c068343481640bf855a8106e5ce8987"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/course-data.ts": {
+    "mtime": 1779486126.109544,
+    "ast_hash": "f01e759303e22e434dbb00e5b33721d8",
+    "semantic_hash": "f01e759303e22e434dbb00e5b33721d8"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/error-capture.ts": {
+    "mtime": 1778428541.8119204,
+    "ast_hash": "00e77bfacfb2d79c0816361e678f1b65",
+    "semantic_hash": "00e77bfacfb2d79c0816361e678f1b65"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/error-page.ts": {
+    "mtime": 1778428541.8119848,
+    "ast_hash": "8da0ddd7569bac2676b9a5c8edff8a36",
+    "semantic_hash": "8da0ddd7569bac2676b9a5c8edff8a36"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/firebase-admin.ts": {
+    "mtime": 1780075626.4023786,
+    "ast_hash": "30447d107daa1f0b64ae376535c84cb1",
+    "semantic_hash": "30447d107daa1f0b64ae376535c84cb1"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/firebase.ts": {
+    "mtime": 1778431969.378204,
+    "ast_hash": "fd59982410da4ed856d813f2e1a027c7",
+    "semantic_hash": "fd59982410da4ed856d813f2e1a027c7"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/inci-analysis.ts": {
+    "mtime": 1780000151.8512313,
+    "ast_hash": "0e44a3790a9583104edd946e7ce2287c",
+    "semantic_hash": "0e44a3790a9583104edd946e7ce2287c"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/inci-db.json": {
+    "mtime": 1779924014.3633354,
+    "ast_hash": "7014f9da48e6c1f9be659d12490cfcbd",
+    "semantic_hash": "7014f9da48e6c1f9be659d12490cfcbd"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/inci-hash.ts": {
+    "mtime": 1779559292.2038786,
+    "ast_hash": "8dd1dc9d9c2bedafeaf2c09d30d89034",
+    "semantic_hash": "8dd1dc9d9c2bedafeaf2c09d30d89034"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/inngest-functions.ts": {
+    "mtime": 1780179057.894148,
+    "ast_hash": "042f7e254131bf0e4f5c561df58637a7",
+    "semantic_hash": "042f7e254131bf0e4f5c561df58637a7"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/inngest.ts": {
+    "mtime": 1778445408.7932715,
+    "ast_hash": "b955521b274b3a64f8067c4f6047b6e7",
+    "semantic_hash": "b955521b274b3a64f8067c4f6047b6e7"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/product-cache.ts": {
+    "mtime": 1779559304.1096125,
+    "ast_hash": "b79ac7da33015f78c858f021b00dcb82",
+    "semantic_hash": "b79ac7da33015f78c858f021b00dcb82"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/product-catalog.ts": {
+    "mtime": 1780001975.349036,
+    "ast_hash": "37367875e62fba514dde2d64f4be9177",
+    "semantic_hash": "37367875e62fba514dde2d64f4be9177"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/product-ingestion.ts": {
+    "mtime": 1779641225.049032,
+    "ast_hash": "da07da35ee1361a099aa752db01fcacd",
+    "semantic_hash": "da07da35ee1361a099aa752db01fcacd"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/r2.ts": {
+    "mtime": 1778673972.4033973,
+    "ast_hash": "c905bf9bfe23ae973fd8eb92d4b8f02a",
+    "semantic_hash": "c905bf9bfe23ae973fd8eb92d4b8f02a"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/skincare-categories.ts": {
+    "mtime": 1778695659.3444934,
+    "ast_hash": "a6092237ca2de4514d9786b6ef21a090",
+    "semantic_hash": "a6092237ca2de4514d9786b6ef21a090"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/stripe-webhook.ts": {
+    "mtime": 1780075642.5166428,
+    "ast_hash": "0040a1fbbf8202265e2927b85b4a4700",
+    "semantic_hash": "0040a1fbbf8202265e2927b85b4a4700"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/unclassified-log.ts": {
+    "mtime": 1779564639.1892633,
+    "ast_hash": "39f1b1574159732b1c1241b4e4042726",
+    "semantic_hash": "39f1b1574159732b1c1241b4e4042726"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/upload-image.ts": {
+    "mtime": 1779221232.7172961,
+    "ast_hash": "970c171e16222e0474db72b214525e9e",
+    "semantic_hash": "970c171e16222e0474db72b214525e9e"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/lib/utils.ts": {
+    "mtime": 1778428541.812054,
+    "ast_hash": "d9837f38cc05303254571985e3164050",
+    "semantic_hash": "d9837f38cc05303254571985e3164050"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routeTree.gen.ts": {
+    "mtime": 1779835337.3605278,
+    "ast_hash": "b2b57afe4e3a777065695313bd894714",
+    "semantic_hash": "b2b57afe4e3a777065695313bd894714"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/router.tsx": {
+    "mtime": 1778428541.8122141,
+    "ast_hash": "8f905e713b0eba7fa8148b7995a708c9",
+    "semantic_hash": "8f905e713b0eba7fa8148b7995a708c9"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/__root.tsx": {
+    "mtime": 1779928742.5361383,
+    "ast_hash": "6102bcd523fd686580cd6351861e8088",
+    "semantic_hash": "6102bcd523fd686580cd6351861e8088"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/admin.tsx": {
+    "mtime": 1780255979.4948895,
+    "ast_hash": "7b4c78f42b8a9c3a2fc8354278bca44a",
+    "semantic_hash": "7b4c78f42b8a9c3a2fc8354278bca44a"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/admin_.admins.tsx": {
+    "mtime": 1778952204.255146,
+    "ast_hash": "13ff054ddb7ae5c2eff1f23c2061c174",
+    "semantic_hash": "13ff054ddb7ae5c2eff1f23c2061c174"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/admin_.course-editor.tsx": {
+    "mtime": 1779221455.9121509,
+    "ast_hash": "97a28d10730d937f39038b82d99a6467",
+    "semantic_hash": "97a28d10730d937f39038b82d99a6467"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/admin_.faq.tsx": {
+    "mtime": 1780223945.677293,
+    "ast_hash": "96deded29d69666d11b3997f104422cc",
+    "semantic_hash": "96deded29d69666d11b3997f104422cc"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/admin_.ingredient-analyzer.tsx": {
+    "mtime": 1779405641.4842248,
+    "ast_hash": "815aa0a7e7ae9e470c34d79b1cfe33f4",
+    "semantic_hash": "815aa0a7e7ae9e470c34d79b1cfe33f4"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/admin_.nutrition.tsx": {
+    "mtime": 1778967046.777771,
+    "ast_hash": "46901b53f131c36e4f1f85ca0a92da03",
+    "semantic_hash": "46901b53f131c36e4f1f85ca0a92da03"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/admin_.products.tsx": {
+    "mtime": 1780000430.8209765,
+    "ast_hash": "04f384efe2f4964ee779555e1ca6c050",
+    "semantic_hash": "04f384efe2f4964ee779555e1ca6c050"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/admin_.routines.tsx": {
+    "mtime": 1780183194.09646,
+    "ast_hash": "455eb2d3e8278c78b58289fe8a75cf4b",
+    "semantic_hash": "455eb2d3e8278c78b58289fe8a75cf4b"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/admin_.student.$uid.tsx": {
+    "mtime": 1780168811.3957663,
+    "ast_hash": "eb75f494b7f20d88492c78d4edeee437",
+    "semantic_hash": "eb75f494b7f20d88492c78d4edeee437"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/admin_.templates.$templateId.tsx": {
+    "mtime": 1779573331.9594529,
+    "ast_hash": "dee998f1f455a2656b5fae8c4b8540b2",
+    "semantic_hash": "dee998f1f455a2656b5fae8c4b8540b2"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/admin_.templates.index.tsx": {
+    "mtime": 1778967046.7616687,
+    "ast_hash": "4d980e420f4a72572dc8bed9fbc30675",
+    "semantic_hash": "4d980e420f4a72572dc8bed9fbc30675"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/admin_.templates.tsx": {
+    "mtime": 1778951753.2559502,
+    "ast_hash": "14ebbb2d43e3192df9f2a5a2b82ec95e",
+    "semantic_hash": "14ebbb2d43e3192df9f2a5a2b82ec95e"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/admin_.unclassified.tsx": {
+    "mtime": 1779637870.0699644,
+    "ast_hash": "04005553ecc193c67a87d354b5f2cae5",
+    "semantic_hash": "04005553ecc193c67a87d354b5f2cae5"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/course.tsx": {
+    "mtime": 1779200160.3192031,
+    "ast_hash": "994f4761113c7c0fe2ef2d2f4708894b",
+    "semantic_hash": "994f4761113c7c0fe2ef2d2f4708894b"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/faq.tsx": {
+    "mtime": 1779221462.805565,
+    "ast_hash": "b0cf01a8271c58b1c80ecc878bc73f51",
+    "semantic_hash": "b0cf01a8271c58b1c80ecc878bc73f51"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/finish.tsx": {
+    "mtime": 1778884502.953196,
+    "ast_hash": "df42eb30471444987aac44731ec5b568",
+    "semantic_hash": "df42eb30471444987aac44731ec5b568"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/index.tsx": {
+    "mtime": 1779809362.7363908,
+    "ast_hash": "615deb2b5e5039fc2c2677a9b8e9d131",
+    "semantic_hash": "615deb2b5e5039fc2c2677a9b8e9d131"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/ingredient-analyzer.tsx": {
+    "mtime": 1779409127.2590005,
+    "ast_hash": "56f9b862727dda33dbdf16e73de1958d",
+    "semantic_hash": "56f9b862727dda33dbdf16e73de1958d"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/intake.tsx": {
+    "mtime": 1778959525.0107682,
+    "ast_hash": "498461765c6491d8e7c6fa64176701c4",
+    "semantic_hash": "498461765c6491d8e7c6fa64176701c4"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/journal.tsx": {
+    "mtime": 1779577408.4420774,
+    "ast_hash": "d90ed4d21f9e25a6bf70908703703231",
+    "semantic_hash": "d90ed4d21f9e25a6bf70908703703231"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/lesson.$lessonId.tsx": {
+    "mtime": 1779310847.1168,
+    "ast_hash": "88111b1d402f879dd6f7c3b38fe3a09b",
+    "semantic_hash": "88111b1d402f879dd6f7c3b38fe3a09b"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/login.tsx": {
+    "mtime": 1779928456.8318794,
+    "ast_hash": "380962e75551da2704532be681e61f0c",
+    "semantic_hash": "380962e75551da2704532be681e61f0c"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/products.tsx": {
+    "mtime": 1780000512.631634,
+    "ast_hash": "050c71240c61414cdce74b5b1152ea0b",
+    "semantic_hash": "050c71240c61414cdce74b5b1152ea0b"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/profile.tsx": {
+    "mtime": 1779928480.5522714,
+    "ast_hash": "b3fd4a640087a3cded435459e34e026a",
+    "semantic_hash": "b3fd4a640087a3cded435459e34e026a"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/register.tsx": {
+    "mtime": 1778513683.8837914,
+    "ast_hash": "e3e846455057db73e38751726da634fe",
+    "semantic_hash": "e3e846455057db73e38751726da634fe"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/suivi.tsx": {
+    "mtime": 1780181842.6230507,
+    "ast_hash": "d3597a18c5e10ec105768d6da95b985e",
+    "semantic_hash": "d3597a18c5e10ec105768d6da95b985e"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/routes/welcome.tsx": {
+    "mtime": 1778865861.875499,
+    "ast_hash": "d1e9a0ab1bb94d84cd666558222e351f",
+    "semantic_hash": "d1e9a0ab1bb94d84cd666558222e351f"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/server.ts": {
+    "mtime": 1778448488.9419372,
+    "ast_hash": "edf79441f61250912b741dca91b0adb0",
+    "semantic_hash": "edf79441f61250912b741dca91b0adb0"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/src/start.ts": {
+    "mtime": 1780072410.8520262,
+    "ast_hash": "da2965093158387c78d7883992d22263",
+    "semantic_hash": "da2965093158387c78d7883992d22263"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/test_reports/iter3_cleanup.py": {
+    "mtime": 1778428541.813836,
+    "ast_hash": "18beef75d8e6729665bc9c4c996ede44",
+    "semantic_hash": "18beef75d8e6729665bc9c4c996ede44"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/test_reports/iter3_creds.json": {
+    "mtime": 1778428541.813915,
+    "ast_hash": "525ff1f56d63faf487689a1dcdbb067e",
+    "semantic_hash": "525ff1f56d63faf487689a1dcdbb067e"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/test_reports/iter3_setup.py": {
+    "mtime": 1778428541.814021,
+    "ast_hash": "a93f21f581fa0e3e2436d13d6f4fd922",
+    "semantic_hash": "a93f21f581fa0e3e2436d13d6f4fd922"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/test_reports/iteration_1.json": {
+    "mtime": 1778428541.8141415,
+    "ast_hash": "eb6bac64ee76762fa7a5dc33980efe7a",
+    "semantic_hash": "eb6bac64ee76762fa7a5dc33980efe7a"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/test_reports/iteration_2.json": {
+    "mtime": 1778428541.814226,
+    "ast_hash": "b4bcb77bf21505d448e7bf2945ad1994",
+    "semantic_hash": "b4bcb77bf21505d448e7bf2945ad1994"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/test_reports/iteration_3.json": {
+    "mtime": 1778428541.8143027,
+    "ast_hash": "21a240c263f23dbc4437186a4d70e36d",
+    "semantic_hash": "21a240c263f23dbc4437186a4d70e36d"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/test_reports/iteration_4.json": {
+    "mtime": 1778428541.814375,
+    "ast_hash": "35b61492d27ef8bc2166d1ebe0090cd4",
+    "semantic_hash": "35b61492d27ef8bc2166d1ebe0090cd4"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/tsconfig.json": {
+    "mtime": 1778428541.8150578,
+    "ast_hash": "994abf64c2b9f78b568879f80ed0170e",
+    "semantic_hash": "994abf64c2b9f78b568879f80ed0170e"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/vercel.json": {
+    "mtime": 1778450645.6564355,
+    "ast_hash": "c6c268fcc83ca40b0a77d582c6d8f568",
+    "semantic_hash": "c6c268fcc83ca40b0a77d582c6d8f568"
+  },
+  "/Users/mehdizaaboubammar/Desktop/clear-protocol/clear-path-protocol/vite.config.ts": {
+    "mtime": 1778450338.0696442,
+    "ast_hash": "d888de34c8d2976a0ffa19901ccce2c4",
+    "semantic_hash": "d888de34c8d2976a0ffa19901ccce2c4"
+  }
+}

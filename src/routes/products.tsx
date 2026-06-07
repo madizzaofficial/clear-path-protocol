@@ -5,7 +5,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useState, useEffect } from "react";
-import { Sun, Moon, Clock, Sparkles, Loader2, Check, X, ShoppingCart, AlertTriangle, ImageOff, Zap } from "lucide-react";
+import { Sun, Moon, Clock, Sparkles, Loader2, Check, X, ShoppingCart, AlertTriangle, ImageOff, Zap, CalendarDays } from "lucide-react";
+import { currentProtocolWeek } from "@/lib/routine-week";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -119,6 +120,8 @@ function RoutinePage() {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [intakeCompleted, setIntakeCompleted] = useState(false);
   const [skinProfile, setSkinProfile] = useState<{ skinType: string; acneTypes: string[] } | null>(null);
+  const [enrolledAt, setEnrolledAt] = useState<number | null>(null);
+  const [selectedWeek, setSelectedWeek] = useState<number>(1);
 
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/login" });
@@ -134,7 +137,8 @@ function RoutinePage() {
       getDoc(doc(db, "nutrition", user.uid)),
       getDoc(doc(db, "config", "reminders")),
       getDoc(doc(db, "intake_answers", user.uid)),
-    ]).then(([routineRes, checkinRes, reportsRes, nutritionRes, remindersRes, intakeRes]) => {
+      getDoc(doc(db, "users", user.uid)),
+    ]).then(([routineRes, checkinRes, reportsRes, nutritionRes, remindersRes, intakeRes, userRes]) => {
       if (routineRes.status === "fulfilled" && routineRes.value.exists())
         setRoutine(routineRes.value.data() as UserRoutine);
       if (checkinRes.status === "fulfilled" && checkinRes.value.exists()) {
@@ -154,6 +158,14 @@ function RoutinePage() {
         const intakeData = intakeRes.value.data();
         if (intakeData?.skinType || intakeData?.acneTypes) {
           setSkinProfile({ skinType: intakeData.skinType ?? "", acneTypes: intakeData.acneTypes ?? [] });
+        }
+      }
+      if (userRes.status === "fulfilled" && userRes.value.exists()) {
+        const data = userRes.value.data();
+        const start = (data.routineStartedAt ?? data.enrolledAt) as number | undefined;
+        if (start) {
+          setEnrolledAt(start);
+          setSelectedWeek(currentProtocolWeek(start));
         }
       }
       setLoadingRoutine(false);
@@ -278,7 +290,7 @@ function RoutinePage() {
   return (
     <AppShell>
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
-        <header className="mb-10">
+        <header className="mb-8">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Ma Routine</p>
           <h1 className="mt-3 max-w-2xl font-display text-4xl font-semibold tracking-tight md:text-5xl">
             Votre routine sur-mesure
@@ -287,6 +299,16 @@ function RoutinePage() {
             Préparée spécialement pour votre peau par votre coach. Suivez l'ordre et les instructions à la lettre.
           </p>
         </header>
+
+        {/* ── Sélecteur de semaines ─────────────────────────────────────── */}
+        {enrolledAt && (
+          <WeekSelector
+            currentWeek={currentProtocolWeek(enrolledAt)}
+            selectedWeek={selectedWeek}
+            allSteps={[...routine.am, ...routine.pm]}
+            onSelect={setSelectedWeek}
+          />
+        )}
 
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
 
@@ -299,6 +321,8 @@ function RoutinePage() {
                 accent="from-peach/60 to-primary-soft"
                 session="am"
                 steps={routine.am}
+                selectedWeek={selectedWeek}
+                currentWeek={enrolledAt ? currentProtocolWeek(enrolledAt) : 1}
                 checked={checkedAm}
                 reports={reports}
                 skinProfile={skinProfile}
@@ -313,6 +337,8 @@ function RoutinePage() {
                 accent="from-primary-muted/50 to-primary-soft/70"
                 session="pm"
                 steps={routine.pm}
+                selectedWeek={selectedWeek}
+                currentWeek={enrolledAt ? currentProtocolWeek(enrolledAt) : 1}
                 checked={checkedPm}
                 reports={reports}
                 skinProfile={skinProfile}
@@ -445,20 +471,24 @@ function RoutinePage() {
 }
 
 function RoutineBlock({
-  title, icon: Icon, accent, session, steps, checked, reports, skinProfile, onToggle, onReport,
+  title, icon: Icon, accent, session, steps, selectedWeek, currentWeek, checked, reports, skinProfile, onToggle, onReport,
 }: {
   title: string;
   icon: typeof Sun;
   accent: string;
   session: "am" | "pm";
   steps: RoutineStep[];
+  selectedWeek: number;
+  currentWeek: number;
   checked: string[];
   reports: Record<string, "irritant" | "allergie">;
   skinProfile: { skinType: string; acneTypes: string[] } | null;
   onToggle: (id: string) => void;
   onReport: (step: RoutineStep) => void;
 }) {
-  const doneCount = steps.filter((s) => checked.includes(s.id)).length;
+  const activeSteps = steps.filter((s) => (s.startWeek ?? 1) <= selectedWeek);
+  const doneCount = activeSteps.filter((s) => checked.includes(s.id)).length;
+  const isPreviewing = selectedWeek !== currentWeek;
 
   return (
     <section className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
@@ -472,11 +502,14 @@ function RoutineBlock({
               <h2 className="font-display text-2xl font-semibold tracking-tight md:text-3xl">{title}</h2>
               <div className="mt-1 flex items-center gap-1.5 text-sm text-foreground/70">
                 <Clock className="h-3.5 w-3.5" />
-                {steps.length} étape{steps.length !== 1 ? "s" : ""}
+                {activeSteps.length} étape{activeSteps.length !== 1 ? "s" : ""}
+                {isPreviewing && steps.length > activeSteps.length && (
+                  <span className="ml-1 text-foreground/40">· {steps.length - activeSteps.length} à venir</span>
+                )}
               </div>
             </div>
           </div>
-          {doneCount === steps.length && steps.length > 0 && (
+          {!isPreviewing && doneCount === activeSteps.length && activeSteps.length > 0 && (
             <span className="flex items-center gap-1.5 rounded-full bg-background/80 px-3 py-1.5 text-xs font-semibold text-primary backdrop-blur">
               <Check className="h-3.5 w-3.5" /> Complète
             </span>
@@ -486,10 +519,13 @@ function RoutineBlock({
 
       <ol className="divide-y divide-border/60">
         {steps.map((step, i) => {
-          const isChecked = checked.includes(step.id);
+          const stepWeek = step.startWeek ?? 1;
+          const isFuture = stepWeek > selectedWeek;
+          const isNewThisWeek = stepWeek === selectedWeek && selectedWeek > 1;
+          const isChecked = !isFuture && checked.includes(step.id);
           const report = reports[step.id];
           return (
-            <li key={step.id} className={`px-6 py-5 transition-colors md:px-8 ${isChecked ? "bg-muted/30" : ""}`}>
+            <li key={step.id} className={`px-6 py-5 transition-colors md:px-8 ${isFuture ? "opacity-45" : isChecked ? "bg-muted/30" : ""}`}>
 
               {/* ── Ligne haute : image + titre + check ── */}
               <div className="flex items-start gap-4">
@@ -509,12 +545,17 @@ function RoutineBlock({
                           {step.category}
                         </span>
                         <span className="text-[11px] font-medium text-muted-foreground/60">#{i + 1}</span>
-                        {step.startWeek && (
-                          <span className="flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold text-violet-600 dark:bg-violet-950/30 dark:text-violet-400">
-                            <Clock className="h-2.5 w-2.5" /> Sem. {step.startWeek}
+                        {isNewThisWeek && (
+                          <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
+                            ✨ Nouveau cette semaine
                           </span>
                         )}
-                        {report && (
+                        {isFuture && (
+                          <span className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                            <Clock className="h-2.5 w-2.5" /> Dès la sem. {stepWeek}
+                          </span>
+                        )}
+                        {report && !isFuture && (
                           <span className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${report === "allergie" ? "bg-red-100 text-red-600" : "bg-orange-100 text-orange-600"}`}>
                             <AlertTriangle className="h-2.5 w-2.5" />
                             {report === "allergie" ? "Allergie" : "Irritant"}
@@ -526,17 +567,19 @@ function RoutineBlock({
                       </h3>
                     </div>
 
-                    {/* Check toggle */}
-                    <button
-                      onClick={() => onToggle(step.id)}
-                      className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
-                        isChecked
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-background hover:border-primary/50"
-                      }`}
-                    >
-                      {isChecked && <Check className="h-4 w-4" />}
-                    </button>
+                    {/* Check toggle — disabled for future steps and when previewing */}
+                    {!isFuture && !isPreviewing && (
+                      <button
+                        onClick={() => onToggle(step.id)}
+                        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
+                          isChecked
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border bg-background hover:border-primary/50"
+                        }`}
+                      >
+                        {isChecked && <Check className="h-4 w-4" />}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -612,7 +655,7 @@ function RoutineBlock({
                   <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{step.instructions}</p>
                 </div>
               )}
-              <div className="mt-3 flex flex-wrap items-center gap-2">
+              {!isFuture && <div className="mt-3 flex flex-wrap items-center gap-2">
                 {(step.purchaseLinks?.[0]?.url || step.purchaseUrl) && (
                   <div className="flex flex-col gap-1">
                     <a
@@ -650,7 +693,7 @@ function RoutineBlock({
                     <AlertTriangle className="h-3 w-3" /> Signaler
                   </button>
                 )}
-              </div>
+              </div>}
             </li>
           );
         })}
@@ -742,6 +785,65 @@ function BonusBlock({ blocks }: { blocks: ExtraBlock[] }) {
         </div>
       ))}
     </section>
+  );
+}
+
+function WeekSelector({
+  currentWeek, selectedWeek, allSteps, onSelect,
+}: {
+  currentWeek: number;
+  selectedWeek: number;
+  allSteps: RoutineStep[];
+  onSelect: (w: number) => void;
+}) {
+  const maxWeek = Math.max(12, ...allSteps.map((s) => s.startWeek ?? 1));
+  const weeks = Array.from({ length: maxWeek }, (_, i) => i + 1);
+
+  return (
+    <div className="mb-8 rounded-2xl border border-border/60 bg-card p-4 shadow-soft">
+      <div className="mb-3 flex items-center gap-2">
+        <CalendarDays className="h-4 w-4 text-primary" />
+        <p className="text-sm font-semibold">Planning du protocole</p>
+        <span className="ml-auto rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-semibold text-primary">
+          Semaine {currentWeek} / {maxWeek}
+        </span>
+      </div>
+      <div className="flex gap-1.5 overflow-x-auto pb-1">
+        {weeks.map((w) => {
+          const isActive = w === selectedWeek;
+          const isCurrent = w === currentWeek;
+          const isFuture = w > currentWeek;
+          const hasNew = allSteps.some((s) => (s.startWeek ?? 1) === w);
+          return (
+            <button
+              key={w}
+              onClick={() => onSelect(w)}
+              className={`relative flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-xl text-xs font-semibold transition-all ${
+                isActive
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : isCurrent
+                  ? "border-2 border-primary bg-primary-soft text-primary"
+                  : isFuture
+                  ? "bg-muted/40 text-muted-foreground hover:bg-muted"
+                  : "bg-muted/60 text-foreground hover:bg-muted"
+              }`}
+            >
+              {w}
+              {hasNew && !isActive && (
+                <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-amber-400" />
+              )}
+            </button>
+          );
+        })}
+      </div>
+      {selectedWeek !== currentWeek && (
+        <p className="mt-2.5 text-xs text-muted-foreground">
+          {selectedWeek < currentWeek
+            ? `Aperçu de la semaine ${selectedWeek} — les cases à cocher sont désactivées en mode historique.`
+            : `Aperçu de la semaine ${selectedWeek} — les étapes grisées ne sont pas encore actives.`}
+        </p>
+      )}
+    </div>
   );
 }
 

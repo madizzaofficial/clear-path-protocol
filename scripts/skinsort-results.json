@@ -1,0 +1,1470 @@
+{
+  "scrapedAt": "2026-05-30T10:10:19.694Z",
+  "total": 141,
+  "found": 99,
+  "notFound": 42,
+  "errors": 0,
+  "results": [
+    {
+      "name": "BENZOPHENONE-3",
+      "slug": "benzophenone-3",
+      "status": "ok",
+      "flags": [
+        "UV Protection",
+        "Chemical UV Filter",
+        "May cause Irritation",
+        "Bad for Coral Reefs"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/benzophenone-3"
+    },
+    {
+      "name": "OXYBENZONE",
+      "slug": "oxybenzone",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "HOMOSALATE",
+      "slug": "homosalate",
+      "status": "ok",
+      "flags": [
+        "UV Protection",
+        "Chemical UV Filter",
+        "Bad for Coral Reefs"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/homosalate"
+    },
+    {
+      "name": "ETHYLHEXYL METHOXYCINNAMATE",
+      "slug": "ethylhexyl-methoxycinnamate",
+      "status": "ok",
+      "flags": [
+        "UV Protection",
+        "Chemical UV Filter",
+        "May cause Irritation",
+        "Bad for Coral Reefs"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/ethylhexyl-methoxycinnamate"
+    },
+    {
+      "name": "OCTINOXATE",
+      "slug": "octinoxate",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "OCTYL METHOXYCINNAMATE",
+      "slug": "octyl-methoxycinnamate",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "BENZOPHENONE-4",
+      "slug": "benzophenone-4",
+      "status": "ok",
+      "flags": [
+        "UV Protection",
+        "Chemical UV Filter"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/benzophenone-4"
+    },
+    {
+      "name": "SULISOBENZONE",
+      "slug": "sulisobenzone",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "ETHYLHEXYL DIMETHYL PABA",
+      "slug": "ethylhexyl-dimethyl-paba",
+      "status": "ok",
+      "flags": [
+        "UV Protection",
+        "Chemical UV Filter",
+        "Bad for Coral Reefs"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/ethylhexyl-dimethyl-paba"
+    },
+    {
+      "name": "OCTYL DIMETHYL PABA",
+      "slug": "octyl-dimethyl-paba",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "BUTYLPARABEN",
+      "slug": "butylparaben",
+      "status": "ok",
+      "flags": [
+        "Paraben",
+        "Preservative",
+        "Can worsen Eczema",
+        "Bad for Coral Reefs"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/butylparaben"
+    },
+    {
+      "name": "ISOBUTYLPARABEN",
+      "slug": "isobutylparaben",
+      "status": "ok",
+      "flags": [
+        "Paraben"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/isobutylparaben"
+    },
+    {
+      "name": "PROPYLPARABEN",
+      "slug": "propylparaben",
+      "status": "ok",
+      "flags": [
+        "Paraben",
+        "Preservative",
+        "Bad for Coral Reefs"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/propylparaben"
+    },
+    {
+      "name": "ISOPROPYLPARABEN",
+      "slug": "isopropylparaben",
+      "status": "ok",
+      "flags": [
+        "Paraben",
+        "Preservative"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/isopropylparaben"
+    },
+    {
+      "name": "METHYLPARABEN",
+      "slug": "methylparaben",
+      "status": "ok",
+      "flags": [
+        "Paraben",
+        "Preservative",
+        "Can worsen Eczema",
+        "Bad for Coral Reefs"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/methylparaben"
+    },
+    {
+      "name": "ETHYLPARABEN",
+      "slug": "ethylparaben",
+      "status": "ok",
+      "flags": [
+        "Paraben",
+        "Preservative",
+        "Bad for Coral Reefs"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/ethylparaben"
+    },
+    {
+      "name": "BENZYLPARABEN",
+      "slug": "benzylparaben",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "TRICLOSAN",
+      "slug": "triclosan",
+      "status": "ok",
+      "flags": [
+        "Preservative",
+        "Bad for Coral Reefs"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/triclosan"
+    },
+    {
+      "name": "TRICLOCARBAN",
+      "slug": "triclocarban",
+      "status": "ok",
+      "flags": [
+        "Preservative"
+      ],
+      "rating": null,
+      "url": "https://skinsort.com/ingredients/triclocarban"
+    },
+    {
+      "name": "DIETHYL PHTHALATE",
+      "slug": "diethyl-phthalate",
+      "status": "ok",
+      "flags": [
+        "Alcohol"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/diethyl-phthalate"
+    },
+    {
+      "name": "DIBUTYL PHTHALATE",
+      "slug": "dibutyl-phthalate",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "DIISOBUTYL PHTHALATE",
+      "slug": "diisobutyl-phthalate",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "BHA",
+      "slug": "bha",
+      "status": "ok",
+      "flags": [
+        "Antioxidant"
+      ],
+      "rating": "Liked",
+      "url": "https://skinsort.com/ingredients/bha"
+    },
+    {
+      "name": "BUTYLATED HYDROXYANISOLE",
+      "slug": "butylated-hydroxyanisole",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "RESORCINOL",
+      "slug": "resorcinol",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "Antioxidant"
+      ],
+      "rating": "Disliked",
+      "url": "https://skinsort.com/ingredients/resorcinol"
+    },
+    {
+      "name": "P-PHENYLENEDIAMINE",
+      "slug": "p-phenylenediamine",
+      "status": "ok",
+      "flags": [
+        "May cause Irritation"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/p-phenylenediamine"
+    },
+    {
+      "name": "CYCLOTETRASILOXANE",
+      "slug": "cyclotetrasiloxane",
+      "status": "ok",
+      "flags": [
+        "Silicon"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/cyclotetrasiloxane"
+    },
+    {
+      "name": "CYCLOPENTASILOXANE",
+      "slug": "cyclopentasiloxane",
+      "status": "ok",
+      "flags": [
+        "Silicon"
+      ],
+      "rating": "Disliked",
+      "url": "https://skinsort.com/ingredients/cyclopentasiloxane"
+    },
+    {
+      "name": "MUSK AMBRETTE",
+      "slug": "musk-ambrette",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "MUSK TIBETENE",
+      "slug": "musk-tibetene",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "MUSK MOSKENE",
+      "slug": "musk-moskene",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "KOJIC ACID",
+      "slug": "kojic-acid",
+      "status": "ok",
+      "flags": [
+        "Kojic Acid",
+        "Antioxidant",
+        "Brightening",
+        "Good for Scar Healing",
+        "Helps with Dark Spots"
+      ],
+      "rating": "Liked",
+      "url": "https://skinsort.com/ingredients/kojic-acid"
+    },
+    {
+      "name": "METHOXYPROPYLAMINO CYCLOHEXENYLIDENE ETHOXYETHYLCYANOACETATE",
+      "slug": "methoxypropylamino-cyclohexenylidene-ethoxyethylcyanoacetate",
+      "status": "ok",
+      "flags": [
+        "Chemical UV Filter"
+      ],
+      "rating": "Loved",
+      "url": "https://skinsort.com/ingredients/methoxypropylamino-cyclohexenylidene-ethoxyethylcyanoacetate"
+    },
+    {
+      "name": "PARFUM",
+      "slug": "parfum",
+      "status": "ok",
+      "flags": [
+        "Synthetic Fragrance",
+        "Fragrance",
+        "Can worsen Eczema",
+        "Can worsen Rosacea"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/parfum"
+    },
+    {
+      "name": "FRAGRANCE",
+      "slug": "fragrance",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "AMYL CINNAMAL",
+      "slug": "amyl-cinnamal",
+      "status": "ok",
+      "flags": [
+        "Synthetic Fragrance",
+        "Fragrance",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/amyl-cinnamal"
+    },
+    {
+      "name": "AMYLCINNAMYL ALCOHOL",
+      "slug": "amylcinnamyl-alcohol",
+      "status": "ok",
+      "flags": [
+        "Synthetic Fragrance",
+        "Fragrance",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": null,
+      "url": "https://skinsort.com/ingredients/amylcinnamyl-alcohol"
+    },
+    {
+      "name": "BENZYL ALCOHOL",
+      "slug": "benzyl-alcohol",
+      "status": "ok",
+      "flags": [
+        "Alcohol",
+        "Fragrance",
+        "Preservative",
+        "Can worsen Eczema",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/benzyl-alcohol"
+    },
+    {
+      "name": "BENZYL SALICYLATE",
+      "slug": "benzyl-salicylate",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/benzyl-salicylate"
+    },
+    {
+      "name": "CINNAMYL ALCOHOL",
+      "slug": "cinnamyl-alcohol",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "May cause Irritation",
+        "Can worsen Rosacea",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/cinnamyl-alcohol"
+    },
+    {
+      "name": "CINNAMALDEHYDE",
+      "slug": "cinnamaldehyde",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "CITRAL",
+      "slug": "citral",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "Can worsen Eczema",
+        "May cause Irritation",
+        "Can worsen Rosacea",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/citral"
+    },
+    {
+      "name": "CITRONELLOL",
+      "slug": "citronellol",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "Can worsen Eczema",
+        "May cause Irritation",
+        "Can worsen Rosacea",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/citronellol"
+    },
+    {
+      "name": "COUMARIN",
+      "slug": "coumarin",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/coumarin"
+    },
+    {
+      "name": "EUGENOL",
+      "slug": "eugenol",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "Can worsen Eczema",
+        "May cause Irritation",
+        "Can worsen Rosacea",
+        "May irritate lips",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/eugenol"
+    },
+    {
+      "name": "FARNESOL",
+      "slug": "farnesol",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/farnesol"
+    },
+    {
+      "name": "GERANIOL",
+      "slug": "geraniol",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "Can worsen Eczema",
+        "May cause Irritation",
+        "Can worsen Rosacea",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/geraniol"
+    },
+    {
+      "name": "HEXYL CINNAMAL",
+      "slug": "hexyl-cinnamal",
+      "status": "ok",
+      "flags": [
+        "Synthetic Fragrance",
+        "Fragrance",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/hexyl-cinnamal"
+    },
+    {
+      "name": "HYDROXYCITRONELLAL",
+      "slug": "hydroxycitronellal",
+      "status": "ok",
+      "flags": [
+        "Synthetic Fragrance",
+        "Fragrance",
+        "Can worsen Eczema",
+        "May cause Irritation",
+        "Can worsen Rosacea",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/hydroxycitronellal"
+    },
+    {
+      "name": "HYDROXYISOHEXYL 3-CYCLOHEXENE CARBOXALDEHYDE",
+      "slug": "hydroxyisohexyl-3-cyclohexene-carboxaldehyde",
+      "status": "ok",
+      "flags": [
+        "Synthetic Fragrance",
+        "Fragrance",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/hydroxyisohexyl-3-cyclohexene-carboxaldehyde"
+    },
+    {
+      "name": "HICC",
+      "slug": "hicc",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "ISOEUGENOL",
+      "slug": "isoeugenol",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "Can worsen Eczema",
+        "May cause Irritation",
+        "Can worsen Rosacea",
+        "May irritate lips",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/isoeugenol"
+    },
+    {
+      "name": "LIMONENE",
+      "slug": "limonene",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "Can worsen Eczema",
+        "May cause Irritation",
+        "Can worsen Rosacea",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/limonene"
+    },
+    {
+      "name": "LINALOOL",
+      "slug": "linalool",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "Can worsen Eczema",
+        "May cause Irritation",
+        "Can worsen Rosacea",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/linalool"
+    },
+    {
+      "name": "METHYL 2-OCTYNOATE",
+      "slug": "methyl-2-octynoate",
+      "status": "ok",
+      "flags": [
+        "Synthetic Fragrance",
+        "Fragrance",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/methyl-2-octynoate"
+    },
+    {
+      "name": "ANISE ALCOHOL",
+      "slug": "anise-alcohol",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/anise-alcohol"
+    },
+    {
+      "name": "BENZYL BENZOATE",
+      "slug": "benzyl-benzoate",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": "Disliked",
+      "url": "https://skinsort.com/ingredients/benzyl-benzoate"
+    },
+    {
+      "name": "BENZYL CINNAMATE",
+      "slug": "benzyl-cinnamate",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "May cause Irritation",
+        "Can worsen Rosacea",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/benzyl-cinnamate"
+    },
+    {
+      "name": "ALPHA-ISOMETHYL IONONE",
+      "slug": "alpha-isomethyl-ionone",
+      "status": "ok",
+      "flags": [
+        "Synthetic Fragrance",
+        "Fragrance",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/alpha-isomethyl-ionone"
+    },
+    {
+      "name": "EVERNIA PRUNASTRI",
+      "slug": "evernia-prunastri",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "EVERNIA FURFURACEA",
+      "slug": "evernia-furfuracea",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "BUTYLPHENYL METHYLPROPIONAL",
+      "slug": "butylphenyl-methylpropional",
+      "status": "ok",
+      "flags": [
+        "Synthetic Fragrance",
+        "Fragrance",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/butylphenyl-methylpropional"
+    },
+    {
+      "name": "LILIAL",
+      "slug": "lilial",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "HYDROXYMETHYLPENTYLCYCLOHEXENECARBOXALDEHYDE",
+      "slug": "hydroxymethylpentylcyclohexenecarboxaldehyde",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "METHYL HEPTINE CARBONATE",
+      "slug": "methyl-heptine-carbonate",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "METHYL OCTINE CARBONATE",
+      "slug": "methyl-octine-carbonate",
+      "status": "ok",
+      "flags": [
+        "Fragrance"
+      ],
+      "rating": null,
+      "url": "https://skinsort.com/ingredients/methyl-octine-carbonate"
+    },
+    {
+      "name": "TREEMOSS",
+      "slug": "treemoss",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "OAKMOSS",
+      "slug": "oakmoss",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "SANTALOL",
+      "slug": "santalol",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": null,
+      "url": "https://skinsort.com/ingredients/santalol"
+    },
+    {
+      "name": "COSTUS ROOT",
+      "slug": "costus-root",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "PERU BALSAM",
+      "slug": "peru-balsam",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "MYROXYLON PEREIRAE",
+      "slug": "myroxylon-pereirae",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "YLANG YLANG OIL",
+      "slug": "ylang-ylang-oil",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "JASMINE",
+      "slug": "jasmine",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "JASMIN ABSOLUTE",
+      "slug": "jasmin-absolute",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "ROSE FLOWER OIL",
+      "slug": "rose-flower-oil",
+      "status": "ok",
+      "flags": [
+        "Oil",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": "Disliked",
+      "url": "https://skinsort.com/ingredients/rose-flower-oil"
+    },
+    {
+      "name": "CANANGA ODORATA",
+      "slug": "cananga-odorata",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "NARCISSUS POETICUS",
+      "slug": "narcissus-poeticus",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "ATRANORIN",
+      "slug": "atranorin",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "CHLOROATRANORIN",
+      "slug": "chloroatranorin",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "HEXAMETHYLINDANOPYRAN",
+      "slug": "hexamethylindanopyran",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/hexamethylindanopyran"
+    },
+    {
+      "name": "TETRAMETHYL ACETYLOCTAHYDRONAPHTHALENES",
+      "slug": "tetramethyl-acetyloctahydronaphthalenes",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/tetramethyl-acetyloctahydronaphthalenes"
+    },
+    {
+      "name": "TRIMETHYLBENZENEPROPANOL",
+      "slug": "trimethylbenzenepropanol",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": null,
+      "url": "https://skinsort.com/ingredients/trimethylbenzenepropanol"
+    },
+    {
+      "name": "LINALYL ACETATE",
+      "slug": "linalyl-acetate",
+      "status": "ok",
+      "flags": [
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/linalyl-acetate"
+    },
+    {
+      "name": "TERPINEOL",
+      "slug": "terpineol",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/terpineol"
+    },
+    {
+      "name": "PINENE",
+      "slug": "pinene",
+      "status": "ok",
+      "flags": [
+        "May cause Irritation",
+        "EU Allergen"
+      ],
+      "rating": null,
+      "url": "https://skinsort.com/ingredients/pinene"
+    },
+    {
+      "name": "SODIUM LAURYL SULFATE",
+      "slug": "sodium-lauryl-sulfate",
+      "status": "ok",
+      "flags": [
+        "Sulfate",
+        "Can worsen Dry Skin",
+        "Can worsen Eczema",
+        "May cause Irritation",
+        "Can worsen Rosacea"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/sodium-lauryl-sulfate"
+    },
+    {
+      "name": "SODIUM DODECYL SULFATE",
+      "slug": "sodium-dodecyl-sulfate",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "SODIUM LAURETH SULFATE",
+      "slug": "sodium-laureth-sulfate",
+      "status": "ok",
+      "flags": [
+        "Sulfate",
+        "Can worsen Dry Skin"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/sodium-laureth-sulfate"
+    },
+    {
+      "name": "AMMONIUM LAURYL SULFATE",
+      "slug": "ammonium-lauryl-sulfate",
+      "status": "ok",
+      "flags": [
+        "Sulfate",
+        "Can worsen Dry Skin",
+        "May cause Irritation",
+        "Can worsen Rosacea"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/ammonium-lauryl-sulfate"
+    },
+    {
+      "name": "AMMONIUM LAURETH SULFATE",
+      "slug": "ammonium-laureth-sulfate",
+      "status": "ok",
+      "flags": [
+        "Sulfate"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/ammonium-laureth-sulfate"
+    },
+    {
+      "name": "ALCOHOL DENAT",
+      "slug": "alcohol-denat",
+      "status": "ok",
+      "flags": [
+        "Alcohol",
+        "Can worsen Dry Skin",
+        "Can worsen Eczema",
+        "May cause Irritation",
+        "Can worsen Rosacea"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/alcohol-denat"
+    },
+    {
+      "name": "SD ALCOHOL",
+      "slug": "sd-alcohol",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "ISOPROPYL ALCOHOL",
+      "slug": "isopropyl-alcohol",
+      "status": "ok",
+      "flags": [
+        "Alcohol",
+        "Can worsen Dry Skin",
+        "Can worsen Eczema",
+        "May cause Irritation",
+        "Can worsen Rosacea"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/isopropyl-alcohol"
+    },
+    {
+      "name": "SODIUM CHLORIDE",
+      "slug": "sodium-chloride",
+      "status": "ok",
+      "flags": [],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/sodium-chloride"
+    },
+    {
+      "name": "ETHANOL",
+      "slug": "ethanol",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "BENZOYL PEROXIDE",
+      "slug": "benzoyl-peroxide",
+      "status": "ok",
+      "flags": [
+        "Benzoyl Peroxide",
+        "Acne Fighter",
+        "Can worsen Dry Skin",
+        "Can worsen Eczema",
+        "May cause Irritation",
+        "Can worsen Rosacea"
+      ],
+      "rating": "Disliked",
+      "url": "https://skinsort.com/ingredients/benzoyl-peroxide"
+    },
+    {
+      "name": "MELALEUCA ALTERNIFOLIA LEAF OIL",
+      "slug": "melaleuca-alternifolia-leaf-oil",
+      "status": "ok",
+      "flags": [
+        "Oil",
+        "Essential Oil",
+        "Fragrance",
+        "Antioxidant",
+        "Good for Oily Skin",
+        "Can worsen Eczema"
+      ],
+      "rating": "Mixed",
+      "url": "https://skinsort.com/ingredients/melaleuca-alternifolia-leaf-oil"
+    },
+    {
+      "name": "HYDROXYPINACOLONE RETINOATE",
+      "slug": "hydroxypinacolone-retinoate",
+      "status": "ok",
+      "flags": [
+        "Retinoid",
+        "Acne Fighter",
+        "Helps with Anti-Aging",
+        "Brightening",
+        "Good for Oily Skin",
+        "Reduces Large Pores",
+        "Good for Scar Healing",
+        "Good for Texture"
+      ],
+      "rating": "Liked",
+      "url": "https://skinsort.com/ingredients/hydroxypinacolone-retinoate"
+    },
+    {
+      "name": "PARAFFINUM LIQUIDUM",
+      "slug": "paraffinum-liquidum",
+      "status": "ok",
+      "flags": [
+        "Oil",
+        "Can worsen Oily Skin",
+        "May feed Fungal Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/paraffinum-liquidum"
+    },
+    {
+      "name": "PETROLATUM",
+      "slug": "petrolatum",
+      "status": "ok",
+      "flags": [
+        "Oil",
+        "Hydrating",
+        "Can worsen Oily Skin",
+        "May feed Fungal Acne"
+      ],
+      "rating": "Disliked",
+      "url": "https://skinsort.com/ingredients/petrolatum"
+    },
+    {
+      "name": "MINERAL OIL",
+      "slug": "mineral-oil",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "CERA MICROCRISTALLINA",
+      "slug": "cera-microcristallina",
+      "status": "ok",
+      "flags": [
+        "May feed Fungal Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/cera-microcristallina"
+    },
+    {
+      "name": "MICROCRYSTALLINE WAX",
+      "slug": "microcrystalline-wax",
+      "status": "ok",
+      "flags": [
+        "May feed Fungal Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/microcrystalline-wax"
+    },
+    {
+      "name": "OZOKERITE",
+      "slug": "ozokerite",
+      "status": "ok",
+      "flags": [],
+      "rating": "Disliked",
+      "url": "https://skinsort.com/ingredients/ozokerite"
+    },
+    {
+      "name": "CERESIN",
+      "slug": "ceresin",
+      "status": "ok",
+      "flags": [],
+      "rating": "Disliked",
+      "url": "https://skinsort.com/ingredients/ceresin"
+    },
+    {
+      "name": "PARAFFIN",
+      "slug": "paraffin",
+      "status": "ok",
+      "flags": [
+        "Fragrance",
+        "May feed Fungal Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/paraffin"
+    },
+    {
+      "name": "POLYISOBUTENE",
+      "slug": "polyisobutene",
+      "status": "ok",
+      "flags": [],
+      "rating": "Disliked",
+      "url": "https://skinsort.com/ingredients/polyisobutene"
+    },
+    {
+      "name": "HYDROGENATED POLYISOBUTENE",
+      "slug": "hydrogenated-polyisobutene",
+      "status": "ok",
+      "flags": [],
+      "rating": "Liked",
+      "url": "https://skinsort.com/ingredients/hydrogenated-polyisobutene"
+    },
+    {
+      "name": "POLYBUTENE",
+      "slug": "polybutene",
+      "status": "ok",
+      "flags": [],
+      "rating": "Disliked",
+      "url": "https://skinsort.com/ingredients/polybutene"
+    },
+    {
+      "name": "NAPHTHA",
+      "slug": "naphtha",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "ISOHEXADECANE",
+      "slug": "isohexadecane",
+      "status": "ok",
+      "flags": [],
+      "rating": "Mixed",
+      "url": "https://skinsort.com/ingredients/isohexadecane"
+    },
+    {
+      "name": "ISODODECANE",
+      "slug": "isododecane",
+      "status": "ok",
+      "flags": [],
+      "rating": "Mixed",
+      "url": "https://skinsort.com/ingredients/isododecane"
+    },
+    {
+      "name": "ISOEICOSANE",
+      "slug": "isoeicosane",
+      "status": "ok",
+      "flags": [],
+      "rating": null,
+      "url": "https://skinsort.com/ingredients/isoeicosane"
+    },
+    {
+      "name": "POLYDECENE",
+      "slug": "polydecene",
+      "status": "ok",
+      "flags": [],
+      "rating": null,
+      "url": "https://skinsort.com/ingredients/polydecene"
+    },
+    {
+      "name": "HYDROGENATED POLYDECENE",
+      "slug": "hydrogenated-polydecene",
+      "status": "ok",
+      "flags": [],
+      "rating": "Liked",
+      "url": "https://skinsort.com/ingredients/hydrogenated-polydecene"
+    },
+    {
+      "name": "SYNTHETIC WAX",
+      "slug": "synthetic-wax",
+      "status": "ok",
+      "flags": [
+        "Exfoliant",
+        "Can worsen Oily Skin",
+        "May feed Fungal Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/synthetic-wax"
+    },
+    {
+      "name": "VASELINE",
+      "slug": "vaseline",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "ISOPROPYL MYRISTATE",
+      "slug": "isopropyl-myristate",
+      "status": "ok",
+      "flags": [
+        "May cause Acne",
+        "Can worsen Oily Skin",
+        "May feed Fungal Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/isopropyl-myristate"
+    },
+    {
+      "name": "ISOPROPYL PALMITATE",
+      "slug": "isopropyl-palmitate",
+      "status": "ok",
+      "flags": [
+        "May cause Acne",
+        "Can worsen Oily Skin",
+        "May feed Fungal Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/isopropyl-palmitate"
+    },
+    {
+      "name": "MYRISTYL MYRISTATE",
+      "slug": "myristyl-myristate",
+      "status": "ok",
+      "flags": [
+        "May cause Acne",
+        "Can worsen Oily Skin",
+        "May feed Fungal Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/myristyl-myristate"
+    },
+    {
+      "name": "OCTYL STEARATE",
+      "slug": "octyl-stearate",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "WHEAT GERM OIL",
+      "slug": "wheat-germ-oil",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "TRITICUM VULGARE GERM OIL",
+      "slug": "triticum-vulgare-germ-oil",
+      "status": "ok",
+      "flags": [
+        "Oil",
+        "May cause Acne",
+        "Can worsen Oily Skin",
+        "May feed Fungal Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/triticum-vulgare-germ-oil"
+    },
+    {
+      "name": "LAURETH-4",
+      "slug": "laureth-4",
+      "status": "ok",
+      "flags": [
+        "May cause Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/laureth-4"
+    },
+    {
+      "name": "MYRISTIC ACID",
+      "slug": "myristic-acid",
+      "status": "ok",
+      "flags": [
+        "Hydrating",
+        "May cause Acne",
+        "May feed Fungal Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/myristic-acid"
+    },
+    {
+      "name": "ACETYLATED LANOLIN ALCOHOL",
+      "slug": "acetylated-lanolin-alcohol",
+      "status": "ok",
+      "flags": [
+        "May cause Acne",
+        "Can worsen Oily Skin"
+      ],
+      "rating": null,
+      "url": "https://skinsort.com/ingredients/acetylated-lanolin-alcohol"
+    },
+    {
+      "name": "ETHYLHEXYL PALMITATE",
+      "slug": "ethylhexyl-palmitate",
+      "status": "ok",
+      "flags": [
+        "May cause Acne",
+        "Can worsen Oily Skin",
+        "May feed Fungal Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/ethylhexyl-palmitate"
+    },
+    {
+      "name": "OCTYL PALMITATE",
+      "slug": "octyl-palmitate",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "COCOS NUCIFERA OIL",
+      "slug": "cocos-nucifera-oil",
+      "status": "ok",
+      "flags": [
+        "Oil",
+        "Coconut Derived",
+        "Fragrance",
+        "Hydrating",
+        "May cause Acne",
+        "Can worsen Oily Skin",
+        "May feed Fungal Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/cocos-nucifera-oil"
+    },
+    {
+      "name": "COCOS NUCIFERA FRUIT OIL",
+      "slug": "cocos-nucifera-fruit-oil",
+      "status": "not_found",
+      "flags": [],
+      "rating": null
+    },
+    {
+      "name": "THEOBROMA CACAO SEED BUTTER",
+      "slug": "theobroma-cacao-seed-butter",
+      "status": "ok",
+      "flags": [
+        "May cause Acne",
+        "Can worsen Oily Skin",
+        "May feed Fungal Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/theobroma-cacao-seed-butter"
+    },
+    {
+      "name": "LANOLIN ALCOHOL",
+      "slug": "lanolin-alcohol",
+      "status": "ok",
+      "flags": [
+        "Fatty Alcohol",
+        "Can worsen Oily Skin"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/lanolin-alcohol"
+    },
+    {
+      "name": "DECYL OLEATE",
+      "slug": "decyl-oleate",
+      "status": "ok",
+      "flags": [
+        "May cause Acne",
+        "Can worsen Oily Skin",
+        "May feed Fungal Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/decyl-oleate"
+    },
+    {
+      "name": "ISOPROPYL ISOSTEARATE",
+      "slug": "isopropyl-isostearate",
+      "status": "ok",
+      "flags": [
+        "May cause Acne",
+        "Can worsen Oily Skin",
+        "May feed Fungal Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/isopropyl-isostearate"
+    },
+    {
+      "name": "LINUM USITATISSIMUM SEED OIL",
+      "slug": "linum-usitatissimum-seed-oil",
+      "status": "ok",
+      "flags": [
+        "Oil",
+        "Fragrance",
+        "Can worsen Oily Skin",
+        "May feed Fungal Acne"
+      ],
+      "rating": "Disliked",
+      "url": "https://skinsort.com/ingredients/linum-usitatissimum-seed-oil"
+    },
+    {
+      "name": "BUTYL STEARATE",
+      "slug": "butyl-stearate",
+      "status": "ok",
+      "flags": [
+        "May cause Acne",
+        "Can worsen Oily Skin"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/butyl-stearate"
+    },
+    {
+      "name": "CETYL ACETATE",
+      "slug": "cetyl-acetate",
+      "status": "ok",
+      "flags": [
+        "May cause Acne",
+        "Can worsen Oily Skin"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/cetyl-acetate"
+    },
+    {
+      "name": "ISOSTEARYL NEOPENTANOATE",
+      "slug": "isostearyl-neopentanoate",
+      "status": "ok",
+      "flags": [
+        "May cause Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/isostearyl-neopentanoate"
+    },
+    {
+      "name": "POLYGLYCERYL-3-DIISOSTEARATE",
+      "slug": "polyglyceryl-3-diisostearate",
+      "status": "ok",
+      "flags": [
+        "May cause Acne",
+        "Can worsen Oily Skin",
+        "May feed Fungal Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/polyglyceryl-3-diisostearate"
+    },
+    {
+      "name": "LAURIC ACID",
+      "slug": "lauric-acid",
+      "status": "ok",
+      "flags": [
+        "May cause Acne",
+        "Can worsen Oily Skin",
+        "May feed Fungal Acne"
+      ],
+      "rating": "Very Disliked",
+      "url": "https://skinsort.com/ingredients/lauric-acid"
+    }
+  ]
+}

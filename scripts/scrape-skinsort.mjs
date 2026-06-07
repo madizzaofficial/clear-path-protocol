@@ -112,16 +112,23 @@ async function scrapeIngredient(page, name) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({
+  headless: false,
+  args: ["--disable-blink-features=AutomationControlled"],
+});
 const context = await browser.newContext({
-  userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+  viewport: { width: 1280, height: 800 },
+  locale: "en-US",
 });
 const page = await context.newPage();
 
-// Accept cookies on first page load
+// First load — wait for Cloudflare to pass and accept cookies
+console.log("Opening browser… wait for the page to fully load then the scraping starts automatically.\n");
 await page.goto("https://skinsort.com/ingredients/glycerin", { waitUntil: "domcontentloaded" });
-await page.getByRole("button", { name: /accepter|accept/i }).click().catch(() => {});
-await page.waitForTimeout(1000);
+await page.waitForSelector("article h1", { timeout: 30000 });
+await page.getByRole("button", { name: /accepter|accept all|tout accepter/i }).click().catch(() => {});
+await page.waitForTimeout(1500);
 
 const results = [];
 let ok = 0, notFound = 0, errors = 0;

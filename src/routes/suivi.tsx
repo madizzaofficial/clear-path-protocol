@@ -287,7 +287,7 @@ function Suivi() {
         loading: false,
         skinState: skinStateSnap?.exists() ? (skinStateSnap.data() as AdminSkinState) : null,
         completedLessons: progressSnap?.exists() ? (progressSnap.data().completedLessons ?? []) : [],
-        enrolledAt: userSnap?.exists() ? (userSnap.data().enrolledAt ?? null) : null,
+        enrolledAt: userSnap?.exists() ? (userSnap.data().routineStartedAt ?? userSnap.data().enrolledAt ?? null) : null,
         totalRoutineSteps,
         amSteps,
         pmSteps,

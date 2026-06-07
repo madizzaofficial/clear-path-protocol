@@ -240,6 +240,10 @@ function StudentPage() {
   const [checkins28Admin, setCheckins28Admin] = useState<Record<string, { am: string[]; pm: string[] }>>({});
   const [editingAdminSkinState, setEditingAdminSkinState] = useState(false);
   const [editingAdminCallDate, setEditingAdminCallDate] = useState(false);
+  const [routineStartedAt, setRoutineStartedAt] = useState<number | null>(null);
+  const [editingStartDate, setEditingStartDate] = useState(false);
+  const [startDateInput, setStartDateInput] = useState("");
+  const [savingStartDate, setSavingStartDate] = useState(false);
   const [skinStateHistory, setSkinStateHistory] = useState<SkinStateHistoryEntry[]>([]);
   const [routineHistory, setRoutineHistory] = useState<RoutineHistoryEntry[]>([]);
   const { tab: initialTab } = Route.useSearch();
@@ -278,7 +282,15 @@ function StudentPage() {
         getDoc(doc(db, "routine_reports", uid)),
         getDoc(doc(db, "admin_skin_state", uid)),
       ]);
-      setProfile(profileSnap.exists() ? (profileSnap.data() as StudentProfile) : null);
+      const profileData = profileSnap.exists() ? (profileSnap.data() as StudentProfile) : null;
+      setProfile(profileData);
+      if (profileSnap.exists()) {
+        const rsa = profileSnap.data().routineStartedAt as number | undefined;
+        if (rsa) {
+          setRoutineStartedAt(rsa);
+          setStartDateInput(new Date(rsa).toISOString().slice(0, 10));
+        }
+      }
       setIntake(intakeSnap.exists() ? (intakeSnap.data() as IntakeAnswers) : null);
       setRoutine(
         routineSnap.exists()
@@ -402,6 +414,37 @@ function StudentPage() {
       toast.error("Impossible de résoudre le signalement.");
     } finally {
       setResolvingReport(null);
+    }
+  }
+
+  async function markRoutineStarted() {
+    const now = Date.now();
+    setSavingStartDate(true);
+    try {
+      await updateDoc(doc(db, "users", uid), { routineStartedAt: now });
+      setRoutineStartedAt(now);
+      setStartDateInput(new Date(now).toISOString().slice(0, 10));
+      toast.success("Date de début de routine enregistrée !");
+    } catch {
+      toast.error("Impossible d'enregistrer la date.");
+    } finally {
+      setSavingStartDate(false);
+    }
+  }
+
+  async function saveStartDate() {
+    const ts = new Date(startDateInput).getTime();
+    if (isNaN(ts)) return;
+    setSavingStartDate(true);
+    try {
+      await updateDoc(doc(db, "users", uid), { routineStartedAt: ts });
+      setRoutineStartedAt(ts);
+      setEditingStartDate(false);
+      toast.success("Date mise à jour.");
+    } catch {
+      toast.error("Impossible de mettre à jour la date.");
+    } finally {
+      setSavingStartDate(false);
     }
   }
 
@@ -689,6 +732,21 @@ function StudentPage() {
               <Trash2 className="h-4 w-4" />
               Supprimer
             </button>
+            {!routineStartedAt ? (
+              <button
+                onClick={markRoutineStarted}
+                disabled={savingStartDate}
+                className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+              >
+                {savingStartDate ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+                A commencé sa routine
+              </button>
+            ) : (
+              <div className="flex items-center gap-1.5 rounded-full bg-primary-soft px-4 py-2 text-sm font-medium text-primary">
+                <Check className="h-4 w-4" />
+                Routine démarrée le {new Date(routineStartedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+              </div>
+            )}
             <Link
               to="/admin/routines"
               search={{ uid }}
@@ -721,8 +779,8 @@ function StudentPage() {
 
         {/* ── Suivi ──────────────────────────────────────────────────────────── */}
         {tab === "suivi" && (() => {
-          const enrolledAt = profile?.enrolledAt ?? null;
-          const dayCount = enrolledAt ? Math.max(1, Math.floor((Date.now() - enrolledAt) / 86_400_000) + 1) : 1;
+          const startTs = routineStartedAt ?? profile?.enrolledAt ?? null;
+          const dayCount = startTs ? Math.max(1, Math.floor((Date.now() - startTs) / 86_400_000) + 1) : 1;
           const week = Math.min(12, Math.ceil(dayCount / 7));
           const totalSteps = (routine?.am?.length ?? 0) + (routine?.pm?.length ?? 0);
           const todayKey2 = new Date().toISOString().slice(0, 10);
@@ -766,6 +824,47 @@ function StudentPage() {
                     <p className="mt-1 text-xs text-muted-foreground">{label}</p>
                   </div>
                 ))}
+              </div>
+
+              {/* Début de routine */}
+              <div className="rounded-2xl border border-border/60 bg-card p-4 shadow-soft">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <CalendarDays className="h-4 w-4 text-primary" />
+                    <div>
+                      <p className="text-sm font-semibold">Début de la routine</p>
+                      <p className="text-xs text-muted-foreground">
+                        {routineStartedAt
+                          ? `Démarrée le ${new Date(routineStartedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} · Semaine ${week}`
+                          : "Non renseigné — les semaines sont calculées depuis l'inscription"}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setEditingStartDate((v) => !v)}
+                    className="shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-muted"
+                  >
+                    {editingStartDate ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+                  </button>
+                </div>
+                {editingStartDate && (
+                  <div className="mt-3 flex items-center gap-2 border-t border-border/60 pt-3">
+                    <input
+                      type="date"
+                      value={startDateInput}
+                      onChange={(e) => setStartDateInput(e.target.value)}
+                      className="flex-1 rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    />
+                    <button
+                      onClick={saveStartDate}
+                      disabled={savingStartDate}
+                      className="flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+                    >
+                      {savingStartDate ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                      Enregistrer
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Row 2: Prochain coaching + État de peau */}

@@ -1,0 +1,716 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - link:
+            - /url: /
+          - link "SkinSort Logo" [ref=e8] [cursor=pointer]:
+            - /url: /
+            - img "SkinSort Logo" [ref=e9]
+        - generic [ref=e14]:
+          - generic:
+            - img
+          - textbox "Find products & brands" [ref=e15]
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - link "Explore" [ref=e18] [cursor=pointer]:
+              - /url: /products
+              - text: Explore
+              - img [ref=e19]
+            - button "Tools" [ref=e21] [cursor=pointer]:
+              - text: Tools
+              - img [ref=e22]
+          - generic [ref=e24]:
+            - button "Get the app" [ref=e25] [cursor=pointer]:
+              - text: Get the app
+              - img [ref=e26]
+            - button "Try SkinSort today" [ref=e29] [cursor=pointer]
+  - generic [ref=e36]:
+    - generic [ref=e38]:
+      - link "Back to Explore" [ref=e40] [cursor=pointer]:
+        - /url: /products
+      - text: "|"
+      - generic [ref=e41]:
+        - link "SKIN1004" [ref=e42] [cursor=pointer]:
+          - /url: /products/skin-1004
+        - text: /
+      - generic [ref=e43]:
+        - link "Sunscreens" [ref=e44] [cursor=pointer]:
+          - /url: /products/skin-1004-sunscreens
+        - text: /
+      - link "Madagascar Centella Hyalu-Cica Water-Fit Sun Serum SPF50+ PA++++" [ref=e46] [cursor=pointer]:
+        - /url: /products/skin-1004/madagascar-centella-hyalu-cica-water-fit-sun-serum-spf50-pa
+    - generic [ref=e48]:
+      - generic [ref=e50]:
+        - generic [ref=e51]:
+          - img "SKIN1004 Madagascar Centella Hyalu-Cica Water-Fit Sun Serum SPF50+ PA++++" [ref=e52]
+          - generic [ref=e53]:
+            - heading "SKIN1004 Madagascar Centella Hyalu-Cica Water-Fit Sun Serum SPF50+ PA++++" [level=1] [ref=e55]:
+              - link "SKIN1004" [ref=e57] [cursor=pointer]:
+                - /url: /products/skin-1004
+              - generic [ref=e58]: Madagascar Centella Hyalu-Cica Water-Fit Sun Serum SPF50+ PA++++
+            - link "3.54 · 421 reviews" [ref=e61] [cursor=pointer]:
+              - /url: /products/skin-1004/madagascar-centella-hyalu-cica-water-fit-sun-serum-spf50-pa/reviews
+              - generic [ref=e62]:
+                - img [ref=e63]
+                - generic [ref=e65]: "3.54"
+                - generic [ref=e66]: ·
+                - generic [ref=e67]: 421 reviews
+            - paragraph [ref=e69]: A popular sunscreen with 42 ingredients, including niacinamide, spf, and vitamin E.
+            - generic [ref=e71]:
+              - link "Save" [ref=e72] [cursor=pointer]:
+                - /url: /register
+              - button "Compare" [ref=e73] [cursor=pointer]
+        - generic [ref=e74]:
+          - button "Where to buy YesStyle, Ulta, +3 more" [ref=e77] [cursor=pointer]:
+            - generic [ref=e78]:
+              - generic [ref=e79]:
+                - text: Where to buy
+                - generic [ref=e80]: YesStyle, Ulta, +3 more
+              - generic [ref=e81]:
+                - img [ref=e82]
+                - img [ref=e83]
+                - img [ref=e84]
+                - img [ref=e85]
+          - generic [ref=e88]:
+            - generic [ref=e89]:
+              - heading "Overview" [level=2] [ref=e90]
+              - generic [ref=e91]:
+                - heading "What it is" [level=3] [ref=e92]
+                - paragraph [ref=e93]:
+                  - strong [ref=e94]: Sunscreen
+                  - text: with 42 ingredients that contains hyaluronic acid, niacinamide, SPF and Vitamin E
+              - generic [ref=e95]:
+                - heading "Cool Features" [level=3] [ref=e96]
+                - paragraph [ref=e97]: It is vegan, cruelty-free, and reef safe
+              - generic [ref=e98]:
+                - heading "Suited For" [level=3] [ref=e99]
+                - paragraph [ref=e100]:
+                  - text: It has ingredients that are
+                  - strong [ref=e101]: good for
+                  - strong [ref=e102]: fighting acne
+                  - text: ","
+                  - strong [ref=e103]: anti aging
+                  - text: ","
+                  - strong [ref=e104]: dry skin
+                  - text: ","
+                  - strong [ref=e105]: brightening skin
+                  - text: ","
+                  - strong [ref=e106]: sensitive skin
+                  - text: ","
+                  - strong [ref=e107]: oily skin
+                  - text: ","
+                  - strong [ref=e108]: reducing pores
+                  - text: ","
+                  - strong [ref=e109]: scar healing
+                  - text: ","
+                  - strong [ref=e110]: dark spots
+                  - text: and
+                  - strong [ref=e111]: better texture
+              - generic [ref=e112]:
+                - heading "Free From" [level=3] [ref=e113]
+                - paragraph [ref=e114]:
+                  - text: It
+                  - strong [ref=e115]: doesn't contain
+                  - text: any common allergens, oils, parabens or sulfates
+              - generic [ref=e116]:
+                - heading "Fun facts" [level=3] [ref=e117]
+                - paragraph [ref=e118]:
+                  - text: SKIN1004 is from
+                  - strong [ref=e119]: South Korea
+                  - text: . This product is used in 25183 routines created by our community.
+            - generic [ref=e120]:
+              - img [ref=e121]
+              - paragraph [ref=e123]:
+                - text: We independently verify ingredients and our claims are backed by peer-reviewed research. Does this product need an update?
+                - link "Let us know" [ref=e124] [cursor=pointer]:
+                  - /url: /contact
+                - text: .
+          - generic [ref=e125]:
+            - generic [ref=e128]:
+              - heading "What's inside" [level=2] [ref=e129]
+              - generic [ref=e130]:
+                - button "EU-allergen-free" [ref=e132] [cursor=pointer]:
+                  - img [ref=e134]
+                  - generic [ref=e136]: EU-allergen-free
+                - button "Oil-free" [ref=e138] [cursor=pointer]:
+                  - img [ref=e140]
+                  - generic [ref=e142]: Oil-free
+                - button "Paraben-free" [ref=e144] [cursor=pointer]:
+                  - img [ref=e146]
+                  - generic [ref=e148]: Paraben-free
+                - button "Sulfate-free" [ref=e150] [cursor=pointer]:
+                  - img [ref=e152]
+                  - generic [ref=e154]: Sulfate-free
+                - button "Cruelty-free" [ref=e156] [cursor=pointer]:
+                  - img [ref=e158]
+                  - generic [ref=e160]: Cruelty-free
+                - button "Reef-safe" [ref=e162] [cursor=pointer]:
+                  - img [ref=e164]
+                  - generic [ref=e166]: Reef-safe
+                - button "Vegan" [ref=e168] [cursor=pointer]:
+                  - img [ref=e170]
+                  - generic [ref=e172]: Vegan
+                - button "Alcohol-free" [ref=e174] [cursor=pointer]:
+                  - img [ref=e176]
+                  - generic [ref=e178]: Alcohol-free
+                - button "Fragrance-free" [ref=e180] [cursor=pointer]:
+                  - img [ref=e182]
+                  - generic [ref=e184]: Fragrance-free
+                - button "Silicone-free" [ref=e186] [cursor=pointer]:
+                  - img [ref=e188]
+                  - generic [ref=e190]: Silicone-free
+                - button "Fungal-acne-safe" [ref=e192] [cursor=pointer]:
+                  - img [ref=e194]
+                  - generic [ref=e196]: Fungal-acne-safe
+            - generic [ref=e198]:
+              - generic [ref=e199]:
+                - heading "Ingredients List" [level=2] [ref=e201]
+                - button [ref=e202] [cursor=pointer]:
+                  - img [ref=e204]
+              - generic [ref=e206]:
+                - link "Water Skin Conditioning" [ref=e211] [cursor=pointer]:
+                  - /url: /ingredients/water
+                  - generic [ref=e212]:
+                    - img [ref=e214]
+                    - generic [ref=e218]:
+                      - paragraph [ref=e220]: Water
+                      - generic [ref=e221]: Skin Conditioning
+                - link "Dibutyl Adipate Emollient" [ref=e223] [cursor=pointer]:
+                  - /url: /ingredients/dibutyl-adipate
+                  - generic [ref=e224]:
+                    - img [ref=e226]
+                    - generic [ref=e230]:
+                      - paragraph [ref=e232]: Dibutyl Adipate
+                      - generic [ref=e233]: Emollient
+                - link "Propanediol Solvent Helps hydrate Dry Skin Icon Good for Barrier Repair Icon" [ref=e235] [cursor=pointer]:
+                  - /url: /ingredients/propanediol
+                  - generic [ref=e236]:
+                    - img [ref=e238]
+                    - generic [ref=e241]:
+                      - generic [ref=e242]:
+                        - paragraph [ref=e244]: Propanediol
+                        - generic [ref=e245]: Solvent
+                      - generic [ref=e247]:
+                        - img "Helps hydrate Dry Skin Icon" [ref=e248]
+                        - img "Good for Barrier Repair Icon" [ref=e249]
+                - link "Diethylamino Hydroxybenzoyl Hexyl Benzoate UV Filter Chemical UV Filter Icon" [ref=e250] [cursor=pointer]:
+                  - /url: /ingredients/diethylamino-hydroxybenzoyl-hexyl-benzoate
+                  - generic [ref=e251]:
+                    - img [ref=e253]
+                    - generic [ref=e256]:
+                      - generic [ref=e257]:
+                        - paragraph [ref=e259]: Diethylamino Hydroxybenzoyl Hexyl Benzoate
+                        - generic [ref=e260]: UV Filter
+                      - img "Chemical UV Filter Icon" [ref=e263]
+                - link "Polymethylsilsesquioxane Silicon Icon" [ref=e264] [cursor=pointer]:
+                  - /url: /ingredients/polymethylsilsesquioxane
+                  - generic [ref=e265]:
+                    - img [ref=e267]
+                    - generic [ref=e270]:
+                      - paragraph [ref=e273]: Polymethylsilsesquioxane
+                      - img "Silicon Icon" [ref=e276]
+                - button "Show all 42 ingredients" [ref=e277] [cursor=pointer]
+            - link "Find dupes Discover better matches for your skin" [ref=e280] [cursor=pointer]:
+              - /url: /products/skin-1004/madagascar-centella-hyalu-cica-water-fit-sun-serum-spf50-pa/dupes
+              - paragraph [ref=e281]:
+                - generic [ref=e282]:
+                  - generic [ref=e283]: Find dupes
+                  - generic [ref=e284]: Discover better matches for your skin
+                - img [ref=e285]
+            - generic [ref=e288]:
+              - generic [ref=e289]:
+                - heading "Key Ingredients" [level=3] [ref=e290]
+                - generic [ref=e291]:
+                  - button "Chemical UV Filter Absorbs UV rays to help prevent sun damage. 4" [ref=e292] [cursor=pointer]:
+                    - img [ref=e294]
+                    - generic [ref=e295]:
+                      - generic [ref=e296]: Chemical UV Filter
+                      - generic [ref=e297]: Absorbs UV rays to help prevent sun damage.
+                    - generic [ref=e298]: "4"
+                  - button "Hyaluronic Acid Hydrates by attracting and holding water. 3" [ref=e299] [cursor=pointer]:
+                    - img [ref=e301]
+                    - generic [ref=e302]:
+                      - generic [ref=e303]: Hyaluronic Acid
+                      - generic [ref=e304]: Hydrates by attracting and holding water.
+                    - generic [ref=e305]: "3"
+                  - button "Antioxidants Shields skin from free radical damage. 2" [ref=e306] [cursor=pointer]:
+                    - img [ref=e308]
+                    - generic [ref=e309]:
+                      - generic [ref=e310]: Antioxidants
+                      - generic [ref=e311]: Shields skin from free radical damage.
+                    - generic [ref=e312]: "2"
+                  - button "Vitamin E Protects skin and soothes irritation." [ref=e313] [cursor=pointer]:
+                    - img [ref=e315]
+                    - generic [ref=e316]:
+                      - generic [ref=e317]: Vitamin E
+                      - generic [ref=e318]: Protects skin and soothes irritation.
+                  - button "Niacinamide Strengthens, smooths, and brightens skin." [ref=e319] [cursor=pointer]:
+                    - img [ref=e321]
+                    - generic [ref=e322]:
+                      - generic [ref=e323]: Niacinamide
+                      - generic [ref=e324]: Strengthens, smooths, and brightens skin.
+              - generic [ref=e325]:
+                - heading "Benefits" [level=3] [ref=e326]
+                - generic [ref=e327]:
+                  - button "Hydrating Boosts hydration and relieves dry, tight skin. 10" [ref=e328] [cursor=pointer]:
+                    - img [ref=e330]
+                    - generic [ref=e331]:
+                      - generic [ref=e332]: Hydrating
+                      - generic [ref=e333]: Boosts hydration and relieves dry, tight skin.
+                    - generic [ref=e334]: "10"
+                  - button "Barrier Repair Strengthen and restore your skin's natural barrier. 9" [ref=e335] [cursor=pointer]:
+                    - img [ref=e337]
+                    - generic [ref=e338]:
+                      - generic [ref=e339]: Barrier Repair
+                      - generic [ref=e340]: Strengthen and restore your skin's natural barrier.
+                    - generic [ref=e341]: "9"
+                  - button "Anti-Aging Softens lines and helps skin look youthful. 8" [ref=e342] [cursor=pointer]:
+                    - img [ref=e344]
+                    - generic [ref=e345]:
+                      - generic [ref=e346]: Anti-Aging
+                      - generic [ref=e347]: Softens lines and helps skin look youthful.
+                    - generic [ref=e348]: "8"
+                  - button "Redness Reducing Soothes visible redness and calms irritation. 6" [ref=e349] [cursor=pointer]:
+                    - img [ref=e351]
+                    - generic [ref=e352]:
+                      - generic [ref=e353]: Redness Reducing
+                      - generic [ref=e354]: Soothes visible redness and calms irritation.
+                    - generic [ref=e355]: "6"
+                  - button "Show all 12 benefits" [ref=e356] [cursor=pointer]
+              - generic [ref=e357]:
+                - heading "Concerns" [level=3] [ref=e358]
+                - button "May Worsen Dryness Can strip moisture and worsen dryness." [ref=e360] [cursor=pointer]:
+                  - img [ref=e362]
+                  - generic [ref=e363]:
+                    - generic [ref=e364]: May Worsen Dryness
+                    - generic [ref=e365]: Can strip moisture and worsen dryness.
+          - generic [ref=e367]:
+            - heading "Ingredients Explained" [level=2] [ref=e368]
+            - generic [ref=e371]:
+              - generic [ref=e373]:
+                - generic [ref=e377]:
+                  - link "Water" [ref=e379] [cursor=pointer]:
+                    - /url: /ingredients/water
+                  - generic [ref=e381]: Skin Conditioning, Solvent
+                - generic [ref=e384]:
+                  - paragraph [ref=e385]: Water. It's the most common cosmetic ingredient of all. You'll usually see it at the top of ingredient lists, meaning that it makes up the largest part of the product.
+                  - paragraph [ref=e386]: So why is it so popular? Water most often acts as a solvent - this means that it helps dissolve other ingredients into the formulation.
+                  - button "Read more" [ref=e387] [cursor=pointer]
+              - generic [ref=e389]:
+                - generic [ref=e393]:
+                  - link "Dibutyl Adipate" [ref=e395] [cursor=pointer]:
+                    - /url: /ingredients/dibutyl-adipate
+                  - generic [ref=e397]: Emollient, Skin Conditioning, Solvent
+                - generic [ref=e400]:
+                  - paragraph [ref=e401]:
+                    - text: Dibutyl Adipate is an emollient and solvent. It is created from
+                    - link "butyl alcohol" [ref=e402] [cursor=pointer]:
+                      - /url: https://skinsort.com/ingredients/t-butyl-alcohol
+                    - text: and
+                    - link "adipic acid" [ref=e403] [cursor=pointer]:
+                      - /url: https://skinsort.com/ingredients/adipic-acid
+                    - text: .
+                  - paragraph [ref=e404]: As a solvent, Dibutyl Adipate helps mix and disperse ingredients evenly.
+                  - button "Read more" [ref=e405] [cursor=pointer]
+              - button "Show all 42 ingredient explanations" [ref=e406] [cursor=pointer]
+      - generic [ref=e408]:
+        - heading "Reviews" [level=2] [ref=e409]
+        - generic [ref=e412]:
+          - generic [ref=e413]:
+            - generic [ref=e415]:
+              - img [ref=e416]
+              - generic [ref=e418]: "3.54"
+            - generic [ref=e419]:
+              - generic [ref=e420]:
+                - generic [ref=e421]: Overall rating
+                - generic [ref=e423] [cursor=pointer]: "5"
+                - generic [ref=e427] [cursor=pointer]: "4"
+                - generic [ref=e431] [cursor=pointer]: "3"
+                - generic [ref=e435] [cursor=pointer]: "2"
+                - generic [ref=e439] [cursor=pointer]: "1"
+              - generic [ref=e442]:
+                - generic [ref=e443]: What people say
+                - generic [ref=e444]:
+                  - generic [ref=e445]:
+                    - text: Light
+                    - generic [ref=e446]: 54%
+                  - generic [ref=e447]:
+                    - text: Absorbs Well
+                    - generic [ref=e448]: 50%
+                  - generic [ref=e449]:
+                    - text: Hydrating
+                    - generic [ref=e450]: 46%
+              - link "Write your review" [ref=e452] [cursor=pointer]:
+                - /url: /register
+          - generic [ref=e453]:
+            - generic [ref=e454]:
+              - generic [ref=e455]: 421 reviews
+              - generic [ref=e456]:
+                - combobox [ref=e457]:
+                  - option "All Skin Types" [selected]
+                  - option "Combination Skin"
+                  - option "Dry Skin"
+                  - option "Normal Skin"
+                  - option "Oily Skin"
+                  - option "Sensitive Skin"
+                - combobox [ref=e458]:
+                  - option "Rating" [selected]
+                  - option "5 Stars"
+                  - option "4 Stars"
+                  - option "3 Stars"
+                  - option "2 Stars"
+                  - option "1 Stars"
+                - combobox [ref=e459]:
+                  - option "Popular" [selected]
+                  - option "Latest"
+            - generic [ref=e460]:
+              - generic [ref=e462]:
+                - generic [ref=e463]:
+                  - generic [ref=e465]:
+                    - link "skinogre's avatar" [ref=e466] [cursor=pointer]:
+                      - /url: /users/skinogre
+                      - img "skinogre's avatar" [ref=e467]
+                    - img [ref=e468]
+                  - generic [ref=e471]:
+                    - heading "skinogre" [level=3] [ref=e472]:
+                      - link "skinogre" [ref=e473] [cursor=pointer]:
+                        - /url: /users/skinogre
+                    - generic [ref=e474]: Oily Skin
+                - generic [ref=e475]:
+                  - generic [ref=e477]:
+                    - img [ref=e478]
+                    - img [ref=e480]
+                    - img [ref=e482]
+                    - img [ref=e484]
+                    - img [ref=e486]
+                  - generic [ref=e488]: ·
+                  - text: June 2024
+                - generic [ref=e489]:
+                  - link "Generally speaking I despise spfs. I hate having to put it on because it always makes me feel greasy, this spf still makes me feel that way sometimes but a lot less often and has not damaged my skin unless I leave it on without washing my face for 2 days, so it’s my favourite. Basically I’d say this spf is like being the tallest dwarf, it’s only triumph is the fact that it doesn’t break me out, Show more" [ref=e490] [cursor=pointer]:
+                    - /url: /users/skinogre/posts/30968
+                    - paragraph [ref=e492]: Generally speaking I despise spfs. I hate having to put it on because it always makes me feel greasy, this spf still makes me feel that way sometimes but a lot less often and has not damaged my skin unless I leave it on without washing my face for 2 days, so it’s my favourite. Basically I’d say this spf is like being the tallest dwarf, it’s only triumph is the fact that it doesn’t break me out, Show more
+                  - generic [ref=e493]:
+                    - generic [ref=e494]: "#hydrating"
+                    - generic [ref=e495]: "#no scent"
+                    - generic [ref=e496]: "#absorbs well"
+                - generic [ref=e499]:
+                  - generic [ref=e501]:
+                    - link [ref=e502] [cursor=pointer]:
+                      - /url: /register
+                      - img [ref=e504]
+                    - link "104" [ref=e506] [cursor=pointer]:
+                      - /url: /feed_items/30968/likes
+                  - link "15" [ref=e507] [cursor=pointer]:
+                    - /url: /users/skinogre/posts/30968
+                    - img [ref=e508]
+                    - generic [ref=e510]: "15"
+              - generic [ref=e512]:
+                - generic [ref=e513]:
+                  - link "alexandria111's avatar" [ref=e516] [cursor=pointer]:
+                    - /url: /users/alexandria111
+                    - img "alexandria111's avatar" [ref=e517]
+                  - generic [ref=e518]:
+                    - heading "Alexandra" [level=3] [ref=e519]:
+                      - link "Alexandra" [ref=e520] [cursor=pointer]:
+                        - /url: /users/alexandria111
+                    - generic [ref=e521]: Normal Skin
+                - generic [ref=e522]:
+                  - generic [ref=e524]:
+                    - img [ref=e525]
+                    - img [ref=e527]
+                    - img [ref=e529]
+                    - img [ref=e531]
+                    - img [ref=e533]
+                  - generic [ref=e535]: ·
+                  - text: May 2025
+                - generic [ref=e536]:
+                  - link "99% sure this has been clogging my skin and giving me sm closed comedones" [ref=e537] [cursor=pointer]:
+                    - /url: /users/alexandria111/posts/173317
+                    - paragraph [ref=e539]: 99% sure this has been clogging my skin and giving me sm closed comedones
+                  - generic [ref=e541]: "#broke me out"
+                - link "Photo 1" [ref=e547] [cursor=pointer]:
+                  - /url: https://storage.skinsort.com/hjolnttpbwe52rtowky1c0a3sfuz
+                  - img "Photo 1" [ref=e548]
+                - generic [ref=e551]:
+                  - generic [ref=e553]:
+                    - link [ref=e554] [cursor=pointer]:
+                      - /url: /register
+                      - img [ref=e556]
+                    - link "89" [ref=e558] [cursor=pointer]:
+                      - /url: /feed_items/173317/likes
+                  - link "6" [ref=e559] [cursor=pointer]:
+                    - /url: /users/alexandria111/posts/173317
+                    - img [ref=e560]
+                    - generic [ref=e562]: "6"
+              - generic [ref=e564]:
+                - generic [ref=e565]:
+                  - generic [ref=e567]:
+                    - link "skincareidiot's avatar" [ref=e568] [cursor=pointer]:
+                      - /url: /users/skincareidiot
+                      - img "skincareidiot's avatar" [ref=e569]
+                    - img [ref=e570]
+                  - generic [ref=e573]:
+                    - heading "Jenn" [level=3] [ref=e574]:
+                      - link "Jenn" [ref=e575] [cursor=pointer]:
+                        - /url: /users/skincareidiot
+                    - generic [ref=e576]: Combination Skin
+                - generic [ref=e577]:
+                  - generic [ref=e579]:
+                    - img [ref=e580]
+                    - img [ref=e582]
+                    - img [ref=e584]
+                    - img [ref=e586]
+                    - img [ref=e588]
+                  - generic [ref=e590]: ·
+                  - text: May 2025
+                - generic [ref=e591]:
+                  - link "I’m really disappointed by this because it has by far the best texture and finish of any sunscreen I’ve tried, even better than my holy grail, the green version of this. It dries down almost immediately and despite popular opinion I don’t think it actually looks very shiny. It has a more natural finish than most, which I loved. BUT… it broke me out so quickly! Within a couple of days I had a Show more" [ref=e592] [cursor=pointer]:
+                    - /url: /users/skincareidiot/posts/179157
+                    - generic [ref=e593]:
+                      - paragraph [ref=e594]: I’m really disappointed by this because it has by far the best texture and finish of any sunscreen I’ve tried, even better than my holy grail, the green version of this. It dries down almost immediately and despite popular opinion I don’t think it actually looks very shiny. It has a more natural finish than most, which I loved.
+                      - paragraph [ref=e595]: BUT… it broke me out so quickly! Within a couple of days I had a Show more
+                  - generic [ref=e596]:
+                    - generic [ref=e597]: "#broke me out"
+                    - generic [ref=e598]: "#drying"
+                    - generic [ref=e599]: "#light"
+                    - generic [ref=e600]: "#absorbs well"
+                - generic [ref=e603]:
+                  - generic [ref=e605]:
+                    - link [ref=e606] [cursor=pointer]:
+                      - /url: /register
+                      - img [ref=e608]
+                    - link "68" [ref=e610] [cursor=pointer]:
+                      - /url: /feed_items/179157/likes
+                  - link "17" [ref=e611] [cursor=pointer]:
+                    - /url: /users/skincareidiot/posts/179157
+                    - img [ref=e612]
+                    - generic [ref=e614]: "17"
+              - generic [ref=e616]:
+                - generic [ref=e617]:
+                  - link "immabtot's avatar" [ref=e620] [cursor=pointer]:
+                    - /url: /users/immabtot
+                    - img "immabtot's avatar" [ref=e621]
+                  - generic [ref=e622]:
+                    - heading "Imma" [level=3] [ref=e623]:
+                      - link "Imma" [ref=e624] [cursor=pointer]:
+                        - /url: /users/immabtot
+                    - generic [ref=e625]: Oily Skin
+                - generic [ref=e626]:
+                  - generic [ref=e628]:
+                    - img [ref=e629]
+                    - img [ref=e631]
+                    - img [ref=e633]
+                    - img [ref=e635]
+                    - img [ref=e637]
+                  - generic [ref=e639]: ·
+                  - text: September 2025
+                - generic [ref=e640]:
+                  - link "Broke me out so bad. It’s a no no for me. It triggered my clogged comedons and acne plus my skin was itching. However the texture of it is soooo good, very liquidy just how i like it, so sad :(" [ref=e641] [cursor=pointer]:
+                    - /url: /users/immabtot/posts/249536
+                    - paragraph [ref=e643]: Broke me out so bad. It’s a no no for me. It triggered my clogged comedons and acne plus my skin was itching. However the texture of it is soooo good, very liquidy just how i like it, so sad :(
+                  - generic [ref=e644]:
+                    - generic [ref=e645]: "#doesn't work"
+                    - generic [ref=e646]: "#broke me out"
+                    - generic [ref=e647]: "#irritating"
+                - generic [ref=e650]:
+                  - generic [ref=e652]:
+                    - link [ref=e653] [cursor=pointer]:
+                      - /url: /register
+                      - img [ref=e655]
+                    - link "42" [ref=e657] [cursor=pointer]:
+                      - /url: /feed_items/249536/likes
+                  - link "15" [ref=e658] [cursor=pointer]:
+                    - /url: /users/immabtot/posts/249536
+                    - img [ref=e659]
+                    - generic [ref=e661]: "15"
+              - generic [ref=e663]:
+                - generic [ref=e664]:
+                  - generic [ref=e666]:
+                    - link "Lapaki's avatar" [ref=e667] [cursor=pointer]:
+                      - /url: /users/lapaki
+                      - img "Lapaki's avatar" [ref=e668]
+                    - img [ref=e669]
+                  - generic [ref=e672]:
+                    - heading "Lapaki" [level=3] [ref=e673]:
+                      - link "Lapaki" [ref=e674] [cursor=pointer]:
+                        - /url: /users/lapaki
+                    - generic [ref=e675]: Dry Skin
+                - generic [ref=e676]:
+                  - generic [ref=e678]:
+                    - img [ref=e679]
+                    - img [ref=e681]
+                    - img [ref=e683]
+                    - img [ref=e685]
+                    - img [ref=e687]
+                  - generic [ref=e689]: ·
+                  - text: January 2024
+                - generic [ref=e690]:
+                  - link "This chemical sunscreen has a modest dewy finish and leaves my skin feeling refreshed. The watery, lightweight lotion dries in under couple of minutes. It doesn't leave any unwanted residue, no greasiness and no stickiness. Plus, there's no white cast, and it doesn't pill when I layer it with other products. Reapplying throughout the day is no issue, and when it's time to cleanse, it washes off Show more" [ref=e691] [cursor=pointer]:
+                    - /url: /users/lapaki/posts/4909
+                    - paragraph [ref=e693]: This chemical sunscreen has a modest dewy finish and leaves my skin feeling refreshed. The watery, lightweight lotion dries in under couple of minutes. It doesn't leave any unwanted residue, no greasiness and no stickiness. Plus, there's no white cast, and it doesn't pill when I layer it with other products. Reapplying throughout the day is no issue, and when it's time to cleanse, it washes off Show more
+                  - generic [ref=e694]:
+                    - generic [ref=e695]: "#no scent"
+                    - generic [ref=e696]: "#absorbs well"
+                    - generic [ref=e697]: "#light"
+                    - generic [ref=e698]: "#hydrating"
+                - generic [ref=e701]:
+                  - generic [ref=e703]:
+                    - link [ref=e704] [cursor=pointer]:
+                      - /url: /register
+                      - img [ref=e706]
+                    - link "27" [ref=e708] [cursor=pointer]:
+                      - /url: /feed_items/4909/likes
+                  - link "5" [ref=e709] [cursor=pointer]:
+                    - /url: /users/lapaki/posts/4909
+                    - img [ref=e710]
+                    - generic [ref=e712]: "5"
+            - link "See all reviews" [ref=e714] [cursor=pointer]:
+              - /url: /products/skin-1004/madagascar-centella-hyalu-cica-water-fit-sun-serum-spf50-pa/reviews
+      - generic [ref=e715]:
+        - generic [ref=e716]:
+          - heading "Where it's from" [level=2] [ref=e717]
+          - generic [ref=e718]:
+            - paragraph [ref=e720]: SKIN1004 is a Korean brand
+            - img "Korean flag" [ref=e721]
+        - generic [ref=e722]:
+          - heading "50 SPF Rating" [level=2] [ref=e723]
+          - paragraph [ref=e724]: With an SPF rating of 50, this product protects against 98.0% of UVB rays
+      - generic [ref=e725]:
+        - generic [ref=e726]:
+          - heading "Often compared with" [level=2] [ref=e727]
+          - generic [ref=e728]:
+            - link "Round Lab Birch Moisturizing Sunscreen SPF 50+ PA++++ Round Lab Birch Moisturizing Sunscreen SPF 50+ PA++++ Compare" [ref=e730] [cursor=pointer]:
+              - /url: /compare/round-lab-birch-juice-moisturizing-sun-cream-vs-skin-1004-madagascar-centella-hyalu-cica-water-fit-sun-serum-spf50-pa
+              - generic [ref=e731]:
+                - generic:
+                  - img "Round Lab Birch Moisturizing Sunscreen SPF 50+ PA++++"
+                - generic [ref=e732]:
+                  - generic [ref=e733]: Round Lab
+                  - generic [ref=e734]: Birch Moisturizing Sunscreen SPF 50+ PA++++
+              - generic [ref=e735]: Compare
+            - link "Isntree Hyaluronic Acid Watery Sun Gel SPF 50+ PA++++ Isntree Hyaluronic Acid Watery Sun Gel SPF 50+ PA++++ Compare" [ref=e737] [cursor=pointer]:
+              - /url: /compare/skin-1004-madagascar-centella-hyalu-cica-water-fit-sun-serum-spf50-pa-vs-isntree-hyaluronic-acid-watery-sun-gel
+              - generic [ref=e738]:
+                - generic:
+                  - img "Isntree Hyaluronic Acid Watery Sun Gel SPF 50+ PA++++"
+                - generic [ref=e739]:
+                  - generic [ref=e740]: Isntree
+                  - generic [ref=e741]: Hyaluronic Acid Watery Sun Gel SPF 50+ PA++++
+              - generic [ref=e742]: Compare
+            - link "SKIN1004 Madagascar Centella Ampoule SKIN1004 Madagascar Centella Ampoule Compare" [ref=e744] [cursor=pointer]:
+              - /url: /compare/skin1004-madagascar-centella-hyalu-cica-water-fit-sun-serum-spf50-pa-vs-skin1004-madagascar-centella-ampoule
+              - generic [ref=e745]:
+                - generic:
+                  - img "SKIN1004 Madagascar Centella Ampoule"
+                - generic [ref=e746]:
+                  - generic [ref=e747]: SKIN1004
+                  - generic [ref=e748]: Madagascar Centella Ampoule
+              - generic [ref=e749]: Compare
+            - 'link "Beauty of Joseon Relief Sun : Rice + Probiotics SPF 50+ PA++++ Beauty of Joseon Relief Sun : Rice + Probiotics SPF 50+ PA++++ Compare" [ref=e751] [cursor=pointer]':
+              - /url: /compare/beauty-of-joseon-relief-sun-rice-probiotics-spf-50-vs-skin1004-madagascar-centella-hyalu-cica-water-fit-sun-serum-spf50-pa
+              - generic [ref=e752]:
+                - generic:
+                  - 'img "Beauty of Joseon Relief Sun : Rice + Probiotics SPF 50+ PA++++"'
+                - generic [ref=e753]:
+                  - generic [ref=e754]: Beauty of Joseon
+                  - generic [ref=e755]: "Relief Sun : Rice + Probiotics SPF 50+ PA++++"
+              - generic [ref=e756]: Compare
+        - generic [ref=e757]:
+          - img "SkinSort Icon" [ref=e759]
+          - generic [ref=e760]:
+            - generic [ref=e761]: Verified by SkinSort
+            - paragraph [ref=e762]: We're dedicated to providing you with the most up-to-date and science-backed ingredient info out there.
+            - paragraph [ref=e763]: The data we've presented on this page has been verified by a member of the SkinSort Team.
+            - link "Read more about us" [ref=e764] [cursor=pointer]:
+              - /url: /about
+        - paragraph [ref=e766]:
+          - generic [ref=e767]: · Updated November 3, 2025
+          - generic [ref=e768]: •
+          - generic [ref=e769]:
+            - text: Added by
+            - link "nycdave886" [ref=e770] [cursor=pointer]:
+              - /url: /users/nycdave886
+  - contentinfo [ref=e771]:
+    - generic [ref=e772]:
+      - generic [ref=e773]:
+        - generic [ref=e775]:
+          - link "SkinSort Logo" [ref=e776] [cursor=pointer]:
+            - /url: /
+            - img "SkinSort Logo"
+          - generic [ref=e777]: Get the app
+          - generic [ref=e778]:
+            - link "Get SkinSort on the App Store" [ref=e779] [cursor=pointer]:
+              - /url: https://apps.apple.com/app/apple-store/id6478040418?pt=126899204&ct=Web%20Footer&mt=8
+              - img "Get SkinSort on the App Store" [ref=e780]
+            - link "Get SkinSort on Google Play":
+              - /url: https://play.google.com/store/apps/details?id=com.skinsort&utm_source=skinsort.com&utm_medium=web&utm_campaign=WebFooter
+              - img "Get SkinSort on Google Play"
+          - generic [ref=e781]: Connect with us
+          - generic [ref=e782]:
+            - link [ref=e783] [cursor=pointer]:
+              - /url: https://instagram.com/skinsort
+              - img [ref=e784]
+            - link [ref=e788] [cursor=pointer]:
+              - /url: https://www.tiktok.com/@skinsort/
+              - img [ref=e789]
+            - link [ref=e792] [cursor=pointer]:
+              - /url: https://www.facebook.com/skinsort/
+              - img [ref=e793]
+            - link [ref=e796] [cursor=pointer]:
+              - /url: https://twitter.com/SkinSortHQ
+              - img [ref=e797]
+        - generic [ref=e801]:
+          - generic [ref=e802]: Tools
+          - link "Routine Creator" [ref=e803] [cursor=pointer]:
+            - /url: /routine
+          - link "Ingredient Checker" [ref=e804] [cursor=pointer]:
+            - /url: /ingredient-analyzer
+          - link "Compare Products" [ref=e805] [cursor=pointer]:
+            - /url: /compare
+          - link "Skincare Dupes" [ref=e806] [cursor=pointer]:
+            - /url: /dupes
+          - link "Fungal Acne Checker" [ref=e807] [cursor=pointer]:
+            - /url: /fungal-acne-checker
+          - link "Pore Clogging Checker" [ref=e808] [cursor=pointer]:
+            - /url: /pore-clogging-checker
+          - link "Seb Derm Checker" [ref=e809] [cursor=pointer]:
+            - /url: /seb-derm-checker
+        - generic [ref=e810]:
+          - generic [ref=e811]: Info
+          - link "Skincare Guides" [ref=e812] [cursor=pointer]:
+            - /url: /learn
+          - link "Browse Products" [ref=e813] [cursor=pointer]:
+            - /url: /products
+          - link "Browse Brands" [ref=e814] [cursor=pointer]:
+            - /url: /brands
+          - link "Ingredients Dictionary" [ref=e815] [cursor=pointer]:
+            - /url: /ingredients
+          - link "Submit a Product" [ref=e816] [cursor=pointer]:
+            - /url: /submissions/new
+          - link "Submit a Brand" [ref=e817] [cursor=pointer]:
+            - /url: /brand-submissions/new
+        - generic [ref=e818]:
+          - generic [ref=e819]: SkinSort
+          - link "About" [ref=e820] [cursor=pointer]:
+            - /url: /about
+          - link "Support" [ref=e821] [cursor=pointer]:
+            - /url: /support
+          - link "Contact Us" [ref=e822] [cursor=pointer]:
+            - /url: /contact
+          - link "Terms of Service" [ref=e823] [cursor=pointer]:
+            - /url: /terms-of-service
+          - link "Affiliate Disclosure" [ref=e824] [cursor=pointer]:
+            - /url: /affiliate-disclosure
+          - link "Privacy Policy" [ref=e825] [cursor=pointer]:
+            - /url: /privacy-policy
+        - generic [ref=e827]:
+          - generic [ref=e828]: Alternative to
+          - link "CosDNA" [ref=e829] [cursor=pointer]:
+            - /url: /alternative/cosdna
+          - link "SkinCarisma" [ref=e830] [cursor=pointer]:
+            - /url: /alternative/skincarisma
+      - generic [ref=e831]: Made with 💜 from around the world
+      - link "© 2026 SkinSort" [ref=e834] [cursor=pointer]:
+        - /url: /
