@@ -51,8 +51,8 @@ service cloud.firestore {
     // Students can only write their own intake once; immutable after submission
     match /intake_answers/{userId} {
       allow read: if isOwner(userId) || isAdmin();
-      allow create: if isOwner(userId)
-        && request.resource.data.uid == userId;
+      allow create: if isAdmin()
+        || (isOwner(userId) && request.resource.data.uid == userId);
       allow update: if isAdmin();
       allow delete: if false;
     }
