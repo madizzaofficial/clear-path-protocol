@@ -134,10 +134,7 @@ export async function handleStripeWebhook(request: Request): Promise<Response> {
 }
 
 async function _handleStripeWebhook(request: Request): Promise<Response> {
-  const isTestMode = process.env.STRIPE_MODE === "test";
-  const secret = isTestMode
-    ? process.env.STRIPE_WEBHOOK_SECRET_TEST
-    : process.env.STRIPE_WEBHOOK_SECRET;
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret) return new Response("Webhook secret missing", { status: 500 });
 
   const rawBody = await request.text();
@@ -158,10 +155,6 @@ async function _handleStripeWebhook(request: Request): Promise<Response> {
   } catch {
     return new Response("Invalid JSON", { status: 400 });
   }
-
-  // Reject event if livemode doesn't match expected environment
-  if (isTestMode && event.livemode) return new Response("Live event rejected in test mode", { status: 400 });
-  if (!isTestMode && !event.livemode) return new Response("Test event rejected in live mode", { status: 400 });
 
   if (event.type !== "checkout.session.completed") {
     return new Response("Ignored", { status: 200 });
