@@ -206,13 +206,14 @@ function ProductsContent() {
     if (selection.length === 0) return;
 
     const { utils, writeFile } = await import("xlsx");
+    const safe = (s: string) => /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
     const rows = selection.map((p) => ({
       product_id: generateProductId(p.brand ?? "", p.name),
-      marque: p.brand ?? "",
-      nom_produit: p.name,
-      type_produit: p.category,
-      inci_complet: p.inciNormalized ?? "",
-      notes: p.description ?? "",
+      marque: safe(p.brand ?? ""),
+      nom_produit: safe(p.name),
+      type_produit: safe(p.category),
+      inci_complet: safe(p.inciNormalized ?? ""),
+      notes: safe(p.description ?? ""),
     }));
 
     const ws = utils.json_to_sheet(rows, {
