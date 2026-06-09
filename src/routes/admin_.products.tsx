@@ -10,6 +10,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Download,
   ImageOff,
   LayoutGrid,
   LayoutList,
@@ -185,6 +186,47 @@ function ProductsContent() {
     }
   }
 
+  function generateProductId(brand: string, name: string): string {
+    const slug = (s: string) =>
+      s.toUpperCase()
+        .normalize("NFD").replace(/[̀-ͯ]/g, "")
+        .replace(/[^A-Z0-9]+/g, "_")
+        .replace(/^_|_$/g, "");
+    const brandSlug = slug(brand || "UNKNOWN");
+    // Keep name slug under ~30 chars to stay readable
+    const nameSlug = slug(name || "PRODUCT").split("_").reduce((acc, w) => {
+      if (acc.length >= 30) return acc;
+      return acc ? `${acc}_${w}` : w;
+    }, "");
+    return `${brandSlug}_${nameSlug}`;
+  }
+
+  async function exportSelection() {
+    const selection = products.filter((p) => p.isFeatured);
+    if (selection.length === 0) return;
+
+    const { utils, writeFile } = await import("xlsx");
+    const rows = selection.map((p) => ({
+      product_id: generateProductId(p.brand ?? "", p.name),
+      marque: p.brand ?? "",
+      nom_produit: p.name,
+      type_produit: p.category,
+      inci_complet: p.inciNormalized ?? "",
+      notes: p.description ?? "",
+    }));
+
+    const ws = utils.json_to_sheet(rows, {
+      header: ["product_id", "marque", "nom_produit", "type_produit", "inci_complet", "notes"],
+    });
+
+    // Column widths
+    ws["!cols"] = [{ wch: 40 }, { wch: 20 }, { wch: 35 }, { wch: 20 }, { wch: 60 }, { wch: 30 }];
+
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, "Produits");
+    writeFile(wb, "selection_protocole_clear.xlsx");
+  }
+
   async function handleToggleFeatured(id: string, current: boolean) {
     const next = !current;
     setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, isFeatured: next } : p)));
@@ -289,6 +331,15 @@ function ProductsContent() {
               </span>
             )}
           </button>
+          {featuredCount > 0 && (
+            <button
+              onClick={exportSelection}
+              className="flex h-10 items-center gap-2 rounded-2xl border border-yellow-400 bg-yellow-50 px-4 text-sm font-medium text-yellow-700 transition-colors hover:bg-yellow-100 dark:bg-yellow-950/30 dark:text-yellow-400 dark:hover:bg-yellow-950/50"
+            >
+              <Download className="h-3.5 w-3.5" />
+              Exporter .xlsx
+            </button>
+          )}
           <button
             onClick={() => setFilterUnverified((v) => !v)}
             className={`flex h-10 items-center gap-2 rounded-2xl border px-4 text-sm font-medium transition-colors ${
