@@ -1107,9 +1107,14 @@ function RoutinesContent() {
                                     {idx + 1}
                                   </span>
                                   <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-medium">{step.product}</p>
-                                    <p className="text-xs text-muted-foreground">{step.category}</p>
+                                    <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{step.category}</span>
+                                    <p className="mt-1 text-sm font-semibold">{step.product}</p>
+                                    {step.brand && <p className="text-xs text-muted-foreground">{step.brand}</p>}
+                                    {step.instructions && <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{step.instructions}</p>}
                                   </div>
+                                  {step.imageUrl && (
+                                    <img src={step.imageUrl} alt={step.product} className="h-12 w-12 shrink-0 rounded-xl border border-border object-cover" />
+                                  )}
                                   <div className="flex items-center gap-1">
                                     <button
                                       onClick={(e) => { e.stopPropagation(); setEditingStep(step); setIsNewStep(false); setEditingExtrasBlockId(block.id); }}
