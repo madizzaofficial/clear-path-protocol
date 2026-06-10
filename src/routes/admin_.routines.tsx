@@ -97,6 +97,7 @@ type SendEmailPayload = {
   displayName: string | null;
   am: RoutineStep[];
   pm: RoutineStep[];
+  extras?: ExtraBlock[];
   isUpdate?: boolean;
 };
 
@@ -164,6 +165,8 @@ function validatePayload(data: unknown): SendEmailPayload {
     throw new Error("displayName invalide.");
   if (!Array.isArray(d.am) || !Array.isArray(d.pm))
     throw new Error("Structure de routine invalide.");
+  if (d.extras !== undefined && !Array.isArray(d.extras))
+    throw new Error("Extras invalide.");
   if (d.am.length > 20 || d.pm.length > 20)
     throw new Error("Trop d'étapes dans la routine (max 20).");
 
@@ -192,7 +195,7 @@ const sendRoutineEmailFn = createServerFn({ method: "POST" })
     if (!apiKey) throw new Error("RESEND_API_KEY non configurée.");
 
     const firstName = data.displayName?.split(" ")[0] ?? "là";
-    const html = buildEmailHtml(firstName, data.am, data.pm, data.isUpdate ?? false);
+    const html = buildEmailHtml(firstName, data.am, data.pm, data.isUpdate ?? false, data.extras ?? []);
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -237,7 +240,7 @@ function escapeHtml(str: string): string {
     .replace(/'/g, "&#039;");
 }
 
-function buildEmailHtml(firstName: string, am: RoutineStep[], pm: RoutineStep[], isUpdate = false): string {
+function buildEmailHtml(firstName: string, am: RoutineStep[], pm: RoutineStep[], isUpdate = false, extras: ExtraBlock[] = []): string {
   const stepBlock = (steps: RoutineStep[]) =>
     steps.length === 0
       ? `<p style="color:#999;font-size:14px;font-style:italic;margin:0;">Aucune étape configurée.</p>`
@@ -326,6 +329,23 @@ function buildEmailHtml(firstName: string, am: RoutineStep[], pm: RoutineStep[],
     </table>
     ${stepBlock(pm)}
   </div>
+
+  ${extras.filter((b) => b.steps.length > 0).map((block) => `
+  <!-- Extra block: ${escapeHtml(block.name)} -->
+  <div style="background:white;border-radius:24px;padding:24px 28px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+    <table cellpadding="0" cellspacing="0" style="margin-bottom:18px;">
+      <tr>
+        <td style="padding-right:14px;">
+          <div style="background:#f0f7f0;border-radius:14px;padding:8px 14px;font-size:20px;line-height:1;">🌿</div>
+        </td>
+        <td>
+          <h3 style="font-family:Georgia,serif;color:#1a1a1a;margin:0;font-size:17px;">${escapeHtml(block.name)}</h3>
+          <p style="color:#bbb;font-size:12px;margin:2px 0 0;text-transform:uppercase;letter-spacing:0.07em;">${block.steps.length} étape${block.steps.length !== 1 ? "s" : ""}</p>
+        </td>
+      </tr>
+    </table>
+    ${stepBlock(block.steps)}
+  </div>`).join("")}
 
   <!-- Footer -->
   <p style="text-align:center;color:#ccc;font-size:12px;line-height:1.6;margin:0;">
@@ -568,6 +588,7 @@ function RoutinesContent() {
           displayName: selectedUser.displayName,
           am: routine.am,
           pm: routine.pm,
+          extras: routine.extras,
           isUpdate,
         },
       });
@@ -1414,6 +1435,7 @@ function RoutinesContent() {
                   routine.am,
                   routine.pm,
                   previewIsUpdate,
+                  routine.extras,
                 )}
                 title="Prévisualisation email"
                 className="h-full w-full"
