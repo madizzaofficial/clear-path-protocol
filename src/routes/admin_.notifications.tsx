@@ -21,10 +21,11 @@ export const Route = createFileRoute("/admin_/notifications")({
 
 type AdminNotification = {
   id: string;
-  type: "new_student";
+  type: "new_student" | "payment";
   studentName: string;
   studentEmail: string;
   studentUid: string;
+  message?: string;
   read: boolean;
   hidden?: boolean;
   createdAt: number;
@@ -104,12 +105,14 @@ function NotificationsPage() {
                 }`}
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-lg">
-                  🎓
+                  {n.type === "payment" ? "💰" : "🎓"}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="font-medium leading-tight">
-                      Nouvel élève inscrit — {n.studentName || n.studentEmail}
+                      {n.type === "payment"
+                        ? `${n.message || "Paiement reçu"} — ${n.studentName || n.studentEmail}`
+                        : `Nouvel élève inscrit — ${n.studentName || n.studentEmail}`}
                     </p>
                     {n.hidden && (
                       <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">Effacée</span>
@@ -121,13 +124,15 @@ function NotificationsPage() {
                   <p className="mt-0.5 truncate text-sm text-muted-foreground">{n.studentEmail}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-3">
                     <span className="text-xs text-muted-foreground">{formatDateTime(n.createdAt)}</span>
-                    <Link
-                      to="/admin/student/$uid"
-                      params={{ uid: n.studentUid }}
-                      className="text-xs font-medium text-primary hover:underline"
-                    >
-                      Voir le profil →
-                    </Link>
+                    {n.studentUid && (
+                      <Link
+                        to="/admin/student/$uid"
+                        params={{ uid: n.studentUid }}
+                        className="text-xs font-medium text-primary hover:underline"
+                      >
+                        Voir le profil →
+                      </Link>
+                    )}
                     {!n.hidden && !n.read && (
                       <button
                         onClick={() => markRead(n.id)}

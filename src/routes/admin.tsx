@@ -176,6 +176,33 @@ function AdminPage() {
     });
   }, [students, search, filterStatus, filterInactive, hideAdmins, adminUids, sortBy, routineStatusMap]);
 
+  // ── Inbox "À traiter aujourd'hui" ──────────────────────────────────────────
+  // Liste priorisée des actions, calculée depuis les données déjà chargées.
+  type TodoItem = { uid: string; name: string; kind: "report" | "routine" | "risk" | "inactive"; label: string; priority: number };
+  const todoItems = useMemo(() => {
+    const inactiveCutoff = Date.now() - 10 * 86_400_000;
+    const items: TodoItem[] = [];
+    for (const s of students) {
+      if (adminUids.has(s.uid)) continue;
+      const name = s.displayName ?? s.email;
+      const status = routineStatusMap.get(s.uid); // undefined | "draft" | "sent"
+      const reports = reportsMap.get(s.uid) ?? 0;
+      const daysIn = s.enrolledAt ? (Date.now() - s.enrolledAt) / 86_400_000 : 0;
+      const pct = (progressMap.get(s.uid) ?? 0) / TOTAL_LESSONS;
+      const lastActive = s.lastSeen ?? s.enrolledAt ?? 0;
+
+      if (reports > 0)
+        items.push({ uid: s.uid, name, kind: "report", label: `${reports} produit${reports > 1 ? "s" : ""} signalé${reports > 1 ? "s" : ""}`, priority: 0 });
+      if ((!status || status === "draft") && daysIn >= 1)
+        items.push({ uid: s.uid, name, kind: "routine", label: status === "draft" ? "Routine en brouillon — pas encore envoyée" : "Routine à créer", priority: 1 });
+      if (daysIn > 14 && pct < 0.25)
+        items.push({ uid: s.uid, name, kind: "risk", label: `Bloqué — ${Math.round(pct * 100)}% à J+${Math.floor(daysIn)}`, priority: 2 });
+      if (status === "sent" && lastActive && lastActive < inactiveCutoff)
+        items.push({ uid: s.uid, name, kind: "inactive", label: `Inactif depuis ${Math.floor((Date.now() - lastActive) / 86_400_000)}j`, priority: 3 });
+    }
+    return items.sort((a, b) => a.priority - b.priority || a.name.localeCompare(b.name));
+  }, [students, adminUids, routineStatusMap, reportsMap, progressMap]);
+
   if (loading || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -248,6 +275,64 @@ function AdminPage() {
           <AdminStat icon={CheckCircle2} label="Protocoles terminés" value={loadingStudents ? "…" : String(completedProtocols)} delta={`sur ${totalStudents} élèves`} />
           <AdminStat icon={AlertCircle} label="Élèves à risque" value={loadingStudents ? "…" : String(atRisk)} delta="> 14j, < 25% progression" tone="warn" />
         </div>
+
+        {/* Inbox — À traiter aujourd'hui */}
+        {!loadingStudents && (
+          <div className="mb-8 overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
+            <div className="flex items-center gap-3 border-b border-border/40 px-6 py-4">
+              <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary-soft">
+                <ClipboardList className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold">À traiter aujourd'hui</p>
+                <p className="text-xs text-muted-foreground">
+                  {todoItems.length === 0 ? "Tout est à jour 🎉" : `${todoItems.length} action${todoItems.length !== 1 ? "s" : ""} en attente`}
+                </p>
+              </div>
+            </div>
+            {todoItems.length > 0 && (
+              <ul className="divide-y divide-border/40">
+                {todoItems.slice(0, 12).map((item) => {
+                  const meta = {
+                    report: { icon: Flame, color: "text-orange-500", bg: "bg-orange-100 dark:bg-orange-950/40" },
+                    routine: { icon: Send, color: "text-primary", bg: "bg-primary-soft" },
+                    risk: { icon: AlertTriangle, color: "text-amber-500", bg: "bg-amber-100 dark:bg-amber-950/40" },
+                    inactive: { icon: Clock, color: "text-muted-foreground", bg: "bg-muted" },
+                  }[item.kind];
+                  const Icon = meta.icon;
+                  const linkProps =
+                    item.kind === "routine"
+                      ? { to: "/admin/routines" as const, search: { uid: item.uid } }
+                      : { to: "/admin/student/$uid" as const, params: { uid: item.uid } };
+                  return (
+                    <li key={`${item.kind}-${item.uid}`}>
+                      <Link
+                        {...(linkProps as any)}
+                        className="flex items-center gap-3 px-6 py-3 transition-colors hover:bg-muted/40"
+                      >
+                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${meta.bg}`}>
+                          <Icon className={`h-4 w-4 ${meta.color}`} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">{item.name}</p>
+                          <p className="truncate text-xs text-muted-foreground">{item.label}</p>
+                        </div>
+                        <span className="shrink-0 text-xs font-medium text-primary">
+                          {item.kind === "routine" ? "Envoyer →" : "Voir →"}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+                {todoItems.length > 12 && (
+                  <li className="px-6 py-2 text-center text-xs text-muted-foreground">
+                    +{todoItems.length - 12} autre{todoItems.length - 12 !== 1 ? "s" : ""}…
+                  </li>
+                )}
+              </ul>
+            )}
+          </div>
+        )}
 
         {/* Signalements produits */}
         {!loadingStudents && irritantsData.length > 0 && (

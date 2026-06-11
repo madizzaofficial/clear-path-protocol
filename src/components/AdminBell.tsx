@@ -15,10 +15,11 @@ import {
 
 type AdminNotification = {
   id: string;
-  type: "new_student";
+  type: "new_student" | "payment";
   studentName: string;
   studentEmail: string;
   studentUid: string;
+  message?: string;
   read: boolean;
   createdAt: number;
 };
@@ -116,11 +117,13 @@ export function AdminBell() {
                   className={`flex items-start gap-3 px-4 py-3 transition-colors ${!n.read ? "bg-primary-soft/30" : ""}`}
                 >
                   <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-soft text-sm">
-                    🎓
+                    {n.type === "payment" ? "💰" : "🎓"}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium leading-tight">
-                      Nouvel élève — {n.studentName || n.studentEmail}
+                      {n.type === "payment"
+                        ? (n.message || "Paiement reçu") + ` — ${n.studentName || n.studentEmail}`
+                        : `Nouvel élève — ${n.studentName || n.studentEmail}`}
                     </p>
                     <p className="mt-0.5 truncate text-xs text-muted-foreground">{n.studentEmail}</p>
                     <div className="mt-1 flex items-center gap-2">
@@ -133,14 +136,16 @@ export function AdminBell() {
                           Marquer lu
                         </button>
                       )}
-                      <Link
-                        to="/admin/student/$uid"
-                        params={{ uid: n.studentUid }}
-                        className="text-xs text-muted-foreground hover:text-foreground hover:underline"
-                        onClick={() => setOpen(false)}
-                      >
-                        Voir →
-                      </Link>
+                      {n.type !== "payment" && n.studentUid && (
+                        <Link
+                          to="/admin/student/$uid"
+                          params={{ uid: n.studentUid }}
+                          className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+                          onClick={() => setOpen(false)}
+                        >
+                          Voir →
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>

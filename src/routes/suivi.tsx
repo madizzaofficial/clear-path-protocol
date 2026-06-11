@@ -465,12 +465,12 @@ function Suivi() {
                 const barPct = skinState!.barrierPct ?? 0;
                 const acnPct = skinState!.acnePct ?? 0;
                 const infDesc = infPct >= 67 ? "Active" : infPct >= 34 ? "Modérée" : "Sous contrôle";
-                const barDesc = barPct >= 67 ? "Excellente" : barPct >= 34 ? "En cours" : "Compromise";
+                const barDesc = barPct >= 67 ? "Compromise" : barPct >= 34 ? "En cours" : "Excellente";
                 const acnDesc = acnPct >= 67 ? "Active" : acnPct >= 34 ? "Modérée" : "Contrôlée";
                 return (
                   <div className="grid w-full grid-cols-3 gap-4">
                     <CircleMetric label="Inflammation" emoji="🔥" pct={infPct} inverted description={infDesc} />
-                    <CircleMetric label="Barrière cutanée" emoji="🧱" pct={barPct} description={barDesc} />
+                    <CircleMetric label="Barrière cutanée" emoji="🧱" pct={barPct} inverted description={barDesc} />
                     <CircleMetric label="Acné" emoji="🧴" pct={acnPct} inverted description={acnDesc} />
                   </div>
                 );

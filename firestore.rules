@@ -178,6 +178,20 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ── Notifications admin (cloche) ──────────────────────────────────────────
+    // Créées côté serveur (Admin SDK, bypass rules). L'admin lit et met à jour
+    // (read/hidden). Pas de create/delete client.
+    match /admin_notifications/{notifId} {
+      allow read, update: if isAdmin();
+      allow create, delete: if false;
+    }
+
+    // ── Journal de paiements Stripe (écrit côté serveur uniquement) ───────────
+    match /payments/{paymentId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     // Deny everything else by default
     match /{document=**} {
       allow read, write: if false;

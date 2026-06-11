@@ -195,13 +195,40 @@ async function _handleStripeWebhook(request: Request): Promise<Response> {
 
   const inviteUrl = `https://app.protocole-clear.com/start/${token}`;
 
-  // Send invitation email via Resend
+  // ── Journal de paiement (trace fiable, indépendante des emails Stripe) ──────
+  const amountTotal = typeof session.amount_total === "number" ? session.amount_total : null;
+  const currency = (session.currency as string | undefined) ?? "eur";
+  await adminDb.collection("payments").doc(eventId).set({
+    stripeEventId: eventId,
+    stripeSessionId: session.id as string,
+    buyerEmail: email,
+    buyerName: fullName ?? null,
+    amountTotal,           // en centimes
+    currency,
+    inviteToken: token,
+    createdAt: now,
+  });
+
+  // ── Notification admin in-app (cloche) ──────────────────────────────────────
+  const amountStr = amountTotal != null ? `${(amountTotal / 100).toFixed(2)} ${currency.toUpperCase()}` : "";
+  await adminDb.collection("admin_notifications").add({
+    type: "payment",
+    studentName: fullName ?? email,
+    studentEmail: email,
+    studentUid: "",
+    message: amountStr ? `Paiement reçu — ${amountStr}` : "Paiement reçu",
+    read: false,
+    createdAt: now,
+  });
+
+  // Send emails via Resend
   const apiKey = process.env.RESEND_API_KEY;
   if (apiKey) {
     const from = (() => {
       const r = process.env.RESEND_FROM ?? "onboarding@resend.dev";
       return r.includes("<") ? r : `Protocole Clear <${r}>`;
     })();
+    // Invitation à l'acheteur
     await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
@@ -210,6 +237,27 @@ async function _handleStripeWebhook(request: Request): Promise<Response> {
         to: email,
         subject: `${firstName}, ton accès Protocole Clear est prêt ✨`,
         html: buildInviteEmailHtml(firstName, inviteUrl),
+      }),
+    }).catch(console.error);
+
+    // Alerte fiable au coach (indépendante de l'email Stripe)
+    const adminEmail = process.env.ADMIN_EMAIL ?? "support@protocole-clear.com";
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from,
+        to: adminEmail,
+        subject: `💰 Nouveau paiement — ${escapeHtml(fullName ?? email)}${amountStr ? ` (${amountStr})` : ""}`,
+        html: `<div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;color:#1a1a1a;">
+          <h2 style="margin:0 0 16px;">Nouveau paiement reçu 🎉</h2>
+          <table style="width:100%;border-collapse:collapse;">
+            <tr><td style="padding:6px 0;color:#888;font-size:14px;width:110px;">Client</td><td style="padding:6px 0;font-size:14px;font-weight:600;">${escapeHtml(fullName ?? "—")}</td></tr>
+            <tr><td style="padding:6px 0;color:#888;font-size:14px;">Email</td><td style="padding:6px 0;font-size:14px;">${escapeHtml(email)}</td></tr>
+            ${amountStr ? `<tr><td style="padding:6px 0;color:#888;font-size:14px;">Montant</td><td style="padding:6px 0;font-size:14px;font-weight:600;">${escapeHtml(amountStr)}</td></tr>` : ""}
+          </table>
+          <p style="color:#888;font-size:13px;margin-top:18px;">Le lien d'invitation a été envoyé automatiquement à ${escapeHtml(email)}.</p>
+        </div>`,
       }),
     }).catch(console.error);
   }
