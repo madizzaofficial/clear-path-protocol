@@ -76,8 +76,14 @@ export type UrlExtractResult = {
 };
 
 export const extractInciFromUrlFn = createServerFn({ method: "POST" })
-  .inputValidator((d: { url: string }) => d)
+  .inputValidator((d: { url: string; callerToken: string }) => d)
   .handler(async (ctx): Promise<UrlExtractResult> => {
+    // Authenticated users only (analyzer is open to all members), and SSRF guard
+    // on the target URL before any server-side fetch.
+    const { requireAuth, assertSafeUrl } = await import("@/lib/server-auth");
+    await requireAuth(ctx.data.callerToken);
+    assertSafeUrl(ctx.data.url);
+
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) throw new Error("SERVICE_UNAVAILABLE");
 

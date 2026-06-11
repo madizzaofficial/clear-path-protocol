@@ -4,14 +4,21 @@ import { analyzeIngredientsV2, type AnalysisResultV2, type SkinProfile } from "@
 import { generateExplanationFn, compareProductsFn, toSnapshot } from "@/lib/ai-analysis";
 import { computeInciHash, normalizeInciText } from "@/lib/inci-hash";
 import { getProductCache, saveProductCache, saveAiSummary, makeProfileKey } from "@/lib/product-cache";
-import { lookupBarcodeFn, extractInciFromUrlFn } from "@/lib/product-ingestion";
+import { lookupBarcodeFn, extractInciFromUrlFn as extractInciFromUrlRaw } from "@/lib/product-ingestion";
 import { getCatalogProductByBarcode, autoSaveProductToCatalog } from "@/lib/product-catalog";
 import { LiveBarcodeScanner } from "@/components/LiveBarcodeScanner";
 import { logUnclassifiedIngredients } from "@/lib/unclassified-log";
 import { useAuth } from "@/hooks/use-auth";
-import { db } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
+// Injects the caller's Firebase ID token so the server fn can authenticate the request.
+async function extractInciFromUrlFn({ data }: { data: { url: string } }) {
+  const callerToken = await auth.currentUser?.getIdToken();
+  if (!callerToken) throw new Error("Connecte-toi pour analyser une URL.");
+  return extractInciFromUrlRaw({ data: { url: data.url, callerToken } });
+}
 
 // ─── Flag config ──────────────────────────────────────────────────────────────
 

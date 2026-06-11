@@ -23,8 +23,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { SearchInput } from "@/components/SearchInput";
-import { uploadProductImageFn } from "@/lib/upload-image";
+import { uploadProductImageFn as uploadProductImageRaw } from "@/lib/upload-image";
+import { auth } from "@/lib/firebase";
 import { CATEGORIES } from "@/lib/skincare-categories";
+
+// Injects the admin's Firebase ID token so the upload server fn can authenticate.
+async function uploadProductImageFn({ data }: { data: { fileName: string; contentType: string; base64: string } }) {
+  const callerToken = await auth.currentUser?.getIdToken();
+  if (!callerToken) throw new Error("Session expirée — reconnecte-toi.");
+  return uploadProductImageRaw({ data: { ...data, callerToken } });
+}
 import type { CatalogProduct } from "@/routes/admin_.products";
 import type { InciAnalysis } from "@/lib/inci-analysis";
 

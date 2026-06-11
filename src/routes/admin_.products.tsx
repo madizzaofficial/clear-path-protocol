@@ -42,8 +42,22 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { CATEGORIES } from "@/lib/skincare-categories";
-import { uploadProductImageFn } from "@/lib/upload-image";
-import { lookupBarcodeFn, extractInciFromUrlFn } from "@/lib/product-ingestion";
+import { uploadProductImageFn as uploadProductImageRaw } from "@/lib/upload-image";
+import { auth } from "@/lib/firebase";
+
+// Injects the admin's Firebase ID token so the server fn can authenticate.
+async function uploadProductImageFn({ data }: { data: { fileName: string; contentType: string; base64: string } }) {
+  const callerToken = await auth.currentUser?.getIdToken();
+  if (!callerToken) throw new Error("Session expirée — reconnecte-toi.");
+  return uploadProductImageRaw({ data: { ...data, callerToken } });
+}
+
+async function extractInciFromUrlFn({ data }: { data: { url: string } }) {
+  const callerToken = await auth.currentUser?.getIdToken();
+  if (!callerToken) throw new Error("Session expirée — reconnecte-toi.");
+  return extractInciFromUrlRaw({ data: { ...data, callerToken } });
+}
+import { lookupBarcodeFn, extractInciFromUrlFn as extractInciFromUrlRaw } from "@/lib/product-ingestion";
 import { computeInciHash, normalizeInciText } from "@/lib/inci-hash";
 import type { CatalogProduct, InciAnalysis } from "@/lib/product-catalog";
 import { analyzeInciFn } from "@/lib/inci-analysis";

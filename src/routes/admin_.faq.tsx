@@ -14,8 +14,16 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import { GripVertical, Plus, Pencil, Trash2, Loader2, ImageIcon, Video, FileText, HelpCircle, Upload, X } from "lucide-react";
-import { uploadProductImageFn } from "@/lib/upload-image";
+import { uploadProductImageFn as uploadProductImageRaw } from "@/lib/upload-image";
+import { auth } from "@/lib/firebase";
 import { toast } from "sonner";
+
+// Injects the admin's Firebase ID token so the upload server fn can authenticate.
+async function uploadProductImageFn({ data }: { data: { fileName: string; contentType: string; base64: string } }) {
+  const callerToken = await auth.currentUser?.getIdToken();
+  if (!callerToken) throw new Error("Session expirée — reconnecte-toi.");
+  return uploadProductImageRaw({ data: { ...data, callerToken } });
+}
 
 type Block = { type: "text" | "image"; value: string };
 

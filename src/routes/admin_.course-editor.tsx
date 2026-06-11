@@ -46,7 +46,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-import { uploadLessonResourceFn } from "@/lib/upload-image";
+import { uploadLessonResourceFn as uploadLessonResourceRaw } from "@/lib/upload-image";
+import { auth } from "@/lib/firebase";
+
+// Injects the admin's Firebase ID token so the upload server fn can authenticate.
+async function uploadLessonResourceFn({ data }: { data: { fileName: string; contentType: string; base64: string } }) {
+  const callerToken = await auth.currentUser?.getIdToken();
+  if (!callerToken) throw new Error("Session expirée — reconnecte-toi.");
+  return uploadLessonResourceRaw({ data: { ...data, callerToken } });
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

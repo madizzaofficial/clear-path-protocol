@@ -30,16 +30,32 @@ async function uploadToR2(prefix: string, fileName: string, contentType: string,
   return { publicUrl: `${publicUrlBase}/${key}` };
 }
 
+// Restrict uploads to a safe content-type allowlist to avoid hosting HTML/scripts
+// on the public R2 domain (stored-XSS / arbitrary file hosting).
+const ALLOWED_IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif", "image/avif"]);
+const ALLOWED_RESOURCE_TYPES = new Set([
+  ...ALLOWED_IMAGE_TYPES,
+  "application/pdf",
+  "video/mp4",
+  "video/webm",
+]);
+
 export const uploadProductImageFn = createServerFn({ method: "POST" })
-  .inputValidator((d: { fileName: string; contentType: string; base64: string }) => d)
+  .inputValidator((d: { fileName: string; contentType: string; base64: string; callerToken: string }) => d)
   .handler(async (ctx) => {
-    const { fileName, contentType, base64 } = ctx.data;
+    const { fileName, contentType, base64, callerToken } = ctx.data;
+    const { requireAdmin } = await import("@/lib/server-auth");
+    await requireAdmin(callerToken);
+    if (!ALLOWED_IMAGE_TYPES.has(contentType)) throw new Error("Type de fichier non autorisé.");
     return uploadToR2("product-images", fileName, contentType, base64);
   });
 
 export const uploadLessonResourceFn = createServerFn({ method: "POST" })
-  .inputValidator((d: { fileName: string; contentType: string; base64: string }) => d)
+  .inputValidator((d: { fileName: string; contentType: string; base64: string; callerToken: string }) => d)
   .handler(async (ctx) => {
-    const { fileName, contentType, base64 } = ctx.data;
+    const { fileName, contentType, base64, callerToken } = ctx.data;
+    const { requireAdmin } = await import("@/lib/server-auth");
+    await requireAdmin(callerToken);
+    if (!ALLOWED_RESOURCE_TYPES.has(contentType)) throw new Error("Type de fichier non autorisé.");
     return uploadToR2("lesson-resources", fileName, contentType, base64);
   });

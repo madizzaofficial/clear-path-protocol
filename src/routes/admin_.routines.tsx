@@ -5,7 +5,7 @@ import type { RoutineStep, ExtraBlock, StepSaveData } from "@/components/Routine
 import { createServerFn } from "@tanstack/react-start";
 import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
-import { db } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
 import { inngest } from "@/lib/inngest";
 import { collection, doc, getDocs, getDoc, setDoc, addDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
@@ -99,6 +99,7 @@ type SendEmailPayload = {
   pm: RoutineStep[];
   extras?: ExtraBlock[];
   isUpdate?: boolean;
+  callerToken: string;
 };
 
 type RoutineChangeReason = "irritation" | "allergie" | "ajustement" | "rupture_stock" | "autre";
@@ -163,6 +164,8 @@ function validatePayload(data: unknown): SendEmailPayload {
     throw new Error("Adresse email invalide.");
   if (d.displayName !== null && typeof d.displayName !== "string")
     throw new Error("displayName invalide.");
+  if (typeof d.callerToken !== "string" || d.callerToken.length === 0)
+    throw new Error("Token manquant.");
   if (!Array.isArray(d.am) || !Array.isArray(d.pm))
     throw new Error("Structure de routine invalide.");
   if (d.extras !== undefined && !Array.isArray(d.extras))
@@ -191,6 +194,8 @@ const sendRoutineEmailFn = createServerFn({ method: "POST" })
   .inputValidator((d: SendEmailPayload) => d)
   .handler(async (ctx) => {
     const data = validatePayload(ctx.data);
+    const { requireAdmin } = await import("@/lib/server-auth");
+    await requireAdmin(data.callerToken);
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) throw new Error("RESEND_API_KEY non configurée.");
 
@@ -582,6 +587,8 @@ function RoutinesContent() {
         pm: JSON.parse(JSON.stringify(routine.pm)),
       });
 
+      const callerToken = await auth.currentUser?.getIdToken();
+      if (!callerToken) throw new Error("Session expirée — reconnecte-toi.");
       await sendRoutineEmailFn({
         data: {
           email: selectedUser.email,
@@ -590,6 +597,7 @@ function RoutinesContent() {
           pm: routine.pm,
           extras: routine.extras,
           isUpdate,
+          callerToken,
         },
       });
 
