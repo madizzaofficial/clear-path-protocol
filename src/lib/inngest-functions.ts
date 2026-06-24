@@ -174,35 +174,11 @@ export const intakeConfirmation = inngest.createFunction(
 );
 
 // ── routine-followup ─────────────────────────────────────────────────────────
-// Triggered when an admin assigns a routine. Sends a 7-day check-in email
-// (the immediate routine notification is sent directly by the admin server fn).
+// Triggered when an admin assigns a routine. No-op — follow-up emails disabled.
 
 export const routineNotification = inngest.createFunction(
   { id: "routine-followup", triggers: [{ event: "routine/assigned" }] },
-  async ({ event, step }: { event: { data: UserPayload }; step: any }) => {
-    const { email, firstName } = event.data;
-
-    await step.sleep("wait-7-days", "7 days");
-
-    await step.run("send-week1-checkin", () =>
-      sendEmail(
-        email,
-        `${esc(firstName)}, une semaine avec ta routine — comment ça se passe ?`,
-        `
-        <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#111">
-          <h1 style="font-size:24px;font-weight:700;margin:0 0 12px">7 jours de routine, ${esc(firstName)} 🌟</h1>
-          <p style="color:#555;line-height:1.6;margin:0 0 16px">
-            Il y a une semaine, tu as reçu ta routine personnalisée. La régularité est la clé : même les petits changements quotidiens font une différence visible sur le long terme.
-          </p>
-          <p style="color:#555;line-height:1.6;margin:0 0 24px">
-            Si tu as des questions sur un produit ou une étape, ton coach est disponible pour t'aider.
-          </p>
-          <a href="https://lumen.app/" style="display:inline-block;background:linear-gradient(135deg,#e879f9,#8b5cf6);color:#fff;text-decoration:none;padding:14px 28px;border-radius:9999px;font-weight:600;font-size:15px">
-            Voir mon tableau de bord →
-          </a>
-        </div>
-        `,
-      )
-    );
+  async () => {
+    // Email de rappel 7 jours désactivé.
   },
 );
