@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { course as staticCourse } from "@/lib/course-data";
 import { useAuth } from "@/hooks/use-auth";
+import { useRestrictedRedirect } from "@/hooks/use-restricted-redirect";
 import { useEffect, useState } from "react";
 import { Play, Check, Lock, Clock, ChevronRight, ArrowRight, Loader2 } from "lucide-react";
 import { doc, getDoc, getDocFromServer } from "firebase/firestore";
@@ -50,7 +51,9 @@ export const Route = createFileRoute("/course")({
 
 function CoursePage() {
   const { user, loading } = useAuth();
+  const restricted = useRestrictedRedirect();
   const navigate = useNavigate();
+  if (restricted) return null;
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [courseData, setCourseData] = useState<FCourse | null>(null);
   const [courseLoading, setCourseLoading] = useState(true);

@@ -12,10 +12,13 @@ import {
 import { type DocumentSnapshot, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
+type AccountType = "full" | "routine_only";
+
 type AuthContextType = {
   user: User | null;
   loading: boolean;
   isAdmin: boolean;
+  accountType: AccountType;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, displayName?: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -59,6 +62,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   isAdmin: false,
+  accountType: "full",
   signIn: async () => {},
   signUp: async () => {},
   signInWithGoogle: async () => {},
@@ -69,12 +73,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [accountType, setAccountType] = useState<AccountType>("full");
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
       if (!u) {
         setIsAdmin(false);
+        setAccountType("full");
         setLoading(false);
         return;
       }
@@ -87,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await fbSignOut(auth);
           setUser(null);
           setIsAdmin(false);
+          setAccountType("full");
           return;
         }
         const prevLastSeen: number | undefined = userSnap.data()?.lastSeen;
@@ -98,9 +105,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await fbSignOut(auth);
           setUser(null);
           setIsAdmin(false);
+          setAccountType("full");
           return;
         }
         const admin = await fetchIsAdmin(u.uid, userSnap);
+        const accountTypeFromDoc = (userSnap.data()?.accountType as AccountType | undefined) ?? "full";
         const update: Record<string, unknown> = {
           uid: u.uid,
           email: u.email ?? "",
@@ -108,9 +117,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           photoURL: u.photoURL ?? null,
           lastSeen: Date.now(),
         };
-        if (!userSnap.exists()) update.enrolledAt = Date.now();
+        if (!userSnap.exists()) {
+          update.enrolledAt = Date.now();
+          update.accountType = "full";
+        }
         setDoc(userRef, update, { merge: true }).catch(() => {});
         setIsAdmin(admin);
+        setAccountType(accountTypeFromDoc);
       } catch {
         // Firestore inaccessible (réseau coupé, extension bloquante) — on laisse passer avec Auth seul
       }
@@ -161,7 +174,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAdmin, signIn, signUp, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin, accountType, signIn, signUp, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   );

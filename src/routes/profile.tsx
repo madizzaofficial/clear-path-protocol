@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
+import { useRestrictedRedirect } from "@/hooks/use-restricted-redirect";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { updateProfile } from "firebase/auth";
@@ -35,7 +36,9 @@ export const Route = createFileRoute("/profile")({
 
 function ProfilePage() {
   const { user, loading: authLoading, signOut } = useAuth();
+  const restricted = useRestrictedRedirect();
   const navigate = useNavigate();
+  if (restricted) return null;
   const [intake, setIntake] = useState<IntakeAnswers | null>(null);
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [enrolledAt, setEnrolledAt] = useState<number | null>(null);

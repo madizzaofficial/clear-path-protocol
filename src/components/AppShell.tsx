@@ -14,7 +14,7 @@ import { AdminBell } from "@/components/AdminBell";
 
 
 function UserMenu() {
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, accountType } = useAuth();
   const navigate = useNavigate();
   const { theme, toggle } = useTheme();
 
@@ -26,6 +26,8 @@ function UserMenu() {
   const initials = user?.displayName
     ? user.displayName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()
     : user?.email?.slice(0, 2).toUpperCase() ?? "?";
+
+  const isRestricted = accountType === "routine_only";
 
   return (
     <DropdownMenu>
@@ -50,16 +52,20 @@ function UserMenu() {
             {theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
             {theme === "dark" ? "Mode clair" : "Mode sombre"}
           </DropdownMenuItem>
-          <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2">
-            <Link to="/ingredient-analyzer">
-              <FlaskConical className="mr-2 h-4 w-4" /> Analyseur INCI
-            </Link>
-          </DropdownMenuItem>
-<DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2">
-            <Link to="/profile">
-              <UserCircle className="mr-2 h-4 w-4" /> Mon profil
-            </Link>
-          </DropdownMenuItem>
+          {!isRestricted && (
+            <>
+              <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2">
+                <Link to="/ingredient-analyzer">
+                  <FlaskConical className="mr-2 h-4 w-4" /> Analyseur INCI
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2">
+                <Link to="/profile">
+                  <UserCircle className="mr-2 h-4 w-4" /> Mon profil
+                </Link>
+              </DropdownMenuItem>
+            </>
+          )}
           {isAdmin && (
             <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2">
               <Link to="/admin/notifications">
@@ -85,16 +91,24 @@ function UserMenu() {
 export function AppShell({ children }: { children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const isNavigating = useRouterState({ select: (s) => s.isLoading });
-  const { isAdmin } = useAuth();
+  const { isAdmin, accountType } = useAuth();
+
+  const isRestricted = accountType === "routine_only";
 
   const nav = [
-    { to: "/suivi", label: "Suivi", icon: Home },
     { to: "/products", label: "Routine", icon: Sparkles },
     { to: "/journal", label: "Journal", icon: Camera },
-    { to: "/course", label: "Protocole", icon: BookOpen },
-    { to: "/faq", label: "FAQ", icon: HelpCircle },
+    ...(isRestricted
+      ? []
+      : [
+          { to: "/suivi", label: "Suivi", icon: Home },
+          { to: "/course", label: "Protocole", icon: BookOpen },
+          { to: "/faq", label: "FAQ", icon: HelpCircle },
+        ]),
     ...(isAdmin ? [{ to: "/admin", label: "Admin", icon: ShieldCheck }] : []),
   ] as const;
+
+  const homeTo = isRestricted ? "/products" : "/suivi";
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -105,7 +119,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <Link to="/suivi" className="flex items-center gap-2">
+          <Link to={homeTo} className="flex items-center gap-2">
             <img src="/logo_clear.png" alt="" className="h-20 w-20 rounded-full object-cover" />
             <span className="font-display text-xl font-semibold tracking-tight">Protocole Clear</span>
           </Link>

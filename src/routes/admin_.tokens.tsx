@@ -3,7 +3,7 @@ import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, setDoc, updateDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link2, Copy, Check, Loader2, Clock, User, Ban, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin_/tokens")({
@@ -24,12 +24,17 @@ type TokenDoc = {
   usedBy?: string;
   usedAt?: number;
   recipientName?: string;
+  intendedFor?: string;
+  intendedEmail?: string;
+  accountType?: "full" | "routine_only";
 };
 
 type StudentDoc = {
   uid: string;
-  email: string;
+  email: string | null;
   displayName: string | null;
+  accountType?: "full" | "routine_only";
+  adminCreated?: boolean;
 };
 
 function tokenStatus(t: TokenDoc): "active" | "used" | "expired" {
@@ -47,10 +52,30 @@ function TokensPage() {
   const [loadingData, setLoadingData] = useState(true);
   const [generatingLink, setGeneratingLink] = useState(false);
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
-  const [recipientName, setRecipientName] = useState("");
+  const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [manualEmail, setManualEmail] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [revoking, setRevoking] = useState<Set<string>>(new Set());
   const [confirmRevoke, setConfirmRevoke] = useState<string | null>(null);
+
+  // Students who have an active (non-revoked, non-used) token are hidden from the picker.
+  const activeTokenUids = useMemo(() => {
+    const uids = new Set<string>();
+    for (const t of tokens) {
+      if (tokenStatus(t) === "active" && t.intendedFor) uids.add(t.intendedFor);
+    }
+    return uids;
+  }, [tokens]);
+
+  const availableStudents = useMemo(
+    () => students.filter((s) => !activeTokenUids.has(s.uid)),
+    [students, activeTokenUids]
+  );
+
+  const selectedStudent = useMemo(
+    () => students.find((s) => s.uid === selectedStudentId) ?? null,
+    [students, selectedStudentId]
+  );
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -75,20 +100,40 @@ function TokensPage() {
   if (loading || !user || !isAdmin) return null;
 
   async function generateLink() {
+    if (!selectedStudent) return;
     setGeneratingLink(true);
     const token = crypto.randomUUID();
     const now = Date.now();
-    const trimmedName = recipientName.trim();
+    const email = (selectedStudent.email ?? manualEmail).trim();
+    const recipientName = selectedStudent.displayName ?? "";
+    const accountType = selectedStudent.accountType ?? "routine_only";
+
     await setDoc(doc(db, "onboarding_tokens", token), {
       createdAt: now,
       expiresAt: now + 7 * 24 * 60 * 60 * 1000,
       used: false,
-      ...(trimmedName && { recipientName: trimmedName }),
+      intendedFor: selectedStudent.uid,
+      intendedEmail: email || null,
+      recipientName: recipientName || null,
+      accountType,
     });
     const link = `${window.location.origin}/start/${token}`;
     setGeneratedLink(link);
-    setTokens((prev) => [{ id: token, createdAt: now, expiresAt: now + 7 * 86400000, used: false, ...(trimmedName && { recipientName: trimmedName }) }, ...prev]);
-    setRecipientName("");
+    setTokens((prev) => [
+      {
+        id: token,
+        createdAt: now,
+        expiresAt: now + 7 * 86400000,
+        used: false,
+        intendedFor: selectedStudent.uid,
+        intendedEmail: email || undefined,
+        recipientName: recipientName || undefined,
+        accountType,
+      },
+      ...prev,
+    ]);
+    setSelectedStudentId("");
+    setManualEmail("");
     await navigator.clipboard.writeText(link).catch(() => {});
     setGeneratingLink(false);
   }
@@ -122,20 +167,34 @@ function TokensPage() {
               Liens d'invitation
             </h1>
             <p className="mt-2 text-muted-foreground">
-              Créez des liens d'onboarding à usage unique valables 7 jours.
+              Sélectionne un élève pour générer son lien d'accès. Valable 7 jours.
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <input
-              type="text"
-              value={recipientName}
-              onChange={(e) => setRecipientName(e.target.value)}
-              placeholder="Prénom (optionnel)"
-              className="rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 w-40"
-            />
+          <div className="flex flex-wrap items-center gap-3">
+            <select
+              value={selectedStudentId}
+              onChange={(e) => setSelectedStudentId(e.target.value)}
+              className="rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 min-w-[14rem]"
+            >
+              <option value="">— Choisir un élève —</option>
+              {availableStudents.map((s) => (
+                <option key={s.uid} value={s.uid}>
+                  {s.displayName ?? "Sans nom"}{s.email ? ` — ${s.email}` : ""}
+                </option>
+              ))}
+            </select>
+            {selectedStudent && !selectedStudent.email && (
+              <input
+                type="email"
+                value={manualEmail}
+                onChange={(e) => setManualEmail(e.target.value)}
+                placeholder="Email de l'élève"
+                className="rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 w-56"
+              />
+            )}
             <button
               onClick={generateLink}
-              disabled={generatingLink}
+              disabled={generatingLink || !selectedStudent}
               className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background shadow-elegant transition-all hover:opacity-90 disabled:opacity-60"
             >
               {generatingLink ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
