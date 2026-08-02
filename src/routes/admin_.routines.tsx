@@ -80,6 +80,7 @@ type UserDoc = {
   email: string;
   displayName: string | null;
   photoURL?: string | null;
+  accountType?: "full" | "routine_only";
 };
 
 type StudentRoutine = {
@@ -540,6 +541,20 @@ function RoutinesContent() {
   function handleSendEmail() {
     if (!routine || !selectedUser) return;
     const isUpdate = !!(routine.sentAt);
+
+    // routine_only students already received the invitation email from /admin/tokens.
+    // Skip the email preview and publish directly.
+    if (selectedUser.accountType === "routine_only") {
+      if (isUpdate) {
+        setPendingReasonTag("ajustement");
+        setPendingReasonNote("");
+        setShowReasonModal(true);
+      } else {
+        publishRoutine("initial" as RoutineChangeReason, "");
+      }
+      return;
+    }
+
     setPreviewIsUpdate(isUpdate);
     setShowPreviewModal(true);
   }
@@ -551,16 +566,17 @@ function RoutinesContent() {
       setPendingReasonNote("");
       setShowReasonModal(true);
     } else {
-      doSendEmail("initial" as RoutineChangeReason, "");
+      publishRoutine("initial" as RoutineChangeReason, "");
     }
   }
 
-  async function doSendEmail(reasonTag: RoutineChangeReason | "initial", reasonNote: string) {
+  async function publishRoutine(reasonTag: RoutineChangeReason | "initial", reasonNote: string) {
     if (!routine || !selectedUser) return;
     setSending(true);
     setSendResult(null);
     setSendError(null);
     const isUpdate = reasonTag !== "initial";
+    const isRoutineOnly = selectedUser.accountType === "routine_only";
     try {
       const toSave: StudentRoutine = {
         ...routine,
@@ -587,31 +603,35 @@ function RoutinesContent() {
         pm: JSON.parse(JSON.stringify(routine.pm)),
       });
 
-      const callerToken = await auth.currentUser?.getIdToken();
-      if (!callerToken) throw new Error("Session expirée — reconnecte-toi.");
-      await sendRoutineEmailFn({
-        data: {
-          email: selectedUser.email,
-          displayName: selectedUser.displayName,
-          am: routine.am,
-          pm: routine.pm,
-          extras: routine.extras,
-          isUpdate,
-          callerToken,
-        },
-      });
+      // Full-plan students receive the routine email.
+      // routine_only students already got the invitation email from /admin/tokens.
+      if (!isRoutineOnly) {
+        const callerToken = await auth.currentUser?.getIdToken();
+        if (!callerToken) throw new Error("Session expirée — reconnecte-toi.");
+        await sendRoutineEmailFn({
+          data: {
+            email: selectedUser.email,
+            displayName: selectedUser.displayName,
+            am: routine.am,
+            pm: routine.pm,
+            extras: routine.extras,
+            isUpdate,
+            callerToken,
+          },
+        });
 
-      triggerRoutineEventFn({
-        data: {
-          uid: selectedUser.uid,
-          email: selectedUser.email,
-          firstName: selectedUser.displayName?.split(" ")[0] ?? selectedUser.email.split("@")[0],
-        },
-      }).catch(() => {});
+        triggerRoutineEventFn({
+          data: {
+            uid: selectedUser.uid,
+            email: selectedUser.email,
+            firstName: selectedUser.displayName?.split(" ")[0] ?? selectedUser.email.split("@")[0],
+          },
+        }).catch(() => {});
+      }
 
       setSendResult("success");
     } catch (e: any) {
-      console.error("[routines] send email error:", e);
+      console.error("[routines] publish routine error:", e);
       setSendError(e?.message ?? "Erreur inconnue");
       setSendResult("error");
     } finally {
@@ -1232,7 +1252,9 @@ function RoutinesContent() {
                         className="flex items-center gap-2 rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium"
                       >
                         <Check className="h-4 w-4 text-primary" />
-                        Email envoyé à {selectedUser.email} !
+                        {selectedUser.accountType === "routine_only"
+                          ? "Routine publiée — visible par l'élève"
+                          : `Email envoyé à ${selectedUser.email} !`}
                       </motion.div>
                     )}
                     {sendResult === "error" && (
@@ -1277,7 +1299,12 @@ function RoutinesContent() {
                     >
                       {sending ? (
                         <>
-                          <Loader2 className="h-4 w-4 animate-spin" /> Envoi en cours…
+                          <Loader2 className="h-4 w-4 animate-spin" /> {selectedUser.accountType === "routine_only" ? "Publication…" : "Envoi en cours…"}
+                        </>
+                      ) : selectedUser.accountType === "routine_only" ? (
+                        <>
+                          <Check className="h-4 w-4" />
+                          Publier la routine
                         </>
                       ) : (
                         <>
@@ -1516,12 +1543,18 @@ function RoutinesContent() {
               <X className="h-4 w-4" /> Annuler
             </button>
             <button
-              onClick={() => { setShowReasonModal(false); doSendEmail(pendingReasonTag, pendingReasonNote); }}
+              onClick={() => { setShowReasonModal(false); publishRoutine(pendingReasonTag, pendingReasonNote); }}
               disabled={sending}
               className="flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
             >
-              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              Confirmer l'envoi
+              {sending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : selectedUser?.accountType === "routine_only" ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+              {selectedUser?.accountType === "routine_only" ? "Confirmer la publication" : "Confirmer l'envoi"}
             </button>
           </DialogFooter>
         </DialogContent>
