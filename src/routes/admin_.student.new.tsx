@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
 import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
-import { db } from "@/lib/firebase";
-import { doc, setDoc, addDoc, collection } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { ChevronLeft, Loader2, UserPlus } from "lucide-react";
 
@@ -12,6 +13,47 @@ export const Route = createFileRoute("/admin_/student/new")({
   }),
   component: NewStudentPage,
 });
+
+// ── Server function — create admin notification ───────────────────────────────
+// Client-side writes to admin_notifications are blocked by Firestore rules
+// (allow create: false). This handler runs server-side with the Admin SDK,
+// which bypasses rules, after verifying the caller is an admin.
+
+const createAdminNotificationFn = createServerFn({ method: "POST" })
+  .inputValidator((d: {
+    type: "new_student";
+    studentUid: string;
+    studentName: string;
+    studentEmail: string;
+    callerToken: string;
+  }) => d)
+  .handler(async (ctx) => {
+    const { callerToken, ...payload } = ctx.data;
+
+    const { requireAdmin } = await import("@/lib/server-auth");
+    await requireAdmin(callerToken);
+
+    const { getApps, initializeApp, cert } = await import("firebase-admin/app");
+    const { getFirestore } = await import("firebase-admin/firestore");
+
+    const encoded = process.env.FIREBASE_SERVICE_ACCOUNT;
+    if (!encoded) throw new Error("FIREBASE_SERVICE_ACCOUNT manquant");
+
+    const app = getApps().find((a) => a.name === "admin")
+      ?? initializeApp(
+           { credential: cert(JSON.parse(Buffer.from(encoded, "base64").toString("utf8"))) },
+           "admin"
+         );
+
+    const adminDb = getFirestore(app);
+    await adminDb.collection("admin_notifications").add({
+      ...payload,
+      read: false,
+      createdAt: Date.now(),
+    });
+  });
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -269,13 +311,19 @@ function NewStudentPage() {
         adminCreated: true,
       });
 
-      await addDoc(collection(db, "admin_notifications"), {
-        type: "new_student",
-        studentUid: uid,
-        studentName: form.displayName.trim(),
-        studentEmail: form.email.trim() || "",
-        read: false,
-        createdAt: now,
+      // Notifications admin ne peuvent pas être créées côté client (rules firestore).
+      // On passe par une server function authentifiée (Admin SDK = bypass rules).
+      const callerToken = await auth.currentUser?.getIdToken();
+      if (!callerToken) throw new Error("Non authentifié");
+
+      await createAdminNotificationFn({
+        data: {
+          type: "new_student",
+          studentUid: uid,
+          studentName: form.displayName.trim(),
+          studentEmail: form.email.trim() || "",
+          callerToken,
+        },
       });
 
       navigate({ to: "/admin/student/$uid", params: { uid } });
