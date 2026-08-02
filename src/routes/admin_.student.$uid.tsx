@@ -130,6 +130,8 @@ type StudentProfile = {
   enrolledAt?: number;
   lastSeen?: number;
   disabled?: boolean;
+  accountType?: "full" | "routine_only";
+  adminCreated?: boolean;
 };
 
 type IntakeAnswers = {
@@ -692,9 +694,16 @@ function StudentPage() {
             {initials}
           </div>
           <div className="flex-1">
-            <h1 className="font-display text-3xl font-semibold tracking-tight">
-              {profile?.displayName ?? "—"}
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="font-display text-3xl font-semibold tracking-tight">
+                {profile?.displayName ?? "—"}
+              </h1>
+              {profile?.accountType === "routine_only" && (
+                <span className="rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-orange-700 dark:bg-orange-950/40" title="Créé par l'admin — pas d'onboarding">
+                  Sans onboarding
+                </span>
+              )}
+            </div>
             <p className="mt-1 text-muted-foreground">{profile?.email}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {profile?.enrolledAt && (

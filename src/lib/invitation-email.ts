@@ -113,11 +113,12 @@ export const sendInvitationEmailFn = createServerFn({ method: "POST" })
     firstName: string;
     signupUrl: string;
     callerToken: string;
+    isTest?: boolean;
   }) => d)
   .handler(async (ctx) => {
-    const { callerToken, to, firstName, signupUrl } = ctx.data;
+    const { callerToken, to, firstName, signupUrl, isTest } = ctx.data;
 
-    // Auth: only admins can send invitations.
+    // Auth: only admins can send invitations (test or real).
     const { requireAdmin } = await import("@/lib/server-auth");
     await requireAdmin(callerToken);
 
@@ -127,7 +128,9 @@ export const sendInvitationEmailFn = createServerFn({ method: "POST" })
     const rawFrom = process.env.RESEND_FROM ?? "onboarding@resend.dev";
     const from = rawFrom.includes("<") ? rawFrom : `Protocole Clear <${rawFrom}>`;
 
-    const subject = `Ta routine est prête, ${firstName} !`;
+    const subject = isTest
+      ? `[TEST] Ta routine est prête, ${firstName} !`
+      : `Ta routine est prête, ${firstName} !`;
     const html = buildInvitationEmailHtml(firstName, signupUrl);
 
     const res = await fetch("https://api.resend.com/emails", {

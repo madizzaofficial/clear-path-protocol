@@ -36,6 +36,8 @@ type StudentDoc = {
   photoURL: string | null;
   enrolledAt?: number;
   lastSeen?: number;
+  accountType?: "full" | "routine_only";
+  adminCreated?: boolean;
 };
 
 function AdminPage() {
@@ -512,6 +514,7 @@ function AdminPage() {
                     const pct = Math.round((done / TOTAL_LESSONS) * 100);
                     const isInactive = s.lastSeen ? s.lastSeen < Date.now() - 3 * 86_400_000 : (s.enrolledAt ? s.enrolledAt < Date.now() - 3 * 86_400_000 : false);
                     const reportCount = reportsMap.get(s.uid) ?? 0;
+                    const isRoutineOnly = s.accountType === "routine_only";
                     return (
                       <tr key={s.uid} className="hover:bg-muted/20 transition-colors">
                         <td className="px-4 py-3">
@@ -520,7 +523,14 @@ function AdminPage() {
                               {initials}
                             </div>
                             <div className="min-w-0">
-                              <p className="text-sm font-semibold transition-colors group-hover:text-primary">{s.displayName ?? "—"}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-semibold transition-colors group-hover:text-primary">{s.displayName ?? "—"}</p>
+                                {isRoutineOnly && (
+                                  <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange-700 dark:bg-orange-950/40" title="Créé par l'admin — pas d'onboarding">
+                                    Sans onboarding
+                                  </span>
+                                )}
+                              </div>
                               <p className="truncate text-xs text-muted-foreground">{s.email}</p>
                             </div>
                           </Link>

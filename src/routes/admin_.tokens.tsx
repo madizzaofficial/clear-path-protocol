@@ -64,6 +64,8 @@ function TokensPage() {
   const [revoking, setRevoking] = useState<Set<string>>(new Set());
   const [confirmRevoke, setConfirmRevoke] = useState<string | null>(null);
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [testEmail, setTestEmail] = useState("");
+  const [sendingTest, setSendingTest] = useState(false);
 
   // Students who have an active (non-revoked, non-used) token are hidden from the picker.
   const activeTokenUids = useMemo(() => {
@@ -172,6 +174,34 @@ function TokensPage() {
     }
   }
 
+  async function sendTestInvitationEmail() {
+    const to = testEmail.trim();
+    if (!to || !generatedLink) {
+      toast.error("Saisis un email de test.");
+      return;
+    }
+    setSendingTest(true);
+    try {
+      const callerToken = await auth.currentUser?.getIdToken();
+      if (!callerToken) throw new Error("Non authentifié");
+      await sendInvitationEmailFn({
+        data: {
+          to,
+          firstName: generatedLink.firstName || "Marie",
+          signupUrl: generatedLink.url,
+          callerToken,
+          isTest: true,
+        },
+      });
+      toast.success(`Mail de test envoyé à ${to}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Erreur inconnue";
+      toast.error(`Envoi test échoué — ${msg}`);
+    } finally {
+      setSendingTest(false);
+    }
+  }
+
   async function revokeToken(id: string) {
     setRevoking((prev) => new Set(prev).add(id));
     await updateDoc(doc(db, "onboarding_tokens", id), { expiresAt: Date.now() - 1 });
@@ -269,6 +299,38 @@ function TokensPage() {
             >
               {sendingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               {sendingEmail ? "Envoi…" : "Envoyer par mail"}
+            </button>
+          </div>
+        )}
+
+        {/* Test email banner */}
+        {generatedLink && (
+          <div className="mb-8 flex flex-wrap items-center gap-3 rounded-2xl border border-dashed border-border/80 bg-muted/30 p-4">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-soft/50">
+              <Send className="h-4 w-4 text-primary/70" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Envoyer un aperçu de test
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Reçois le mail "Ta routine est prête" sur n'importe quelle adresse.
+              </p>
+            </div>
+            <input
+              type="email"
+              value={testEmail}
+              onChange={(e) => setTestEmail(e.target.value)}
+              placeholder="test@email.com"
+              className="w-48 rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+            <button
+              onClick={sendTestInvitationEmail}
+              disabled={sendingTest || !testEmail.trim()}
+              className="flex shrink-0 items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-60"
+            >
+              {sendingTest ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {sendingTest ? "Envoi…" : "Envoyer le test"}
             </button>
           </div>
         )}
