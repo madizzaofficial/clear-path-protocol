@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as SuiviRouteImport } from './routes/suivi'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as QuestionnaireRouteImport } from './routes/questionnaire'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as LoginRouteImport } from './routes/login'
@@ -23,7 +24,23 @@ import { Route as FaqRouteImport } from './routes/faq'
 import { Route as CourseRouteImport } from './routes/course'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as QuestionnaireIndexRouteImport } from './routes/questionnaire/index'
 import { Route as StartTokenRouteImport } from './routes/start.$token'
+import { Route as QuestionnaireFinalRouteImport } from './routes/questionnaire/final'
+import { Route as Questionnaire14AlimentationRouteImport } from './routes/questionnaire/14-alimentation'
+import { Route as Questionnaire13AttentesRouteImport } from './routes/questionnaire/13-attentes'
+import { Route as Questionnaire12PhotosRouteImport } from './routes/questionnaire/12-photos'
+import { Route as Questionnaire11FacteursRouteImport } from './routes/questionnaire/11-facteurs'
+import { Route as Questionnaire10HabitudesRouteImport } from './routes/questionnaire/10-habitudes'
+import { Route as Questionnaire09BudgetRouteImport } from './routes/questionnaire/09-budget'
+import { Route as Questionnaire08SanteRouteImport } from './routes/questionnaire/08-sante'
+import { Route as Questionnaire07ReactionsRouteImport } from './routes/questionnaire/07-reactions'
+import { Route as Questionnaire06RoutineRouteImport } from './routes/questionnaire/06-routine'
+import { Route as Questionnaire05HistoriqueRouteImport } from './routes/questionnaire/05-historique'
+import { Route as Questionnaire04ImperfectionsRouteImport } from './routes/questionnaire/04-imperfections'
+import { Route as Questionnaire03TypePeauRouteImport } from './routes/questionnaire/03-type-peau'
+import { Route as Questionnaire02ObjectifsRouteImport } from './routes/questionnaire/02-objectifs'
+import { Route as Questionnaire01InfosRouteImport } from './routes/questionnaire/01-infos'
 import { Route as LessonLessonIdRouteImport } from './routes/lesson.$lessonId'
 import { Route as AdminUnclassifiedRouteImport } from './routes/admin_.unclassified'
 import { Route as AdminTokensRouteImport } from './routes/admin_.tokens'
@@ -54,6 +71,11 @@ const SuiviRoute = SuiviRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionnaireRoute = QuestionnaireRouteImport.update({
+  id: '/questionnaire',
+  path: '/questionnaire',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -111,10 +133,96 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QuestionnaireIndexRoute = QuestionnaireIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => QuestionnaireRoute,
+} as any)
 const StartTokenRoute = StartTokenRouteImport.update({
   id: '/start/$token',
   path: '/start/$token',
   getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionnaireFinalRoute = QuestionnaireFinalRouteImport.update({
+  id: '/final',
+  path: '/final',
+  getParentRoute: () => QuestionnaireRoute,
+} as any)
+const Questionnaire14AlimentationRoute =
+  Questionnaire14AlimentationRouteImport.update({
+    id: '/14-alimentation',
+    path: '/14-alimentation',
+    getParentRoute: () => QuestionnaireRoute,
+  } as any)
+const Questionnaire13AttentesRoute = Questionnaire13AttentesRouteImport.update({
+  id: '/13-attentes',
+  path: '/13-attentes',
+  getParentRoute: () => QuestionnaireRoute,
+} as any)
+const Questionnaire12PhotosRoute = Questionnaire12PhotosRouteImport.update({
+  id: '/12-photos',
+  path: '/12-photos',
+  getParentRoute: () => QuestionnaireRoute,
+} as any)
+const Questionnaire11FacteursRoute = Questionnaire11FacteursRouteImport.update({
+  id: '/11-facteurs',
+  path: '/11-facteurs',
+  getParentRoute: () => QuestionnaireRoute,
+} as any)
+const Questionnaire10HabitudesRoute =
+  Questionnaire10HabitudesRouteImport.update({
+    id: '/10-habitudes',
+    path: '/10-habitudes',
+    getParentRoute: () => QuestionnaireRoute,
+  } as any)
+const Questionnaire09BudgetRoute = Questionnaire09BudgetRouteImport.update({
+  id: '/09-budget',
+  path: '/09-budget',
+  getParentRoute: () => QuestionnaireRoute,
+} as any)
+const Questionnaire08SanteRoute = Questionnaire08SanteRouteImport.update({
+  id: '/08-sante',
+  path: '/08-sante',
+  getParentRoute: () => QuestionnaireRoute,
+} as any)
+const Questionnaire07ReactionsRoute =
+  Questionnaire07ReactionsRouteImport.update({
+    id: '/07-reactions',
+    path: '/07-reactions',
+    getParentRoute: () => QuestionnaireRoute,
+  } as any)
+const Questionnaire06RoutineRoute = Questionnaire06RoutineRouteImport.update({
+  id: '/06-routine',
+  path: '/06-routine',
+  getParentRoute: () => QuestionnaireRoute,
+} as any)
+const Questionnaire05HistoriqueRoute =
+  Questionnaire05HistoriqueRouteImport.update({
+    id: '/05-historique',
+    path: '/05-historique',
+    getParentRoute: () => QuestionnaireRoute,
+  } as any)
+const Questionnaire04ImperfectionsRoute =
+  Questionnaire04ImperfectionsRouteImport.update({
+    id: '/04-imperfections',
+    path: '/04-imperfections',
+    getParentRoute: () => QuestionnaireRoute,
+  } as any)
+const Questionnaire03TypePeauRoute = Questionnaire03TypePeauRouteImport.update({
+  id: '/03-type-peau',
+  path: '/03-type-peau',
+  getParentRoute: () => QuestionnaireRoute,
+} as any)
+const Questionnaire02ObjectifsRoute =
+  Questionnaire02ObjectifsRouteImport.update({
+    id: '/02-objectifs',
+    path: '/02-objectifs',
+    getParentRoute: () => QuestionnaireRoute,
+  } as any)
+const Questionnaire01InfosRoute = Questionnaire01InfosRouteImport.update({
+  id: '/01-infos',
+  path: '/01-infos',
+  getParentRoute: () => QuestionnaireRoute,
 } as any)
 const LessonLessonIdRoute = LessonLessonIdRouteImport.update({
   id: '/lesson/$lessonId',
@@ -210,6 +318,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
+  '/questionnaire': typeof QuestionnaireRouteWithChildren
   '/register': typeof RegisterRoute
   '/suivi': typeof SuiviRoute
   '/welcome': typeof WelcomeRoute
@@ -225,7 +334,23 @@ export interface FileRoutesByFullPath {
   '/admin/tokens': typeof AdminTokensRoute
   '/admin/unclassified': typeof AdminUnclassifiedRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
+  '/questionnaire/01-infos': typeof Questionnaire01InfosRoute
+  '/questionnaire/02-objectifs': typeof Questionnaire02ObjectifsRoute
+  '/questionnaire/03-type-peau': typeof Questionnaire03TypePeauRoute
+  '/questionnaire/04-imperfections': typeof Questionnaire04ImperfectionsRoute
+  '/questionnaire/05-historique': typeof Questionnaire05HistoriqueRoute
+  '/questionnaire/06-routine': typeof Questionnaire06RoutineRoute
+  '/questionnaire/07-reactions': typeof Questionnaire07ReactionsRoute
+  '/questionnaire/08-sante': typeof Questionnaire08SanteRoute
+  '/questionnaire/09-budget': typeof Questionnaire09BudgetRoute
+  '/questionnaire/10-habitudes': typeof Questionnaire10HabitudesRoute
+  '/questionnaire/11-facteurs': typeof Questionnaire11FacteursRoute
+  '/questionnaire/12-photos': typeof Questionnaire12PhotosRoute
+  '/questionnaire/13-attentes': typeof Questionnaire13AttentesRoute
+  '/questionnaire/14-alimentation': typeof Questionnaire14AlimentationRoute
+  '/questionnaire/final': typeof QuestionnaireFinalRoute
   '/start/$token': typeof StartTokenRoute
+  '/questionnaire/': typeof QuestionnaireIndexRoute
   '/admin/student/$uid': typeof AdminStudentUidRoute
   '/admin/student/new': typeof AdminStudentNewRoute
   '/admin/templates/$templateId': typeof AdminTemplatesTemplateIdRoute
@@ -257,7 +382,23 @@ export interface FileRoutesByTo {
   '/admin/tokens': typeof AdminTokensRoute
   '/admin/unclassified': typeof AdminUnclassifiedRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
+  '/questionnaire/01-infos': typeof Questionnaire01InfosRoute
+  '/questionnaire/02-objectifs': typeof Questionnaire02ObjectifsRoute
+  '/questionnaire/03-type-peau': typeof Questionnaire03TypePeauRoute
+  '/questionnaire/04-imperfections': typeof Questionnaire04ImperfectionsRoute
+  '/questionnaire/05-historique': typeof Questionnaire05HistoriqueRoute
+  '/questionnaire/06-routine': typeof Questionnaire06RoutineRoute
+  '/questionnaire/07-reactions': typeof Questionnaire07ReactionsRoute
+  '/questionnaire/08-sante': typeof Questionnaire08SanteRoute
+  '/questionnaire/09-budget': typeof Questionnaire09BudgetRoute
+  '/questionnaire/10-habitudes': typeof Questionnaire10HabitudesRoute
+  '/questionnaire/11-facteurs': typeof Questionnaire11FacteursRoute
+  '/questionnaire/12-photos': typeof Questionnaire12PhotosRoute
+  '/questionnaire/13-attentes': typeof Questionnaire13AttentesRoute
+  '/questionnaire/14-alimentation': typeof Questionnaire14AlimentationRoute
+  '/questionnaire/final': typeof QuestionnaireFinalRoute
   '/start/$token': typeof StartTokenRoute
+  '/questionnaire': typeof QuestionnaireIndexRoute
   '/admin/student/$uid': typeof AdminStudentUidRoute
   '/admin/student/new': typeof AdminStudentNewRoute
   '/admin/templates/$templateId': typeof AdminTemplatesTemplateIdRoute
@@ -276,6 +417,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
+  '/questionnaire': typeof QuestionnaireRouteWithChildren
   '/register': typeof RegisterRoute
   '/suivi': typeof SuiviRoute
   '/welcome': typeof WelcomeRoute
@@ -291,7 +433,23 @@ export interface FileRoutesById {
   '/admin_/tokens': typeof AdminTokensRoute
   '/admin_/unclassified': typeof AdminUnclassifiedRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
+  '/questionnaire/01-infos': typeof Questionnaire01InfosRoute
+  '/questionnaire/02-objectifs': typeof Questionnaire02ObjectifsRoute
+  '/questionnaire/03-type-peau': typeof Questionnaire03TypePeauRoute
+  '/questionnaire/04-imperfections': typeof Questionnaire04ImperfectionsRoute
+  '/questionnaire/05-historique': typeof Questionnaire05HistoriqueRoute
+  '/questionnaire/06-routine': typeof Questionnaire06RoutineRoute
+  '/questionnaire/07-reactions': typeof Questionnaire07ReactionsRoute
+  '/questionnaire/08-sante': typeof Questionnaire08SanteRoute
+  '/questionnaire/09-budget': typeof Questionnaire09BudgetRoute
+  '/questionnaire/10-habitudes': typeof Questionnaire10HabitudesRoute
+  '/questionnaire/11-facteurs': typeof Questionnaire11FacteursRoute
+  '/questionnaire/12-photos': typeof Questionnaire12PhotosRoute
+  '/questionnaire/13-attentes': typeof Questionnaire13AttentesRoute
+  '/questionnaire/14-alimentation': typeof Questionnaire14AlimentationRoute
+  '/questionnaire/final': typeof QuestionnaireFinalRoute
   '/start/$token': typeof StartTokenRoute
+  '/questionnaire/': typeof QuestionnaireIndexRoute
   '/admin_/student/$uid': typeof AdminStudentUidRoute
   '/admin_/student/new': typeof AdminStudentNewRoute
   '/admin_/templates/$templateId': typeof AdminTemplatesTemplateIdRoute
@@ -311,6 +469,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/products'
     | '/profile'
+    | '/questionnaire'
     | '/register'
     | '/suivi'
     | '/welcome'
@@ -326,7 +485,23 @@ export interface FileRouteTypes {
     | '/admin/tokens'
     | '/admin/unclassified'
     | '/lesson/$lessonId'
+    | '/questionnaire/01-infos'
+    | '/questionnaire/02-objectifs'
+    | '/questionnaire/03-type-peau'
+    | '/questionnaire/04-imperfections'
+    | '/questionnaire/05-historique'
+    | '/questionnaire/06-routine'
+    | '/questionnaire/07-reactions'
+    | '/questionnaire/08-sante'
+    | '/questionnaire/09-budget'
+    | '/questionnaire/10-habitudes'
+    | '/questionnaire/11-facteurs'
+    | '/questionnaire/12-photos'
+    | '/questionnaire/13-attentes'
+    | '/questionnaire/14-alimentation'
+    | '/questionnaire/final'
     | '/start/$token'
+    | '/questionnaire/'
     | '/admin/student/$uid'
     | '/admin/student/new'
     | '/admin/templates/$templateId'
@@ -358,7 +533,23 @@ export interface FileRouteTypes {
     | '/admin/tokens'
     | '/admin/unclassified'
     | '/lesson/$lessonId'
+    | '/questionnaire/01-infos'
+    | '/questionnaire/02-objectifs'
+    | '/questionnaire/03-type-peau'
+    | '/questionnaire/04-imperfections'
+    | '/questionnaire/05-historique'
+    | '/questionnaire/06-routine'
+    | '/questionnaire/07-reactions'
+    | '/questionnaire/08-sante'
+    | '/questionnaire/09-budget'
+    | '/questionnaire/10-habitudes'
+    | '/questionnaire/11-facteurs'
+    | '/questionnaire/12-photos'
+    | '/questionnaire/13-attentes'
+    | '/questionnaire/14-alimentation'
+    | '/questionnaire/final'
     | '/start/$token'
+    | '/questionnaire'
     | '/admin/student/$uid'
     | '/admin/student/new'
     | '/admin/templates/$templateId'
@@ -376,6 +567,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/products'
     | '/profile'
+    | '/questionnaire'
     | '/register'
     | '/suivi'
     | '/welcome'
@@ -391,7 +583,23 @@ export interface FileRouteTypes {
     | '/admin_/tokens'
     | '/admin_/unclassified'
     | '/lesson/$lessonId'
+    | '/questionnaire/01-infos'
+    | '/questionnaire/02-objectifs'
+    | '/questionnaire/03-type-peau'
+    | '/questionnaire/04-imperfections'
+    | '/questionnaire/05-historique'
+    | '/questionnaire/06-routine'
+    | '/questionnaire/07-reactions'
+    | '/questionnaire/08-sante'
+    | '/questionnaire/09-budget'
+    | '/questionnaire/10-habitudes'
+    | '/questionnaire/11-facteurs'
+    | '/questionnaire/12-photos'
+    | '/questionnaire/13-attentes'
+    | '/questionnaire/14-alimentation'
+    | '/questionnaire/final'
     | '/start/$token'
+    | '/questionnaire/'
     | '/admin_/student/$uid'
     | '/admin_/student/new'
     | '/admin_/templates/$templateId'
@@ -410,6 +618,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ProductsRoute: typeof ProductsRoute
   ProfileRoute: typeof ProfileRoute
+  QuestionnaireRoute: typeof QuestionnaireRouteWithChildren
   RegisterRoute: typeof RegisterRoute
   SuiviRoute: typeof SuiviRoute
   WelcomeRoute: typeof WelcomeRoute
@@ -451,6 +660,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/questionnaire': {
+      id: '/questionnaire'
+      path: '/questionnaire'
+      fullPath: '/questionnaire'
+      preLoaderRoute: typeof QuestionnaireRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -530,12 +746,124 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/questionnaire/': {
+      id: '/questionnaire/'
+      path: '/'
+      fullPath: '/questionnaire/'
+      preLoaderRoute: typeof QuestionnaireIndexRouteImport
+      parentRoute: typeof QuestionnaireRoute
+    }
     '/start/$token': {
       id: '/start/$token'
       path: '/start/$token'
       fullPath: '/start/$token'
       preLoaderRoute: typeof StartTokenRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/questionnaire/final': {
+      id: '/questionnaire/final'
+      path: '/final'
+      fullPath: '/questionnaire/final'
+      preLoaderRoute: typeof QuestionnaireFinalRouteImport
+      parentRoute: typeof QuestionnaireRoute
+    }
+    '/questionnaire/14-alimentation': {
+      id: '/questionnaire/14-alimentation'
+      path: '/14-alimentation'
+      fullPath: '/questionnaire/14-alimentation'
+      preLoaderRoute: typeof Questionnaire14AlimentationRouteImport
+      parentRoute: typeof QuestionnaireRoute
+    }
+    '/questionnaire/13-attentes': {
+      id: '/questionnaire/13-attentes'
+      path: '/13-attentes'
+      fullPath: '/questionnaire/13-attentes'
+      preLoaderRoute: typeof Questionnaire13AttentesRouteImport
+      parentRoute: typeof QuestionnaireRoute
+    }
+    '/questionnaire/12-photos': {
+      id: '/questionnaire/12-photos'
+      path: '/12-photos'
+      fullPath: '/questionnaire/12-photos'
+      preLoaderRoute: typeof Questionnaire12PhotosRouteImport
+      parentRoute: typeof QuestionnaireRoute
+    }
+    '/questionnaire/11-facteurs': {
+      id: '/questionnaire/11-facteurs'
+      path: '/11-facteurs'
+      fullPath: '/questionnaire/11-facteurs'
+      preLoaderRoute: typeof Questionnaire11FacteursRouteImport
+      parentRoute: typeof QuestionnaireRoute
+    }
+    '/questionnaire/10-habitudes': {
+      id: '/questionnaire/10-habitudes'
+      path: '/10-habitudes'
+      fullPath: '/questionnaire/10-habitudes'
+      preLoaderRoute: typeof Questionnaire10HabitudesRouteImport
+      parentRoute: typeof QuestionnaireRoute
+    }
+    '/questionnaire/09-budget': {
+      id: '/questionnaire/09-budget'
+      path: '/09-budget'
+      fullPath: '/questionnaire/09-budget'
+      preLoaderRoute: typeof Questionnaire09BudgetRouteImport
+      parentRoute: typeof QuestionnaireRoute
+    }
+    '/questionnaire/08-sante': {
+      id: '/questionnaire/08-sante'
+      path: '/08-sante'
+      fullPath: '/questionnaire/08-sante'
+      preLoaderRoute: typeof Questionnaire08SanteRouteImport
+      parentRoute: typeof QuestionnaireRoute
+    }
+    '/questionnaire/07-reactions': {
+      id: '/questionnaire/07-reactions'
+      path: '/07-reactions'
+      fullPath: '/questionnaire/07-reactions'
+      preLoaderRoute: typeof Questionnaire07ReactionsRouteImport
+      parentRoute: typeof QuestionnaireRoute
+    }
+    '/questionnaire/06-routine': {
+      id: '/questionnaire/06-routine'
+      path: '/06-routine'
+      fullPath: '/questionnaire/06-routine'
+      preLoaderRoute: typeof Questionnaire06RoutineRouteImport
+      parentRoute: typeof QuestionnaireRoute
+    }
+    '/questionnaire/05-historique': {
+      id: '/questionnaire/05-historique'
+      path: '/05-historique'
+      fullPath: '/questionnaire/05-historique'
+      preLoaderRoute: typeof Questionnaire05HistoriqueRouteImport
+      parentRoute: typeof QuestionnaireRoute
+    }
+    '/questionnaire/04-imperfections': {
+      id: '/questionnaire/04-imperfections'
+      path: '/04-imperfections'
+      fullPath: '/questionnaire/04-imperfections'
+      preLoaderRoute: typeof Questionnaire04ImperfectionsRouteImport
+      parentRoute: typeof QuestionnaireRoute
+    }
+    '/questionnaire/03-type-peau': {
+      id: '/questionnaire/03-type-peau'
+      path: '/03-type-peau'
+      fullPath: '/questionnaire/03-type-peau'
+      preLoaderRoute: typeof Questionnaire03TypePeauRouteImport
+      parentRoute: typeof QuestionnaireRoute
+    }
+    '/questionnaire/02-objectifs': {
+      id: '/questionnaire/02-objectifs'
+      path: '/02-objectifs'
+      fullPath: '/questionnaire/02-objectifs'
+      preLoaderRoute: typeof Questionnaire02ObjectifsRouteImport
+      parentRoute: typeof QuestionnaireRoute
+    }
+    '/questionnaire/01-infos': {
+      id: '/questionnaire/01-infos'
+      path: '/01-infos'
+      fullPath: '/questionnaire/01-infos'
+      preLoaderRoute: typeof Questionnaire01InfosRouteImport
+      parentRoute: typeof QuestionnaireRoute
     }
     '/lesson/$lessonId': {
       id: '/lesson/$lessonId'
@@ -652,6 +980,48 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface QuestionnaireRouteChildren {
+  Questionnaire01InfosRoute: typeof Questionnaire01InfosRoute
+  Questionnaire02ObjectifsRoute: typeof Questionnaire02ObjectifsRoute
+  Questionnaire03TypePeauRoute: typeof Questionnaire03TypePeauRoute
+  Questionnaire04ImperfectionsRoute: typeof Questionnaire04ImperfectionsRoute
+  Questionnaire05HistoriqueRoute: typeof Questionnaire05HistoriqueRoute
+  Questionnaire06RoutineRoute: typeof Questionnaire06RoutineRoute
+  Questionnaire07ReactionsRoute: typeof Questionnaire07ReactionsRoute
+  Questionnaire08SanteRoute: typeof Questionnaire08SanteRoute
+  Questionnaire09BudgetRoute: typeof Questionnaire09BudgetRoute
+  Questionnaire10HabitudesRoute: typeof Questionnaire10HabitudesRoute
+  Questionnaire11FacteursRoute: typeof Questionnaire11FacteursRoute
+  Questionnaire12PhotosRoute: typeof Questionnaire12PhotosRoute
+  Questionnaire13AttentesRoute: typeof Questionnaire13AttentesRoute
+  Questionnaire14AlimentationRoute: typeof Questionnaire14AlimentationRoute
+  QuestionnaireFinalRoute: typeof QuestionnaireFinalRoute
+  QuestionnaireIndexRoute: typeof QuestionnaireIndexRoute
+}
+
+const QuestionnaireRouteChildren: QuestionnaireRouteChildren = {
+  Questionnaire01InfosRoute: Questionnaire01InfosRoute,
+  Questionnaire02ObjectifsRoute: Questionnaire02ObjectifsRoute,
+  Questionnaire03TypePeauRoute: Questionnaire03TypePeauRoute,
+  Questionnaire04ImperfectionsRoute: Questionnaire04ImperfectionsRoute,
+  Questionnaire05HistoriqueRoute: Questionnaire05HistoriqueRoute,
+  Questionnaire06RoutineRoute: Questionnaire06RoutineRoute,
+  Questionnaire07ReactionsRoute: Questionnaire07ReactionsRoute,
+  Questionnaire08SanteRoute: Questionnaire08SanteRoute,
+  Questionnaire09BudgetRoute: Questionnaire09BudgetRoute,
+  Questionnaire10HabitudesRoute: Questionnaire10HabitudesRoute,
+  Questionnaire11FacteursRoute: Questionnaire11FacteursRoute,
+  Questionnaire12PhotosRoute: Questionnaire12PhotosRoute,
+  Questionnaire13AttentesRoute: Questionnaire13AttentesRoute,
+  Questionnaire14AlimentationRoute: Questionnaire14AlimentationRoute,
+  QuestionnaireFinalRoute: QuestionnaireFinalRoute,
+  QuestionnaireIndexRoute: QuestionnaireIndexRoute,
+}
+
+const QuestionnaireRouteWithChildren = QuestionnaireRoute._addFileChildren(
+  QuestionnaireRouteChildren,
+)
+
 interface AdminTemplatesRouteChildren {
   AdminTemplatesTemplateIdRoute: typeof AdminTemplatesTemplateIdRoute
   AdminTemplatesIndexRoute: typeof AdminTemplatesIndexRoute
@@ -678,6 +1048,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ProductsRoute: ProductsRoute,
   ProfileRoute: ProfileRoute,
+  QuestionnaireRoute: QuestionnaireRouteWithChildren,
   RegisterRoute: RegisterRoute,
   SuiviRoute: SuiviRoute,
   WelcomeRoute: WelcomeRoute,

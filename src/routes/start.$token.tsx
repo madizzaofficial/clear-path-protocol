@@ -9,14 +9,7 @@ import { createUserWithEmailAndPassword, type User as FirebaseUser } from "fireb
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { createAdminNotificationFn } from "@/lib/admin-notifications";
-import {
-  Loader2,
-  Lock,
-  Mail,
-  User,
-  LinkIcon,
-  Sparkles,
-} from "lucide-react";
+import { Loader2, Lock, Mail, User, LinkIcon, Sparkles } from "lucide-react";
 
 // ── Server function — finalize student signup ─────────────────────────────────
 //
@@ -28,22 +21,19 @@ import {
 //     routines/{uid_admin}) onto the real Firebase Auth UID.
 
 const completeStudentSignupFn = createServerFn({ method: "POST" })
-  .inputValidator((d: {
-    token: string;
-    password: string;
-    callerToken: string;
-  }) => d)
+  .inputValidator((d: { token: string; password: string; callerToken: string }) => d)
   .handler(async (ctx) => {
     const { token, password, callerToken } = ctx.data;
 
     const encoded = process.env.FIREBASE_SERVICE_ACCOUNT;
     if (!encoded) throw new Error("FIREBASE_SERVICE_ACCOUNT manquant");
 
-    const app = getApps().find((a) => a.name === "admin")
-      ?? initializeApp(
-           { credential: cert(JSON.parse(Buffer.from(encoded, "base64").toString("utf8"))) },
-           "admin"
-         );
+    const app =
+      getApps().find((a) => a.name === "admin") ??
+      initializeApp(
+        { credential: cert(JSON.parse(Buffer.from(encoded, "base64").toString("utf8"))) },
+        "admin",
+      );
 
     const adminAuth = getAdminAuth(app);
     const adminDb = getAdminFirestore(app);
@@ -66,7 +56,13 @@ const completeStudentSignupFn = createServerFn({ method: "POST" })
       claimed = await adminDb.runTransaction(async (tx) => {
         const snap = await tx.get(tokenRef);
         if (!snap.exists) throw new Error("TOKEN_INVALID");
-        const data = snap.data() as { used?: boolean; expiresAt?: number; intendedFor?: string; recipientName?: string; intendedEmail?: string };
+        const data = snap.data() as {
+          used?: boolean;
+          expiresAt?: number;
+          intendedFor?: string;
+          recipientName?: string;
+          intendedEmail?: string;
+        };
         if (data.used) throw new Error("TOKEN_ALREADY_USED");
         if (!data.expiresAt || data.expiresAt < Date.now()) throw new Error("TOKEN_EXPIRED");
         if (!data.intendedFor) throw new Error("TOKEN_NOT_LINKED");
@@ -123,7 +119,7 @@ const completeStudentSignupFn = createServerFn({ method: "POST" })
         accountType: adminProfile.accountType ?? "routine_only",
         lastSeen: Date.now(),
       },
-      { merge: true }
+      { merge: true },
     );
 
     // 5. Transfer intake_answers/{adminUid} → intake_answers/{callerUid}.
@@ -195,25 +191,26 @@ type TokenStatus = "checking" | "invalid" | "valid";
 function OnboardingPage() {
   const { token } = Route.useParams();
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, accountType } = useAuth();
 
   const [tokenStatus, setTokenStatus] = useState<TokenStatus>("checking");
   const [recipientName, setRecipientName] = useState("");
   const [intendedEmail, setIntendedEmail] = useState("");
+  const [tokenAccountType, setTokenAccountType] = useState<"full" | "routine_only" | null>(null);
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // If already logged in, bounce to /products (or /suivi for full).
+  // If already logged in, bounce to /products (routine_only) or /suivi (full).
   useEffect(() => {
     if (!authLoading && user) {
-      navigate({ to: "/products" });
+      navigate({ to: accountType === "routine_only" ? "/products" : "/suivi" });
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, accountType, navigate]);
 
-  // Validate token + read recipientName / intendedEmail.
+  // Validate token + read recipientName / intendedEmail / accountType.
   useEffect(() => {
     let cancelled = false;
     getDoc(doc(db, "onboarding_tokens", token)).then((snap) => {
@@ -225,6 +222,7 @@ function OnboardingPage() {
       const data = snap.data();
       setRecipientName(data.recipientName ?? "");
       setIntendedEmail(data.intendedEmail ?? "");
+      setTokenAccountType((data.accountType as "full" | "routine_only") ?? "routine_only");
       setTokenStatus("valid");
     });
     return () => {
@@ -259,8 +257,10 @@ function OnboardingPage() {
         data: { token, password, callerToken },
       });
 
-      // 3. Force a reload of the auth context so accountType is fresh.
-      navigate({ to: "/products" });
+      // 3. Redirect based on the token's accountType (full → questionnaire,
+      //    routine_only → routine/products). The auth context's accountType
+      //    isn't fresh yet here, so we use the token's value read earlier.
+      navigate({ to: tokenAccountType === "full" ? "/questionnaire" : "/products" });
     } catch (err: unknown) {
       const code = (err as { code?: string }).code;
       const msg = (err as { message?: string }).message;
@@ -301,7 +301,8 @@ function OnboardingPage() {
           </div>
           <h1 className="font-display text-3xl font-semibold tracking-tight">Lien invalide</h1>
           <p className="mt-4 leading-relaxed text-muted-foreground">
-            Ce lien a déjà été utilisé ou a expiré. Contacte ton coach pour recevoir un nouveau lien d'accès.
+            Ce lien a déjà été utilisé ou a expiré. Contacte ton coach pour recevoir un nouveau lien
+            d'accès.
           </p>
         </div>
       </div>
@@ -339,9 +340,7 @@ function OnboardingPage() {
                 className="w-full rounded-xl border border-border bg-muted/40 py-2.5 pl-10 pr-3 text-sm text-foreground outline-none"
               />
             </div>
-            <p className="text-xs text-muted-foreground">
-              Pour modifier, demande à ton coach.
-            </p>
+            <p className="text-xs text-muted-foreground">Pour modifier, demande à ton coach.</p>
           </div>
 
           {/* Email (lecture seule) */}
@@ -356,9 +355,7 @@ function OnboardingPage() {
                 className="w-full rounded-xl border border-border bg-muted/40 py-2.5 pl-10 pr-3 text-sm text-foreground outline-none"
               />
             </div>
-            <p className="text-xs text-muted-foreground">
-              Cet email te servira de login.
-            </p>
+            <p className="text-xs text-muted-foreground">Cet email te servira de login.</p>
           </div>
 
           {/* Mot de passe */}
