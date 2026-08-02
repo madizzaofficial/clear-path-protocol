@@ -234,6 +234,7 @@ function StudentPage() {
   const [savingSkinState, setSavingSkinState] = useState(false);
   const [resolvingReport, setResolvingReport] = useState<string | null>(null);
   const [isDisabling, setIsDisabling] = useState(false);
+  const [switchingAccountType, setSwitchingAccountType] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [editingIntake, setEditingIntake] = useState(false);
@@ -462,6 +463,30 @@ function StudentPage() {
       toast.error("Impossible de modifier le compte.");
     } finally {
       setIsDisabling(false);
+    }
+  }
+
+  async function toggleAccountType() {
+    if (!profile || switchingAccountType) return;
+    const isRoutineOnly = profile.accountType === "routine_only";
+    const newAccountType: "full" | "routine_only" = isRoutineOnly ? "full" : "routine_only";
+    const confirmMsg = isRoutineOnly
+      ? "Donner accès complet (Suivi, Protocole, FAQ, INCI) à cet élève ?"
+      : "Restreindre cet élève à Routine + Journal uniquement ?";
+    if (!window.confirm(confirmMsg)) return;
+    setSwitchingAccountType(true);
+    try {
+      await updateDoc(doc(db, "users", uid), { accountType: newAccountType });
+      setProfile((prev) => prev ? { ...prev, accountType: newAccountType } : prev);
+      toast.success(
+        newAccountType === "routine_only"
+          ? "Élève passé en 'sans onboarding' — accès Routine + Journal uniquement."
+          : "Élève passé en accès complet."
+      );
+    } catch {
+      toast.error("Impossible de modifier le type de compte.");
+    } finally {
+      setSwitchingAccountType(false);
     }
   }
 
@@ -716,6 +741,21 @@ function StudentPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={toggleAccountType}
+              disabled={switchingAccountType}
+              className="flex items-center gap-2 rounded-full bg-orange-100 px-4 py-2 text-sm font-medium text-orange-700 transition-colors hover:bg-orange-200 disabled:opacity-60 dark:bg-orange-950/40 dark:hover:bg-orange-950/60"
+              title={profile?.accountType === "routine_only"
+                ? "Cet élève a un accès restreint (Routine + Journal). Clique pour lui donner l'accès complet."
+                : "Cet élève a l'accès complet. Clique pour le restreindre à Routine + Journal."}
+            >
+              {switchingAccountType ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              {profile?.accountType === "routine_only" ? "Accès complet" : "Restreindre l'accès"}
+            </button>
             <button
               onClick={toggleDisabled}
               disabled={isDisabling}
