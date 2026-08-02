@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AdminShell } from "@/components/AdminShell";
 import { useAuth } from "@/hooks/use-auth";
-import { db } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { collection, getDocs, doc, setDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useMemo, useState } from "react";
-import { Link2, Copy, Check, Loader2, Clock, User, Ban, X } from "lucide-react";
+import { Link2, Copy, Check, Loader2, Clock, User, Ban, X, Send } from "lucide-react";
+import { sendInvitationEmailFn } from "@/lib/invitation-email";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin_/tokens")({
   head: () => ({
@@ -51,12 +53,17 @@ function TokensPage() {
   const [students, setStudents] = useState<StudentDoc[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [generatingLink, setGeneratingLink] = useState(false);
-  const [generatedLink, setGeneratedLink] = useState<string | null>(null);
+  const [generatedLink, setGeneratedLink] = useState<{
+    url: string;
+    email: string;
+    firstName: string;
+  } | null>(null);
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const [manualEmail, setManualEmail] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [revoking, setRevoking] = useState<Set<string>>(new Set());
   const [confirmRevoke, setConfirmRevoke] = useState<string | null>(null);
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   // Students who have an active (non-revoked, non-used) token are hidden from the picker.
   const activeTokenUids = useMemo(() => {
@@ -106,6 +113,7 @@ function TokensPage() {
     const now = Date.now();
     const email = (selectedStudent.email ?? manualEmail).trim();
     const recipientName = selectedStudent.displayName ?? "";
+    const firstName = (recipientName.trim().split(" ")[0] || recipientName).trim();
     const accountType = selectedStudent.accountType ?? "routine_only";
 
     await setDoc(doc(db, "onboarding_tokens", token), {
@@ -118,7 +126,7 @@ function TokensPage() {
       accountType,
     });
     const link = `${window.location.origin}/start/${token}`;
-    setGeneratedLink(link);
+    setGeneratedLink({ url: link, email, firstName });
     setTokens((prev) => [
       {
         id: token,
@@ -136,6 +144,32 @@ function TokensPage() {
     setManualEmail("");
     await navigator.clipboard.writeText(link).catch(() => {});
     setGeneratingLink(false);
+  }
+
+  async function sendInvitationEmail() {
+    if (!generatedLink || !generatedLink.email) {
+      toast.error("Aucun email associé à cet élève. Saisis un email avant d'envoyer.");
+      return;
+    }
+    setSendingEmail(true);
+    try {
+      const callerToken = await auth.currentUser?.getIdToken();
+      if (!callerToken) throw new Error("Non authentifié");
+      await sendInvitationEmailFn({
+        data: {
+          to: generatedLink.email,
+          firstName: generatedLink.firstName,
+          signupUrl: generatedLink.url,
+          callerToken,
+        },
+      });
+      toast.success(`Mail envoyé à ${generatedLink.email}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Erreur inconnue";
+      toast.error(`Envoi échoué — ${msg}`);
+    } finally {
+      setSendingEmail(false);
+    }
   }
 
   async function revokeToken(id: string) {
@@ -205,7 +239,7 @@ function TokensPage() {
 
         {/* Generated link banner */}
         {generatedLink && (
-          <div className="mb-8 flex items-center gap-4 rounded-2xl border border-border/60 bg-card p-4 shadow-soft">
+          <div className="mb-8 flex flex-wrap items-center gap-4 rounded-2xl border border-border/60 bg-card p-4 shadow-soft">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-soft">
               <Link2 className="h-4 w-4 text-primary" />
             </div>
@@ -213,10 +247,13 @@ function TokensPage() {
               <p className="mb-0.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Lien copié dans le presse-papier
               </p>
-              <p className="truncate font-mono text-sm text-foreground">{generatedLink}</p>
+              <p className="truncate font-mono text-sm text-foreground">{generatedLink.url}</p>
+              {generatedLink.email && (
+                <p className="mt-0.5 text-xs text-muted-foreground">À : {generatedLink.email}</p>
+              )}
             </div>
             <button
-              onClick={() => copyLink(generatedLink, "banner")}
+              onClick={() => copyLink(generatedLink.url, "banner")}
               className="flex shrink-0 items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
             >
               {copiedId === "banner" ? (
@@ -224,6 +261,14 @@ function TokensPage() {
               ) : (
                 <><Copy className="h-4 w-4" /> Copier</>
               )}
+            </button>
+            <button
+              onClick={sendInvitationEmail}
+              disabled={sendingEmail || !generatedLink.email}
+              className="flex shrink-0 items-center gap-2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background shadow-elegant transition-opacity hover:opacity-90 disabled:opacity-60"
+            >
+              {sendingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {sendingEmail ? "Envoi…" : "Envoyer par mail"}
             </button>
           </div>
         )}
