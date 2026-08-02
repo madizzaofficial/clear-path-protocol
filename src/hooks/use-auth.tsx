@@ -84,8 +84,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
         return;
       }
-      // Débloquer le rendu immédiatement — les vérifications Firestore tournent en arrière-plan
-      setLoading(false);
+      // On attend la lecture de accountType avant de débloquer le rendu.
+      // Sans ça, la nav se base sur la valeur par défaut "full" pendant
+      // une fraction de seconde, et useRestrictedRedirect peut laisser
+      // passer l'élève sur /suivi avant de connaître son vrai type.
       try {
         const userRef = doc(db, "users", u.uid);
         const userSnap = await getDoc(userRef);
@@ -94,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null);
           setIsAdmin(false);
           setAccountType("full");
+          setLoading(false);
           return;
         }
         const prevLastSeen: number | undefined = userSnap.data()?.lastSeen;
@@ -106,6 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null);
           setIsAdmin(false);
           setAccountType("full");
+          setLoading(false);
           return;
         }
         const admin = await fetchIsAdmin(u.uid, userSnap);
@@ -125,7 +129,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAdmin(admin);
         setAccountType(accountTypeFromDoc);
       } catch {
-        // Firestore inaccessible (réseau coupé, extension bloquante) — on laisse passer avec Auth seul
+        // Firestore inaccessible (réseau coupé, extension bloquante) — on
+        // débloque avec le défaut pour ne pas bloquer l'utilisateur.
+      } finally {
+        setLoading(false);
       }
     });
     return unsub;
