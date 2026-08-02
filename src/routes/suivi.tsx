@@ -189,7 +189,7 @@ function MiniWeekDots({
 
 // ── Pending state ─────────────────────────────────────────────────────────────
 // EDIT: remplace par ton numéro WhatsApp (format international sans +)
-const WA_PHONE = "33762688174";
+const WA_PHONE = "33781031208";
 function buildWaUrl(firstName: string) {
   const name = firstName || "membre";
   const msg = `Bonjour Mehdi 👋\nJe m'appelle ${name} et je suis membre du Protocole Clear. J'ai une question concernant mon suivi.`;
