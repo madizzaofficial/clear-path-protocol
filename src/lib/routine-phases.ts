@@ -14,6 +14,15 @@ export type RoutinePhase = {
 
 export const DEFAULT_PHASE_COUNT = 12;
 
+/** Un titre est « automatique » s'il a la forme d'un libellé généré
+ *  (« Semaine 3 », « Semaines 2-3 ») ou s'il est vide. On teste la *forme*,
+ *  pas l'égalité avec les bornes courantes : sinon un titre auto devenu
+ *  périmé après un décalage serait pris pour un titre personnalisé et figé,
+ *  laissant l'élève lire « Semaines 1-2 » sur une phase allant de 1 à 3. */
+export function isAutoTitle(title: string): boolean {
+  return title.trim() === "" || /^Semaines?\s+\d+(\s*-\s*\d+)?$/i.test(title.trim());
+}
+
 /** Libellé par défaut d'une phase, dérivé de ses bornes. */
 export function phaseLabel(fromWeek: number, toWeek: number): string {
   return fromWeek === toWeek ? `Semaine ${fromWeek}` : `Semaines ${fromWeek}-${toWeek}`;
@@ -62,7 +71,7 @@ export function resequence(phases: RoutinePhase[]): RoutinePhase[] {
     const fromWeek = cursor;
     const toWeek = cursor + span - 1;
     cursor = toWeek + 1;
-    const wasAutoTitle = p.title.trim() === "" || p.title === phaseLabel(p.fromWeek, p.toWeek);
+    const wasAutoTitle = isAutoTitle(p.title);
     return {
       ...p,
       fromWeek,
@@ -80,7 +89,7 @@ export function mergeWithNext(phases: RoutinePhase[], i: number): RoutinePhase[]
   const merged: RoutinePhase = {
     ...a,
     toWeek: b.toWeek,
-    title: phaseLabel(a.fromWeek, b.toWeek),
+    title: isAutoTitle(a.title) ? phaseLabel(a.fromWeek, b.toWeek) : a.title,
     // On garde les deux descriptions plutôt que d'en perdre une silencieusement.
     description: [a.description, b.description].filter(Boolean).join("\n\n"),
   };
@@ -95,7 +104,7 @@ export function splitPhase(phases: RoutinePhase[], i: number): RoutinePhase[] {
   const first: RoutinePhase = {
     ...p,
     toWeek: mid,
-    title: phaseLabel(p.fromWeek, mid),
+    title: isAutoTitle(p.title) ? phaseLabel(p.fromWeek, mid) : p.title,
   };
   const second: RoutinePhase = {
     id: `${p.id}-b${Date.now().toString(36)}`,

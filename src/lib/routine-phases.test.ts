@@ -62,6 +62,24 @@ assert.equal(reseq[1].fromWeek, 2, "la phase suivante est recollée");
 assert.equal(reseq[1].title, "Semaines 2-3", "titre auto recalculé sur les nouvelles bornes");
 assertContiguous(reseq, "resequence");
 
+// Régression : un titre auto rendu périmé par un changement de durée doit être
+// recalculé, pas figé. Sinon le badge affiche "Semaines 1-3" et l'élève lit
+// "Semaines 1-2" juste en dessous.
+const stale = resequence([
+  { id: "s1", fromWeek: 1, toWeek: 3, title: "Semaines 1-2", description: "" },
+  { id: "s2", fromWeek: 4, toWeek: 4, title: "Semaine 4", description: "" },
+]);
+assert.equal(stale[0].title, "Semaines 1-3", "titre auto périmé recalculé");
+assert.equal(stale[1].title, "Semaine 4");
+
+// Un titre personnalisé n'est jamais écrasé, ni par une fusion ni par une division.
+const named: RoutinePhase[] = [
+  { id: "n1", fromWeek: 1, toWeek: 2, title: "Phase d'attaque", description: "" },
+  { id: "n2", fromWeek: 3, toWeek: 4, title: "Semaines 3-4", description: "" },
+];
+assert.equal(mergeWithNext(named, 0)[0].title, "Phase d'attaque");
+assert.equal(splitPhase(named, 0)[0].title, "Phase d'attaque");
+
 // Recherche par semaine.
 assert.equal(phaseForWeek(merged, 3)?.id, merged[1].id);
 assert.equal(phaseForWeek(merged, 99), undefined);

@@ -1,13 +1,5 @@
 import { useState } from "react";
-import {
-  CalendarDays,
-  ChevronDown,
-  ChevronUp,
-  Link2,
-  Plus,
-  Scissors,
-  Trash2,
-} from "lucide-react";
+import { CalendarDays, ChevronDown, ChevronUp, Link2, Plus, Scissors, Trash2 } from "lucide-react";
 import type { RoutineStep } from "@/components/RoutineStepEditor";
 import {
   defaultPhases,
