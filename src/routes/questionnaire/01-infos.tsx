@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Loader2, ArrowRight, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
@@ -10,8 +10,13 @@ import {
   Pills,
 } from "@/components/questionnaire/QuestionnaireUI";
 import { AGE_OPTIONS, GENDER_OPTIONS, SECTION_SLUGS } from "@/lib/questionnaire-constants";
+import { ONBOARDING_ENABLED } from "@/lib/feature-flags";
 
 export const Route = createFileRoute("/questionnaire/01-infos")({
+  // ponytail: onboarding désactivé — ONBOARDING_ENABLED=true pour le rouvrir.
+  beforeLoad: () => {
+    if (!ONBOARDING_ENABLED) throw redirect({ to: "/products" });
+  },
   head: () => ({ meta: [{ title: "Section 1 — Protocole Clear" }] }),
   component: Section1,
 });

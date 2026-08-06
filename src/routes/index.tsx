@@ -9,7 +9,7 @@ export const Route = createFileRoute("/")({
 });
 
 function HomeRedirect() {
-  const { user, loading, accountType } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,9 +18,8 @@ function HomeRedirect() {
       navigate({ to: "/login" });
       return;
     }
-    // routine_only élèves → Routine ; full/admin → Suivi.
-    navigate({ to: accountType === "routine_only" ? "/products" : "/suivi" });
-  }, [loading, user, accountType, navigate]);
+    navigate({ to: "/suivi" });
+  }, [loading, user, navigate]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">

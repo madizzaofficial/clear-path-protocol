@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, redirect, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { findLesson, course as staticCourse } from "@/lib/course-data";
 import { useState, useEffect, useRef } from "react";
@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, Check, ChevronDown, Clock, Download, FileText, L
 import { useAuth } from "@/hooks/use-auth";
 import { doc, getDoc, getDocFromServer, setDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { PROTOCOLE_ENABLED } from "@/lib/feature-flags";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -59,6 +60,10 @@ async function loadCourseFromFirestore(): Promise<FCourse | null> {
 // ─── Route ─────────────────────────────────────────────────────────────────
 
 export const Route = createFileRoute("/lesson/$lessonId")({
+  // ponytail: page Protocole masquée — PROTOCOLE_ENABLED=true pour la rouvrir.
+  beforeLoad: () => {
+    if (!PROTOCOLE_ENABLED) throw redirect({ to: "/products" });
+  },
   head: ({ params }) => {
     const found = findLesson(params.lessonId);
     return {

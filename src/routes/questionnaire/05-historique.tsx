@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuestionnaire } from "@/hooks/use-questionnaire";
@@ -15,8 +15,13 @@ import {
   SECTION_SLUGS,
 } from "@/lib/questionnaire-constants";
 import { CenterSpinner, NavButtons } from "@/components/questionnaire/NavButtons";
+import { ONBOARDING_ENABLED } from "@/lib/feature-flags";
 
 export const Route = createFileRoute("/questionnaire/05-historique")({
+  // ponytail: onboarding désactivé — ONBOARDING_ENABLED=true pour le rouvrir.
+  beforeLoad: () => {
+    if (!ONBOARDING_ENABLED) throw redirect({ to: "/products" });
+  },
   head: () => ({ meta: [{ title: "Section 5 — Protocole Clear" }] }),
   component: Section5,
 });

@@ -28,14 +28,12 @@ type TokenDoc = {
   recipientName?: string;
   intendedFor?: string;
   intendedEmail?: string;
-  accountType?: "full" | "routine_only";
 };
 
 type StudentDoc = {
   uid: string;
   email: string | null;
   displayName: string | null;
-  accountType?: "full" | "routine_only";
   adminCreated?: boolean;
 };
 
@@ -116,7 +114,6 @@ function TokensPage() {
     const email = (selectedStudent.email ?? manualEmail).trim();
     const recipientName = selectedStudent.displayName ?? "";
     const firstName = (recipientName.trim().split(" ")[0] || recipientName).trim();
-    const accountType = selectedStudent.accountType ?? "routine_only";
 
     await setDoc(doc(db, "onboarding_tokens", token), {
       createdAt: now,
@@ -125,7 +122,6 @@ function TokensPage() {
       intendedFor: selectedStudent.uid,
       intendedEmail: email || null,
       recipientName: recipientName || null,
-      accountType,
     });
     const link = `${window.location.origin}/start/${token}`;
     setGeneratedLink({ url: link, email, firstName });
@@ -138,7 +134,6 @@ function TokensPage() {
         intendedFor: selectedStudent.uid,
         intendedEmail: email || undefined,
         recipientName: recipientName || undefined,
-        accountType,
       },
       ...prev,
     ]);

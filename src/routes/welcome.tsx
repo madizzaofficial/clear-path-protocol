@@ -134,10 +134,10 @@ function WelcomePage() {
         {/* 3-pillar overview */}
         <div className="mb-10 grid gap-4 sm:grid-cols-3">
           <FeatureCard
-            icon="📚"
-            title="Le protocole"
-            body="18 leçons vidéo pour comprendre et traiter ta peau en profondeur."
-            href="/course"
+            icon="📈"
+            title="Ton suivi"
+            body="Ton avancée semaine après semaine, et le point avec ton coach."
+            href="/suivi"
           />
           <FeatureCard
             icon="🧴"
@@ -156,11 +156,10 @@ function WelcomePage() {
         {/* CTA */}
         <div className="text-center">
           <Link
-            to="/lesson/$lessonId"
-            params={{ lessonId: "l-1" }}
+            to="/products"
             className="inline-flex items-center gap-3 rounded-full bg-foreground px-8 py-3.5 text-base font-semibold text-background shadow-elegant transition-all hover:opacity-90"
           >
-            Commencer la leçon 1 <ArrowRight className="h-5 w-5" />
+            Voir ma routine <ArrowRight className="h-5 w-5" />
           </Link>
           <p className="mt-4 text-sm text-muted-foreground">
             Tu peux revenir à tout moment depuis le menu.

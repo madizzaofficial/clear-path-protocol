@@ -243,7 +243,6 @@ function NewStudentPage() {
         enrolledAt: now,
         welcomeSeen: false,
         adminCreated: true,
-        accountType: "routine_only",
       });
 
       const currentRoutineSummary = form.hasRoutine === "oui"

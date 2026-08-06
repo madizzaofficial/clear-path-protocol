@@ -1,12 +1,12 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { course as staticCourse } from "@/lib/course-data";
 import { useAuth } from "@/hooks/use-auth";
-import { useRestrictedRedirect } from "@/hooks/use-restricted-redirect";
 import { useEffect, useState } from "react";
 import { Play, Check, Lock, Clock, ChevronRight, ArrowRight, Loader2 } from "lucide-react";
 import { doc, getDoc, getDocFromServer } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { PROTOCOLE_ENABLED } from "@/lib/feature-flags";
 
 // ─── Types (mirrored from admin course-editor) ─────────────────────────────
 
@@ -40,6 +40,10 @@ const COURSE_ID = "clear-skin-protocol";
 // ─── Route ─────────────────────────────────────────────────────────────────
 
 export const Route = createFileRoute("/course")({
+  // ponytail: page Protocole masquée — PROTOCOLE_ENABLED=true pour la rouvrir.
+  beforeLoad: () => {
+    if (!PROTOCOLE_ENABLED) throw redirect({ to: "/products" });
+  },
   head: () => ({
     meta: [
       { title: "Le Protocole — Protocole Clear" },
@@ -51,9 +55,7 @@ export const Route = createFileRoute("/course")({
 
 function CoursePage() {
   const { user, loading } = useAuth();
-  const restricted = useRestrictedRedirect();
   const navigate = useNavigate();
-  if (restricted) return null;
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [courseData, setCourseData] = useState<FCourse | null>(null);
   const [courseLoading, setCourseLoading] = useState(true);

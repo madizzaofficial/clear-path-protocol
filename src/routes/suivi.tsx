@@ -6,7 +6,6 @@ import {
   Sparkles, Check, Sun, Moon, UserCircle,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { useRestrictedRedirect } from "@/hooks/use-restricted-redirect";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, getDocs, query, orderBy, limit, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
@@ -208,8 +207,6 @@ const PENDING_STEPS = [
 
 function Suivi() {
   const { user } = useAuth();
-  const restricted = useRestrictedRedirect();
-  if (restricted) return null;
   const [data, setData] = useState<SuiviData>({
     loading: true,
     skinState: null,

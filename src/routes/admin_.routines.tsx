@@ -1,5 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { StudentPicker } from "@/components/StudentPicker";
+import { PhaseEditor } from "@/components/PhaseEditor";
+import type { RoutinePhase } from "@/lib/routine-phases";
 import { SortableStep, StepDialog } from "@/components/RoutineStepEditor";
 import type { RoutineStep, ExtraBlock, StepSaveData } from "@/components/RoutineStepEditor";
 import { createServerFn } from "@tanstack/react-start";
@@ -80,7 +82,6 @@ type UserDoc = {
   email: string;
   displayName: string | null;
   photoURL?: string | null;
-  accountType?: "full" | "routine_only";
 };
 
 type StudentRoutine = {
@@ -88,6 +89,7 @@ type StudentRoutine = {
   am: RoutineStep[];
   pm: RoutineStep[];
   extras: ExtraBlock[];
+  phases?: RoutinePhase[];
   updatedAt: number;
   sentAt: number | null;
   status: "draft" | "sent";
@@ -191,6 +193,8 @@ function validatePayload(data: unknown): SendEmailPayload {
   return d as unknown as SendEmailPayload;
 }
 
+// ponytail: plus appelé — la publication est silencieuse (voir handleSendEmail).
+// Conservé pour réactiver l'email routine sans le réécrire.
 const sendRoutineEmailFn = createServerFn({ method: "POST" })
   .inputValidator((d: SendEmailPayload) => d)
   .handler(async (ctx) => {
@@ -451,7 +455,6 @@ function RoutinesContent() {
 
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewIsUpdate, setPreviewIsUpdate] = useState(false);
-  const [showPlanning, setShowPlanning] = useState(false);
 
   const { uid: preselectedUid } = Route.useSearch();
 
@@ -538,25 +541,17 @@ function RoutinesContent() {
     }
   }
 
+  // ponytail: publication silencieuse — l'élève reçoit le lien d'invitation
+  // depuis /admin/tokens et consulte sa routine en ligne. Aucun email ici.
   function handleSendEmail() {
     if (!routine || !selectedUser) return;
-    const isUpdate = !!(routine.sentAt);
-
-    // routine_only students already received the invitation email from /admin/tokens.
-    // Skip the email preview and publish directly.
-    if (selectedUser.accountType === "routine_only") {
-      if (isUpdate) {
-        setPendingReasonTag("ajustement");
-        setPendingReasonNote("");
-        setShowReasonModal(true);
-      } else {
-        publishRoutine("initial" as RoutineChangeReason, "");
-      }
-      return;
+    if (routine.sentAt) {
+      setPendingReasonTag("ajustement");
+      setPendingReasonNote("");
+      setShowReasonModal(true);
+    } else {
+      publishRoutine("initial" as RoutineChangeReason, "");
     }
-
-    setPreviewIsUpdate(isUpdate);
-    setShowPreviewModal(true);
   }
 
   function handleConfirmPreview() {
@@ -576,7 +571,6 @@ function RoutinesContent() {
     setSendResult(null);
     setSendError(null);
     const isUpdate = reasonTag !== "initial";
-    const isRoutineOnly = selectedUser.accountType === "routine_only";
     try {
       const toSave: StudentRoutine = {
         ...routine,
@@ -602,32 +596,6 @@ function RoutinesContent() {
         am: JSON.parse(JSON.stringify(routine.am)),
         pm: JSON.parse(JSON.stringify(routine.pm)),
       });
-
-      // Full-plan students receive the routine email.
-      // routine_only students already got the invitation email from /admin/tokens.
-      if (!isRoutineOnly) {
-        const callerToken = await auth.currentUser?.getIdToken();
-        if (!callerToken) throw new Error("Session expirée — reconnecte-toi.");
-        await sendRoutineEmailFn({
-          data: {
-            email: selectedUser.email,
-            displayName: selectedUser.displayName,
-            am: routine.am,
-            pm: routine.pm,
-            extras: routine.extras,
-            isUpdate,
-            callerToken,
-          },
-        });
-
-        triggerRoutineEventFn({
-          data: {
-            uid: selectedUser.uid,
-            email: selectedUser.email,
-            firstName: selectedUser.displayName?.split(" ")[0] ?? selectedUser.email.split("@")[0],
-          },
-        }).catch(() => {});
-      }
 
       setSendResult("success");
     } catch (e: any) {
@@ -1184,62 +1152,16 @@ function RoutinesContent() {
                     </div>
                   )}
 
-                  {/* ── Planning semaine par semaine ────────────────────────── */}
-                  {routine && (routine.am.length > 0 || routine.pm.length > 0) && (
-                    <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
-                      <button
-                        onClick={() => setShowPlanning((v) => !v)}
-                        className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-muted/40"
-                      >
-                        <CalendarDays className="h-4 w-4 text-primary" />
-                        <span className="text-sm font-semibold">Planning semaine par semaine</span>
-                        <span className="ml-auto text-xs text-muted-foreground">Lecture seule — éditer via les étapes</span>
-                        {showPlanning ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-                      </button>
-                      {showPlanning && (
-                        <div className="border-t border-border/60 divide-y divide-border/40">
-                          {Array.from({ length: 12 }, (_, i) => i + 1).map((week) => {
-                            const amSteps = routine.am.filter((s) => (s.startWeek ?? 1) <= week);
-                            const pmSteps = routine.pm.filter((s) => (s.startWeek ?? 1) <= week);
-                            const newAm = routine.am.filter((s) => (s.startWeek ?? 1) === week);
-                            const newPm = routine.pm.filter((s) => (s.startWeek ?? 1) === week);
-                            const hasNew = newAm.length > 0 || newPm.length > 0;
-                            const isFirstWeekWithContent = week === 1 || (
-                              routine.am.some((s) => (s.startWeek ?? 1) === week) ||
-                              routine.pm.some((s) => (s.startWeek ?? 1) === week)
-                            );
-                            if (amSteps.length === 0 && pmSteps.length === 0) return null;
-                            return (
-                              <div key={week} className={`px-5 py-4 ${hasNew ? "bg-amber-50/40 dark:bg-amber-950/10" : ""}`}>
-                                <div className="mb-2 flex items-center gap-2">
-                                  <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${hasNew ? "bg-amber-400 text-white" : "bg-muted text-muted-foreground"}`}>
-                                    {week}
-                                  </span>
-                                  <span className="text-sm font-semibold">Semaine {week}</span>
-                                  {hasNew && (
-                                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
-                                      ✨ {newAm.length + newPm.length} nouveau{newAm.length + newPm.length > 1 ? "x" : ""}
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex flex-wrap gap-1.5 pl-8">
-                                  {amSteps.map((s) => (
-                                    <span key={s.id} className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium ${(s.startWeek ?? 1) === week ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" : "bg-muted/60 text-muted-foreground"}`}>
-                                      ☀️ {s.product}
-                                    </span>
-                                  ))}
-                                  {pmSteps.map((s) => (
-                                    <span key={s.id} className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium ${(s.startWeek ?? 1) === week ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" : "bg-muted/60 text-muted-foreground"}`}>
-                                      🌙 {s.product}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
+                  {/* ── Parcours (phases) ──────────────────────────────────── */}
+                  {routine && (
+                    <PhaseEditor
+                      phases={routine.phases}
+                      am={routine.am}
+                      pm={routine.pm}
+                      onChange={(phases) =>
+                        saveRoutine({ ...routine, phases, updatedAt: Date.now() })
+                      }
+                    />
                   )}
 
                   {/* Send result feedback */}
@@ -1252,9 +1174,7 @@ function RoutinesContent() {
                         className="flex items-center gap-2 rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium"
                       >
                         <Check className="h-4 w-4 text-primary" />
-                        {selectedUser.accountType === "routine_only"
-                          ? "Routine publiée — visible par l'élève"
-                          : `Email envoyé à ${selectedUser.email} !`}
+                        Routine publiée — visible par l'élève
                       </motion.div>
                     )}
                     {sendResult === "error" && (
@@ -1299,17 +1219,12 @@ function RoutinesContent() {
                     >
                       {sending ? (
                         <>
-                          <Loader2 className="h-4 w-4 animate-spin" /> {selectedUser.accountType === "routine_only" ? "Publication…" : "Envoi en cours…"}
-                        </>
-                      ) : selectedUser.accountType === "routine_only" ? (
-                        <>
-                          <Check className="h-4 w-4" />
-                          Publier la routine
+                          <Loader2 className="h-4 w-4 animate-spin" /> Publication…
                         </>
                       ) : (
                         <>
-                          <Send className="h-4 w-4" />
-                          Envoyer à {selectedUser.displayName?.split(" ")[0] ?? selectedUser.email}
+                          <Check className="h-4 w-4" />
+                          Publier la routine
                         </>
                       )}
                     </button>
@@ -1459,7 +1374,8 @@ function RoutinesContent() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Email preview modal — shown before sending */}
+      {/* ponytail: aperçu email — inatteignable tant que la publication est
+          silencieuse (showPreviewModal n'est plus jamais mis à true). */}
       <Dialog open={showPreviewModal} onOpenChange={(o) => { if (!o) setShowPreviewModal(false); }}>
         <DialogContent className="rounded-3xl sm:max-w-2xl">
           <DialogHeader>
@@ -1549,12 +1465,10 @@ function RoutinesContent() {
             >
               {sending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
-              ) : selectedUser?.accountType === "routine_only" ? (
-                <Check className="h-4 w-4" />
               ) : (
-                <Send className="h-4 w-4" />
+                <Check className="h-4 w-4" />
               )}
-              {selectedUser?.accountType === "routine_only" ? "Confirmer la publication" : "Confirmer l'envoi"}
+              Confirmer la publication
             </button>
           </DialogFooter>
         </DialogContent>

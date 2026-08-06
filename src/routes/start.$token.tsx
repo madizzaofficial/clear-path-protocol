@@ -93,7 +93,6 @@ const completeStudentSignupFn = createServerFn({ method: "POST" })
       photoURL?: string | null;
       enrolledAt?: number;
       adminCreated?: boolean;
-      accountType?: string;
     };
 
     // 3. Sync the password to the Auth account (Web SDK may have used a different one).
@@ -116,7 +115,6 @@ const completeStudentSignupFn = createServerFn({ method: "POST" })
         enrolledAt: adminProfile.enrolledAt ?? Date.now(),
         welcomeSeen: false,
         adminCreated: adminProfile.adminCreated ?? true,
-        accountType: adminProfile.accountType ?? "routine_only",
         lastSeen: Date.now(),
       },
       { merge: true },
@@ -191,26 +189,25 @@ type TokenStatus = "checking" | "invalid" | "valid";
 function OnboardingPage() {
   const { token } = Route.useParams();
   const navigate = useNavigate();
-  const { user, loading: authLoading, accountType } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   const [tokenStatus, setTokenStatus] = useState<TokenStatus>("checking");
   const [recipientName, setRecipientName] = useState("");
   const [intendedEmail, setIntendedEmail] = useState("");
-  const [tokenAccountType, setTokenAccountType] = useState<"full" | "routine_only" | null>(null);
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // If already logged in, bounce to /products (routine_only) or /suivi (full).
+  // Déjà connecté → on renvoie vers la routine.
   useEffect(() => {
     if (!authLoading && user) {
-      navigate({ to: accountType === "routine_only" ? "/products" : "/suivi" });
+      navigate({ to: "/products" });
     }
-  }, [user, authLoading, accountType, navigate]);
+  }, [user, authLoading, navigate]);
 
-  // Validate token + read recipientName / intendedEmail / accountType.
+  // Validate token + read recipientName / intendedEmail.
   useEffect(() => {
     let cancelled = false;
     getDoc(doc(db, "onboarding_tokens", token)).then((snap) => {
@@ -222,7 +219,6 @@ function OnboardingPage() {
       const data = snap.data();
       setRecipientName(data.recipientName ?? "");
       setIntendedEmail(data.intendedEmail ?? "");
-      setTokenAccountType((data.accountType as "full" | "routine_only") ?? "routine_only");
       setTokenStatus("valid");
     });
     return () => {
@@ -257,10 +253,9 @@ function OnboardingPage() {
         data: { token, password, callerToken },
       });
 
-      // 3. Redirect based on the token's accountType (full → questionnaire,
-      //    routine_only → routine/products). The auth context's accountType
-      //    isn't fresh yet here, so we use the token's value read earlier.
-      navigate({ to: tokenAccountType === "full" ? "/questionnaire" : "/products" });
+      // 3. Tout le monde suit la même trame : direction la routine.
+      //    Le questionnaire passe par Tally, le profil est rempli par le coach.
+      navigate({ to: "/products" });
     } catch (err: unknown) {
       const code = (err as { code?: string }).code;
       const msg = (err as { message?: string }).message;

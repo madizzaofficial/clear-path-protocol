@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/use-auth";
 import { db, storage } from "@/lib/firebase";
@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { ChevronRight, ChevronLeft, Check, Loader2, Sparkles, ArrowRight, Camera, X } from "lucide-react";
 import { inngest } from "@/lib/inngest";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ONBOARDING_ENABLED } from "@/lib/feature-flags";
 
 const triggerIntakeEventFn = createServerFn({ method: "POST" })
   .inputValidator((d: { uid: string; email: string; firstName: string }) => d)
@@ -16,6 +17,10 @@ const triggerIntakeEventFn = createServerFn({ method: "POST" })
   });
 
 export const Route = createFileRoute("/intake")({
+  // ponytail: onboarding désactivé — ONBOARDING_ENABLED=true pour le rouvrir.
+  beforeLoad: () => {
+    if (!ONBOARDING_ENABLED) throw redirect({ to: "/products" });
+  },
   head: () => ({ meta: [{ title: "Bilan peau — Protocole Clear" }] }),
   component: IntakePage,
 });

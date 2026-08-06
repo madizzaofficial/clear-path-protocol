@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Search, ChevronDown, X, Loader2 } from "lucide-react";
 
 export type StudentStatus = "sent" | "draft" | "none";
-export type StudentItem = { uid: string; email: string; displayName: string | null; accountType?: "full" | "routine_only" };
+export type StudentItem = { uid: string; email: string; displayName: string | null };
 
 type Props = {
   users: StudentItem[];

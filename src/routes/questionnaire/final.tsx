@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { doc, setDoc } from "firebase/firestore";
 import { Check, Loader2 } from "lucide-react";
@@ -8,8 +8,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { useQuestionnaire } from "@/hooks/use-questionnaire";
 import { SECTIONS } from "@/lib/questionnaire-constants";
 import { toast } from "sonner";
+import { ONBOARDING_ENABLED } from "@/lib/feature-flags";
 
 export const Route = createFileRoute("/questionnaire/final")({
+  // ponytail: onboarding désactivé — ONBOARDING_ENABLED=true pour le rouvrir.
+  beforeLoad: () => {
+    if (!ONBOARDING_ENABLED) throw redirect({ to: "/products" });
+  },
   head: () => ({ meta: [{ title: "Merci — Protocole Clear" }] }),
   component: QuestionnaireFinal,
 });

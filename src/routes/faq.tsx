@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
-import { useRestrictedRedirect } from "@/hooks/use-restricted-redirect";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
@@ -43,9 +42,7 @@ function getVideoEmbed(url: string): { kind: "video" | "iframe"; src: string } {
 
 function FaqPage() {
   const { user, loading } = useAuth();
-  const restricted = useRestrictedRedirect();
   const navigate = useNavigate();
-  if (restricted) return null;
   const [entries, setEntries] = useState<FAQEntry[]>([]);
   const [faqLoading, setFaqLoading] = useState(true);
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());

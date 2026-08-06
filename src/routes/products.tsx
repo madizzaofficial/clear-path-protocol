@@ -7,6 +7,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useState, useEffect } from "react";
 import { Sun, Moon, Clock, Sparkles, Loader2, Check, X, ShoppingCart, AlertTriangle, ImageOff, Zap, CalendarDays } from "lucide-react";
 import { currentProtocolWeek } from "@/lib/routine-week";
+import { defaultPhases, phaseForWeek, phaseLabel, type RoutinePhase } from "@/lib/routine-phases";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -42,6 +43,7 @@ type UserRoutine = {
   am: RoutineStep[];
   pm: RoutineStep[];
   extras?: ExtraBlock[];
+  phases?: RoutinePhase[];
   updatedAt: number;
   sentAt: number | null;
   status: "draft" | "sent";
@@ -231,7 +233,7 @@ function RoutinePage() {
     const hasRoutineDraft = routine?.status === "draft";
     const steps = [
       { label: "Inscription", done: true },
-      { label: "Bilan peau envoyé", done: intakeCompleted },
+      { label: "Profil complété par ton coach", done: intakeCompleted },
       { label: "Routine en cours", done: hasRoutineDraft },
       { label: "Routine envoyée", done: false },
     ];
@@ -302,9 +304,10 @@ function RoutinePage() {
 
         {/* ── Sélecteur de semaines ─────────────────────────────────────── */}
         {enrolledAt && (
-          <WeekSelector
+          <PhaseSelector
             currentWeek={currentProtocolWeek(enrolledAt)}
             selectedWeek={selectedWeek}
+            phases={routine.phases?.length ? routine.phases : defaultPhases()}
             allSteps={[...routine.am, ...routine.pm]}
             onSelect={setSelectedWeek}
           />
@@ -788,16 +791,18 @@ function BonusBlock({ blocks }: { blocks: ExtraBlock[] }) {
   );
 }
 
-function WeekSelector({
-  currentWeek, selectedWeek, allSteps, onSelect,
+function PhaseSelector({
+  currentWeek, selectedWeek, phases, allSteps, onSelect,
 }: {
   currentWeek: number;
   selectedWeek: number;
+  phases: RoutinePhase[];
   allSteps: RoutineStep[];
   onSelect: (w: number) => void;
 }) {
-  const maxWeek = Math.max(12, ...allSteps.map((s) => s.startWeek ?? 1));
-  const weeks = Array.from({ length: maxWeek }, (_, i) => i + 1);
+  const currentPhase = phaseForWeek(phases, currentWeek);
+  const selectedPhase = phaseForWeek(phases, selectedWeek);
+  const totalWeeks = phases[phases.length - 1]?.toWeek ?? 1;
 
   return (
     <div className="mb-8 rounded-2xl border border-border/60 bg-card p-4 shadow-soft">
@@ -805,20 +810,25 @@ function WeekSelector({
         <CalendarDays className="h-4 w-4 text-primary" />
         <p className="text-sm font-semibold">Planning du protocole</p>
         <span className="ml-auto rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-semibold text-primary">
-          Semaine {currentWeek} / {maxWeek}
+          Semaine {currentWeek} / {totalWeeks}
         </span>
       </div>
+
       <div className="flex gap-1.5 overflow-x-auto pb-1">
-        {weeks.map((w) => {
-          const isActive = w === selectedWeek;
-          const isCurrent = w === currentWeek;
-          const isFuture = w > currentWeek;
-          const hasNew = allSteps.some((s) => (s.startWeek ?? 1) === w);
+        {phases.map((phase) => {
+          const isActive = selectedPhase?.id === phase.id;
+          const isCurrent = currentPhase?.id === phase.id;
+          const isFuture = phase.fromWeek > currentWeek;
+          const hasNew = allSteps.some((s) => {
+            const w = s.startWeek ?? 1;
+            return w >= phase.fromWeek && w <= phase.toWeek;
+          });
           return (
             <button
-              key={w}
-              onClick={() => onSelect(w)}
-              className={`relative flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-xl text-xs font-semibold transition-all ${
+              key={phase.id}
+              onClick={() => onSelect(phase.toWeek)}
+              title={phase.title || phaseLabel(phase.fromWeek, phase.toWeek)}
+              className={`relative flex h-10 shrink-0 items-center justify-center rounded-xl px-3 text-xs font-semibold transition-all ${
                 isActive
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : isCurrent
@@ -828,7 +838,9 @@ function WeekSelector({
                   : "bg-muted/60 text-foreground hover:bg-muted"
               }`}
             >
-              {w}
+              {phase.fromWeek === phase.toWeek
+                ? phase.fromWeek
+                : `${phase.fromWeek}-${phase.toWeek}`}
               {hasNew && !isActive && (
                 <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-amber-400" />
               )}
@@ -836,11 +848,25 @@ function WeekSelector({
           );
         })}
       </div>
-      {selectedWeek !== currentWeek && (
+
+      {selectedPhase && (
+        <div className="mt-3 border-t border-border/60 pt-3">
+          <p className="text-sm font-semibold">
+            {selectedPhase.title || phaseLabel(selectedPhase.fromWeek, selectedPhase.toWeek)}
+          </p>
+          {selectedPhase.description && (
+            <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+              {selectedPhase.description}
+            </p>
+          )}
+        </div>
+      )}
+
+      {selectedPhase?.id !== currentPhase?.id && (
         <p className="mt-2.5 text-xs text-muted-foreground">
           {selectedWeek < currentWeek
-            ? `Aperçu de la semaine ${selectedWeek} — les cases à cocher sont désactivées en mode historique.`
-            : `Aperçu de la semaine ${selectedWeek} — les étapes grisées ne sont pas encore actives.`}
+            ? "Aperçu d'une phase passée — les cases à cocher sont désactivées."
+            : "Aperçu d'une phase à venir — les étapes grisées ne sont pas encore actives."}
         </p>
       )}
     </div>
