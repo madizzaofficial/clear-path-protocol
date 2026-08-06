@@ -40,6 +40,31 @@ export function defaultPhases(count: number = DEFAULT_PHASE_COUNT): RoutinePhase
   }));
 }
 
+/** Bornes en jours d'une phase, comptées depuis le début du protocole
+ *  (jour 1 = premier jour). Semaine N couvre les jours (N-1)*7+1 → N*7.
+ *  `isLast` étend la dernière phase à l'infini : un élève qui dépasse la durée
+ *  prévue doit rester sur la dernière phase plutôt que de n'en avoir aucune. */
+export function phaseDayRange(
+  phase: RoutinePhase,
+  isLast: boolean,
+): { dayStart: number; dayEnd: number } {
+  return {
+    dayStart: (phase.fromWeek - 1) * 7 + 1,
+    dayEnd: isLast ? Infinity : phase.toWeek * 7,
+  };
+}
+
+/** Phase en cours au jour `dayCount` du protocole (1 = premier jour).
+ *  C'est ce qui fait avancer « Phase actuelle » tout seul avec la date. */
+export function phaseForDay(phases: RoutinePhase[], dayCount: number): RoutinePhase | undefined {
+  if (phases.length === 0) return undefined;
+  const found = phases.find((p, i) => {
+    const { dayStart, dayEnd } = phaseDayRange(p, i === phases.length - 1);
+    return dayCount >= dayStart && dayCount <= dayEnd;
+  });
+  return found ?? phases[phases.length - 1];
+}
+
 /** Phase contenant une semaine donnée, ou undefined hors parcours. */
 export function phaseForWeek(phases: RoutinePhase[], week: number): RoutinePhase | undefined {
   return phases.find((p) => week >= p.fromWeek && week <= p.toWeek);

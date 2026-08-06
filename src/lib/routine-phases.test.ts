@@ -7,6 +7,7 @@ import {
   splitPhase,
   resequence,
   phaseForWeek,
+  phaseForDay,
   lastWeek,
   phaseLabel,
   type RoutinePhase,
@@ -79,6 +80,23 @@ const named: RoutinePhase[] = [
 ];
 assert.equal(mergeWithNext(named, 0)[0].title, "Phase d'attaque");
 assert.equal(splitPhase(named, 0)[0].title, "Phase d'attaque");
+
+// Phase actuelle selon le jour du protocole : S1, S2-3, S4-6.
+const parcours = resequence([
+  { id: "p1", fromWeek: 1, toWeek: 1, title: "", description: "" },
+  { id: "p2", fromWeek: 1, toWeek: 2, title: "", description: "" },
+  { id: "p3", fromWeek: 1, toWeek: 3, title: "", description: "" },
+]);
+assert.deepEqual(
+  parcours.map((p) => phaseLabel(p.fromWeek, p.toWeek)),
+  ["Semaine 1", "Semaines 2-3", "Semaines 4-6"],
+);
+assert.equal(phaseForDay(parcours, 1)?.id, "p1", "jour 1 → Semaine 1");
+assert.equal(phaseForDay(parcours, 7)?.id, "p1", "jour 7 → encore Semaine 1");
+assert.equal(phaseForDay(parcours, 8)?.id, "p2", "jour 8 → Semaines 2-3");
+assert.equal(phaseForDay(parcours, 21)?.id, "p2", "jour 21 → fin de Semaines 2-3");
+assert.equal(phaseForDay(parcours, 22)?.id, "p3", "jour 22 → Semaines 4-6");
+assert.equal(phaseForDay(parcours, 500)?.id, "p3", "au-delà du parcours → dernière phase");
 
 // Recherche par semaine.
 assert.equal(phaseForWeek(merged, 3)?.id, merged[1].id);
