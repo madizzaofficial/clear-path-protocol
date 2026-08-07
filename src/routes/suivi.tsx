@@ -435,7 +435,7 @@ function Suivi() {
     ? Math.max(1, Math.floor((Date.now() - enrolledAt) / 86_400_000) + 1)
     : 1;
   // Parcours de l'élève (édité dans /admin/routines). Sans parcours
-  // personnalisé, on retombe sur 12 semaines simples.
+  // personnalisé, on retombe sur 5 phases groupées (12 semaines).
   const journey = phases.length ? phases : defaultPhases();
   const journeyRanges = journey.map((p, i) => ({
     phase: p,
