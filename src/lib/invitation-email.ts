@@ -9,6 +9,15 @@
 
 import { createServerFn } from "@tanstack/react-start";
 
+/** Validation d'email volontairement simple : présence d'un local, d'un @, et
+ *  d'un domaine avec TLD. On ne cherche pas la conformité RFC 5322 — le but est
+ *  d'attraper le champ vide et la faute de frappe évidente ("a@icloud") avant
+ *  d'écrire un token inutilisable ou d'appeler Resend pour rien. */
+export function isValidEmail(email: string): boolean {
+  const v = email.trim();
+  return v.length > 0 && v.length <= 254 && /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(v);
+}
+
 function esc(s: string): string {
   return String(s)
     .replace(/&/g, "&amp;")
@@ -108,19 +117,30 @@ function buildInvitationEmailHtml(firstName: string, signupUrl: string): string 
 }
 
 export const sendInvitationEmailFn = createServerFn({ method: "POST" })
-  .inputValidator((d: {
-    to: string;
-    firstName: string;
-    signupUrl: string;
-    callerToken: string;
-    isTest?: boolean;
-  }) => d)
+  .inputValidator(
+    (d: {
+      to: string;
+      firstName: string;
+      signupUrl: string;
+      callerToken: string;
+      isTest?: boolean;
+    }) => d,
+  )
   .handler(async (ctx) => {
     const { callerToken, to, firstName, signupUrl, isTest } = ctx.data;
 
     // Auth: only admins can send invitations (test or real).
     const { requireAdmin } = await import("@/lib/server-auth");
     await requireAdmin(callerToken);
+
+    // Le client valide déjà, mais on ne lui fait pas confiance : un destinataire
+    // vide ou malformé partirait chez Resend et échouerait sans trace utile.
+    if (!isValidEmail(to)) {
+      throw new Error(`Destinataire invalide : "${to}"`);
+    }
+    if (!signupUrl || !/^https?:\/\//.test(signupUrl)) {
+      throw new Error("Lien d'inscription invalide.");
+    }
 
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) throw new Error("RESEND_API_KEY manquant");

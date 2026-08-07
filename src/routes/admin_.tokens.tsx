@@ -5,7 +5,7 @@ import { auth, db } from "@/lib/firebase";
 import { collection, getDocs, doc, setDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useMemo, useState } from "react";
 import { Link2, Copy, Check, Loader2, Clock, User, Ban, X, Send } from "lucide-react";
-import { sendInvitationEmailFn } from "@/lib/invitation-email";
+import { sendInvitationEmailFn, isValidEmail } from "@/lib/invitation-email";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin_/tokens")({
@@ -37,9 +37,13 @@ type StudentDoc = {
   adminCreated?: boolean;
 };
 
-function tokenStatus(t: TokenDoc): "active" | "used" | "expired" {
+function tokenStatus(t: TokenDoc): "active" | "used" | "expired" | "invalid" {
   if (t.used) return "used";
   if (t.expiresAt < Date.now()) return "expired";
+  // Token sans destinataire valide : /start/:token refuse la création de compte,
+  // donc le lien est mort. On le marque comme tel plutôt que de le dire "actif" —
+  // sinon il masque l'élève du sélecteur et empêche d'en regénérer un bon.
+  if (!isValidEmail(t.intendedEmail ?? "")) return "invalid";
   return "active";
 }
 
@@ -76,13 +80,17 @@ function TokensPage() {
 
   const availableStudents = useMemo(
     () => students.filter((s) => !activeTokenUids.has(s.uid)),
-    [students, activeTokenUids]
+    [students, activeTokenUids],
   );
 
   const selectedStudent = useMemo(
     () => students.find((s) => s.uid === selectedStudentId) ?? null,
-    [students, selectedStudentId]
+    [students, selectedStudentId],
   );
+
+  /** Email qui sera réellement écrit dans le token. Source unique de vérité,
+   *  partagée par le bouton (état désactivé) et par generateLink(). */
+  const pendingEmail = ((selectedStudent?.email || manualEmail) ?? "").trim();
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -96,7 +104,7 @@ function TokensPage() {
       getDocs(collection(db, "users")),
     ]).then(([tokensSnap, usersSnap]) => {
       const sorted = tokensSnap.docs
-        .map((d) => ({ id: d.id, ...d.data() } as TokenDoc))
+        .map((d) => ({ id: d.id, ...d.data() }) as TokenDoc)
         .sort((a, b) => b.createdAt - a.createdAt);
       setTokens(sorted);
       setStudents(usersSnap.docs.map((d) => d.data() as StudentDoc));
@@ -108,10 +116,27 @@ function TokensPage() {
 
   async function generateLink() {
     if (!selectedStudent) return;
+
+    // pendingEmail utilise `||` et non `??` : l'email d'un élève peut être une
+    // chaîne vide, pas seulement null — `??` la laissait passer et produisait
+    // un token sans destinataire (email jamais envoyé, inscription impossible).
+    const email = pendingEmail;
+
+    // Sans email valide, le token serait inutilisable : /start/:token refuse
+    // la création de compte s'il n'a pas d'intendedEmail. On bloque ici plutôt
+    // que d'écrire un lien mort en base.
+    if (!isValidEmail(email)) {
+      toast.error(
+        email
+          ? `Email invalide : "${email}". Corrige-le avant de générer le lien.`
+          : "Cet élève n'a pas d'email. Saisis-en un avant de générer le lien.",
+      );
+      return;
+    }
+
     setGeneratingLink(true);
     const token = crypto.randomUUID();
     const now = Date.now();
-    const email = (selectedStudent.email ?? manualEmail).trim();
     const recipientName = selectedStudent.displayName ?? "";
     const firstName = (recipientName.trim().split(" ")[0] || recipientName).trim();
 
@@ -120,7 +145,7 @@ function TokensPage() {
       expiresAt: now + 7 * 24 * 60 * 60 * 1000,
       used: false,
       intendedFor: selectedStudent.uid,
-      intendedEmail: email || null,
+      intendedEmail: email,
       recipientName: recipientName || null,
     });
     const link = `${window.location.origin}/start/${token}`;
@@ -132,7 +157,7 @@ function TokensPage() {
         expiresAt: now + 7 * 86400000,
         used: false,
         intendedFor: selectedStudent.uid,
-        intendedEmail: email || undefined,
+        intendedEmail: email,
         recipientName: recipientName || undefined,
       },
       ...prev,
@@ -144,8 +169,8 @@ function TokensPage() {
   }
 
   async function sendInvitationEmail() {
-    if (!generatedLink || !generatedLink.email) {
-      toast.error("Aucun email associé à cet élève. Saisis un email avant d'envoyer.");
+    if (!generatedLink || !isValidEmail(generatedLink.email)) {
+      toast.error("Aucun email valide associé à ce lien. Régénère-le avec un email correct.");
       return;
     }
     setSendingEmail(true);
@@ -171,8 +196,8 @@ function TokensPage() {
 
   async function sendTestInvitationEmail() {
     const to = testEmail.trim();
-    if (!to || !generatedLink) {
-      toast.error("Saisis un email de test.");
+    if (!generatedLink || !isValidEmail(to)) {
+      toast.error(to ? `Email de test invalide : "${to}"` : "Saisis un email de test.");
       return;
     }
     setSendingTest(true);
@@ -200,8 +225,12 @@ function TokensPage() {
   async function revokeToken(id: string) {
     setRevoking((prev) => new Set(prev).add(id));
     await updateDoc(doc(db, "onboarding_tokens", id), { expiresAt: Date.now() - 1 });
-    setTokens((prev) => prev.map((t) => t.id === id ? { ...t, expiresAt: Date.now() - 1 } : t));
-    setRevoking((prev) => { const s = new Set(prev); s.delete(id); return s; });
+    setTokens((prev) => prev.map((t) => (t.id === id ? { ...t, expiresAt: Date.now() - 1 } : t)));
+    setRevoking((prev) => {
+      const s = new Set(prev);
+      s.delete(id);
+      return s;
+    });
     setConfirmRevoke(null);
   }
 
@@ -214,11 +243,11 @@ function TokensPage() {
   const activeCount = tokens.filter((t) => tokenStatus(t) === "active").length;
   const usedCount = tokens.filter((t) => tokenStatus(t) === "used").length;
   const expiredCount = tokens.filter((t) => tokenStatus(t) === "expired").length;
+  const invalidTokens = tokens.filter((t) => tokenStatus(t) === "invalid");
 
   return (
     <AdminShell>
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:pt-12">
-
         <header className="mb-10 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>
@@ -238,25 +267,44 @@ function TokensPage() {
               <option value="">— Choisir un élève —</option>
               {availableStudents.map((s) => (
                 <option key={s.uid} value={s.uid}>
-                  {s.displayName ?? "Sans nom"}{s.email ? ` — ${s.email}` : ""}
+                  {s.displayName ?? "Sans nom"}
+                  {s.email ? ` — ${s.email}` : ""}
                 </option>
               ))}
             </select>
-            {selectedStudent && !selectedStudent.email && (
+            {/* Toujours affiché quand l'email de l'élève est absent OU invalide,
+                pour qu'une adresse erronée en base soit visible et corrigeable. */}
+            {selectedStudent && !isValidEmail(selectedStudent.email ?? "") && (
               <input
                 type="email"
                 value={manualEmail}
                 onChange={(e) => setManualEmail(e.target.value)}
-                placeholder="Email de l'élève"
-                className="rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 w-56"
+                placeholder="Email de l'élève (requis)"
+                aria-label="Email de l'élève"
+                className={`rounded-xl border bg-card px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/20 w-56 ${
+                  manualEmail && !isValidEmail(manualEmail)
+                    ? "border-destructive focus:border-destructive"
+                    : "border-border focus:border-primary"
+                }`}
               />
             )}
             <button
               onClick={generateLink}
-              disabled={generatingLink || !selectedStudent}
+              disabled={generatingLink || !selectedStudent || !isValidEmail(pendingEmail)}
+              title={
+                !selectedStudent
+                  ? "Choisis un élève"
+                  : !isValidEmail(pendingEmail)
+                    ? "Un email valide est requis pour générer le lien"
+                    : undefined
+              }
               className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background shadow-elegant transition-all hover:opacity-90 disabled:opacity-60"
             >
-              {generatingLink ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
+              {generatingLink ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Link2 className="h-4 w-4" />
+              )}
               Nouveau lien
             </button>
           </div>
@@ -282,9 +330,13 @@ function TokensPage() {
               className="flex shrink-0 items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
             >
               {copiedId === "banner" ? (
-                <><Check className="h-4 w-4 text-primary" /> Copié</>
+                <>
+                  <Check className="h-4 w-4 text-primary" /> Copié
+                </>
               ) : (
-                <><Copy className="h-4 w-4" /> Copier</>
+                <>
+                  <Copy className="h-4 w-4" /> Copier
+                </>
               )}
             </button>
             <button
@@ -292,7 +344,11 @@ function TokensPage() {
               disabled={sendingEmail || !generatedLink.email}
               className="flex shrink-0 items-center gap-2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background shadow-elegant transition-opacity hover:opacity-90 disabled:opacity-60"
             >
-              {sendingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {sendingEmail ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
               {sendingEmail ? "Envoi…" : "Envoyer par mail"}
             </button>
           </div>
@@ -324,7 +380,11 @@ function TokensPage() {
               disabled={sendingTest || !testEmail.trim()}
               className="flex shrink-0 items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-60"
             >
-              {sendingTest ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {sendingTest ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
               {sendingTest ? "Envoi…" : "Envoyer le test"}
             </button>
           </div>
@@ -342,8 +402,37 @@ function TokensPage() {
               <p className="mt-1 text-xs text-muted-foreground">Utilisés</p>
             </div>
             <div className="rounded-2xl border border-border/60 bg-card p-4 text-center shadow-soft">
-              <p className="font-display text-2xl font-semibold text-muted-foreground">{expiredCount}</p>
+              <p className="font-display text-2xl font-semibold text-muted-foreground">
+                {expiredCount}
+              </p>
               <p className="mt-1 text-xs text-muted-foreground">Expirés</p>
+            </div>
+          </div>
+        )}
+
+        {/* Liens cassés : sans email, l'élève ne peut pas créer son compte. */}
+        {invalidTokens.length > 0 && (
+          <div className="mb-6 flex items-start gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-4">
+            <Ban className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+            <div className="text-sm">
+              <p className="font-semibold text-destructive">
+                {invalidTokens.length} lien{invalidTokens.length > 1 ? "s" : ""} sans email —
+                inutilisable{invalidTokens.length > 1 ? "s" : ""}
+              </p>
+              <p className="mt-0.5 text-muted-foreground">
+                L'élève ne peut pas créer son compte avec ce lien, et aucun email n'a pu être
+                envoyé. Ajoute son email dans sa fiche, puis génère un nouveau lien.
+                {invalidTokens.some((t) => t.recipientName) && (
+                  <>
+                    {" "}
+                    Concerné{invalidTokens.length > 1 ? "s" : ""} :{" "}
+                    <span className="font-medium text-foreground">
+                      {invalidTokens.map((t) => t.recipientName ?? "sans nom").join(", ")}
+                    </span>
+                    .
+                  </>
+                )}
+              </p>
             </div>
           </div>
         )}
@@ -369,10 +458,15 @@ function TokensPage() {
                 const tokenLink = `${typeof window !== "undefined" ? window.location.origin : ""}/start/${t.id}`;
 
                 return (
-                  <li key={t.id} className="flex items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4">
-                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
-                      status === "active" ? "bg-primary-soft" : "bg-muted"
-                    }`}>
+                  <li
+                    key={t.id}
+                    className="flex items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4"
+                  >
+                    <div
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
+                        status === "active" ? "bg-primary-soft" : "bg-muted"
+                      }`}
+                    >
                       {status === "active" ? (
                         <Link2 className="h-4 w-4 text-primary" />
                       ) : status === "used" ? (
@@ -384,38 +478,77 @@ function TokensPage() {
 
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                          status === "active"
-                            ? "bg-primary-soft text-primary"
-                            : status === "used"
-                            ? "bg-muted text-muted-foreground"
-                            : "bg-muted/50 text-muted-foreground/50"
-                        }`}>
-                          {status === "active" ? "Actif" : status === "used" ? "Utilisé" : "Expiré"}
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                            status === "active"
+                              ? "bg-primary-soft text-primary"
+                              : status === "invalid"
+                                ? "bg-destructive/10 text-destructive"
+                                : status === "used"
+                                  ? "bg-muted text-muted-foreground"
+                                  : "bg-muted/50 text-muted-foreground/50"
+                          }`}
+                          title={
+                            status === "invalid"
+                              ? "Ce lien n'a pas d'email valide : l'élève ne peut pas créer son compte. Regénère-le."
+                              : undefined
+                          }
+                        >
+                          {status === "active"
+                            ? "Actif"
+                            : status === "invalid"
+                              ? "Sans email — inutilisable"
+                              : status === "used"
+                                ? "Utilisé"
+                                : "Expiré"}
                         </span>
                         {t.recipientName && (
-                          <span className="text-xs font-medium text-foreground">— {t.recipientName}</span>
+                          <span className="text-xs font-medium text-foreground">
+                            — {t.recipientName}
+                          </span>
                         )}
                         {status === "active" && (
                           <span className="flex items-center gap-1 text-xs text-muted-foreground">
                             <Clock className="h-3 w-3" />
-                            Expire le {new Date(t.expiresAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}
+                            Expire le{" "}
+                            {new Date(t.expiresAt).toLocaleDateString("fr-FR", {
+                              day: "numeric",
+                              month: "long",
+                            })}
                           </span>
                         )}
                       </div>
                       <div className="mt-1 text-xs text-muted-foreground">
-                        <p>{new Date(t.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>
-                        <p>{new Date(t.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</p>
+                        <p>
+                          {new Date(t.createdAt).toLocaleDateString("fr-FR", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </p>
+                        <p>
+                          {new Date(t.createdAt).toLocaleTimeString("fr-FR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </p>
                         {status === "used" && (
                           <>
                             <span>·</span>
                             <span className="font-medium text-foreground">
-                              {usedByStudent ? (usedByStudent.displayName ?? usedByStudent.email) : "Élève inconnu"}
+                              {usedByStudent
+                                ? (usedByStudent.displayName ?? usedByStudent.email)
+                                : "Élève inconnu"}
                             </span>
                             {t.usedAt && (
                               <>
                                 <span>·</span>
-                                <span>{new Date(t.usedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}</span>
+                                <span>
+                                  {new Date(t.usedAt).toLocaleDateString("fr-FR", {
+                                    day: "numeric",
+                                    month: "long",
+                                  })}
+                                </span>
                               </>
                             )}
                           </>
@@ -430,9 +563,13 @@ function TokensPage() {
                           className="flex items-center gap-1.5 rounded-xl border border-border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-muted"
                         >
                           {copiedId === t.id ? (
-                            <><Check className="h-3.5 w-3.5 text-primary" /> Copié</>
+                            <>
+                              <Check className="h-3.5 w-3.5 text-primary" /> Copié
+                            </>
                           ) : (
-                            <><Copy className="h-3.5 w-3.5" /> Copier</>
+                            <>
+                              <Copy className="h-3.5 w-3.5" /> Copier
+                            </>
                           )}
                         </button>
                         {confirmRevoke === t.id ? (
@@ -442,7 +579,11 @@ function TokensPage() {
                               disabled={revoking.has(t.id)}
                               className="flex items-center gap-1 rounded-xl bg-destructive px-3 py-1.5 text-xs font-semibold text-destructive-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
                             >
-                              {revoking.has(t.id) ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                              {revoking.has(t.id) ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <Check className="h-3 w-3" />
+                              )}
                               Confirmer
                             </button>
                             <button
@@ -468,7 +609,6 @@ function TokensPage() {
             </ul>
           )}
         </div>
-
       </main>
     </AdminShell>
   );

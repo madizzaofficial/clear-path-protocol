@@ -6,6 +6,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { createAdminNotificationFn } from "@/lib/admin-notifications";
 import { useEffect, useState } from "react";
 import { ChevronLeft, Loader2, UserPlus } from "lucide-react";
+import { isValidEmail } from "@/lib/invitation-email";
 
 export const Route = createFileRoute("/admin_/student/new")({
   head: () => ({
@@ -149,18 +150,35 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+function Field({
+  label,
+  required,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex flex-col gap-1.5">
       <label className="text-sm font-medium text-foreground">
-        {label}{required && <span className="ml-0.5 text-destructive">*</span>}
+        {label}
+        {required && <span className="ml-0.5 text-destructive">*</span>}
       </label>
       {children}
     </div>
   );
 }
 
-function Pills({ options, value, onChange }: { options: { value: string; label: string }[]; value: string; onChange: (v: string) => void }) {
+function Pills({
+  options,
+  value,
+  onChange,
+}: {
+  options: { value: string; label: string }[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
   return (
     <div className="flex flex-wrap gap-2">
       {options.map((o) => (
@@ -181,7 +199,15 @@ function Pills({ options, value, onChange }: { options: { value: string; label: 
   );
 }
 
-function MultiPills({ options, values, onChange }: { options: { value: string; label: string }[]; values: string[]; onChange: (v: string[]) => void }) {
+function MultiPills({
+  options,
+  values,
+  onChange,
+}: {
+  options: { value: string; label: string }[];
+  values: string[];
+  onChange: (v: string[]) => void;
+}) {
   function toggle(v: string) {
     onChange(values.includes(v) ? values.filter((x) => x !== v) : [...values, v]);
   }
@@ -227,7 +253,20 @@ function NewStudentPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.displayName.trim()) { setError("Le nom est requis."); return; }
+    if (!form.displayName.trim()) {
+      setError("Le nom est requis.");
+      return;
+    }
+    // L'email est l'identifiant de connexion de l'élève et le destinataire du
+    // lien d'invitation : sans lui, le compte ne peut pas être créé.
+    if (!isValidEmail(form.email)) {
+      setError(
+        form.email.trim()
+          ? "Cet email n'est pas valide."
+          : "L'email est requis — il sert d'identifiant de connexion à l'élève.",
+      );
+      return;
+    }
     setError("");
     setSaving(true);
 
@@ -237,7 +276,7 @@ function NewStudentPage() {
 
       await setDoc(doc(db, "users", uid), {
         uid,
-        email: form.email.trim() || null,
+        email: form.email.trim(),
         displayName: form.displayName.trim(),
         photoURL: null,
         enrolledAt: now,
@@ -245,9 +284,10 @@ function NewStudentPage() {
         adminCreated: true,
       });
 
-      const currentRoutineSummary = form.hasRoutine === "oui"
-        ? form.currentProducts.trim() || "Oui (produits non précisés)"
-        : "Aucune routine actuelle";
+      const currentRoutineSummary =
+        form.hasRoutine === "oui"
+          ? form.currentProducts.trim() || "Oui (produits non précisés)"
+          : "Aucune routine actuelle";
 
       await setDoc(doc(db, "intake_answers", uid), {
         uid,
@@ -297,7 +337,6 @@ function NewStudentPage() {
   return (
     <AdminShell>
       <main className="mx-auto max-w-2xl px-6 pb-24 pt-8 md:pt-12">
-
         <header className="mb-10">
           <button
             onClick={() => navigate({ to: "/admin" })}
@@ -306,16 +345,13 @@ function NewStudentPage() {
             <ChevronLeft className="h-4 w-4" /> Retour
           </button>
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>
-          <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight">
-            Nouvel élève
-          </h1>
+          <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight">Nouvel élève</h1>
           <p className="mt-2 text-muted-foreground">
             Crée le profil manuellement pour suivre cet élève dans le dashboard.
           </p>
         </header>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-
           <Section title="Identité">
             <Field label="Nom complet" required>
               <input
@@ -326,48 +362,87 @@ function NewStudentPage() {
                 className="rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </Field>
-            <Field label="Email">
+            <Field label="Email" required>
               <input
                 type="email"
                 value={form.email}
                 onChange={(e) => set("email", e.target.value)}
-                placeholder="optionnel"
-                className="rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                placeholder="prenom@exemple.com"
+                required
+                className={`rounded-xl border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/20 ${
+                  form.email && !isValidEmail(form.email)
+                    ? "border-destructive focus:border-destructive"
+                    : "border-border focus:border-primary"
+                }`}
               />
+              <p className="text-xs text-muted-foreground">
+                Sert d'identifiant de connexion et destinataire du lien d'invitation.
+              </p>
             </Field>
           </Section>
 
           <Section title="Profil">
             <Field label="Tranche d'âge">
-              <Pills options={AGE_OPTIONS} value={form.ageRange} onChange={(v) => set("ageRange", v)} />
+              <Pills
+                options={AGE_OPTIONS}
+                value={form.ageRange}
+                onChange={(v) => set("ageRange", v)}
+              />
             </Field>
             <Field label="Genre">
-              <Pills options={GENDER_OPTIONS} value={form.gender} onChange={(v) => set("gender", v)} />
+              <Pills
+                options={GENDER_OPTIONS}
+                value={form.gender}
+                onChange={(v) => set("gender", v)}
+              />
             </Field>
             <Field label="Acné liée au cycle hormonal ?">
-              <Pills options={HORMONAL_OPTIONS} value={form.hormonalCycleAcne} onChange={(v) => set("hormonalCycleAcne", v)} />
+              <Pills
+                options={HORMONAL_OPTIONS}
+                value={form.hormonalCycleAcne}
+                onChange={(v) => set("hormonalCycleAcne", v)}
+              />
             </Field>
           </Section>
 
           <Section title="Peau">
             <Field label="Type de peau">
-              <Pills options={SKIN_TYPES} value={form.skinType} onChange={(v) => set("skinType", v)} />
+              <Pills
+                options={SKIN_TYPES}
+                value={form.skinType}
+                onChange={(v) => set("skinType", v)}
+              />
             </Field>
             <Field label="Types d'acné">
-              <MultiPills options={ACNE_TYPES} values={form.acneTypes} onChange={(v) => set("acneTypes", v)} />
+              <MultiPills
+                options={ACNE_TYPES}
+                values={form.acneTypes}
+                onChange={(v) => set("acneTypes", v)}
+              />
             </Field>
             <Field label="Localisation">
-              <MultiPills options={ACNE_LOCATIONS} values={form.acneLocations} onChange={(v) => set("acneLocations", v)} />
+              <MultiPills
+                options={ACNE_LOCATIONS}
+                values={form.acneLocations}
+                onChange={(v) => set("acneLocations", v)}
+              />
             </Field>
             <Field label="Intensité">
-              <Pills options={INTENSITY_OPTIONS} value={form.intensity} onChange={(v) => set("intensity", v)} />
+              <Pills
+                options={INTENSITY_OPTIONS}
+                value={form.intensity}
+                onChange={(v) => set("intensity", v)}
+              />
             </Field>
           </Section>
 
           <Section title="Routine actuelle">
             <Field label="A une routine ?">
               <Pills
-                options={[{ value: "oui", label: "Oui" }, { value: "non", label: "Non" }]}
+                options={[
+                  { value: "oui", label: "Oui" },
+                  { value: "non", label: "Non" },
+                ]}
                 value={form.hasRoutine}
                 onChange={(v) => set("hasRoutine", v)}
               />
@@ -387,7 +462,11 @@ function NewStudentPage() {
 
           <Section title="Historique">
             <Field label="Durée de l'acné">
-              <Pills options={DURATION_OPTIONS} value={form.durationAcne} onChange={(v) => set("durationAcne", v)} />
+              <Pills
+                options={DURATION_OPTIONS}
+                value={form.durationAcne}
+                onChange={(v) => set("durationAcne", v)}
+              />
             </Field>
             <Field label="Traitements antérieurs">
               <textarea
@@ -399,11 +478,18 @@ function NewStudentPage() {
               />
             </Field>
             <Field label="Réactivité cutanée">
-              <Pills options={REACTIVITY_OPTIONS} value={form.skinReactivity} onChange={(v) => set("skinReactivity", v)} />
+              <Pills
+                options={REACTIVITY_OPTIONS}
+                value={form.skinReactivity}
+                onChange={(v) => set("skinReactivity", v)}
+              />
             </Field>
             <Field label="Réactions à des produits ?">
               <Pills
-                options={[{ value: "oui", label: "Oui" }, { value: "non", label: "Non" }]}
+                options={[
+                  { value: "oui", label: "Oui" },
+                  { value: "non", label: "Non" },
+                ]}
                 value={form.hadReactions}
                 onChange={(v) => set("hadReactions", v)}
               />
@@ -432,12 +518,18 @@ function NewStudentPage() {
               />
             </Field>
             <Field label="Priorité">
-              <Pills options={PRIORITY_OPTIONS} value={form.priorityGoal} onChange={(v) => set("priorityGoal", v)} />
+              <Pills
+                options={PRIORITY_OPTIONS}
+                value={form.priorityGoal}
+                onChange={(v) => set("priorityGoal", v)}
+              />
             </Field>
           </Section>
 
           {error && (
-            <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</p>
+            <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {error}
+            </p>
           )}
 
           <button
@@ -445,10 +537,13 @@ function NewStudentPage() {
             disabled={saving}
             className="flex items-center justify-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background shadow-elegant transition-opacity hover:opacity-90 disabled:opacity-60"
           >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+            {saving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <UserPlus className="h-4 w-4" />
+            )}
             Créer le profil
           </button>
-
         </form>
       </main>
     </AdminShell>
