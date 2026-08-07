@@ -445,8 +445,7 @@ function Suivi() {
     (r) => dayCount >= r.dayStart && dayCount <= r.dayEnd,
   );
   const currentPhase =
-    journeyRanges.find((r) => dayCount >= r.dayStart && dayCount <= r.dayEnd)?.phase ??
-    journey[journey.length - 1];
+    journeyRanges[currentPhaseIndex]?.phase ?? journey[journey.length - 1];
   const nextLesson = lessons.find((l) => !completedLessons.includes(l.id));
   const daysUntilCall = skinState?.nextCallDate ? getDaysUntil(skinState.nextCallDate) : null;
   const todayKey = new Date().toISOString().slice(0, 10);
