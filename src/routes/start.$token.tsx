@@ -184,7 +184,7 @@ export const Route = createFileRoute("/start/$token")({
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 
-type TokenStatus = "checking" | "invalid" | "valid";
+type TokenStatus = "checking" | "used" | "expired" | "invalid" | "valid";
 
 function OnboardingPage() {
   const { token } = Route.useParams();
@@ -200,27 +200,52 @@ function OnboardingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // Déjà connecté → on renvoie vers la routine.
+  // createUserWithEmailAndPassword connecte l'élève AVANT que la fonction
+  // serveur ait transféré son profil. Sans ce drapeau, l'effet ci-dessous
+  // voyait `user` apparaître en plein milieu de handleSubmit et redirigeait
+  // vers /products, démontant le composant pendant l'await : le token était
+  // déjà consommé côté serveur, mais le transfert de profil pouvait ne jamais
+  // aboutir côté client. L'élève se retrouvait alors sans routine, revenait
+  // sur le lien, et tombait sur « Lien invalide ».
+  const [signingUp, setSigningUp] = useState(false);
+
+  // Déjà connecté (et pas en train de s'inscrire ici) → on renvoie vers la routine.
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && user && !signingUp) {
       navigate({ to: "/products" });
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, signingUp, navigate]);
 
   // Validate token + read recipientName / intendedEmail.
   useEffect(() => {
     let cancelled = false;
-    getDoc(doc(db, "onboarding_tokens", token)).then((snap) => {
-      if (cancelled) return;
-      if (!snap.exists() || snap.data().used || snap.data().expiresAt < Date.now()) {
-        setTokenStatus("invalid");
-        return;
-      }
-      const data = snap.data();
-      setRecipientName(data.recipientName ?? "");
-      setIntendedEmail(data.intendedEmail ?? "");
-      setTokenStatus("valid");
-    });
+    getDoc(doc(db, "onboarding_tokens", token))
+      .then((snap) => {
+        if (cancelled) return;
+        if (!snap.exists()) {
+          setTokenStatus("invalid");
+          return;
+        }
+        // « Utilisé » ≠ « expiré » : dans le premier cas le compte existe déjà,
+        // l'élève doit simplement se connecter — pas redemander un lien.
+        if (snap.data().used) {
+          setTokenStatus("used");
+          return;
+        }
+        if (snap.data().expiresAt < Date.now()) {
+          setTokenStatus("expired");
+          return;
+        }
+        const data = snap.data();
+        setRecipientName(data.recipientName ?? "");
+        setIntendedEmail(data.intendedEmail ?? "");
+        setTokenStatus("valid");
+      })
+      .catch(() => {
+        // Sans ce catch, une lecture Firestore en échec (réseau, extension
+        // bloquante) laissait la page sur le spinner indéfiniment.
+        if (!cancelled) setTokenStatus("invalid");
+      });
     return () => {
       cancelled = true;
     };
@@ -242,6 +267,9 @@ function OnboardingPage() {
       return;
     }
     setSubmitting(true);
+    // Verrouille la redirection automatique le temps de l'inscription : sans ça,
+    // la connexion Firebase (étape 1) la déclenche avant l'étape 2.
+    setSigningUp(true);
     try {
       // 1. Create the Auth account with the email + password.
       const credential = await createUserWithEmailAndPassword(auth, intendedEmail, password);
@@ -253,14 +281,24 @@ function OnboardingPage() {
         data: { token, password, callerToken },
       });
 
-      // 3. Tout le monde suit la même trame : direction la routine.
+      // 3. Profil transféré : on peut relâcher le verrou et rediriger.
       //    Le questionnaire passe par Tally, le profil est rempli par le coach.
+      setSigningUp(false);
       navigate({ to: "/products" });
     } catch (err: unknown) {
+      // On relâche le verrou pour que l'élève déjà authentifié (compte créé mais
+      // transfert échoué) ne reste pas bloqué sur cet écran.
+      setSigningUp(false);
       const code = (err as { code?: string }).code;
       const msg = (err as { message?: string }).message;
-      if (code === "auth/email-already-in-use") {
-        setError("Un compte existe déjà avec cet email. Connecte-toi à la place.");
+      // Le compte Auth a pu être créé avant l'échec (transfert de profil KO) :
+      // dans ce cas l'élève est authentifié et doit passer par la connexion,
+      // pas rester sur un formulaire d'inscription qui ne marchera plus.
+      const accountCreated = !!auth.currentUser;
+      if (code === "auth/email-already-in-use" || accountCreated) {
+        setError(
+          "Ton compte existe déjà. Connecte-toi avec ton email et ton mot de passe depuis la page de connexion.",
+        );
       } else if (code === "auth/weak-password") {
         setError("Mot de passe trop faible (6 caractères minimum).");
       } else if (msg === "TOKEN_ALREADY_USED") {
@@ -287,18 +325,58 @@ function OnboardingPage() {
     );
   }
 
-  if (tokenStatus === "invalid") {
+  // Lien déjà utilisé → le compte existe. On oriente vers la connexion plutôt
+  // que d'annoncer une erreur : c'est le cas le plus fréquent (retour arrière,
+  // rafraîchissement, second clic depuis l'email).
+  if (tokenStatus === "used") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-6">
+        <div className="w-full max-w-md text-center">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary-soft">
+            <Sparkles className="h-7 w-7 text-primary" />
+          </div>
+          <h1 className="font-display text-3xl font-semibold tracking-tight">
+            Ton compte est déjà créé
+          </h1>
+          <p className="mt-4 leading-relaxed text-muted-foreground">
+            Ce lien a servi à créer ton accès — il ne fonctionne qu'une fois. Connecte-toi avec ton
+            email et le mot de passe que tu as choisi.
+          </p>
+          <button
+            onClick={() => navigate({ to: "/login" })}
+            className="mt-8 inline-flex items-center justify-center rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background shadow-elegant transition-opacity hover:opacity-90"
+          >
+            Me connecter
+          </button>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Mot de passe oublié ? Tu peux le réinitialiser depuis la page de connexion.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (tokenStatus === "expired" || tokenStatus === "invalid") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-6">
         <div className="w-full max-w-md text-center">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
             <LinkIcon className="h-7 w-7 text-destructive" />
           </div>
-          <h1 className="font-display text-3xl font-semibold tracking-tight">Lien invalide</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight">
+            {tokenStatus === "expired" ? "Lien expiré" : "Lien invalide"}
+          </h1>
           <p className="mt-4 leading-relaxed text-muted-foreground">
-            Ce lien a déjà été utilisé ou a expiré. Contacte ton coach pour recevoir un nouveau lien
-            d'accès.
+            {tokenStatus === "expired"
+              ? "Ce lien d'accès a dépassé sa durée de validité. Contacte ton coach pour en recevoir un nouveau."
+              : "Ce lien ne correspond à aucun accès. Vérifie qu'il a été copié en entier, ou contacte ton coach."}
           </p>
+          <button
+            onClick={() => navigate({ to: "/login" })}
+            className="mt-8 inline-flex items-center justify-center rounded-full border border-border px-6 py-3 text-sm font-medium transition-colors hover:bg-muted"
+          >
+            J'ai déjà un compte — me connecter
+          </button>
         </div>
       </div>
     );
@@ -392,9 +470,18 @@ function OnboardingPage() {
           </div>
 
           {error && (
-            <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
-              {error}
-            </p>
+            <div className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              <p>{error}</p>
+              {error.includes("Connecte-toi") && (
+                <button
+                  type="button"
+                  onClick={() => navigate({ to: "/login" })}
+                  className="mt-2 font-semibold underline underline-offset-2"
+                >
+                  Aller à la page de connexion
+                </button>
+              )}
+            </div>
           )}
 
           <button
