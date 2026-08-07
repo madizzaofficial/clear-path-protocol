@@ -28,16 +28,23 @@ export function phaseLabel(fromWeek: number, toWeek: number): string {
   return fromWeek === toWeek ? `Semaine ${fromWeek}` : `Semaines ${fromWeek}-${toWeek}`;
 }
 
-/** Parcours par défaut : 12 semaines individuelles, sans description.
- *  Utilisé quand un élève n'a pas encore de parcours personnalisé. */
-export function defaultPhases(count: number = DEFAULT_PHASE_COUNT): RoutinePhase[] {
-  return Array.from({ length: count }, (_, i) => ({
-    id: `w${i + 1}`,
-    fromWeek: i + 1,
-    toWeek: i + 1,
-    title: phaseLabel(i + 1, i + 1),
-    description: "",
-  }));
+/** Libellé « Phase N » pour l'index 0-based `i`. */
+export function phaseIndexLabel(i: number): string {
+  return `Phase ${i + 1}`;
+}
+
+/** Parcours par défaut : 5 phases contiguës couvrant 12 semaines, avec
+ *  descriptions par défaut. Utilisé quand un élève n'a pas encore de
+ *  parcours personnalisé. Le paramètre `count` est ignoré (gardé pour
+ *  compatibilité d'interface). */
+export function defaultPhases(_count: number = DEFAULT_PHASE_COUNT): RoutinePhase[] {
+  return [
+    { id: "p1", fromWeek: 1, toWeek: 1,  title: "", description: "Tu démarres ta nouvelle routine." },
+    { id: "p2", fromWeek: 2, toWeek: 2,  title: "", description: "Ta peau s'adapte à la routine." },
+    { id: "p3", fromWeek: 3, toWeek: 4,  title: "", description: "La purge peut commencer, sois patient." },
+    { id: "p4", fromWeek: 5, toWeek: 7,  title: "", description: "La purge se calme, la peau commence à s'habituer." },
+    { id: "p5", fromWeek: 8, toWeek: 12, title: "", description: "La peau s'éclaircit, les résultats se confirment." },
+  ];
 }
 
 /** Bornes en jours d'une phase, comptées depuis le début du protocole
