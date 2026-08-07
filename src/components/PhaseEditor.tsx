@@ -5,6 +5,7 @@ import {
   defaultPhases,
   mergeWithNext,
   phaseLabel,
+  phaseIndexLabel,
   resequence,
   splitPhase,
   stepsStartingInPhase,
@@ -86,6 +87,9 @@ export function PhaseEditor({
               <div key={phase.id} className="rounded-2xl border border-border/60 bg-background p-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-semibold text-primary">
+                    {phaseIndexLabel(i)}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
                     {phaseLabel(phase.fromWeek, phase.toWeek)}
                   </span>
 
