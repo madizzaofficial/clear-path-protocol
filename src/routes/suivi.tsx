@@ -15,7 +15,7 @@ import {
   UserCircle,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { defaultPhases, phaseDayRange, phaseLabel, type RoutinePhase } from "@/lib/routine-phases";
+import { defaultPhases, phaseDayRange, phaseIndexLabel, phaseLabel, type RoutinePhase } from "@/lib/routine-phases";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, getDocs, query, orderBy, limit, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
@@ -441,6 +441,9 @@ function Suivi() {
     phase: p,
     ...phaseDayRange(p, i === journey.length - 1),
   }));
+  const currentPhaseIndex = journeyRanges.findIndex(
+    (r) => dayCount >= r.dayStart && dayCount <= r.dayEnd,
+  );
   const currentPhase =
     journeyRanges.find((r) => dayCount >= r.dayStart && dayCount <= r.dayEnd)?.phase ??
     journey[journey.length - 1];
@@ -579,7 +582,7 @@ function Suivi() {
                 )}
               </div>
               <span className="mt-3 inline-flex items-center rounded-full bg-background/50 px-3 py-1 text-xs font-semibold backdrop-blur-sm">
-                Phase {currentPhase.id}/6
+                {phaseIndexLabel(currentPhaseIndex >= 0 ? currentPhaseIndex : journey.length - 1)}/{journey.length}
               </span>
             </div>
 
@@ -947,14 +950,25 @@ function Suivi() {
                           <p
                             className={`text-sm font-medium ${isCurrent ? "text-foreground" : ""}`}
                           >
-                            {phase.title || phaseLabel(phase.fromWeek, phase.toWeek)}
+                            {phaseIndexLabel(i)}
                           </p>
+                          <span className="text-xs text-muted-foreground">
+                            {phaseLabel(phase.fromWeek, phase.toWeek)}
+                          </span>
                           {isCurrent && (
                             <span className="rounded-full bg-primary px-2 py-0.5 text-[9px] font-semibold text-primary-foreground">
                               Phase actuelle
                             </span>
                           )}
                         </div>
+                        {phase.title &&
+                          phase.title !== phaseLabel(phase.fromWeek, phase.toWeek) && (
+                            <p
+                              className={`mt-0.5 text-sm font-medium ${isCurrent ? "text-foreground/80" : ""}`}
+                            >
+                              {phase.title}
+                            </p>
+                          )}
                         {phase.description && (
                           <p
                             className={`mt-0.5 text-xs ${isCurrent ? "text-foreground/70" : "text-muted-foreground"}`}
