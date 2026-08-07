@@ -10,6 +10,7 @@ import {
   phaseForDay,
   lastWeek,
   phaseLabel,
+  phaseIndexLabel,
   type RoutinePhase,
 } from "./routine-phases";
 
@@ -23,31 +24,46 @@ function assertContiguous(phases: RoutinePhase[], label: string) {
   }
 }
 
-// Parcours par défaut : 12 semaines individuelles.
+// Parcours par défaut : 5 phases groupées couvrant 12 semaines.
 const base = defaultPhases();
-assert.equal(base.length, 12);
+assert.equal(base.length, 5);
 assert.equal(lastWeek(base), 12);
 assertContiguous(base, "default");
+// Vérifier les bornes exactes du défaut groupé.
+assert.equal(base[0].fromWeek, 1); assert.equal(base[0].toWeek, 1);
+assert.equal(base[1].fromWeek, 2); assert.equal(base[1].toWeek, 2);
+assert.equal(base[2].fromWeek, 3); assert.equal(base[2].toWeek, 4);
+assert.equal(base[3].fromWeek, 5); assert.equal(base[3].toWeek, 7);
+assert.equal(base[4].fromWeek, 8); assert.equal(base[4].toWeek, 12);
+// Les titres sont vides (auto) — l'UI affichera phaseIndexLabel + phaseLabel.
+assert.equal(base[0].title, "");
+assert.equal(base[0].description, "Tu démarres ta nouvelle routine.");
 
-// Fusion : semaine 2 + semaine 3 → "Semaines 2-3", le reste se décale.
+// Fusion : Phase 2 (S2) + Phase 3 (S3-4) → "Semaines 2-4", 4 phases au total.
 const merged = mergeWithNext(base, 1);
-assert.equal(merged.length, 11);
-assert.equal(merged[1].title, "Semaines 2-3");
+assert.equal(merged.length, 4);
+assert.equal(merged[1].title, "Semaines 2-4");
 assert.equal(merged[1].fromWeek, 2);
-assert.equal(merged[1].toWeek, 3);
-assert.equal(merged[2].fromWeek, 4, "la phase suivante reprend en semaine 4");
+assert.equal(merged[1].toWeek, 4);
+assert.equal(merged[2].fromWeek, 5, "la phase suivante reprend en semaine 5");
 assert.equal(lastWeek(merged), 12, "fusionner ne raccourcit pas le parcours");
 assertContiguous(merged, "merge");
 
-// Division : "Semaines 2-3" se recoupe en deux semaines simples.
+// Division : "Semaines 2-4" se recoupe → 5 phases au total.
 const split = splitPhase(merged, 1);
-assert.equal(split.length, 12);
-assert.equal(split[1].toWeek, 2);
-assert.equal(split[2].fromWeek, 3);
+assert.equal(split.length, 5);
+assert.equal(split[1].toWeek, 3);
+assert.equal(split[2].fromWeek, 4);
 assertContiguous(split, "split");
 
 // Les descriptions des deux phases fusionnées sont conservées, pas écrasées.
-const withText = defaultPhases(3).map((p, i) => ({ ...p, description: `desc${i}` }));
+// On construit un parcours explicite de 3 phases pour ce test (defaultPhases
+// retourne maintenant 5 phases, donc on ne peut plus s'en servir ici).
+const withText: RoutinePhase[] = [
+  { id: "t1", fromWeek: 1, toWeek: 1, title: "", description: "desc0" },
+  { id: "t2", fromWeek: 2, toWeek: 2, title: "", description: "desc1" },
+  { id: "t3", fromWeek: 3, toWeek: 3, title: "", description: "desc2" },
+];
 const mergedText = mergeWithNext(withText, 0);
 assert.ok(mergedText[0].description.includes("desc0"));
 assert.ok(mergedText[0].description.includes("desc1"));
@@ -101,5 +117,9 @@ assert.equal(phaseForDay(parcours, 500)?.id, "p3", "au-delà du parcours → der
 // Recherche par semaine.
 assert.equal(phaseForWeek(merged, 3)?.id, merged[1].id);
 assert.equal(phaseForWeek(merged, 99), undefined);
+
+// phaseIndexLabel : "Phase 1", "Phase 2", …
+assert.equal(phaseIndexLabel(0), "Phase 1");
+assert.equal(phaseIndexLabel(4), "Phase 5");
 
 console.log("routine-phases: OK");
