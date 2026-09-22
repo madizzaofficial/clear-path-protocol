@@ -49,6 +49,7 @@ import {
   ChevronDown,
   ChevronUp,
   CalendarDays,
+  Eye,
 } from "lucide-react";
 import {
   Dialog,
@@ -1221,6 +1222,18 @@ function RoutinesContent() {
                       <Sparkles className="h-4 w-4" />
                       Aide IA ✦
                     </button>
+                    {selectedUser && (
+                      <a
+                        href={`/ma-routine?as=${selectedUser.uid}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Voir la routine telle que l'élève la voit"
+                        className="flex items-center gap-2 rounded-2xl border border-border bg-card px-5 py-3 text-sm font-medium transition-colors hover:bg-muted"
+                      >
+                        <Eye className="h-4 w-4" />
+                        Aperçu élève
+                      </a>
+                    )}
                     <button
                       onClick={() => routine && saveRoutine({ ...routine, updatedAt: Date.now() })}
                       disabled={saving || !routine}

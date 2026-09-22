@@ -6,7 +6,7 @@ import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import { useState, useEffect } from "react";
 import {
   Sun, Moon, Loader2, Check, Sparkles, ShoppingCart, PlayCircle, Info,
-  Printer, Salad, Pill, Lightbulb, Leaf, Ban, HeartPulse,
+  Printer, Salad, Pill, Lightbulb, Leaf, Ban, HeartPulse, Eye,
 } from "lucide-react";
 import { currentProtocolWeek } from "@/lib/routine-week";
 import { defaultPhases, phaseLabel, type RoutinePhase } from "@/lib/routine-phases";
@@ -63,6 +63,10 @@ type Supplement = { id: string; label: string; emoji: string; dosage?: string };
 type TipItem = { id: string; text: string; emoji: string };
 
 export const Route = createFileRoute("/ma-routine")({
+  // ?as=<uid> : aperçu admin de la routine d'un élève (réservé aux admins).
+  validateSearch: (search: Record<string, unknown>) => ({
+    as: typeof search.as === "string" ? search.as : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Ma Routine — Protocole Clear" },
@@ -546,8 +550,13 @@ function TipList({ items }: { items: TipItem[] }) {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 function MaRoutinePage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, isAdmin } = useAuth();
+  const { as } = Route.useSearch();
   const navigate = useNavigate();
+  // Aperçu admin : on lit la routine d'un autre élève (uid `as`), en lecture seule.
+  const previewUid = isAdmin && as && as !== user?.uid ? as : null;
+  const targetUid = previewUid ?? user?.uid ?? null;
+  const [previewName, setPreviewName] = useState<string>("");
   const [routine, setRoutine] = useState<UserRoutine | null>(null);
   const [loading, setLoading] = useState(true);
   const [checkedAm, setCheckedAm] = useState<string[]>([]);
@@ -566,22 +575,24 @@ function MaRoutinePage() {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!targetUid) return;
+    setLoading(true);
+    setRoutine(null);
     const todayKey = new Date().toISOString().slice(0, 10);
 
     // Routine en écoute live : une modif publiée par le coach s'affiche sans
     // recharger la page (et met à jour l'onglet déjà ouvert de l'élève).
-    const unsubRoutine = onSnapshot(doc(db, "routines", user.uid), (snap) => {
-      if (snap.exists()) setRoutine(snap.data() as UserRoutine);
+    const unsubRoutine = onSnapshot(doc(db, "routines", targetUid), (snap) => {
+      setRoutine(snap.exists() ? (snap.data() as UserRoutine) : null);
     });
 
     // Le reste change rarement pendant la session → lecture ponctuelle.
     Promise.allSettled([
-      getDoc(doc(db, "routine_checkins", user.uid, "days", todayKey)),
-      getDoc(doc(db, "users", user.uid)),
+      getDoc(doc(db, "routine_checkins", targetUid, "days", todayKey)),
+      getDoc(doc(db, "users", targetUid)),
       getDoc(doc(db, "config", "nutrition")),
       getDoc(doc(db, "config", "reminders")),
-      getDoc(doc(db, "admin_skin_state", user.uid)),
+      getDoc(doc(db, "admin_skin_state", targetUid)),
     ]).then(([checkinRes, userRes, nutritionRes, remindersRes, skinRes]) => {
       if (checkinRes.status === "fulfilled" && checkinRes.value.exists()) {
         setCheckedAm(checkinRes.value.data().am ?? []);
@@ -590,6 +601,7 @@ function MaRoutinePage() {
       if (userRes.status === "fulfilled" && userRes.value.exists()) {
         const d = userRes.value.data();
         setStartTs((d.routineStartedAt ?? d.enrolledAt) ?? null);
+        setPreviewName(d.displayName ?? d.email ?? "");
       }
       if (nutritionRes.status === "fulfilled" && nutritionRes.value.exists()) {
         const d = nutritionRes.value.data();
@@ -607,10 +619,10 @@ function MaRoutinePage() {
     });
 
     return () => unsubRoutine();
-  }, [user]);
+  }, [targetUid]);
 
   async function toggleStep(session: "am" | "pm", stepId: string) {
-    if (!user) return;
+    if (!user || previewUid) return; // aperçu admin : lecture seule
     const current = session === "am" ? checkedAm : checkedPm;
     const updated = current.includes(stepId) ? current.filter((id) => id !== stepId) : [...current, stepId];
     if (session === "am") setCheckedAm(updated);
@@ -666,6 +678,14 @@ function MaRoutinePage() {
     <AppShell>
       {/* Conteneur aligné sur le menu (AppShell : max-w-7xl px-6) */}
       <main className="mx-auto max-w-7xl px-4 pb-28 pt-6 sm:px-6 lg:pt-10">
+        {previewUid && (
+          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-950/30 dark:text-amber-200">
+            <Eye className="h-4 w-4 shrink-0" />
+            <span>
+              Aperçu élève — tu vois la routine de <strong>{previewName || "cet élève"}</strong>, en lecture seule.
+            </span>
+          </div>
+        )}
         {/* Hero */}
         <header className="mb-8 overflow-hidden rounded-3xl bg-gradient-warm p-6 shadow-elegant sm:p-8">
           <div className="flex items-start justify-between gap-4">
@@ -730,7 +750,7 @@ function MaRoutinePage() {
             <RoutineSection
               title="Matin" icon={Sun} accent="from-amber-200/70 to-primary-soft"
               steps={routine.am} checked={checkedAm} currentWeek={currentWeek}
-              onToggle={(id) => toggleStep("am", id)}
+              onToggle={(id) => toggleStep("am", id)} trackable={!previewUid}
             />
             {routine.am.length > 0 && routine.pm.length > 0 && (
               <div className="flex items-center gap-3" aria-hidden="true">
@@ -742,7 +762,7 @@ function MaRoutinePage() {
             <RoutineSection
               title="Soir" icon={Moon} accent="from-indigo-200/60 to-primary-soft"
               steps={routine.pm} checked={checkedPm} currentWeek={currentWeek}
-              onToggle={(id) => toggleStep("pm", id)}
+              onToggle={(id) => toggleStep("pm", id)} trackable={!previewUid}
             />
             {(routine.extras ?? []).map((block) => (
               <RoutineSection
