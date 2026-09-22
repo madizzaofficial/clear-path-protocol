@@ -136,7 +136,7 @@ function RoutinePage() {
       getDoc(doc(db, "routines", user.uid)),
       getDoc(doc(db, "routine_checkins", user.uid, "days", todayKey)),
       getDoc(doc(db, "routine_reports", user.uid)),
-      getDoc(doc(db, "nutrition", user.uid)),
+      getDoc(doc(db, "config", "nutrition")),
       getDoc(doc(db, "config", "reminders")),
       getDoc(doc(db, "intake_answers", user.uid)),
       getDoc(doc(db, "users", user.uid)),

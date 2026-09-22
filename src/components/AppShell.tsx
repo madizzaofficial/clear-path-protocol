@@ -90,7 +90,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   // ponytail: "Protocole" (/course) est masqué — remettre l'entrée ci-dessous
   // et PROTOCOLE_ENABLED=true dans src/routes/course.tsx pour le réactiver.
   const nav = [
-    { to: "/products", label: "Routine", icon: Sparkles },
+    { to: "/ma-routine", label: "Routine", icon: Sparkles },
     { to: "/journal", label: "Journal", icon: Camera },
     { to: "/suivi", label: "Suivi", icon: Home },
     { to: "/faq", label: "FAQ", icon: HelpCircle },

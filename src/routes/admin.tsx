@@ -137,7 +137,7 @@ function AdminPage() {
           await Promise.all([
             getDocs(collection(db, "users")),
             getDocs(collection(db, "routines")),
-            getDocs(collection(db, "nutrition")),
+            getDoc(doc(db, "config", "nutrition")),
             getDocs(collection(db, "routine_reports")),
             getDoc(doc(db, "config", "admins")),
             getDocs(collection(db, "admin_skin_state")),
@@ -178,12 +178,19 @@ function AdminPage() {
         });
         setCallMap(cMap);
 
-        const nSet = new Set<string>();
-        nutritionSnap.docs.forEach((d) => {
-          const { toEat = [], toAvoid = [] } = d.data();
-          if (toEat.length > 0 || toAvoid.length > 0) nSet.add(d.id);
-        });
-        setNutritionSet(nSet);
+        // Nutrition est désormais commune à tous (config/nutrition) : si elle
+        // contient des items, tous les élèves l'affichent.
+        const nData = nutritionSnap.exists() ? nutritionSnap.data() : {};
+        const nutritionSet2 = new Set<string>();
+        const hasGlobalNutrition = [
+          nData.toEat,
+          nData.toAvoid,
+          nData.supplementsToTake,
+          nData.supplementsToAvoid,
+          nData.lifestyle,
+        ].some((arr) => Array.isArray(arr) && arr.length > 0);
+        if (hasGlobalNutrition) docs.forEach((d) => nutritionSet2.add(d.uid));
+        setNutritionSet(nutritionSet2);
 
         const rptMap = new Map<string, number>();
         reportsSnap.docs.forEach((d) => {

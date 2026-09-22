@@ -44,7 +44,7 @@ export function ProtocolTimeline({
           {week > 0 ? (
             <>
               Semaine {week} <span className="font-normal text-muted-foreground">sur {maxWeek}</span>
-              {current && <span className="text-muted-foreground"> · {current.title}</span>}
+              {current?.title && <span className="text-muted-foreground"> · {current.title}</span>}
             </>
           ) : (
             "Parcours pas encore démarré"
@@ -78,15 +78,21 @@ export function ProtocolTimeline({
       </div>
 
       <div className="relative mt-1 h-4">
-        {Array.from({ length: months + 1 }).map((_, i) => (
-          <span
-            key={i}
-            className="absolute -translate-x-1/2 text-[10px] text-muted-foreground"
-            style={{ left: `${Math.min(100, (i * 4 * 100) / maxWeek)}%` }}
-          >
-            {i === 0 ? "Début" : `M${i}`}
-          </span>
-        ))}
+        {Array.from({ length: months + 1 }).map((_, i) => {
+          const isFirst = i === 0;
+          const isLast = i === months;
+          return (
+            <span
+              key={i}
+              className={`absolute text-[10px] text-muted-foreground ${
+                isFirst ? "left-0" : isLast ? "right-0" : "-translate-x-1/2"
+              }`}
+              style={isFirst || isLast ? undefined : { left: `${(i * 4 * 100) / maxWeek}%` }}
+            >
+              {isFirst ? "Début" : `M${i}`}
+            </span>
+          );
+        })}
         {week > 0 && (
           <span
             className="absolute -top-[6px] h-2 w-2 -translate-x-1/2 rotate-45 rounded-[2px] bg-foreground"

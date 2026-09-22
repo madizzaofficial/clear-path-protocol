@@ -554,7 +554,7 @@ function MaRoutinePage() {
       getDoc(doc(db, "routines", user.uid)),
       getDoc(doc(db, "routine_checkins", user.uid, "days", todayKey)),
       getDoc(doc(db, "users", user.uid)),
-      getDoc(doc(db, "nutrition", user.uid)),
+      getDoc(doc(db, "config", "nutrition")),
       getDoc(doc(db, "config", "reminders")),
       getDoc(doc(db, "admin_skin_state", user.uid)),
     ]).then(([routineRes, checkinRes, userRes, nutritionRes, remindersRes, skinRes]) => {

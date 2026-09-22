@@ -198,7 +198,6 @@ async function seedClientBundle(uid, email, displayName) {
     skinType: "mixte", acneTypes: ["papules", "comedons"], intensity: "moderee", completedAt: now - 19 * DAY,
   });
   await db.collection("progress").doc(uid).set({ completedLessons: [] });
-  await db.collection("nutrition").doc(uid).set(nutrition);
   await db.collection("admin_skin_state").doc(uid).set({
     uid,
     inflammationPct: 45,
@@ -220,7 +219,8 @@ async function main() {
   await db.collection("users").doc(admin.uid).set({ is_admin: true, role: "admin" }, { merge: true });
   await db.collection("config").doc("admins").set({ uids: FieldValue.arrayUnion(admin.uid) }, { merge: true });
 
-  // Rappels "à savoir" — globaux (config/reminders).
+  // Nutrition + rappels "à savoir" — globaux, communs à tous (config/*).
+  await db.collection("config").doc("nutrition").set(nutrition);
   await db.collection("config").doc("reminders").set({ items: reminders });
 
   console.log("\n✅ Émulateur seedé.\n");

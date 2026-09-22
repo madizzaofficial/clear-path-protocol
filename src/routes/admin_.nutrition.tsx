@@ -1,12 +1,11 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AdminShell } from "@/components/AdminShell";
-import { StudentPicker } from "@/components/StudentPicker";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
-  Plus, Trash2, Loader2, GripVertical, Users, Save, Check, X, Pill, HeartPulse,
+  Plus, Trash2, Loader2, GripVertical, Save, Check, X, Pill, HeartPulse,
 } from "lucide-react";
 import {
   DndContext,
@@ -28,7 +27,6 @@ import { CSS } from "@dnd-kit/utilities";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type UserDoc = { uid: string; email: string; displayName: string | null };
 type NutritionItem = { id: string; label: string; emoji: string };
 type Reminder = { id: string; text: string; emoji: string };
 
@@ -65,16 +63,10 @@ function NutritionPage() {
 // ─── Main content ─────────────────────────────────────────────────────────────
 
 function NutritionContent() {
-  const { uid: preselectedUid } = Route.useSearch();
-
-  const [users, setUsers] = useState<UserDoc[]>([]);
-  const [selectedUser, setSelectedUser] = useState<UserDoc | null>(null);
-  const [loadingUsers, setLoadingUsers] = useState(true);
-
-  // Per-student nutrition — two lists
+  // Nutrition commune à tous les élèves — un seul doc global (config/nutrition).
   const [toEat, setToEat] = useState<NutritionItem[]>([]);
   const [toAvoid, setToAvoid] = useState<NutritionItem[]>([]);
-  const [loadingNutrition, setLoadingNutrition] = useState(false);
+  const [loadingNutrition, setLoadingNutrition] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -84,7 +76,7 @@ function NutritionContent() {
   const [newAvoidEmoji, setNewAvoidEmoji] = useState("❌");
   const [newAvoidLabel, setNewAvoidLabel] = useState("");
 
-  // Compléments (à privilégier / à éviter) + hygiène de vie — par élève
+  // Compléments (à privilégier / à éviter) + hygiène de vie — communs à tous
   const [suppTake, setSuppTake] = useState<NutritionItem[]>([]);
   const [suppAvoid, setSuppAvoid] = useState<NutritionItem[]>([]);
   const [lifestyle, setLifestyle] = useState<Reminder[]>([]);
@@ -109,54 +101,30 @@ function NutritionContent() {
 
   useEffect(() => {
     async function load() {
-      const [usersSnap, remindersSnap] = await Promise.all([
-        getDocs(collection(db, "users")),
+      const [nutritionSnap, remindersSnap] = await Promise.all([
+        getDoc(doc(db, "config", "nutrition")),
         getDoc(doc(db, "config", "reminders")),
       ]);
-      const fetched = usersSnap.docs.map((d) => d.data() as UserDoc);
-      setUsers(fetched);
-      setLoadingUsers(false);
-
-      if (preselectedUid) {
-        const match = fetched.find((u) => u.uid === preselectedUid);
-        if (match) selectUser(match);
+      if (nutritionSnap.exists()) {
+        const d = nutritionSnap.data();
+        setToEat(d.toEat ?? []);
+        setToAvoid(d.toAvoid ?? []);
+        setSuppTake(d.supplementsToTake ?? []);
+        setSuppAvoid(d.supplementsToAvoid ?? []);
+        setLifestyle(d.lifestyle ?? []);
       }
+      setLoadingNutrition(false);
       if (remindersSnap.exists()) setReminders(remindersSnap.data().items ?? []);
       setLoadingReminders(false);
     }
     load();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preselectedUid]);
+  }, []);
 
-  async function selectUser(u: UserDoc) {
-    setSelectedUser(u);
-    setToEat([]);
-    setToAvoid([]);
-    setSuppTake([]);
-    setSuppAvoid([]);
-    setLifestyle([]);
-    setIsDirty(false);
-    setSaveSuccess(false);
-    setNewEatLabel("");
-    setNewAvoidLabel("");
-    setLoadingNutrition(true);
-    const snap = await getDoc(doc(db, "nutrition", u.uid));
-    if (snap.exists()) {
-      setToEat(snap.data().toEat ?? []);
-      setToAvoid(snap.data().toAvoid ?? []);
-      setSuppTake(snap.data().supplementsToTake ?? []);
-      setSuppAvoid(snap.data().supplementsToAvoid ?? []);
-      setLifestyle(snap.data().lifestyle ?? []);
-    }
-    setLoadingNutrition(false);
-  }
-
-  // ── Per-student nutrition — explicit save ──────────────────────────────────
+  // ── Nutrition globale — sauvegarde explicite ───────────────────────────────
 
   async function handleSave() {
-    if (!selectedUser) return;
     setSaving(true);
-    await setDoc(doc(db, "nutrition", selectedUser.uid), {
+    await setDoc(doc(db, "config", "nutrition"), {
       toEat,
       toAvoid,
       supplementsToTake: suppTake,
@@ -276,23 +244,13 @@ function NutritionContent() {
         <header className="mb-10">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Admin</p>
           <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight md:text-5xl">Nutrition & Rappels</h1>
-          <p className="mt-2 text-muted-foreground">Consignes nutritionnelles par élève — rappels généraux communs à tous.</p>
+          <p className="mt-2 text-muted-foreground">Consignes communes à tous les élèves — nutrition, compléments, hygiène de vie et rappels.</p>
         </header>
-
-        {/* Student picker */}
-        <div className="mb-6">
-          <StudentPicker
-            users={users}
-            selected={selectedUser}
-            onSelect={selectUser}
-            loading={loadingUsers}
-          />
-        </div>
 
         {/* ── Right panel ───────────────────────────────────────────────── */}
         <div className="space-y-6">
 
-            {/* Per-student nutrition editor */}
+            {/* Nutrition globale */}
             <section className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
 
               {/* Header */}
@@ -300,9 +258,7 @@ function NutritionContent() {
                 <div className="min-w-0">
                   <h2 className="font-display text-xl font-semibold">Consignes nutritionnelles</h2>
                   <p className="mt-0.5 text-sm text-muted-foreground">
-                    {selectedUser
-                      ? `Configuration pour ${selectedUser.displayName ?? selectedUser.email}`
-                      : "Sélectionnez un élève pour configurer sa nutrition."}
+                    Affichées à tous les élèves dans leur routine.
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
@@ -316,25 +272,18 @@ function NutritionContent() {
                       <Check className="h-3 w-3" /> Sauvegardé
                     </span>
                   )}
-                  {selectedUser && (
-                    <button
-                      onClick={handleSave}
-                      disabled={saving || !isDirty}
-                      className="flex items-center gap-2 rounded-2xl bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
-                    >
-                      {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                      Sauvegarder
-                    </button>
-                  )}
+                  <button
+                    onClick={handleSave}
+                    disabled={saving || !isDirty}
+                    className="flex items-center gap-2 rounded-2xl bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
+                  >
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    Sauvegarder
+                  </button>
                 </div>
               </div>
 
-              {!selectedUser ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <Users className="mb-3 h-8 w-8 text-muted-foreground/30" />
-                  <p className="text-sm text-muted-foreground">Sélectionnez un élève dans la liste</p>
-                </div>
-              ) : loadingNutrition ? (
+              {loadingNutrition ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                 </div>
