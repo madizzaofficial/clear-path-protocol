@@ -6,7 +6,7 @@ import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import { useState, useEffect } from "react";
 import {
   Sun, Moon, Loader2, Check, Sparkles, ShoppingCart, PlayCircle, Info,
-  Printer, Salad, Pill, Lightbulb, Leaf, Ban, HeartPulse, Eye,
+  Printer, Salad, Pill, Lightbulb, Leaf, Ban, HeartPulse, Eye, Droplet,
 } from "lucide-react";
 import { currentProtocolWeek } from "@/lib/routine-week";
 import { defaultPhases, phaseLabel, type RoutinePhase } from "@/lib/routine-phases";
@@ -302,6 +302,10 @@ function StepCard({
   const upcoming = introWeek != null && introWeek > currentWeek;
   const buyUrl = safeHttpUrl(step.purchaseLinks?.[0]?.url ?? step.purchaseUrl);
   const fact = didYouKnow(step.category, step.product);
+  // Eau / hydratation : icône plutôt qu'une image (souvent absente → bloc vide).
+  const isWater = /\beau\b|hydrat|water/i.test(`${step.product} ${step.category}`);
+  const [imgError, setImgError] = useState(false);
+  const showImg = !!step.imageUrl && !imgError;
 
   return (
     <div
@@ -313,11 +317,20 @@ function StepCard({
         {/* Contenu (gauche) */}
         <div className="min-w-0 flex-1 p-4 sm:p-5">
           <div className="flex items-start gap-4">
-            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-muted">
-              {step.imageUrl ? (
-                <img src={step.imageUrl} alt={step.product} className="h-full w-full object-cover" />
+            <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-muted sm:h-24 sm:w-24">
+              {showImg ? (
+                <img
+                  src={step.imageUrl}
+                  alt={step.product}
+                  className="h-full w-full object-cover"
+                  onError={() => setImgError(true)}
+                />
+              ) : isWater ? (
+                <div className="flex h-full w-full items-center justify-center text-primary/70">
+                  <Droplet className="h-9 w-9" />
+                </div>
               ) : (
-                <div className="flex h-full w-full items-center justify-center font-display text-xl font-semibold text-muted-foreground/40">
+                <div className="flex h-full w-full items-center justify-center font-display text-2xl font-semibold text-muted-foreground/40">
                   {index}
                 </div>
               )}
