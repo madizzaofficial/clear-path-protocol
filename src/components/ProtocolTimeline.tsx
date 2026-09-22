@@ -30,8 +30,16 @@ export function ProtocolTimeline({
           <span className="truncate">{week > 0 ? (current?.title ?? "En cours") : "Pas démarré"}</span>
           <span className="shrink-0 tabular-nums">{week > 0 ? `S${week}/${maxWeek}` : "—"}</span>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+        <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
           <div className="h-full rounded-full bg-gradient-primary transition-all" style={{ width: `${pct}%` }} />
+          {Array.from({ length: maxWeek - 1 }).map((_, i) => (
+            <span
+              key={`wk-${i}`}
+              className="pointer-events-none absolute inset-y-0 w-px bg-background/70"
+              style={{ left: `${((i + 1) * 100) / maxWeek}%` }}
+              aria-hidden="true"
+            />
+          ))}
         </div>
       </div>
     );
@@ -53,7 +61,7 @@ export function ProtocolTimeline({
         <span className="shrink-0 text-xs text-muted-foreground">≈ {months} mois</span>
       </div>
 
-      <div className="flex h-9 w-full overflow-hidden rounded-xl border border-border/60">
+      <div className="relative flex h-9 w-full overflow-hidden rounded-xl border border-border/60">
         {ph.map((p, i) => {
           const span = p.toWeek - p.fromWeek + 1;
           const isCur = week >= p.fromWeek && week <= p.toWeek;
@@ -63,7 +71,7 @@ export function ProtocolTimeline({
               key={p.id}
               style={{ flexGrow: span, flexBasis: 0 }}
               title={`${p.title} · S${p.fromWeek}–${p.toWeek}`}
-              className={`flex items-center justify-center overflow-hidden border-r border-background/60 px-1 text-[10px] font-semibold last:border-r-0 ${
+              className={`flex items-center justify-center overflow-hidden px-1 text-[10px] font-semibold ${
                 isCur
                   ? "bg-primary text-primary-foreground"
                   : isPast
@@ -75,6 +83,15 @@ export function ProtocolTimeline({
             </div>
           );
         })}
+        {/* Traits blancs à chaque limite de semaine (lisibilité de la frise). */}
+        {Array.from({ length: maxWeek - 1 }).map((_, i) => (
+          <span
+            key={`wk-${i}`}
+            className="pointer-events-none absolute inset-y-0 w-px bg-background/70"
+            style={{ left: `${((i + 1) * 100) / maxWeek}%` }}
+            aria-hidden="true"
+          />
+        ))}
       </div>
 
       <div className="relative mt-1 h-4">

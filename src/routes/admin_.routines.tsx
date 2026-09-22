@@ -665,6 +665,7 @@ function RoutinesContent() {
         inciAnalysis: data.inciAnalysis,
         whyThisProduct: data.whyThisProduct ?? existing?.whyThisProduct,
         amountPreset: data.amountPreset ?? existing?.amountPreset,
+        amountImageUrl: data.amountImageUrl ?? existing?.amountImageUrl,
         schedule: data.schedule ?? existing?.schedule,
         verified: existing?.verified ?? true,
         createdAt: existing?.createdAt ?? Date.now(),
@@ -729,6 +730,7 @@ function RoutinesContent() {
         purchaseUrl: catalog?.purchaseLinks?.[0]?.url ?? (catalog as any)?.purchaseUrl,
         whyThisProduct: catalog?.whyThisProduct,
         amountPreset: catalog?.amountPreset,
+        amountImageUrl: catalog?.amountImageUrl,
         schedule: catalog?.schedule,
       };
     };

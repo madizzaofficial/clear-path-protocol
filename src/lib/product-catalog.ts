@@ -27,6 +27,7 @@ export type CatalogProduct = {
   // Contenu réutilisable — évite de re-taper à chaque routine.
   whyThisProduct?: string;
   amountPreset?: string;
+  amountImageUrl?: string;
   schedule?: FreqPhase[];
   verified: boolean;
   isFeatured?: boolean;

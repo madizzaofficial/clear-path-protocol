@@ -14,7 +14,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { SearchInput } from "@/components/SearchInput";
-import { uploadProductImageFn as uploadProductImageRaw } from "@/lib/upload-image";
+import {
+  uploadProductImageFn as uploadProductImageRaw,
+  uploadLessonResourceFn as uploadResourceRaw,
+} from "@/lib/upload-image";
 import { auth } from "@/lib/firebase";
 import { CATEGORIES } from "@/lib/skincare-categories";
 
@@ -27,6 +30,29 @@ async function uploadProductImageFn({
   const callerToken = await auth.currentUser?.getIdToken();
   if (!callerToken) throw new Error("Session expirée — reconnecte-toi.");
   return uploadProductImageRaw({ data: { ...data, callerToken } });
+}
+
+// Upload générique (autorise mp4/webm en plus des images) pour la vidéo d'application.
+async function uploadResourceFn({
+  data,
+}: {
+  data: { fileName: string; contentType: string; base64: string };
+}) {
+  const callerToken = await auth.currentUser?.getIdToken();
+  if (!callerToken) throw new Error("Session expirée — reconnecte-toi.");
+  return uploadResourceRaw({ data: { ...data, callerToken } });
+}
+
+// ponytail: upload via base64 → server fn → R2 (réutilise le chemin des images).
+// Plafond : la vidéo tient en mémoire (base64, +33%) ; pour de gros fichiers,
+// passer à un PUT présigné direct navigateur→R2.
+function fileToBase64(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve((reader.result as string).split(",")[1]);
+    reader.onerror = () => reject(new Error("File read error"));
+    reader.readAsDataURL(file);
+  });
 }
 import type { CatalogProduct } from "@/routes/admin_.products";
 import type { InciAnalysis } from "@/lib/inci-analysis";
@@ -51,6 +77,7 @@ export type RoutineStep = {
   frequency?: string;
   amount?: string;
   amountPreset?: string;
+  amountImageUrl?: string;
   schedule?: FreqPhase[];
   videoUrl?: string;
   inciAnalysis?: InciAnalysis;
@@ -75,6 +102,7 @@ export type StepSaveData = {
   frequency?: string;
   amount?: string;
   amountPreset?: string;
+  amountImageUrl?: string;
   schedule?: FreqPhase[];
   videoUrl?: string;
   inciAnalysis?: InciAnalysis;
@@ -194,10 +222,14 @@ export function StepDialog({
   const [whyThisProduct, setWhyThisProduct] = useState("");
   const [schedule, setSchedule] = useState<FreqPhase[]>([]);
   const [amountPreset, setAmountPreset] = useState("");
+  const [amountImageUrl, setAmountImageUrl] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [stepInciAnalysis, setStepInciAnalysis] = useState<InciAnalysis | undefined>(undefined);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [amountUploading, setAmountUploading] = useState(false);
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [videoError, setVideoError] = useState<string | null>(null);
   const [catalogSearch, setCatalogSearch] = useState("");
   const [showCatalogPicker, setShowCatalogPicker] = useState(false);
 
@@ -227,10 +259,14 @@ export function StepDialog({
       setWhyThisProduct(step.whyThisProduct ?? "");
       setSchedule(step.schedule ?? []);
       setAmountPreset(step.amountPreset ?? "");
+      setAmountImageUrl(step.amountImageUrl ?? "");
       setVideoUrl(step.videoUrl ?? "");
       setStepInciAnalysis(step.inciAnalysis);
       setUploadError(null);
       setUploading(false);
+      setVideoError(null);
+      setVideoUploading(false);
+      setAmountUploading(false);
       setShowCatalogPicker(false);
       setCatalogSearch("");
     }
@@ -247,6 +283,7 @@ export function StepDialog({
     // Contenu réutilisable du catalogue → plus besoin de re-taper à chaque fois.
     setWhyThisProduct(p.whyThisProduct ?? "");
     setAmountPreset(p.amountPreset ?? "");
+    setAmountImageUrl(p.amountImageUrl ?? "");
     setSchedule(p.schedule ?? []);
     setCatalogSearch("");
     setShowCatalogPicker(false);
@@ -256,12 +293,7 @@ export function StepDialog({
     setUploading(true);
     setUploadError(null);
     try {
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve((reader.result as string).split(",")[1]);
-        reader.onerror = () => reject(new Error("File read error"));
-        reader.readAsDataURL(file);
-      });
+      const base64 = await fileToBase64(file);
       const { publicUrl } = await uploadProductImageFn({
         data: { fileName: file.name, contentType: file.type || "image/jpeg", base64 },
       });
@@ -270,6 +302,40 @@ export function StepDialog({
       setUploadError(err?.message ?? "Erreur lors de l'upload — réessaye.");
     } finally {
       setUploading(false);
+    }
+  }
+
+  // Quantité en image : upload personnalisé (prend le pas sur le visuel préréglé).
+  async function handleAmountImageFile(file: File) {
+    setAmountUploading(true);
+    setUploadError(null);
+    try {
+      const base64 = await fileToBase64(file);
+      const { publicUrl } = await uploadProductImageFn({
+        data: { fileName: file.name, contentType: file.type || "image/jpeg", base64 },
+      });
+      setAmountImageUrl(publicUrl);
+      setAmountPreset(""); // image custom → on retire le visuel préréglé
+    } catch (err: any) {
+      setUploadError(err?.message ?? "Erreur lors de l'upload — réessaye.");
+    } finally {
+      setAmountUploading(false);
+    }
+  }
+
+  async function handleVideoFile(file: File) {
+    setVideoUploading(true);
+    setVideoError(null);
+    try {
+      const base64 = await fileToBase64(file);
+      const { publicUrl } = await uploadResourceFn({
+        data: { fileName: file.name, contentType: file.type || "video/mp4", base64 },
+      });
+      setVideoUrl(publicUrl);
+    } catch (err: any) {
+      setVideoError(err?.message ?? "Erreur lors de l'upload — réessaye.");
+    } finally {
+      setVideoUploading(false);
     }
   }
 
@@ -404,19 +470,60 @@ export function StepDialog({
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium text-foreground/80">Quantité</label>
-              <div className="flex items-center gap-4">
-                <select
-                  value={amountPreset}
-                  onChange={(e) => setAmountPreset(e.target.value)}
-                  className="h-11 flex-1 rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-                >
-                  <option value="">— Choisir un visuel —</option>
-                  {QTY_PRESETS.map((q) => (
-                    <option key={q.key} value={q.key}>{q.label}</option>
-                  ))}
-                </select>
-                {amountPreset && <QuantityVisual preset={amountPreset} />}
-              </div>
+              {amountImageUrl ? (
+                // Image personnalisée uploadée — prend le pas sur le visuel préréglé.
+                <div className="relative inline-block">
+                  <img
+                    src={amountImageUrl}
+                    alt="Quantité"
+                    className="h-24 w-24 rounded-2xl border border-border object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setAmountImageUrl("")}
+                    className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-white shadow"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-4">
+                    <select
+                      value={amountPreset}
+                      onChange={(e) => setAmountPreset(e.target.value)}
+                      className="h-11 flex-1 rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    >
+                      <option value="">— Choisir un visuel —</option>
+                      {QTY_PRESETS.map((q) => (
+                        <option key={q.key} value={q.key}>{q.label}</option>
+                      ))}
+                    </select>
+                    {amountPreset && <QuantityVisual preset={amountPreset} />}
+                  </div>
+                  {amountUploading ? (
+                    <div className="mt-2 flex items-center gap-3 rounded-2xl border border-border bg-background px-4 py-3">
+                      <Loader2 className="h-4 w-4 shrink-0 animate-spin text-primary" />
+                      <span className="text-sm text-muted-foreground">Upload en cours…</span>
+                    </div>
+                  ) : (
+                    <label className="mt-2 flex cursor-pointer items-center gap-2 rounded-2xl border border-dashed border-border px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary-soft/30 hover:text-foreground">
+                      <Upload className="h-4 w-4 shrink-0" />
+                      …ou uploader une image de quantité
+                      <input
+                        autoComplete="off"
+                        type="file"
+                        accept="image/*"
+                        className="sr-only"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleAmountImageFile(file);
+                        }}
+                      />
+                    </label>
+                  )}
+                </>
+              )}
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium text-foreground/80">
@@ -479,15 +586,49 @@ export function StepDialog({
             <div>
               <label className="mb-2 block text-sm font-medium text-foreground/80">
                 Vidéo d'application{" "}
-                <span className="font-normal text-muted-foreground">(URL optionnelle)</span>
+                <span className="font-normal text-muted-foreground">(mp4/webm, optionnelle)</span>
               </label>
-              <input
-                autoComplete="off"
-                value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
-                placeholder="https://… (mp4, YouTube, Vimeo)"
-                className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-              />
+              {videoUrl ? (
+                <div className="relative inline-block">
+                  <video
+                    src={videoUrl}
+                    className="h-40 w-auto rounded-2xl border border-border object-cover"
+                    controls
+                    muted
+                    playsInline
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setVideoUrl("")}
+                    className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-white shadow"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : videoUploading ? (
+                <div className="flex items-center gap-3 rounded-2xl border border-border bg-background px-4 py-3">
+                  <Loader2 className="h-4 w-4 shrink-0 animate-spin text-primary" />
+                  <span className="text-sm text-muted-foreground">Upload de la vidéo…</span>
+                </div>
+              ) : (
+                <>
+                  <label className="flex cursor-pointer items-center gap-2 rounded-2xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary-soft/30 hover:text-foreground">
+                    <Upload className="h-4 w-4 shrink-0" />
+                    Choisir une vidéo
+                    <input
+                      autoComplete="off"
+                      type="file"
+                      accept="video/mp4,video/webm"
+                      className="sr-only"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleVideoFile(file);
+                      }}
+                    />
+                  </label>
+                  {videoError && <p className="mt-1.5 text-xs text-destructive">{videoError}</p>}
+                </>
+              )}
             </div>
 
             {/* Pourquoi ce produit */}
@@ -559,6 +700,7 @@ export function StepDialog({
                 purchaseUrl: purchaseUrl.trim() || undefined,
                 whyThisProduct: whyThisProduct.trim() || undefined,
                 amountPreset: amountPreset || undefined,
+                amountImageUrl: amountImageUrl.trim() || undefined,
                 schedule: schedule.length ? schedule : undefined,
               })
             }
@@ -592,6 +734,7 @@ export function StepDialog({
                 introNote: introNote.trim() || undefined,
                 whyThisProduct: whyThisProduct.trim() || undefined,
                 amountPreset: amountPreset || undefined,
+                amountImageUrl: amountImageUrl.trim() || undefined,
                 schedule: schedule.length ? schedule : undefined,
                 videoUrl: videoUrl.trim() || undefined,
                 inciAnalysis: stepInciAnalysis,

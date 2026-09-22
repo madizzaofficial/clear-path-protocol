@@ -15,6 +15,7 @@ import {
   phaseDays, freqLabel, DAY_LABELS, type FreqPhase,
 } from "@/lib/routine-schedule";
 import { WeekStrip } from "@/components/WeekStrip";
+import { QuantityVisual } from "@/components/QuantityVisual";
 import { weeklyGuidance, didYouKnow } from "@/lib/skincare-education";
 import { GlossaryTerm } from "@/components/GlossaryTerm";
 import type { PurchaseLink } from "@/lib/product-catalog";
@@ -35,6 +36,7 @@ type RoutineStep = {
   frequency?: string;
   amount?: string;
   amountPreset?: string;
+  amountImageUrl?: string;
   schedule?: FreqPhase[];
   purchaseUrl?: string;
   purchaseLinks?: PurchaseLink[];
@@ -108,11 +110,16 @@ function stepRowsHtml(steps: RoutineStep[], week: number): string {
       const introWeek = firstWeek(s.schedule) ?? s.startWeek ?? null;
       const upcoming = introWeek != null && introWeek > week;
       const qty = qtyLabel(s.amountPreset) || s.amount || "";
+      const qtyHtml = s.amountImageUrl
+        ? `<img class="amt-img" src="${escapeHtml(s.amountImageUrl)}" alt="Quantité" />`
+        : qty
+          ? `<span class="chip amt">${escapeHtml(qty)}</span>`
+          : "";
       const freqHtml = upcoming
         ? `<p class="soon">◷ À introduire dès la semaine ${introWeek}</p>`
         : phase
-          ? `${weekStripHtml(phase)}${qty ? `<span class="chip amt">${escapeHtml(qty)}</span>` : ""}`
-          : `<div class="freq">${s.frequency ? `<span class="chip freq">${escapeHtml(s.frequency)}</span>` : ""}${qty ? `<span class="chip amt">${escapeHtml(qty)}</span>` : ""}</div>`;
+          ? `${weekStripHtml(phase)}${qtyHtml}`
+          : `<div class="freq">${s.frequency ? `<span class="chip freq">${escapeHtml(s.frequency)}</span>` : ""}${qtyHtml}</div>`;
       return `
       <div class="step">
         ${s.imageUrl ? `<img src="${escapeHtml(s.imageUrl)}" alt="" />` : `<div class="ph">${i + 1}</div>`}
@@ -192,6 +199,7 @@ function printRoutine(opts: {
       .chip { font-size: 11px; font-weight: 600; border-radius: 999px; padding: 2px 9px; display: inline-block; }
       .chip.freq { background: #f6e9e1; color: #b5613c; }
       .chip.amt { background: #fbeecb; color: #a9791a; }
+      .amt-img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; vertical-align: middle; margin-left: 4px; }
       .instr { font-size: 12px; color: #514a43; line-height: 1.5; margin: 5px 0 0; }
       .why { font-size: 11px; color: #6b5a4d; background: #faf1ea; border-radius: 8px; padding: 6px 9px; margin: 5px 0 0; }
       .conseils { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -407,12 +415,22 @@ function StepCard({
                   </p>
                 )}
               </div>
-              {(step.amountPreset || step.amount) && (
+              {(step.amountImageUrl || step.amountPreset || step.amount) && (
                 <div>
                   <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Quantité</p>
-                  <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
-                    {qtyLabel(step.amountPreset) || step.amount}
-                  </span>
+                  {step.amountImageUrl ? (
+                    <img
+                      src={step.amountImageUrl}
+                      alt="Quantité"
+                      className="h-24 w-24 rounded-xl border border-border object-cover"
+                    />
+                  ) : step.amountPreset ? (
+                    <QuantityVisual preset={step.amountPreset} />
+                  ) : (
+                    <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
+                      {step.amount}
+                    </span>
+                  )}
                 </div>
               )}
               {/* Vidéo : seulement si renseignée (sinon rien) + légende "comment appliquer" par-dessus. */}
@@ -771,17 +789,13 @@ function MaRoutinePage() {
                       <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                         <Leaf className="h-3.5 w-3.5" /> À privilégier
                       </p>
-                      <ul className="space-y-2">
+                      <div className="flex flex-wrap gap-1.5">
                         {suppTake.map((s) => (
-                          <li key={s.id} className="flex items-start gap-2.5">
-                            <span className="shrink-0 text-base leading-none">{s.emoji}</span>
-                            <span className="min-w-0 text-sm">
-                              <span className="font-medium text-foreground/90">{s.label}</span>
-                              {s.dosage && <span className="block text-xs text-muted-foreground">{s.dosage}</span>}
-                            </span>
-                          </li>
+                          <span key={s.id} className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300">
+                            <span>{s.emoji}</span> {s.label}{s.dosage ? ` · ${s.dosage}` : ""}
+                          </span>
                         ))}
-                      </ul>
+                      </div>
                     </div>
                   )}
                   {suppAvoid.length > 0 && (
@@ -789,17 +803,13 @@ function MaRoutinePage() {
                       <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-red-600 dark:text-red-400">
                         <Ban className="h-3.5 w-3.5" /> À éviter
                       </p>
-                      <ul className="space-y-2">
+                      <div className="flex flex-wrap gap-1.5">
                         {suppAvoid.map((s) => (
-                          <li key={s.id} className="flex items-start gap-2.5">
-                            <span className="shrink-0 text-base leading-none">{s.emoji}</span>
-                            <span className="min-w-0 text-sm">
-                              <span className="font-medium text-foreground/90">{s.label}</span>
-                              {s.dosage && <span className="block text-xs text-muted-foreground">{s.dosage}</span>}
-                            </span>
-                          </li>
+                          <span key={s.id} className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-xs text-red-800 dark:bg-red-950/30 dark:text-red-300">
+                            <span>{s.emoji}</span> {s.label}{s.dosage ? ` · ${s.dosage}` : ""}
+                          </span>
                         ))}
-                      </ul>
+                      </div>
                     </div>
                   )}
                 </RailCard>

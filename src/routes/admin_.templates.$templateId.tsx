@@ -219,6 +219,7 @@ function TemplateEditorContent() {
     purchaseUrl?: string;
     whyThisProduct?: string;
     amountPreset?: string;
+    amountImageUrl?: string;
     schedule?: RoutineStep["schedule"];
   }) {
     setSavingToCatalog(true);
@@ -237,6 +238,7 @@ function TemplateEditorContent() {
         purchaseUrl: data.purchaseUrl,
         whyThisProduct: data.whyThisProduct ?? existing?.whyThisProduct,
         amountPreset: data.amountPreset ?? existing?.amountPreset,
+        amountImageUrl: data.amountImageUrl ?? existing?.amountImageUrl,
         schedule: data.schedule ?? existing?.schedule,
         verified: existing?.verified ?? true,
         createdAt: existing?.createdAt ?? Date.now(),
