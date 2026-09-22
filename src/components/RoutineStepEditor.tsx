@@ -5,16 +5,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
-import {
-  GripVertical,
-  Loader2,
-  Package,
-  Pencil,
-  Trash2,
-  Upload,
-  X,
-  Clock,
-} from "lucide-react";
+import { GripVertical, Loader2, Package, Pencil, Trash2, Upload, X, Clock } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -28,13 +19,20 @@ import { auth } from "@/lib/firebase";
 import { CATEGORIES } from "@/lib/skincare-categories";
 
 // Injects the admin's Firebase ID token so the upload server fn can authenticate.
-async function uploadProductImageFn({ data }: { data: { fileName: string; contentType: string; base64: string } }) {
+async function uploadProductImageFn({
+  data,
+}: {
+  data: { fileName: string; contentType: string; base64: string };
+}) {
   const callerToken = await auth.currentUser?.getIdToken();
   if (!callerToken) throw new Error("Session expirée — reconnecte-toi.");
   return uploadProductImageRaw({ data: { ...data, callerToken } });
 }
 import type { CatalogProduct } from "@/routes/admin_.products";
 import type { InciAnalysis } from "@/lib/inci-analysis";
+import { QTY_PRESETS, type FreqPhase } from "@/lib/routine-schedule";
+import { ScheduleBuilder } from "@/components/ScheduleBuilder";
+import { QuantityVisual } from "@/components/QuantityVisual";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -50,6 +48,11 @@ export type RoutineStep = {
   startWeek?: number;
   introNote?: string;
   whyThisProduct?: string;
+  frequency?: string;
+  amount?: string;
+  amountPreset?: string;
+  schedule?: FreqPhase[];
+  videoUrl?: string;
   inciAnalysis?: InciAnalysis;
 };
 
@@ -69,6 +72,11 @@ export type StepSaveData = {
   startWeek?: number;
   introNote?: string;
   whyThisProduct?: string;
+  frequency?: string;
+  amount?: string;
+  amountPreset?: string;
+  schedule?: FreqPhase[];
+  videoUrl?: string;
   inciAnalysis?: InciAnalysis;
 };
 
@@ -116,9 +124,7 @@ export function SortableStep({
         <p className="mt-1 text-sm font-semibold">
           {step.product || <span className="italic text-muted-foreground">—</span>}
         </p>
-        {step.brand && (
-          <p className="text-xs text-muted-foreground">{step.brand}</p>
-        )}
+        {step.brand && <p className="text-xs text-muted-foreground">{step.brand}</p>}
         {step.instructions && (
           <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{step.instructions}</p>
         )}
@@ -132,14 +138,20 @@ export function SortableStep({
       )}
       <div className="flex shrink-0 items-center gap-1.5">
         <button
-          onClick={(e) => { e.stopPropagation(); onEdit(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
           title="Modifier"
           className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <Pencil className="h-3.5 w-3.5" />
         </button>
         <button
-          onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
           title="Supprimer"
           className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground transition-colors hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
         >
@@ -180,6 +192,9 @@ export function StepDialog({
   const [startWeek, setStartWeek] = useState<number | "">("");
   const [introNote, setIntroNote] = useState("");
   const [whyThisProduct, setWhyThisProduct] = useState("");
+  const [schedule, setSchedule] = useState<FreqPhase[]>([]);
+  const [amountPreset, setAmountPreset] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
   const [stepInciAnalysis, setStepInciAnalysis] = useState<InciAnalysis | undefined>(undefined);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -190,7 +205,12 @@ export function StepDialog({
     if (!catalogSearch.trim()) return catalogProducts.slice(0, 8);
     const q = catalogSearch.toLowerCase();
     return catalogProducts
-      .filter((p) => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q))
+      .filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          (p.brand ?? "").toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q),
+      )
       .slice(0, 20);
   }, [catalogProducts, catalogSearch]);
 
@@ -205,6 +225,9 @@ export function StepDialog({
       setStartWeek(step.startWeek ?? "");
       setIntroNote(step.introNote ?? "");
       setWhyThisProduct(step.whyThisProduct ?? "");
+      setSchedule(step.schedule ?? []);
+      setAmountPreset(step.amountPreset ?? "");
+      setVideoUrl(step.videoUrl ?? "");
       setStepInciAnalysis(step.inciAnalysis);
       setUploadError(null);
       setUploading(false);
@@ -221,6 +244,10 @@ export function StepDialog({
     setImageUrl(p.imageUrl ?? "");
     setPurchaseUrl(p.purchaseLinks?.[0]?.url ?? p.purchaseUrl ?? "");
     setStepInciAnalysis(p.inciAnalysis);
+    // Contenu réutilisable du catalogue → plus besoin de re-taper à chaque fois.
+    setWhyThisProduct(p.whyThisProduct ?? "");
+    setAmountPreset(p.amountPreset ?? "");
+    setSchedule(p.schedule ?? []);
     setCatalogSearch("");
     setShowCatalogPicker(false);
   }
@@ -259,7 +286,9 @@ export function StepDialog({
             {/* Catalog picker */}
             <div>
               <div className="mb-2 flex items-center justify-between">
-                <label className="text-sm font-medium text-foreground/80">Depuis le catalogue</label>
+                <label className="text-sm font-medium text-foreground/80">
+                  Depuis le catalogue
+                </label>
                 <button
                   type="button"
                   onClick={() => setShowCatalogPicker((v) => !v)}
@@ -303,7 +332,7 @@ export function StepDialog({
               </select>
             </div>
             {/* Raccourci nettoyage à l'eau */}
-            {(category === "Nettoyant" || category === "Démaquillant") ? (
+            {category === "Nettoyant" || category === "Démaquillant" ? (
               <button
                 type="button"
                 onClick={() => {
@@ -357,15 +386,37 @@ export function StepDialog({
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-foreground/80">Instructions</label>
+              <label className="mb-2 block text-sm font-medium text-foreground/80">
+                Instructions
+              </label>
               <textarea
-
-                autoComplete="off"                value={instructions}
+                autoComplete="off"
+                value={instructions}
                 onChange={(e) => setInstructions(e.target.value)}
                 placeholder="ex. Appliquer sur peau humide, masser doucement 30 s puis rincer."
                 rows={3}
                 className="w-full resize-none rounded-2xl border border-border bg-background p-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-foreground/80">Fréquence</label>
+              <ScheduleBuilder value={schedule} onChange={setSchedule} />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-foreground/80">Quantité</label>
+              <div className="flex items-center gap-4">
+                <select
+                  value={amountPreset}
+                  onChange={(e) => setAmountPreset(e.target.value)}
+                  className="h-11 flex-1 rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                >
+                  <option value="">— Choisir un visuel —</option>
+                  {QTY_PRESETS.map((q) => (
+                    <option key={q.key} value={q.key}>{q.label}</option>
+                  ))}
+                </select>
+                {amountPreset && <QuantityVisual preset={amountPreset} />}
+              </div>
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium text-foreground/80">
@@ -398,8 +449,8 @@ export function StepDialog({
                     <Upload className="h-4 w-4 shrink-0" />
                     Choisir une image
                     <input
-
-                      autoComplete="off"                      type="file"
+                      autoComplete="off"
+                      type="file"
                       accept="image/*"
                       className="sr-only"
                       onChange={(e) => {
@@ -422,6 +473,19 @@ export function StepDialog({
                 value={purchaseUrl}
                 onChange={(e) => setPurchaseUrl(e.target.value)}
                 placeholder="https://..."
+                className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-foreground/80">
+                Vidéo d'application{" "}
+                <span className="font-normal text-muted-foreground">(URL optionnelle)</span>
+              </label>
+              <input
+                autoComplete="off"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                placeholder="https://… (mp4, YouTube, Vimeo)"
                 className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -450,20 +514,26 @@ export function StepDialog({
                 <span className="text-xs text-muted-foreground">(optionnel)</span>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Semaine d'introduction</label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  Semaine d'introduction
+                </label>
                 <input
                   autoComplete="off"
                   type="number"
                   min={1}
                   max={52}
                   value={startWeek}
-                  onChange={(e) => setStartWeek(e.target.value === "" ? "" : Number(e.target.value))}
+                  onChange={(e) =>
+                    setStartWeek(e.target.value === "" ? "" : Number(e.target.value))
+                  }
                   placeholder="ex : 3"
                   className="h-9 w-28 rounded-xl border border-border bg-background px-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Note de progression</label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  Note de progression
+                </label>
                 <textarea
                   autoComplete="off"
                   value={introNote}
@@ -487,13 +557,20 @@ export function StepDialog({
                 instructions,
                 imageUrl: imageUrl.trim() || undefined,
                 purchaseUrl: purchaseUrl.trim() || undefined,
+                whyThisProduct: whyThisProduct.trim() || undefined,
+                amountPreset: amountPreset || undefined,
+                schedule: schedule.length ? schedule : undefined,
               })
             }
             /* introNote/startWeek are student-specific, not saved to catalogue */
             disabled={savingToCatalog || !product.trim()}
             className="mr-auto flex items-center gap-2 rounded-2xl border border-border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-50"
           >
-            {savingToCatalog ? <Loader2 className="h-4 w-4 animate-spin" /> : <Package className="h-4 w-4" />}
+            {savingToCatalog ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Package className="h-4 w-4" />
+            )}
             Catalogue
           </button>
           <button
@@ -514,6 +591,9 @@ export function StepDialog({
                 startWeek: startWeek !== "" ? startWeek : undefined,
                 introNote: introNote.trim() || undefined,
                 whyThisProduct: whyThisProduct.trim() || undefined,
+                amountPreset: amountPreset || undefined,
+                schedule: schedule.length ? schedule : undefined,
+                videoUrl: videoUrl.trim() || undefined,
                 inciAnalysis: stepInciAnalysis,
               })
             }

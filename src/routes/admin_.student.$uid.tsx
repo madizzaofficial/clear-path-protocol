@@ -3,15 +3,57 @@ import { createServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db, auth } from "@/lib/firebase";
-import { doc, getDoc, collection, query, where, getDocs, addDoc, updateDoc, deleteField, orderBy, setDoc, deleteDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteField,
+  orderBy,
+  setDoc,
+  deleteDoc,
+} from "firebase/firestore";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
-  ArrowLeft, Loader2, Check, Sun, Moon, ClipboardList,
-  BookOpen, ChevronDown, Lock, Play, ImageOff, MessageSquare, Send, AlertTriangle,
-  Ban, UserCheck, Pencil, X, ShoppingCart, Package, Activity, Flame, CalendarDays, History, Sparkles, Trash2,
+  ArrowLeft,
+  Loader2,
+  Check,
+  Sun,
+  Moon,
+  ClipboardList,
+  BookOpen,
+  ChevronDown,
+  Lock,
+  Play,
+  ImageOff,
+  MessageSquare,
+  Send,
+  AlertTriangle,
+  Ban,
+  UserCheck,
+  Pencil,
+  X,
+  ShoppingCart,
+  Package,
+  Activity,
+  Flame,
+  CalendarDays,
+  History,
+  Sparkles,
+  Trash2,
 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import {
   analyzeIntakeFn,
   analyzeIntakeFinalFn,
@@ -20,9 +62,18 @@ import {
   type AiAnalysisResult,
 } from "@/lib/ai-coach";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
 } from "recharts";
 import { course } from "@/lib/course-data";
+import { ProtocolTimeline } from "@/components/ProtocolTimeline";
+import type { RoutinePhase } from "@/lib/routine-phases";
 
 // ── Server function — delete Firebase Auth user ───────────────────────────────
 // callerToken: Firebase ID token of the admin making the request.
@@ -38,15 +89,16 @@ const deleteAuthUserFn = createServerFn({ method: "POST" })
     if (!encoded) throw new Error("FIREBASE_SERVICE_ACCOUNT manquant");
 
     const { getApps, initializeApp, cert } = await import("firebase-admin/app");
-    const { getAuth }      = await import("firebase-admin/auth");
+    const { getAuth } = await import("firebase-admin/auth");
     const { getFirestore } = await import("firebase-admin/firestore");
 
     // Named "admin" app — same as firebase-admin.ts, safe against hot-reload double-init
-    const app = getApps().find((a) => a.name === "admin")
-      ?? initializeApp(
-           { credential: cert(JSON.parse(Buffer.from(encoded, "base64").toString("utf8"))) },
-           "admin"
-         );
+    const app =
+      getApps().find((a) => a.name === "admin") ??
+      initializeApp(
+        { credential: cert(JSON.parse(Buffer.from(encoded, "base64").toString("utf8"))) },
+        "admin",
+      );
 
     // 1. Verify caller identity
     let callerUid: string;
@@ -131,6 +183,8 @@ type StudentProfile = {
   lastSeen?: number;
   disabled?: boolean;
   adminCreated?: boolean;
+  productOrderedAt?: number;
+  productReceivedAt?: number;
 };
 
 type IntakeAnswers = {
@@ -169,15 +223,24 @@ type PhotoEntry = {
 const TOTAL_LESSONS = course.chapters.reduce((sum, ch) => sum + ch.lessons.length, 0);
 
 const SKIN_TYPE_LABELS: Record<string, string> = {
-  normale: "Normale", grasse: "Grasse", seche: "Sèche", mixte: "Mixte", sensible: "Sensible",
+  normale: "Normale",
+  grasse: "Grasse",
+  seche: "Sèche",
+  mixte: "Mixte",
+  sensible: "Sensible",
 };
 
 const ACNE_TYPE_LABELS: Record<string, string> = {
-  comedons: "Comédons", papules: "Papules / Pustules", microkystes: "Microkystes", kystes: "Kystes / Nodules",
+  comedons: "Comédons",
+  papules: "Papules / Pustules",
+  microkystes: "Microkystes",
+  kystes: "Kystes / Nodules",
 };
 
 const INTENSITY_LABELS: Record<string, string> = {
-  legere: "Légère", moderee: "Modérée", severe: "Sévère",
+  legere: "Légère",
+  moderee: "Modérée",
+  severe: "Sévère",
 };
 
 function formatDays(enrolledAt: number): string {
@@ -189,10 +252,21 @@ function formatDays(enrolledAt: number): string {
 }
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  return new Date(dateStr).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
 
-type CoachNote = { id: string; note: string; authorName: string; authorUid: string; createdAt: string; isFromStudent?: boolean };
+type CoachNote = {
+  id: string;
+  note: string;
+  authorName: string;
+  authorUid: string;
+  createdAt: string;
+  isFromStudent?: boolean;
+};
 
 type AdminSkinState = {
   uid: string;
@@ -218,6 +292,7 @@ function StudentPage() {
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [intake, setIntake] = useState<IntakeAnswers | null>(null);
   const [routine, setRoutine] = useState<Routine | null>(null);
+  const [routinePhases, setRoutinePhases] = useState<RoutinePhase[]>([]);
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [photos, setPhotos] = useState<PhotoEntry[]>([]);
   const [reports, setReports] = useState<Record<string, "irritant" | "allergie">>({});
@@ -238,13 +313,31 @@ function StudentPage() {
   const [editingIntake, setEditingIntake] = useState(false);
   const [intakeDraft, setIntakeDraft] = useState<IntakeAnswers>({});
   const [savingIntake, setSavingIntake] = useState(false);
-  const [checkins28Admin, setCheckins28Admin] = useState<Record<string, { am: string[]; pm: string[] }>>({});
+  const [checkins28Admin, setCheckins28Admin] = useState<
+    Record<string, { am: string[]; pm: string[] }>
+  >({});
   const [editingAdminSkinState, setEditingAdminSkinState] = useState(false);
   const [editingAdminCallDate, setEditingAdminCallDate] = useState(false);
   const [routineStartedAt, setRoutineStartedAt] = useState<number | null>(null);
   const [editingStartDate, setEditingStartDate] = useState(false);
   const [startDateInput, setStartDateInput] = useState("");
   const [savingStartDate, setSavingStartDate] = useState(false);
+  // Édition nom/prénom du prospect (champ displayName sur users)
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState("");
+  const [savingName, setSavingName] = useState(false);
+  // Logistique produits (commande / réception) — dates éditables sur le doc users
+  const [productOrderedAt, setProductOrderedAt] = useState<number | null>(null);
+  const [productReceivedAt, setProductReceivedAt] = useState<number | null>(null);
+  const [editingLogistics, setEditingLogistics] = useState(false);
+  const [orderDateInput, setOrderDateInput] = useState("");
+  const [receivedDateInput, setReceivedDateInput] = useState("");
+  const [savingLogistics, setSavingLogistics] = useState(false);
+  // Flag intolérance en 1 clic (écrit dans routine_reports, réutilisé par le dashboard)
+  const [flagOpen, setFlagOpen] = useState(false);
+  const [flagStepId, setFlagStepId] = useState("");
+  const [flagType, setFlagType] = useState<"irritant" | "allergie">("irritant");
+  const [savingFlag, setSavingFlag] = useState(false);
   const [skinStateHistory, setSkinStateHistory] = useState<SkinStateHistoryEntry[]>([]);
   const [routineHistory, setRoutineHistory] = useState<RoutineHistoryEntry[]>([]);
   const { tab: initialTab } = Route.useSearch();
@@ -261,7 +354,7 @@ function StudentPage() {
   const [progressAiFinal, setProgressAiFinal] = useState("");
   const [selectedPhotoEntries, setSelectedPhotoEntries] = useState<string[]>([]);
   const [progressAiContext, setProgressAiContext] = useState("");
-  const [tab, setTab] = useState<Tab>(initialTab ?? "profil");
+  const [tab, setTab] = useState<Tab>(initialTab ?? "suivi");
   const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -273,7 +366,16 @@ function StudentPage() {
     if (!isAdmin || !uid) return;
     async function load() {
       setLoading(true);
-      const [profileSnap, intakeSnap, routineSnap, progressSnap, photosSnap, notesSnap, reportsSnap, skinStateSnap] = await Promise.all([
+      const [
+        profileSnap,
+        intakeSnap,
+        routineSnap,
+        progressSnap,
+        photosSnap,
+        notesSnap,
+        reportsSnap,
+        skinStateSnap,
+      ] = await Promise.all([
         getDoc(doc(db, "users", uid)),
         getDoc(doc(db, "intake_answers", uid)),
         getDoc(doc(db, "routines", uid)),
@@ -286,25 +388,40 @@ function StudentPage() {
       const profileData = profileSnap.exists() ? (profileSnap.data() as StudentProfile) : null;
       setProfile(profileData);
       if (profileSnap.exists()) {
-        const rsa = profileSnap.data().routineStartedAt as number | undefined;
+        const pd = profileSnap.data();
+        const rsa = pd.routineStartedAt as number | undefined;
         if (rsa) {
           setRoutineStartedAt(rsa);
           setStartDateInput(new Date(rsa).toISOString().slice(0, 10));
+        }
+        const poa = pd.productOrderedAt as number | undefined;
+        if (poa) {
+          setProductOrderedAt(poa);
+          setOrderDateInput(new Date(poa).toISOString().slice(0, 10));
+        }
+        const pra = pd.productReceivedAt as number | undefined;
+        if (pra) {
+          setProductReceivedAt(pra);
+          setReceivedDateInput(new Date(pra).toISOString().slice(0, 10));
         }
       }
       setIntake(intakeSnap.exists() ? (intakeSnap.data() as IntakeAnswers) : null);
       setRoutine(
         routineSnap.exists()
           ? { am: routineSnap.data().am ?? [], pm: routineSnap.data().pm ?? [] }
-          : null
+          : null,
       );
-      setCompletedLessons(progressSnap.exists() ? (progressSnap.data().completedLessons ?? []) : []);
+      setRoutinePhases(routineSnap.exists() ? (routineSnap.data().phases ?? []) : []);
+      setCompletedLessons(
+        progressSnap.exists() ? (progressSnap.data().completedLessons ?? []) : [],
+      );
       const sorted = photosSnap.docs
         .map((d) => d.data() as PhotoEntry)
         .sort((a, b) => b.date.localeCompare(a.date));
       setPhotos(sorted);
-      setNotes(notesSnap.docs.map((d) => ({ id: d.id, ...d.data() } as CoachNote)));
-      if (reportsSnap.exists()) setReports(reportsSnap.data() as Record<string, "irritant" | "allergie">);
+      setNotes(notesSnap.docs.map((d) => ({ id: d.id, ...d.data() }) as CoachNote));
+      if (reportsSnap.exists())
+        setReports(reportsSnap.data() as Record<string, "irritant" | "allergie">);
       if (skinStateSnap.exists()) {
         const ss = skinStateSnap.data() as AdminSkinState;
         setSkinState(ss);
@@ -325,21 +442,38 @@ function StudentPage() {
       }
       const today = new Date();
       const todayKey = today.toISOString().slice(0, 10);
-      const start28 = new Date(today); start28.setDate(today.getDate() - 27);
+      const start28 = new Date(today);
+      start28.setDate(today.getDate() - 27);
       const start28Key = start28.toISOString().slice(0, 10);
       const checkinsSnap = await getDocs(
-        query(collection(db, "routine_checkins", uid, "days"), where("__name__", ">=", start28Key), where("__name__", "<=", todayKey)),
+        query(
+          collection(db, "routine_checkins", uid, "days"),
+          where("__name__", ">=", start28Key),
+          where("__name__", "<=", todayKey),
+        ),
       ).catch(() => null);
       const checkins28map: Record<string, { am: string[]; pm: string[] }> = {};
-      checkinsSnap?.forEach((d: any) => { checkins28map[d.id] = d.data() as { am: string[]; pm: string[] }; });
+      checkinsSnap?.forEach((d: any) => {
+        checkins28map[d.id] = d.data() as { am: string[]; pm: string[] };
+      });
       setCheckins28Admin(checkins28map);
 
       // Load history subcollections (non-blocking)
-      getDocs(query(collection(db, "users", uid, "skin_state_history"), orderBy("timestamp", "asc")))
-        .then((snap) => setSkinStateHistory(snap.docs.map((d) => ({ id: d.id, ...d.data() } as SkinStateHistoryEntry))))
+      getDocs(
+        query(collection(db, "users", uid, "skin_state_history"), orderBy("timestamp", "asc")),
+      )
+        .then((snap) =>
+          setSkinStateHistory(
+            snap.docs.map((d) => ({ id: d.id, ...d.data() }) as SkinStateHistoryEntry),
+          ),
+        )
         .catch(() => {});
       getDocs(query(collection(db, "users", uid, "routine_history"), orderBy("timestamp", "desc")))
-        .then((snap) => setRoutineHistory(snap.docs.map((d) => ({ id: d.id, ...d.data() } as RoutineHistoryEntry))))
+        .then((snap) =>
+          setRoutineHistory(
+            snap.docs.map((d) => ({ id: d.id, ...d.data() }) as RoutineHistoryEntry),
+          ),
+        )
         .catch(() => {});
 
       const initial = Object.fromEntries(course.chapters.map((c) => [c.id, true]));
@@ -433,6 +567,22 @@ function StudentPage() {
     }
   }
 
+  async function saveName() {
+    const name = nameInput.trim();
+    if (!name || savingName) return;
+    setSavingName(true);
+    try {
+      await updateDoc(doc(db, "users", uid), { displayName: name });
+      setProfile((prev) => (prev ? { ...prev, displayName: name } : prev));
+      setEditingName(false);
+      toast.success("Nom mis à jour.");
+    } catch {
+      toast.error("Impossible de mettre à jour le nom.");
+    } finally {
+      setSavingName(false);
+    }
+  }
+
   async function saveStartDate() {
     const ts = new Date(startDateInput).getTime();
     if (isNaN(ts)) return;
@@ -449,13 +599,52 @@ function StudentPage() {
     }
   }
 
+  async function saveLogistics() {
+    if (savingLogistics) return;
+    setSavingLogistics(true);
+    try {
+      const orderTs = orderDateInput ? new Date(orderDateInput).getTime() : NaN;
+      const recvTs = receivedDateInput ? new Date(receivedDateInput).getTime() : NaN;
+      const orderOk = !isNaN(orderTs);
+      const recvOk = !isNaN(recvTs);
+      await updateDoc(doc(db, "users", uid), {
+        productOrderedAt: orderOk ? orderTs : deleteField(),
+        productReceivedAt: recvOk ? recvTs : deleteField(),
+      });
+      setProductOrderedAt(orderOk ? orderTs : null);
+      setProductReceivedAt(recvOk ? recvTs : null);
+      setEditingLogistics(false);
+      toast.success("Dates produits mises à jour.");
+    } catch {
+      toast.error("Impossible d'enregistrer les dates.");
+    } finally {
+      setSavingLogistics(false);
+    }
+  }
+
+  async function flagIntolerance() {
+    if (!flagStepId || savingFlag) return;
+    setSavingFlag(true);
+    try {
+      await setDoc(doc(db, "routine_reports", uid), { [flagStepId]: flagType }, { merge: true });
+      setReports((prev) => ({ ...prev, [flagStepId]: flagType }));
+      setFlagOpen(false);
+      setFlagStepId("");
+      toast.success("Intolérance signalée.");
+    } catch {
+      toast.error("Impossible d'enregistrer le signalement.");
+    } finally {
+      setSavingFlag(false);
+    }
+  }
+
   async function toggleDisabled() {
     if (!profile || isDisabling) return;
     const newDisabled = !profile.disabled;
     setIsDisabling(true);
     try {
       await updateDoc(doc(db, "users", uid), { disabled: newDisabled });
-      setProfile((prev) => prev ? { ...prev, disabled: newDisabled } : prev);
+      setProfile((prev) => (prev ? { ...prev, disabled: newDisabled } : prev));
       toast.success(newDisabled ? "Compte désactivé." : "Compte réactivé.");
     } catch {
       toast.error("Impossible de modifier le compte.");
@@ -526,7 +715,7 @@ function StudentPage() {
             p.left ? { url: p.left, date: p.date, label: "Profil gauche" } : null,
             p.right ? { url: p.right, date: p.date, label: "Profil droit" } : null,
           ] as ({ url: string; date: string; label: string } | null)[]
-        ).filter((x): x is { url: string; date: string; label: string } => x !== null)
+        ).filter((x): x is { url: string; date: string; label: string } => x !== null),
       );
   }
 
@@ -581,7 +770,12 @@ function StudentPage() {
           adminNote: intakeAiAdminNote,
         },
       });
-      const result: AiAnalysisResult = { draft: intakeAiDraft, adminNote: intakeAiAdminNote, final: res.text, analyzedAt: Date.now() };
+      const result: AiAnalysisResult = {
+        draft: intakeAiDraft,
+        adminNote: intakeAiAdminNote,
+        final: res.text,
+        analyzedAt: Date.now(),
+      };
       await setDoc(doc(db, "intake_answers", uid), { aiAnalysis: result }, { merge: true });
       setIntakeAiFinal(res.text);
       setIntakeAiStep("final");
@@ -622,7 +816,12 @@ function StudentPage() {
           adminNote: progressAiAdminNote,
         },
       });
-      const result: AiAnalysisResult = { draft: progressAiDraft, adminNote: progressAiAdminNote, final: res.text, analyzedAt: Date.now() };
+      const result: AiAnalysisResult = {
+        draft: progressAiDraft,
+        adminNote: progressAiAdminNote,
+        final: res.text,
+        analyzedAt: Date.now(),
+      };
       await setDoc(doc(db, "admin_skin_state", uid), { aiProgress: result }, { merge: true });
       setProgressAiFinal(res.text);
       setProgressAiStep("final");
@@ -664,9 +863,11 @@ function StudentPage() {
         inflammationPct: clean.inflammationPct ?? 0,
         barrierPct: clean.barrierPct ?? 0,
         acnePct: clean.acnePct ?? 0,
-      }).then((ref) => {
-        setSkinStateHistory((prev) => [...prev, { ...historyEntry, id: ref.id }]);
-      }).catch(() => {});
+      })
+        .then((ref) => {
+          setSkinStateHistory((prev) => [...prev, { ...historyEntry, id: ref.id }]);
+        })
+        .catch(() => {});
 
       toast.success("État & direction sauvegardés.");
     } catch {
@@ -693,15 +894,64 @@ function StudentPage() {
             {initials}
           </div>
           <div className="flex-1">
-            <h1 className="font-display text-3xl font-semibold tracking-tight">
-              {profile?.displayName ?? "—"}
-            </h1>
+            {editingName ? (
+              <div className="flex items-center gap-2">
+                <input
+                  autoFocus
+                  value={nameInput}
+                  onChange={(e) => setNameInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") saveName();
+                    if (e.key === "Escape") setEditingName(false);
+                  }}
+                  placeholder="Nom et prénom"
+                  className="w-full max-w-xs rounded-lg border border-input bg-background px-3 py-1.5 font-display text-2xl font-semibold tracking-tight outline-none focus:ring-2 focus:ring-primary"
+                />
+                <button
+                  onClick={saveName}
+                  disabled={savingName || !nameInput.trim()}
+                  className="rounded-full bg-primary p-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+                  aria-label="Enregistrer le nom"
+                >
+                  {savingName ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Check className="h-4 w-4" />
+                  )}
+                </button>
+                <button
+                  onClick={() => setEditingName(false)}
+                  className="rounded-full bg-muted p-2 text-muted-foreground transition-colors hover:bg-muted/80"
+                  aria-label="Annuler"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <h1 className="font-display text-3xl font-semibold tracking-tight">
+                  {profile?.displayName ?? "—"}
+                </h1>
+                <button
+                  onClick={() => {
+                    setNameInput(profile?.displayName ?? "");
+                    setEditingName(true);
+                  }}
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                  aria-label="Modifier le nom"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+              </div>
+            )}
             <p className="mt-1 text-muted-foreground">{profile?.email}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {profile?.enrolledAt && (
                 <Chip>{formatDays(profile.enrolledAt)} dans le protocole</Chip>
               )}
-              <Chip>{done}/{TOTAL_LESSONS} leçons · {pct}%</Chip>
+              <Chip>
+                {done}/{TOTAL_LESSONS} leçons · {pct}%
+              </Chip>
               {profile?.lastSeen && (
                 <Chip>Vu {formatDate(new Date(profile.lastSeen).toISOString().split("T")[0])}</Chip>
               )}
@@ -739,13 +989,21 @@ function StudentPage() {
                 disabled={savingStartDate}
                 className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
               >
-                {savingStartDate ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+                {savingStartDate ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Play className="h-4 w-4" />
+                )}
                 A commencé sa routine
               </button>
             ) : (
               <div className="flex items-center gap-1.5 rounded-full bg-primary-soft px-4 py-2 text-sm font-medium text-primary">
                 <Check className="h-4 w-4" />
-                Routine démarrée le {new Date(routineStartedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                Routine démarrée le{" "}
+                {new Date(routineStartedAt).toLocaleDateString("fr-FR", {
+                  day: "numeric",
+                  month: "short",
+                })}
               </div>
             )}
             <Link
@@ -754,6 +1012,12 @@ function StudentPage() {
               className="flex items-center gap-2 rounded-full bg-primary-soft px-4 py-2 text-sm font-medium text-foreground hover:bg-primary-muted"
             >
               <ClipboardList className="h-4 w-4" /> Modifier la routine
+            </Link>
+            <Link
+              to="/admin/products"
+              className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
+            >
+              <Package className="h-4 w-4" /> Catalogue
             </Link>
           </div>
         </div>
@@ -768,7 +1032,9 @@ function StudentPage() {
                 key={t.id}
                 onClick={() => setTab(t.id)}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-2 py-2.5 text-sm font-medium transition-colors sm:px-4 ${
-                  active ? "bg-background text-foreground shadow-soft" : "text-muted-foreground hover:text-foreground"
+                  active
+                    ? "bg-background text-foreground shadow-soft"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Icon className="h-4 w-4 shrink-0" />
@@ -779,455 +1045,909 @@ function StudentPage() {
         </div>
 
         {/* ── Suivi ──────────────────────────────────────────────────────────── */}
-        {tab === "suivi" && (() => {
-          const startTs = routineStartedAt ?? profile?.enrolledAt ?? null;
-          const dayCount = startTs ? Math.max(1, Math.floor((Date.now() - startTs) / 86_400_000) + 1) : 1;
-          const week = Math.min(12, Math.ceil(dayCount / 7));
-          const totalSteps = (routine?.am?.length ?? 0) + (routine?.pm?.length ?? 0);
-          const todayKey2 = new Date().toISOString().slice(0, 10);
-          const todayCheckins = checkins28Admin[todayKey2];
-          const amDoneAdmin = todayCheckins?.am?.length ?? 0;
-          const pmDoneAdmin = todayCheckins?.pm?.length ?? 0;
-          const amStepsAdmin = routine?.am?.length ?? 0;
-          const pmStepsAdmin = routine?.pm?.length ?? 0;
+        {tab === "suivi" &&
+          (() => {
+            const startTs = routineStartedAt ?? profile?.enrolledAt ?? null;
+            const dayCount = startTs
+              ? Math.max(1, Math.floor((Date.now() - startTs) / 86_400_000) + 1)
+              : 1;
+            const week = Math.min(12, Math.ceil(dayCount / 7));
+            const totalSteps = (routine?.am?.length ?? 0) + (routine?.pm?.length ?? 0);
+            const todayKey2 = new Date().toISOString().slice(0, 10);
+            const todayCheckins = checkins28Admin[todayKey2];
+            const amDoneAdmin = todayCheckins?.am?.length ?? 0;
+            const pmDoneAdmin = todayCheckins?.pm?.length ?? 0;
+            const amStepsAdmin = routine?.am?.length ?? 0;
+            const pmStepsAdmin = routine?.pm?.length ?? 0;
 
-          let adherenceDays = 0, adminStreak = 0, streakBroken = false;
-          const todayAdm = new Date();
-          for (let i = 0; i < 28; i++) {
-            const d = new Date(todayAdm); d.setDate(todayAdm.getDate() - i);
-            const key = d.toISOString().slice(0, 10);
-            const c = checkins28Admin[key];
-            const isDone = totalSteps > 0 && c && (c.am?.length ?? 0) + (c.pm?.length ?? 0) >= totalSteps;
-            if (isDone) { adherenceDays++; if (!streakBroken) adminStreak++; }
-            else if (i > 0) { streakBroken = true; }
-          }
-          const adherencePct = totalSteps > 0 ? Math.round((adherenceDays / 28) * 100) : 0;
+            let adherenceDays = 0,
+              adminStreak = 0,
+              streakBroken = false;
+            const todayAdm = new Date();
+            for (let i = 0; i < 28; i++) {
+              const d = new Date(todayAdm);
+              d.setDate(todayAdm.getDate() - i);
+              const key = d.toISOString().slice(0, 10);
+              const c = checkins28Admin[key];
+              const isDone =
+                totalSteps > 0 && c && (c.am?.length ?? 0) + (c.pm?.length ?? 0) >= totalSteps;
+              if (isDone) {
+                adherenceDays++;
+                if (!streakBroken) adminStreak++;
+              } else if (i > 0) {
+                streakBroken = true;
+              }
+            }
+            const adherencePct = totalSteps > 0 ? Math.round((adherenceDays / 28) * 100) : 0;
 
-          const infPct = skinState?.inflammationPct ?? 0;
-          const barPct = skinState?.barrierPct ?? 0;
-          const acnPct = skinState?.acnePct ?? 0;
-          const infDesc = infPct >= 67 ? "Active" : infPct >= 34 ? "Modérée" : "Sous contrôle";
-          const barDesc = barPct >= 67 ? "Compromise" : barPct >= 34 ? "En cours" : "Excellente";
-          const acnDesc = acnPct >= 67 ? "Active" : acnPct >= 34 ? "Modérée" : "Contrôlée";
+            const infPct = skinState?.inflammationPct ?? 0;
+            const barPct = skinState?.barrierPct ?? 0;
+            const acnPct = skinState?.acnePct ?? 0;
+            const infDesc = infPct >= 67 ? "Active" : infPct >= 34 ? "Modérée" : "Sous contrôle";
+            const barDesc = barPct >= 67 ? "Compromise" : barPct >= 34 ? "En cours" : "Excellente";
+            const acnDesc = acnPct >= 67 ? "Active" : acnPct >= 34 ? "Modérée" : "Contrôlée";
 
-          return (
-            <div className="space-y-6">
-              {/* KPI chips */}
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                {[
-                  { label: "Jour", value: `J+${dayCount}` },
-                  { label: "Semaine", value: `S${week}/12` },
-                  { label: "Adhérence 28j", value: `${adherencePct}%` },
-                  { label: "Streak", value: adminStreak > 0 ? `🔥 ${adminStreak}j` : "—" },
-                ].map(({ label, value }) => (
-                  <div key={label} className="rounded-2xl border border-border/60 bg-card p-4 text-center shadow-soft">
-                    <p className="font-display text-2xl font-semibold">{value}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">{label}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Début de routine */}
-              <div className="rounded-2xl border border-border/60 bg-card p-4 shadow-soft">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <CalendarDays className="h-4 w-4 text-primary" />
-                    <div>
-                      <p className="text-sm font-semibold">Début de la routine</p>
-                      <p className="text-xs text-muted-foreground">
-                        {routineStartedAt
-                          ? `Démarrée le ${new Date(routineStartedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} · Semaine ${week}`
-                          : "Non renseigné — les semaines sont calculées depuis l'inscription"}
-                      </p>
+            return (
+              <div className="space-y-6">
+                {/* KPI chips */}
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  {[
+                    { label: "Jour", value: `J+${dayCount}` },
+                    { label: "Semaine", value: `S${week}/12` },
+                    { label: "Adhérence 28j", value: `${adherencePct}%` },
+                    { label: "Streak", value: adminStreak > 0 ? `🔥 ${adminStreak}j` : "—" },
+                  ].map(({ label, value }) => (
+                    <div
+                      key={label}
+                      className="rounded-2xl border border-border/60 bg-card p-4 text-center shadow-soft"
+                    >
+                      <p className="font-display text-2xl font-semibold">{value}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{label}</p>
                     </div>
-                  </div>
-                  <button
-                    onClick={() => setEditingStartDate((v) => !v)}
-                    className="shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-muted"
-                  >
-                    {editingStartDate ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
-                  </button>
+                  ))}
                 </div>
-                {editingStartDate && (
-                  <div className="mt-3 flex items-center gap-2 border-t border-border/60 pt-3">
-                    <input
-                      type="date"
-                      value={startDateInput}
-                      onChange={(e) => setStartDateInput(e.target.value)}
-                      className="flex-1 rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                    />
-                    <button
-                      onClick={saveStartDate}
-                      disabled={savingStartDate}
-                      className="flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
-                    >
-                      {savingStartDate ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
-                      Enregistrer
-                    </button>
-                  </div>
-                )}
-              </div>
 
-              {/* Row 2: Prochain coaching + État de peau */}
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* Prochain point coaching */}
-                <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-                  <div className="mb-4 flex items-center justify-between">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Prochain point coaching</p>
+                {/* Début de routine */}
+                <div className="rounded-2xl border border-border/60 bg-card p-4 shadow-soft">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <CalendarDays className="h-4 w-4 text-primary" />
+                      <div>
+                        <p className="text-sm font-semibold">Début de la routine</p>
+                        <p className="text-xs text-muted-foreground">
+                          {routineStartedAt
+                            ? `Démarrée le ${new Date(routineStartedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} · Semaine ${week}`
+                            : "Non renseigné — les semaines sont calculées depuis l'inscription"}
+                        </p>
+                      </div>
+                    </div>
                     <button
-                      onClick={() => { setEditingAdminCallDate((v) => !v); }}
-                      className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
+                      onClick={() => setEditingStartDate((v) => !v)}
+                      className="shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-muted"
                     >
-                      {editingAdminCallDate ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+                      {editingStartDate ? (
+                        <X className="h-4 w-4" />
+                      ) : (
+                        <Pencil className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
-                  {editingAdminCallDate ? (
-                    <div className="space-y-3">
-                      <div className="flex gap-3">
-                        <input
-                          type="date"
-                          value={skinStateDraft.nextCallDate ?? ""}
-                          onChange={(e) => setSkinStateDraft((d) => ({ ...d, nextCallDate: e.target.value }))}
-                          className="flex-1 rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none focus:border-primary"
-                        />
-                        <input
-                          type="text"
-                          placeholder="18h"
-                          value={skinStateDraft.nextCallTime ?? ""}
-                          onChange={(e) => setSkinStateDraft((d) => ({ ...d, nextCallTime: e.target.value }))}
-                          className="w-20 rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none focus:border-primary"
-                        />
-                      </div>
+                  {editingStartDate && (
+                    <div className="mt-3 flex items-center gap-2 border-t border-border/60 pt-3">
+                      <input
+                        type="date"
+                        value={startDateInput}
+                        onChange={(e) => setStartDateInput(e.target.value)}
+                        className="flex-1 rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                      />
                       <button
-                        onClick={() => { saveSkinState(); setEditingAdminCallDate(false); }}
-                        disabled={savingSkinState}
-                        className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+                        onClick={saveStartDate}
+                        disabled={savingStartDate}
+                        className="flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
                       >
-                        {savingSkinState ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                        {savingStartDate ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Check className="h-3.5 w-3.5" />
+                        )}
                         Enregistrer
                       </button>
                     </div>
-                  ) : skinStateDraft.nextCallDate ? (
-                    <div>
-                      <p className="font-semibold capitalize">
-                        {new Date(skinStateDraft.nextCallDate).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
-                      </p>
-                      {skinStateDraft.nextCallTime && (
-                        <p className="text-sm text-muted-foreground">à {skinStateDraft.nextCallTime}</p>
-                      )}
-                      {(() => {
-                        const now = new Date(); now.setHours(0,0,0,0);
-                        const t = new Date(skinStateDraft.nextCallDate); t.setHours(0,0,0,0);
-                        const diff = Math.round((t.getTime() - now.getTime()) / 86_400_000);
-                        return (
-                          <p className={`mt-1 text-sm font-semibold ${diff <= 0 ? "text-primary" : diff <= 3 ? "text-amber-600" : "text-muted-foreground"}`}>
-                            {diff < 0 ? "Passé" : diff === 0 ? "Aujourd'hui !" : diff === 1 ? "Demain" : `Dans ${diff} jours`}
-                          </p>
-                        );
-                      })()}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Aucun appel planifié.</p>
                   )}
                 </div>
 
-                {/* État de peau — CircleMetric + inline edit */}
-                <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-                  <div className="mb-4 flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">État de peau</p>
-                      {skinState?.updatedAt && (
-                        <p className="text-[10px] text-muted-foreground/50 mt-0.5">
-                          mis à jour {new Date(skinState.updatedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
-                        </p>
-                      )}
+                {/* Parcours & commande produits */}
+                <div className="rounded-2xl border border-border/60 bg-card p-4 shadow-soft">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <ShoppingCart className="h-4 w-4 text-primary" />
+                      <p className="text-sm font-semibold">Parcours &amp; commande</p>
                     </div>
                     <button
-                      onClick={() => setEditingAdminSkinState((v) => !v)}
-                      className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
+                      onClick={() => setEditingLogistics((v) => !v)}
+                      className="shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-muted"
                     >
-                      {editingAdminSkinState ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+                      {editingLogistics ? (
+                        <X className="h-4 w-4" />
+                      ) : (
+                        <Pencil className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
-                  {editingAdminSkinState ? (
-                    <div className="space-y-4">
-                      {([
-                        { key: "inflammationPct" as const, label: "🔥 Inflammation", hint: "0 = absente → 100 = sévère" },
-                        { key: "barrierPct" as const, label: "🧱 Barrière cutanée", hint: "0 = excellente → 100 = compromise" },
-                        { key: "acnePct" as const, label: "🧴 Acné", hint: "0 = contrôlée → 100 = sévère" },
-                      ]).map(({ key, label, hint }) => (
-                        <div key={key}>
-                          <div className="mb-1 flex items-center justify-between">
-                            <label className="text-sm font-medium">{label}</label>
-                            <span className="text-xs font-semibold tabular-nums text-muted-foreground">{skinStateDraft[key] ?? 50}%</span>
-                          </div>
-                          <input
-                            type="range" min={0} max={100} step={5}
-                            value={skinStateDraft[key] ?? 50}
-                            onChange={(e) => setSkinStateDraft((d) => ({ ...d, [key]: parseInt(e.target.value) }))}
-                            className="w-full cursor-pointer accent-primary"
-                          />
-                          <p className="mt-0.5 text-[10px] text-muted-foreground/60">{hint}</p>
-                        </div>
-                      ))}
-                      <div>
-                        <label className="mb-1.5 block text-sm font-medium">Phase</label>
-                        <div className="flex flex-wrap gap-2">
-                          {(["reset", "stabilisation", "purge", "amélioration"] as const).map((v) => (
-                            <button key={v} type="button"
-                              onClick={() => setSkinStateDraft((d) => ({ ...d, currentPhase: v }))}
-                              className={`rounded-xl px-3 py-1.5 text-xs font-medium capitalize transition-colors ${skinStateDraft.currentPhase === v ? "bg-primary text-primary-foreground" : "border border-border bg-muted/30 hover:bg-muted"}`}
-                            >{v}</button>
-                          ))}
-                        </div>
+                  {routine && (
+                    <div className="mt-4 border-t border-border/60 pt-4">
+                      <ProtocolTimeline startTs={startTs} phases={routinePhases} />
+                    </div>
+                  )}
+                  <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    {[
+                      { label: "Inscrit", ts: profile?.enrolledAt ?? null },
+                      { label: "Commandé", ts: productOrderedAt },
+                      { label: "Reçu", ts: productReceivedAt },
+                      { label: "Routine démarrée", ts: routineStartedAt },
+                    ].map(({ label, ts }) => (
+                      <div
+                        key={label}
+                        className="rounded-xl border border-border/50 bg-muted/20 px-3 py-2"
+                      >
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                          {label}
+                        </p>
+                        <p
+                          className={`mt-0.5 text-sm font-medium ${ts ? "" : "text-muted-foreground/40"}`}
+                        >
+                          {ts
+                            ? new Date(ts).toLocaleDateString("fr-FR", {
+                                day: "numeric",
+                                month: "short",
+                                year: "2-digit",
+                              })
+                            : "—"}
+                        </p>
                       </div>
+                    ))}
+                  </div>
+                  {editingLogistics && (
+                    <div className="mt-3 flex flex-wrap items-end gap-3 border-t border-border/60 pt-3">
                       <div>
-                        <label className="mb-1.5 block text-sm font-medium">Phrase du coach</label>
-                        <textarea
-                          autoComplete="off"
-                          value={skinStateDraft.coachPhrase ?? ""}
-                          onChange={(e) => setSkinStateDraft((d) => ({ ...d, coachPhrase: e.target.value }))}
-                          rows={2}
-                          className="w-full resize-none rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none focus:border-primary"
+                        <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                          Commande produits
+                        </label>
+                        <input
+                          type="date"
+                          value={orderDateInput}
+                          onChange={(e) => setOrderDateInput(e.target.value)}
+                          className="rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                         />
                       </div>
-                      <div className="flex justify-end">
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                          Réception produits
+                        </label>
+                        <input
+                          type="date"
+                          value={receivedDateInput}
+                          onChange={(e) => setReceivedDateInput(e.target.value)}
+                          className="rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                        />
+                      </div>
+                      <button
+                        onClick={saveLogistics}
+                        disabled={savingLogistics}
+                        className="flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+                      >
+                        {savingLogistics ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Check className="h-3.5 w-3.5" />
+                        )}
+                        Enregistrer
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Intolérances signalées */}
+                <div className="rounded-2xl border border-border/60 bg-card p-4 shadow-soft">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <Flame className="h-4 w-4 text-orange-500" />
+                      <p className="text-sm font-semibold">Intolérances signalées</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setFlagStepId("");
+                        setFlagType("irritant");
+                        setFlagOpen(true);
+                      }}
+                      disabled={(routine?.am?.length ?? 0) + (routine?.pm?.length ?? 0) === 0}
+                      className="flex items-center gap-1.5 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-semibold text-orange-700 transition-colors hover:bg-orange-200 disabled:opacity-40 dark:bg-orange-950/40 dark:text-orange-400"
+                    >
+                      <AlertTriangle className="h-3.5 w-3.5" /> Signaler
+                    </button>
+                  </div>
+                  {Object.keys(reports).length > 0 ? (
+                    <div className="mt-3 space-y-2">
+                      {Object.entries(reports).map(([stepId, type]) => {
+                        const step = [...(routine?.am ?? []), ...(routine?.pm ?? [])].find(
+                          (s) => s.id === stepId,
+                        );
+                        return (
+                          <div
+                            key={stepId}
+                            className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-muted/20 px-3 py-2"
+                          >
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-medium">
+                                {step?.product ?? "Produit retiré de la routine"}
+                              </p>
+                              <span
+                                className={`text-xs font-semibold ${type === "allergie" ? "text-red-600 dark:text-red-400" : "text-orange-600 dark:text-orange-400"}`}
+                              >
+                                {type === "allergie" ? "Allergie" : "Irritant"}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => resolveReport(stepId)}
+                              disabled={resolvingReport === stepId}
+                              title="Résoudre"
+                              className="shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-muted disabled:opacity-50"
+                            >
+                              {resolvingReport === stepId ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Check className="h-4 w-4" />
+                              )}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm text-muted-foreground">
+                      Aucune intolérance signalée.
+                    </p>
+                  )}
+                </div>
+
+                {/* Row 2: Prochain coaching + État de peau */}
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* Prochain point coaching */}
+                  <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                    <div className="mb-4 flex items-center justify-between">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Prochain point coaching
+                      </p>
+                      <button
+                        onClick={() => {
+                          setEditingAdminCallDate((v) => !v);
+                        }}
+                        className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
+                      >
+                        {editingAdminCallDate ? (
+                          <X className="h-4 w-4" />
+                        ) : (
+                          <Pencil className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                    {editingAdminCallDate ? (
+                      <div className="space-y-3">
+                        <div className="flex gap-3">
+                          <input
+                            type="date"
+                            value={skinStateDraft.nextCallDate ?? ""}
+                            onChange={(e) =>
+                              setSkinStateDraft((d) => ({ ...d, nextCallDate: e.target.value }))
+                            }
+                            className="flex-1 rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none focus:border-primary"
+                          />
+                          <input
+                            type="text"
+                            placeholder="18h"
+                            value={skinStateDraft.nextCallTime ?? ""}
+                            onChange={(e) =>
+                              setSkinStateDraft((d) => ({ ...d, nextCallTime: e.target.value }))
+                            }
+                            className="w-20 rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none focus:border-primary"
+                          />
+                        </div>
                         <button
-                          onClick={() => { saveSkinState(); setEditingAdminSkinState(false); }}
+                          onClick={() => {
+                            saveSkinState();
+                            setEditingAdminCallDate(false);
+                          }}
                           disabled={savingSkinState}
                           className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-60"
                         >
-                          {savingSkinState ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
-                          Sauvegarder
+                          {savingSkinState ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Check className="h-3.5 w-3.5" />
+                          )}
+                          Enregistrer
+                        </button>
+                      </div>
+                    ) : skinStateDraft.nextCallDate ? (
+                      <div>
+                        <p className="font-semibold capitalize">
+                          {new Date(skinStateDraft.nextCallDate).toLocaleDateString("fr-FR", {
+                            weekday: "long",
+                            day: "numeric",
+                            month: "long",
+                          })}
+                        </p>
+                        {skinStateDraft.nextCallTime && (
+                          <p className="text-sm text-muted-foreground">
+                            à {skinStateDraft.nextCallTime}
+                          </p>
+                        )}
+                        {(() => {
+                          const now = new Date();
+                          now.setHours(0, 0, 0, 0);
+                          const t = new Date(skinStateDraft.nextCallDate);
+                          t.setHours(0, 0, 0, 0);
+                          const diff = Math.round((t.getTime() - now.getTime()) / 86_400_000);
+                          return (
+                            <p
+                              className={`mt-1 text-sm font-semibold ${diff <= 0 ? "text-primary" : diff <= 3 ? "text-amber-600" : "text-muted-foreground"}`}
+                            >
+                              {diff < 0
+                                ? "Passé"
+                                : diff === 0
+                                  ? "Aujourd'hui !"
+                                  : diff === 1
+                                    ? "Demain"
+                                    : `Dans ${diff} jours`}
+                            </p>
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Aucun appel planifié.</p>
+                    )}
+                  </div>
+
+                  {/* État de peau — CircleMetric + inline edit */}
+                  <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                    <div className="mb-4 flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          État de peau
+                        </p>
+                        {skinState?.updatedAt && (
+                          <p className="text-[10px] text-muted-foreground/50 mt-0.5">
+                            mis à jour{" "}
+                            {new Date(skinState.updatedAt).toLocaleDateString("fr-FR", {
+                              day: "numeric",
+                              month: "short",
+                            })}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => setEditingAdminSkinState((v) => !v)}
+                        className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
+                      >
+                        {editingAdminSkinState ? (
+                          <X className="h-4 w-4" />
+                        ) : (
+                          <Pencil className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                    {editingAdminSkinState ? (
+                      <div className="space-y-4">
+                        {[
+                          {
+                            key: "inflammationPct" as const,
+                            label: "🔥 Inflammation",
+                            hint: "0 = absente → 100 = sévère",
+                          },
+                          {
+                            key: "barrierPct" as const,
+                            label: "🧱 Barrière cutanée",
+                            hint: "0 = excellente → 100 = compromise",
+                          },
+                          {
+                            key: "acnePct" as const,
+                            label: "🧴 Acné",
+                            hint: "0 = contrôlée → 100 = sévère",
+                          },
+                        ].map(({ key, label, hint }) => (
+                          <div key={key}>
+                            <div className="mb-1 flex items-center justify-between">
+                              <label className="text-sm font-medium">{label}</label>
+                              <span className="text-xs font-semibold tabular-nums text-muted-foreground">
+                                {skinStateDraft[key] ?? 50}%
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min={0}
+                              max={100}
+                              step={5}
+                              value={skinStateDraft[key] ?? 50}
+                              onChange={(e) =>
+                                setSkinStateDraft((d) => ({
+                                  ...d,
+                                  [key]: parseInt(e.target.value),
+                                }))
+                              }
+                              className="w-full cursor-pointer accent-primary"
+                            />
+                            <p className="mt-0.5 text-[10px] text-muted-foreground/60">{hint}</p>
+                          </div>
+                        ))}
+                        <div>
+                          <label className="mb-1.5 block text-sm font-medium">Phase</label>
+                          <div className="flex flex-wrap gap-2">
+                            {(["reset", "stabilisation", "purge", "amélioration"] as const).map(
+                              (v) => (
+                                <button
+                                  key={v}
+                                  type="button"
+                                  onClick={() =>
+                                    setSkinStateDraft((d) => ({ ...d, currentPhase: v }))
+                                  }
+                                  className={`rounded-xl px-3 py-1.5 text-xs font-medium capitalize transition-colors ${skinStateDraft.currentPhase === v ? "bg-primary text-primary-foreground" : "border border-border bg-muted/30 hover:bg-muted"}`}
+                                >
+                                  {v}
+                                </button>
+                              ),
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="mb-1.5 block text-sm font-medium">
+                            Phrase du coach
+                          </label>
+                          <textarea
+                            autoComplete="off"
+                            value={skinStateDraft.coachPhrase ?? ""}
+                            onChange={(e) =>
+                              setSkinStateDraft((d) => ({ ...d, coachPhrase: e.target.value }))
+                            }
+                            rows={2}
+                            className="w-full resize-none rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none focus:border-primary"
+                          />
+                        </div>
+                        <div className="flex justify-end">
+                          <button
+                            onClick={() => {
+                              saveSkinState();
+                              setEditingAdminSkinState(false);
+                            }}
+                            disabled={savingSkinState}
+                            className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+                          >
+                            {savingSkinState ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Check className="h-3.5 w-3.5" />
+                            )}
+                            Sauvegarder
+                          </button>
+                        </div>
+                      </div>
+                    ) : skinState ? (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-3 gap-2">
+                          <AdminCircleMetric
+                            label="Inflammation"
+                            emoji="🔥"
+                            pct={infPct}
+                            inverted
+                            description={infDesc}
+                          />
+                          <AdminCircleMetric
+                            label="Barrière"
+                            emoji="🧱"
+                            pct={barPct}
+                            inverted
+                            description={barDesc}
+                          />
+                          <AdminCircleMetric
+                            label="Acné"
+                            emoji="🧴"
+                            pct={acnPct}
+                            inverted
+                            description={acnDesc}
+                          />
+                        </div>
+                        {skinState.currentPhase && (
+                          <div className="flex items-center gap-2 pt-1">
+                            <span className="text-xs text-muted-foreground">Phase :</span>
+                            <span className="rounded-full bg-primary-soft px-3 py-0.5 text-xs font-semibold text-primary capitalize">
+                              {skinState.currentPhase}
+                            </span>
+                          </div>
+                        )}
+                        {skinState.coachPhrase && (
+                          <p className="text-xs italic text-muted-foreground">
+                            "{skinState.coachPhrase}"
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        Aucun bilan enregistré. Clique sur Modifier pour en créer un.
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* ── Bilan IA progression ── */}
+                <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                  <div className="mb-4 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Bilan IA progression
+                    </p>
+                  </div>
+
+                  {progressAiStep === "idle" && (
+                    <div className="space-y-4">
+                      {photos.length > 0 && (
+                        <div>
+                          <p className="mb-2 text-xs font-medium text-muted-foreground">
+                            Photos à inclure (optionnel)
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {photos.slice(0, 8).map((p) => (
+                              <label
+                                key={p.date}
+                                className="flex cursor-pointer items-center gap-1.5"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={selectedPhotoEntries.includes(p.date)}
+                                  onChange={() =>
+                                    setSelectedPhotoEntries((prev) =>
+                                      prev.includes(p.date)
+                                        ? prev.filter((d) => d !== p.date)
+                                        : [...prev, p.date],
+                                    )
+                                  }
+                                  className="h-3.5 w-3.5 rounded border-border accent-primary"
+                                />
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(p.date).toLocaleDateString("fr-FR", {
+                                    day: "numeric",
+                                    month: "short",
+                                  })}
+                                </span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      <textarea
+                        value={progressAiContext}
+                        onChange={(e) => setProgressAiContext(e.target.value)}
+                        rows={2}
+                        placeholder="Contexte : changement alimentation, stress, nouvel actif…"
+                        className="w-full resize-none rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none focus:border-primary"
+                      />
+                      <button
+                        onClick={handleProgressAnalyze}
+                        className="flex items-center gap-2 rounded-xl bg-muted/60 px-4 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted"
+                      >
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        Analyser la progression
+                      </button>
+                    </div>
+                  )}
+
+                  {(progressAiStep === "analyzing" || progressAiStep === "finalizing") && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                      {progressAiStep === "analyzing"
+                        ? "Analyse en cours…"
+                        : "Génération du verdict…"}
+                    </div>
+                  )}
+
+                  {progressAiStep === "draft" && (
+                    <div className="space-y-3">
+                      <div className="rounded-xl border border-border/60 bg-muted/30 px-4 py-3">
+                        <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
+                          {progressAiDraft}
+                        </p>
+                      </div>
+                      <textarea
+                        value={progressAiAdminNote}
+                        onChange={(e) => setProgressAiAdminNote(e.target.value)}
+                        rows={3}
+                        placeholder="Votre analyse / observations avant le verdict final…"
+                        className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+                      />
+                      <button
+                        onClick={handleProgressFinalize}
+                        disabled={!progressAiAdminNote.trim()}
+                        className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-40"
+                      >
+                        <Check className="h-4 w-4" /> Valider →
+                      </button>
+                    </div>
+                  )}
+
+                  {progressAiStep === "final" && (
+                    <div className="space-y-3">
+                      <div className="rounded-xl border border-primary/20 bg-primary-soft/30 px-4 py-3">
+                        <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
+                          {progressAiFinal}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-muted-foreground/60">
+                          Verdict IA · GPT-4o
+                        </span>
+                        <button
+                          onClick={() => {
+                            setProgressAiStep("idle");
+                            setProgressAiDraft("");
+                            setProgressAiAdminNote("");
+                            setSelectedPhotoEntries([]);
+                          }}
+                          className="text-[10px] text-muted-foreground/60 underline underline-offset-2 hover:text-muted-foreground"
+                        >
+                          Ré-analyser
                         </button>
                       </div>
                     </div>
-                  ) : skinState ? (
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-3 gap-2">
-                        <AdminCircleMetric label="Inflammation" emoji="🔥" pct={infPct} inverted description={infDesc} />
-                        <AdminCircleMetric label="Barrière" emoji="🧱" pct={barPct} inverted description={barDesc} />
-                        <AdminCircleMetric label="Acné" emoji="🧴" pct={acnPct} inverted description={acnDesc} />
-                      </div>
-                      {skinState.currentPhase && (
-                        <div className="flex items-center gap-2 pt-1">
-                          <span className="text-xs text-muted-foreground">Phase :</span>
-                          <span className="rounded-full bg-primary-soft px-3 py-0.5 text-xs font-semibold text-primary capitalize">{skinState.currentPhase}</span>
-                        </div>
-                      )}
-                      {skinState.coachPhrase && (
-                        <p className="text-xs italic text-muted-foreground">"{skinState.coachPhrase}"</p>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Aucun bilan enregistré. Clique sur Modifier pour en créer un.</p>
                   )}
                 </div>
-              </div>
 
-              {/* ── Bilan IA progression ── */}
-              <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-                <div className="mb-4 flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Bilan IA progression</p>
+                {/* Évolution métriques peau */}
+                {skinStateHistory.length >= 2 && (
+                  <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                    <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Évolution métriques peau
+                    </p>
+                    <ResponsiveContainer width="100%" height={220}>
+                      <LineChart
+                        data={skinStateHistory.map((e) => ({
+                          date: new Date(e.timestamp).toLocaleDateString("fr-FR", {
+                            day: "numeric",
+                            month: "short",
+                          }),
+                          Inflammation: e.inflammationPct,
+                          Barrière: e.barrierPct,
+                          Acné: e.acnePct,
+                        }))}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="oklch(var(--border))" />
+                        <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                        <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
+                        <Tooltip formatter={(v: number) => `${v}%`} />
+                        <Legend wrapperStyle={{ fontSize: 12 }} />
+                        <Line
+                          type="monotone"
+                          dataKey="Inflammation"
+                          stroke="#f97316"
+                          strokeWidth={2}
+                          dot={{ r: 3 }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="Barrière"
+                          stroke="#22c55e"
+                          strokeWidth={2}
+                          dot={{ r: 3 }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="Acné"
+                          stroke="#6366f1"
+                          strokeWidth={2}
+                          dot={{ r: 3 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+
+                {/* Row 3: Adhérence + Routine du jour */}
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* Adhérence 28j */}
+                  <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                    <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Adhérence — 28 derniers jours
+                    </p>
+                    <div className="grid grid-cols-7 gap-1.5">
+                      {Array.from({ length: 28 }, (_, i) => {
+                        const d = new Date(todayAdm);
+                        d.setDate(todayAdm.getDate() - (27 - i));
+                        const isFuture = d > todayAdm;
+                        const key = d.toISOString().slice(0, 10);
+                        const c = checkins28Admin[key];
+                        const sum = c ? (c.am?.length ?? 0) + (c.pm?.length ?? 0) : 0;
+                        const isDone = totalSteps > 0 && sum >= totalSteps;
+                        const isPartial = !isDone && sum > 0;
+                        return (
+                          <div
+                            key={i}
+                            title={key}
+                            className={`h-4 rounded-sm ${isFuture ? "bg-muted/20" : isDone ? "bg-primary" : isPartial ? "bg-primary/30" : "bg-muted"}`}
+                          />
+                        );
+                      })}
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1.5">
+                        <span className="inline-block h-2.5 w-2.5 rounded-sm bg-primary" /> Complète
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="inline-block h-2.5 w-2.5 rounded-sm bg-primary/30" />{" "}
+                        Partielle
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="inline-block h-2.5 w-2.5 rounded-sm bg-muted" /> Manquée
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Routine du jour */}
+                  <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                    <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Routine du jour
+                    </p>
+                    {totalSteps > 0 ? (
+                      <div className="space-y-4">
+                        {[
+                          {
+                            label: "Matin",
+                            icon: Sun,
+                            done: amDoneAdmin,
+                            total: amStepsAdmin,
+                            bg: "bg-amber-50 dark:bg-amber-950/30",
+                            ic: "text-amber-500",
+                          },
+                          {
+                            label: "Soir",
+                            icon: Moon,
+                            done: pmDoneAdmin,
+                            total: pmStepsAdmin,
+                            bg: "bg-indigo-50 dark:bg-indigo-950/30",
+                            ic: "text-indigo-400",
+                          },
+                        ].map(({ label, icon: Icon, done, total, bg, ic }) => (
+                          <div key={label} className="flex items-center gap-3">
+                            <div
+                              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${bg}`}
+                            >
+                              <Icon className={`h-4 w-4 ${ic}`} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-sm font-medium">{label}</span>
+                                <span
+                                  className={`text-xs font-semibold tabular-nums ${done >= total && total > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}
+                                >
+                                  {done}/{total}
+                                </span>
+                              </div>
+                              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
+                                <div
+                                  className={`h-full rounded-full transition-all ${done >= total && total > 0 ? "bg-emerald-500" : "bg-primary"}`}
+                                  style={{
+                                    width:
+                                      total > 0 ? `${Math.min((done / total) * 100, 100)}%` : "0%",
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Aucune routine assignée.</p>
+                    )}
+                  </div>
                 </div>
 
-                {progressAiStep === "idle" && (
-                  <div className="space-y-4">
-                    {photos.length > 0 && (
+                {/* Envoyer une note */}
+                <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Envoyer une note
+                  </p>
+                  <textarea
+                    autoComplete="off"
+                    value={noteInput}
+                    onChange={(e) => setNoteInput(e.target.value)}
+                    placeholder="Écris ton message pour l'élève…"
+                    rows={3}
+                    className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  />
+                  <div className="mt-3 flex justify-end">
+                    <button
+                      onClick={sendNote}
+                      disabled={sendingNote || !noteInput.trim()}
+                      className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+                    >
+                      {sendingNote ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
+                      Envoyer
+                    </button>
+                  </div>
+                </div>
+
+                {/* Dialog — signaler une intolérance */}
+                <Dialog open={flagOpen} onOpenChange={setFlagOpen}>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Signaler une intolérance</DialogTitle>
+                      <DialogDescription>
+                        Sélectionne le produit mal toléré et le type de réaction. Il apparaîtra dans
+                        les signalements du dashboard.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
                       <div>
-                        <p className="mb-2 text-xs font-medium text-muted-foreground">Photos à inclure (optionnel)</p>
-                        <div className="flex flex-wrap gap-2">
-                          {photos.slice(0, 8).map((p) => (
-                            <label key={p.date} className="flex cursor-pointer items-center gap-1.5">
-                              <input
-                                type="checkbox"
-                                checked={selectedPhotoEntries.includes(p.date)}
-                                onChange={() =>
-                                  setSelectedPhotoEntries((prev) =>
-                                    prev.includes(p.date) ? prev.filter((d) => d !== p.date) : [...prev, p.date]
-                                  )
-                                }
-                                className="h-3.5 w-3.5 rounded border-border accent-primary"
-                              />
-                              <span className="text-xs text-muted-foreground">
-                                {new Date(p.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
-                              </span>
-                            </label>
+                        <label className="mb-1.5 block text-sm font-medium">Produit</label>
+                        <select
+                          value={flagStepId}
+                          onChange={(e) => setFlagStepId(e.target.value)}
+                          className="h-11 w-full rounded-2xl border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                        >
+                          <option value="">— Choisir un produit —</option>
+                          {(routine?.am ?? []).map((s) => (
+                            <option key={s.id} value={s.id}>
+                              Matin · {s.product}
+                            </option>
+                          ))}
+                          {(routine?.pm ?? []).map((s) => (
+                            <option key={s.id} value={s.id}>
+                              Soir · {s.product}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="mb-1.5 block text-sm font-medium">Type de réaction</label>
+                        <div className="flex gap-2">
+                          {(["irritant", "allergie"] as const).map((t) => (
+                            <button
+                              key={t}
+                              type="button"
+                              onClick={() => setFlagType(t)}
+                              className={`flex-1 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${flagType === t ? "bg-primary text-primary-foreground" : "border border-border bg-muted/30 hover:bg-muted"}`}
+                            >
+                              {t === "allergie" ? "Allergie" : "Irritant"}
+                            </button>
                           ))}
                         </div>
                       </div>
-                    )}
-                    <textarea
-                      value={progressAiContext}
-                      onChange={(e) => setProgressAiContext(e.target.value)}
-                      rows={2}
-                      placeholder="Contexte : changement alimentation, stress, nouvel actif…"
-                      className="w-full resize-none rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none focus:border-primary"
-                    />
-                    <button
-                      onClick={handleProgressAnalyze}
-                      className="flex items-center gap-2 rounded-xl bg-muted/60 px-4 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted"
-                    >
-                      <Sparkles className="h-4 w-4 text-primary" />
-                      Analyser la progression
-                    </button>
-                  </div>
-                )}
-
-                {(progressAiStep === "analyzing" || progressAiStep === "finalizing") && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                    {progressAiStep === "analyzing" ? "Analyse en cours…" : "Génération du verdict…"}
-                  </div>
-                )}
-
-                {progressAiStep === "draft" && (
-                  <div className="space-y-3">
-                    <div className="rounded-xl border border-border/60 bg-muted/30 px-4 py-3">
-                      <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{progressAiDraft}</p>
                     </div>
-                    <textarea
-                      value={progressAiAdminNote}
-                      onChange={(e) => setProgressAiAdminNote(e.target.value)}
-                      rows={3}
-                      placeholder="Votre analyse / observations avant le verdict final…"
-                      className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
-                    />
-                    <button
-                      onClick={handleProgressFinalize}
-                      disabled={!progressAiAdminNote.trim()}
-                      className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-40"
-                    >
-                      <Check className="h-4 w-4" /> Valider →
-                    </button>
-                  </div>
-                )}
-
-                {progressAiStep === "final" && (
-                  <div className="space-y-3">
-                    <div className="rounded-xl border border-primary/20 bg-primary-soft/30 px-4 py-3">
-                      <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{progressAiFinal}</p>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-muted-foreground/60">Verdict IA · GPT-4o</span>
+                    <div className="mt-2 flex justify-end gap-2">
                       <button
-                        onClick={() => { setProgressAiStep("idle"); setProgressAiDraft(""); setProgressAiAdminNote(""); setSelectedPhotoEntries([]); }}
-                        className="text-[10px] text-muted-foreground/60 underline underline-offset-2 hover:text-muted-foreground"
+                        onClick={() => setFlagOpen(false)}
+                        className="rounded-2xl border border-border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted"
                       >
-                        Ré-analyser
+                        Annuler
+                      </button>
+                      <button
+                        onClick={flagIntolerance}
+                        disabled={!flagStepId || savingFlag}
+                        className="flex items-center gap-2 rounded-2xl bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
+                      >
+                        {savingFlag ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <AlertTriangle className="h-4 w-4" />
+                        )}
+                        Signaler
                       </button>
                     </div>
-                  </div>
-                )}
+                  </DialogContent>
+                </Dialog>
               </div>
-
-              {/* Évolution métriques peau */}
-              {skinStateHistory.length >= 2 && (
-                <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-                  <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Évolution métriques peau</p>
-                  <ResponsiveContainer width="100%" height={220}>
-                    <LineChart data={skinStateHistory.map((e) => ({
-                      date: new Date(e.timestamp).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }),
-                      Inflammation: e.inflammationPct,
-                      Barrière: e.barrierPct,
-                      Acné: e.acnePct,
-                    }))}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="oklch(var(--border))" />
-                      <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                      <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
-                      <Tooltip formatter={(v: number) => `${v}%`} />
-                      <Legend wrapperStyle={{ fontSize: 12 }} />
-                      <Line type="monotone" dataKey="Inflammation" stroke="#f97316" strokeWidth={2} dot={{ r: 3 }} />
-                      <Line type="monotone" dataKey="Barrière" stroke="#22c55e" strokeWidth={2} dot={{ r: 3 }} />
-                      <Line type="monotone" dataKey="Acné" stroke="#6366f1" strokeWidth={2} dot={{ r: 3 }} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-
-              {/* Row 3: Adhérence + Routine du jour */}
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* Adhérence 28j */}
-                <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-                  <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Adhérence — 28 derniers jours</p>
-                  <div className="grid grid-cols-7 gap-1.5">
-                    {Array.from({ length: 28 }, (_, i) => {
-                      const d = new Date(todayAdm); d.setDate(todayAdm.getDate() - (27 - i));
-                      const isFuture = d > todayAdm;
-                      const key = d.toISOString().slice(0, 10);
-                      const c = checkins28Admin[key];
-                      const sum = c ? (c.am?.length ?? 0) + (c.pm?.length ?? 0) : 0;
-                      const isDone = totalSteps > 0 && sum >= totalSteps;
-                      const isPartial = !isDone && sum > 0;
-                      return (
-                        <div key={i} title={key} className={`h-4 rounded-sm ${isFuture ? "bg-muted/20" : isDone ? "bg-primary" : isPartial ? "bg-primary/30" : "bg-muted"}`} />
-                      );
-                    })}
-                  </div>
-                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-sm bg-primary" /> Complète</span>
-                    <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-sm bg-primary/30" /> Partielle</span>
-                    <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-sm bg-muted" /> Manquée</span>
-                  </div>
-                </div>
-
-                {/* Routine du jour */}
-                <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-                  <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Routine du jour</p>
-                  {totalSteps > 0 ? (
-                    <div className="space-y-4">
-                      {[
-                        { label: "Matin", icon: Sun, done: amDoneAdmin, total: amStepsAdmin, bg: "bg-amber-50 dark:bg-amber-950/30", ic: "text-amber-500" },
-                        { label: "Soir", icon: Moon, done: pmDoneAdmin, total: pmStepsAdmin, bg: "bg-indigo-50 dark:bg-indigo-950/30", ic: "text-indigo-400" },
-                      ].map(({ label, icon: Icon, done, total, bg, ic }) => (
-                        <div key={label} className="flex items-center gap-3">
-                          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${bg}`}>
-                            <Icon className={`h-4 w-4 ${ic}`} />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="text-sm font-medium">{label}</span>
-                              <span className={`text-xs font-semibold tabular-nums ${done >= total && total > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>{done}/{total}</span>
-                            </div>
-                            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
-                              <div className={`h-full rounded-full transition-all ${done >= total && total > 0 ? "bg-emerald-500" : "bg-primary"}`} style={{ width: total > 0 ? `${Math.min((done / total) * 100, 100)}%` : "0%" }} />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Aucune routine assignée.</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Envoyer une note */}
-              <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Envoyer une note</p>
-                <textarea
-                  autoComplete="off"
-                  value={noteInput}
-                  onChange={(e) => setNoteInput(e.target.value)}
-                  placeholder="Écris ton message pour l'élève…"
-                  rows={3}
-                  className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
-                />
-                <div className="mt-3 flex justify-end">
-                  <button
-                    onClick={sendNote}
-                    disabled={sendingNote || !noteInput.trim()}
-                    className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
-                  >
-                    {sendingNote ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                    Envoyer
-                  </button>
-                </div>
-              </div>
-            </div>
-          );
-        })()}
+            );
+          })()}
 
         {/* ── Profil peau ─────────────────────────────────────────────────────── */}
         {tab === "profil" && (
@@ -1255,13 +1975,20 @@ function StudentPage() {
                         disabled={savingIntake}
                         className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90 disabled:opacity-60"
                       >
-                        {savingIntake ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                        {savingIntake ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Check className="h-4 w-4" />
+                        )}
                         Enregistrer
                       </button>
                     </>
                   ) : (
                     <button
-                      onClick={() => { setIntakeDraft(intake); setEditingIntake(true); }}
+                      onClick={() => {
+                        setIntakeDraft(intake);
+                        setEditingIntake(true);
+                      }}
                       className="flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted"
                     >
                       <Pencil className="h-4 w-4" /> Modifier
@@ -1276,24 +2003,32 @@ function StudentPage() {
                       <IntakeSection title="Type de peau">
                         <select
                           value={intakeDraft.skinType ?? ""}
-                          onChange={(e) => setIntakeDraft((d) => ({ ...d, skinType: e.target.value }))}
+                          onChange={(e) =>
+                            setIntakeDraft((d) => ({ ...d, skinType: e.target.value }))
+                          }
                           className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
                         >
                           <option value="">—</option>
                           {Object.entries(SKIN_TYPE_LABELS).map(([k, v]) => (
-                            <option key={k} value={k}>{v}</option>
+                            <option key={k} value={k}>
+                              {v}
+                            </option>
                           ))}
                         </select>
                       </IntakeSection>
                       <IntakeSection title="Intensité acné">
                         <select
                           value={intakeDraft.intensity ?? ""}
-                          onChange={(e) => setIntakeDraft((d) => ({ ...d, intensity: e.target.value }))}
+                          onChange={(e) =>
+                            setIntakeDraft((d) => ({ ...d, intensity: e.target.value }))
+                          }
                           className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
                         >
                           <option value="">—</option>
                           {Object.entries(INTENSITY_LABELS).map(([k, v]) => (
-                            <option key={k} value={k}>{v}</option>
+                            <option key={k} value={k}>
+                              {v}
+                            </option>
                           ))}
                         </select>
                       </IntakeSection>
@@ -1307,8 +2042,8 @@ function StudentPage() {
                           return (
                             <label key={k} className="flex cursor-pointer items-center gap-2">
                               <input
-
-                                autoComplete="off"                                type="checkbox"
+                                autoComplete="off"
+                                type="checkbox"
                                 checked={checked}
                                 onChange={() =>
                                   setIntakeDraft((d) => ({
@@ -1330,9 +2065,11 @@ function StudentPage() {
                     {/* Routine actuelle */}
                     <IntakeSection title="Routine actuelle">
                       <input
-
-                        autoComplete="off"                        value={intakeDraft.currentRoutine ?? ""}
-                        onChange={(e) => setIntakeDraft((d) => ({ ...d, currentRoutine: e.target.value }))}
+                        autoComplete="off"
+                        value={intakeDraft.currentRoutine ?? ""}
+                        onChange={(e) =>
+                          setIntakeDraft((d) => ({ ...d, currentRoutine: e.target.value }))
+                        }
                         className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
                         placeholder="Ex. Nettoyant La Roche-Posay, hydratant…"
                       />
@@ -1341,9 +2078,11 @@ function StudentPage() {
                     {/* Objectif */}
                     <IntakeSection title="Objectif principal">
                       <textarea
-
-                        autoComplete="off"                        value={intakeDraft.mainGoal ?? ""}
-                        onChange={(e) => setIntakeDraft((d) => ({ ...d, mainGoal: e.target.value }))}
+                        autoComplete="off"
+                        value={intakeDraft.mainGoal ?? ""}
+                        onChange={(e) =>
+                          setIntakeDraft((d) => ({ ...d, mainGoal: e.target.value }))
+                        }
                         rows={3}
                         className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
                         placeholder="Objectif de l'élève…"
@@ -1359,13 +2098,15 @@ function StudentPage() {
                         </span>
                       </IntakeSection>
                       <IntakeSection title="Intensité">
-                        <span className={`rounded-full px-4 py-1.5 text-sm font-semibold ${
-                          intake.intensity === "severe"
-                            ? "bg-destructive/10 text-destructive"
-                            : intake.intensity === "moderee"
-                            ? "bg-amber-100 text-amber-700"
-                            : "bg-primary-soft text-primary"
-                        }`}>
+                        <span
+                          className={`rounded-full px-4 py-1.5 text-sm font-semibold ${
+                            intake.intensity === "severe"
+                              ? "bg-destructive/10 text-destructive"
+                              : intake.intensity === "moderee"
+                                ? "bg-amber-100 text-amber-700"
+                                : "bg-primary-soft text-primary"
+                          }`}
+                        >
                           {INTENSITY_LABELS[intake.intensity ?? ""] ?? intake.intensity ?? "—"}
                         </span>
                       </IntakeSection>
@@ -1386,7 +2127,9 @@ function StudentPage() {
 
                     {intake.mainGoal && (
                       <IntakeSection title="Objectif principal">
-                        <p className="text-sm leading-relaxed text-foreground/80">{intake.mainGoal}</p>
+                        <p className="text-sm leading-relaxed text-foreground/80">
+                          {intake.mainGoal}
+                        </p>
                       </IntakeSection>
                     )}
 
@@ -1420,13 +2163,17 @@ function StudentPage() {
                       {(intakeAiStep === "analyzing" || intakeAiStep === "finalizing") && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                          {intakeAiStep === "analyzing" ? "Analyse en cours…" : "Génération du verdict…"}
+                          {intakeAiStep === "analyzing"
+                            ? "Analyse en cours…"
+                            : "Génération du verdict…"}
                         </div>
                       )}
                       {intakeAiStep === "draft" && (
                         <div className="space-y-3">
                           <div className="rounded-xl border border-border/60 bg-muted/30 px-4 py-3">
-                            <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{intakeAiDraft}</p>
+                            <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
+                              {intakeAiDraft}
+                            </p>
                           </div>
                           <textarea
                             value={intakeAiAdminNote}
@@ -1447,10 +2194,14 @@ function StudentPage() {
                       {intakeAiStep === "final" && (
                         <div className="space-y-3">
                           <div className="rounded-xl border border-primary/20 bg-primary-soft/30 px-4 py-3">
-                            <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{intakeAiFinal}</p>
+                            <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
+                              {intakeAiFinal}
+                            </p>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-[10px] text-muted-foreground/60">Verdict IA · GPT-4o</span>
+                            <span className="text-[10px] text-muted-foreground/60">
+                              Verdict IA · GPT-4o
+                            </span>
                             <button
                               onClick={() => setIntakeAiStep("idle")}
                               className="text-[10px] text-muted-foreground/60 underline underline-offset-2 hover:text-muted-foreground"
@@ -1472,54 +2223,62 @@ function StudentPage() {
         {tab === "routine" && (
           <div>
             {/* Produits signalés */}
-            {Object.keys(reports).length > 0 && routine && (() => {
-              const allSteps = [...(routine.am ?? []), ...(routine.pm ?? [])];
-              const flagged = Object.entries(reports)
-                .map(([stepId, type]) => ({ step: allSteps.find((s) => s.id === stepId), type }))
-                .filter((f) => f.step);
-              if (flagged.length === 0) return null;
-              return (
-                <div className="mb-6 rounded-3xl border border-orange-200 bg-orange-50 p-5 dark:border-orange-900/40 dark:bg-orange-950/20">
-                  <div className="mb-3 flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-orange-500" />
-                    <p className="text-sm font-semibold text-orange-700 dark:text-orange-400">
-                      {flagged.length} produit{flagged.length > 1 ? "s" : ""} signalé{flagged.length > 1 ? "s" : ""}
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    {flagged.map(({ step, type }) => (
-                      <div key={step!.id} className="flex items-center justify-between gap-3 rounded-xl bg-white/60 px-4 py-2.5 dark:bg-black/20">
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium">{step!.product}</p>
-                          <p className="text-xs text-muted-foreground">{step!.category}</p>
+            {Object.keys(reports).length > 0 &&
+              routine &&
+              (() => {
+                const allSteps = [...(routine.am ?? []), ...(routine.pm ?? [])];
+                const flagged = Object.entries(reports)
+                  .map(([stepId, type]) => ({ step: allSteps.find((s) => s.id === stepId), type }))
+                  .filter((f) => f.step);
+                if (flagged.length === 0) return null;
+                return (
+                  <div className="mb-6 rounded-3xl border border-orange-200 bg-orange-50 p-5 dark:border-orange-900/40 dark:bg-orange-950/20">
+                    <div className="mb-3 flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4 text-orange-500" />
+                      <p className="text-sm font-semibold text-orange-700 dark:text-orange-400">
+                        {flagged.length} produit{flagged.length > 1 ? "s" : ""} signalé
+                        {flagged.length > 1 ? "s" : ""}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      {flagged.map(({ step, type }) => (
+                        <div
+                          key={step!.id}
+                          className="flex items-center justify-between gap-3 rounded-xl bg-white/60 px-4 py-2.5 dark:bg-black/20"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium">{step!.product}</p>
+                            <p className="text-xs text-muted-foreground">{step!.category}</p>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-2">
+                            <span
+                              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                                type === "allergie"
+                                  ? "bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400"
+                                  : "bg-orange-100 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400"
+                              }`}
+                            >
+                              {type === "allergie" ? "Allergie" : "Irritant"}
+                            </span>
+                            <button
+                              onClick={() => resolveReport(step!.id)}
+                              disabled={resolvingReport === step!.id}
+                              className="flex items-center gap-1 rounded-xl border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-50"
+                            >
+                              {resolvingReport === step!.id ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <Check className="h-3 w-3" />
+                              )}
+                              Traité
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex shrink-0 items-center gap-2">
-                          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                            type === "allergie"
-                              ? "bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400"
-                              : "bg-orange-100 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400"
-                          }`}>
-                            {type === "allergie" ? "Allergie" : "Irritant"}
-                          </span>
-                          <button
-                            onClick={() => resolveReport(step!.id)}
-                            disabled={resolvingReport === step!.id}
-                            className="flex items-center gap-1 rounded-xl border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-50"
-                          >
-                            {resolvingReport === step!.id ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <Check className="h-3 w-3" />
-                            )}
-                            Traité
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              );
-            })()}
+                );
+              })()}
 
             {!routine || (routine.am.length === 0 && routine.pm.length === 0) ? (
               <EmptyState
@@ -1539,19 +2298,39 @@ function StudentPage() {
         {/* ── Historique ──────────────────────────────────────────────────────── */}
         {tab === "historique" && (
           <div className="space-y-10">
-
             {/* ── États de peau ── */}
             <section>
-              <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">États de peau</p>
+              <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                États de peau
+              </p>
               {skinStateHistory.length === 0 ? (
-                <EmptyState icon="🧴" title="Aucun bilan enregistré" body="Les bilans apparaîtront ici après chaque sauvegarde de l'état de peau." />
+                <EmptyState
+                  icon="🧴"
+                  title="Aucun bilan enregistré"
+                  body="Les bilans apparaîtront ici après chaque sauvegarde de l'état de peau."
+                />
               ) : (
                 <div className="relative space-y-0">
                   <div className="absolute left-5 top-4 bottom-4 w-px bg-border/60" />
                   {[...skinStateHistory].reverse().map((entry) => {
-                    const infDesc = entry.inflammationPct >= 67 ? "Active" : entry.inflammationPct >= 34 ? "Modérée" : "Sous contrôle";
-                    const barDesc = entry.barrierPct >= 67 ? "Excellente" : entry.barrierPct >= 34 ? "En cours" : "Compromise";
-                    const acnDesc = entry.acnePct >= 67 ? "Active" : entry.acnePct >= 34 ? "Modérée" : "Contrôlée";
+                    const infDesc =
+                      entry.inflammationPct >= 67
+                        ? "Active"
+                        : entry.inflammationPct >= 34
+                          ? "Modérée"
+                          : "Sous contrôle";
+                    const barDesc =
+                      entry.barrierPct >= 67
+                        ? "Excellente"
+                        : entry.barrierPct >= 34
+                          ? "En cours"
+                          : "Compromise";
+                    const acnDesc =
+                      entry.acnePct >= 67
+                        ? "Active"
+                        : entry.acnePct >= 34
+                          ? "Modérée"
+                          : "Contrôlée";
                     return (
                       <div key={entry.id} className="relative flex gap-4 pb-6">
                         <div className="relative z-10 mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-background bg-muted shadow-sm">
@@ -1559,12 +2338,34 @@ function StudentPage() {
                         </div>
                         <div className="flex-1 rounded-2xl border border-border/60 bg-card p-4 shadow-soft">
                           <p className="mb-3 text-xs text-muted-foreground">
-                            {new Date(entry.timestamp).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                            {new Date(entry.timestamp).toLocaleDateString("fr-FR", {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            })}
                           </p>
                           <div className="grid grid-cols-3 gap-2">
-                            <AdminCircleMetric label="Inflammation" emoji="🔥" pct={entry.inflammationPct} inverted description={infDesc} />
-                            <AdminCircleMetric label="Barrière cutanée" emoji="🧱" pct={entry.barrierPct} inverted description={barDesc} />
-                            <AdminCircleMetric label="Acné" emoji="🧴" pct={entry.acnePct} inverted description={acnDesc} />
+                            <AdminCircleMetric
+                              label="Inflammation"
+                              emoji="🔥"
+                              pct={entry.inflammationPct}
+                              inverted
+                              description={infDesc}
+                            />
+                            <AdminCircleMetric
+                              label="Barrière cutanée"
+                              emoji="🧱"
+                              pct={entry.barrierPct}
+                              inverted
+                              description={barDesc}
+                            />
+                            <AdminCircleMetric
+                              label="Acné"
+                              emoji="🧴"
+                              pct={entry.acnePct}
+                              inverted
+                              description={acnDesc}
+                            />
                           </div>
                         </div>
                       </div>
@@ -1576,36 +2377,63 @@ function StudentPage() {
 
             {/* ── Routines ── */}
             <section>
-              <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Routines</p>
+              <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Routines
+              </p>
               {routineHistory.length === 0 ? (
-                <EmptyState icon="📋" title="Aucun historique" body="L'historique se construira à chaque envoi de routine." />
+                <EmptyState
+                  icon="📋"
+                  title="Aucun historique"
+                  body="L'historique se construira à chaque envoi de routine."
+                />
               ) : (
                 <div className="relative space-y-0">
                   <div className="absolute left-5 top-4 bottom-4 w-px bg-border/60" />
                   {routineHistory.map((entry) => (
                     <div key={entry.id} className="relative flex gap-4 pb-6">
-                      <div className={`relative z-10 mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-background shadow-sm ${entry.isUpdate ? "bg-muted" : "bg-primary"}`}>
-                        {entry.isUpdate ? <History className="h-4 w-4 text-muted-foreground" /> : <Sun className="h-4 w-4 text-primary-foreground" />}
+                      <div
+                        className={`relative z-10 mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-background shadow-sm ${entry.isUpdate ? "bg-muted" : "bg-primary"}`}
+                      >
+                        {entry.isUpdate ? (
+                          <History className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Sun className="h-4 w-4 text-primary-foreground" />
+                        )}
                       </div>
                       <div className="flex-1 rounded-2xl border border-border/60 bg-card p-4 shadow-soft">
                         <div className="mb-2 flex flex-wrap items-center gap-2">
-                          <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${REASON_TAG_COLORS[entry.reasonTag] ?? REASON_TAG_COLORS.autre}`}>
+                          <span
+                            className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${REASON_TAG_COLORS[entry.reasonTag] ?? REASON_TAG_COLORS.autre}`}
+                          >
                             {REASON_TAG_LABELS[entry.reasonTag] ?? entry.reasonTag}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            {new Date(entry.timestamp).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                            {new Date(entry.timestamp).toLocaleDateString("fr-FR", {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            })}
                           </span>
                         </div>
                         {entry.note && (
-                          <p className="mb-3 text-sm italic text-muted-foreground">"{entry.note}"</p>
+                          <p className="mb-3 text-sm italic text-muted-foreground">
+                            "{entry.note}"
+                          </p>
                         )}
                         <div className="grid gap-3 sm:grid-cols-2">
-                          {[{ label: "☀️ Matin", steps: entry.am }, { label: "🌙 Soir", steps: entry.pm }].map(({ label, steps }) => (
+                          {[
+                            { label: "☀️ Matin", steps: entry.am },
+                            { label: "🌙 Soir", steps: entry.pm },
+                          ].map(({ label, steps }) => (
                             <div key={label}>
-                              <p className="mb-1.5 text-xs font-semibold text-muted-foreground">{label} — {steps.length} étape{steps.length !== 1 ? "s" : ""}</p>
+                              <p className="mb-1.5 text-xs font-semibold text-muted-foreground">
+                                {label} — {steps.length} étape{steps.length !== 1 ? "s" : ""}
+                              </p>
                               <ul className="space-y-0.5">
                                 {steps.map((s, j) => (
-                                  <li key={j} className="text-xs text-foreground/80">• {s.product}</li>
+                                  <li key={j} className="text-xs text-foreground/80">
+                                    • {s.product}
+                                  </li>
                                 ))}
                               </ul>
                             </div>
@@ -1617,7 +2445,6 @@ function StudentPage() {
                 </div>
               )}
             </section>
-
           </div>
         )}
 
@@ -1633,7 +2460,10 @@ function StudentPage() {
             ) : (
               <div className="space-y-6">
                 {photos.map((p) => (
-                  <div key={p.date} className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
+                  <div
+                    key={p.date}
+                    className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft"
+                  >
                     <div className="flex items-center justify-between border-b border-border/60 px-6 py-4">
                       <p className="font-semibold">{formatDate(p.date)}</p>
                       {p.note && (
@@ -1685,7 +2515,9 @@ function StudentPage() {
                   style={{ width: `${pct}%` }}
                 />
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">{done} sur {TOTAL_LESSONS} leçons complétées</p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                {done} sur {TOTAL_LESSONS} leçons complétées
+              </p>
             </div>
 
             <div className="space-y-3">
@@ -1694,7 +2526,10 @@ function StudentPage() {
                 const chPct = Math.round((chDone / ch.lessons.length) * 100);
                 const isOpen = openChapters[ch.id];
                 return (
-                  <div key={ch.id} className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft">
+                  <div
+                    key={ch.id}
+                    className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft"
+                  >
                     <button
                       onClick={() => setOpenChapters((s) => ({ ...s, [ch.id]: !s[ch.id] }))}
                       className="flex w-full items-center gap-4 p-5 text-left"
@@ -1725,17 +2560,14 @@ function StudentPage() {
                         {ch.lessons.map((l) => {
                           const isDone = completedLessons.includes(l.id);
                           return (
-                            <li
-                              key={l.id}
-                              className="flex items-center gap-3 px-5 py-3"
-                            >
+                            <li key={l.id} className="flex items-center gap-3 px-5 py-3">
                               <span
                                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
                                   isDone
                                     ? "bg-primary text-primary-foreground"
                                     : l.locked
-                                    ? "bg-muted"
-                                    : "border border-border bg-background"
+                                      ? "bg-muted"
+                                      : "border border-border bg-background"
                                 }`}
                               >
                                 {isDone ? (
@@ -1766,7 +2598,6 @@ function StudentPage() {
         {/* ── Notes ──────────────────────────────────────────────────────────── */}
         {tab === "notes" && (
           <div className="space-y-6">
-
             {/* Notes history */}
             {notes.length === 0 ? (
               <EmptyState
@@ -1792,7 +2623,12 @@ function StudentPage() {
                     )}
                     <p className="text-sm leading-relaxed text-foreground">{n.note}</p>
                     <p className="mt-2 text-xs text-muted-foreground">
-                      {n.authorName} · {new Date(n.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                      {n.authorName} ·{" "}
+                      {new Date(n.createdAt).toLocaleDateString("fr-FR", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
                     </p>
                   </div>
                 ))}
@@ -1800,40 +2636,45 @@ function StudentPage() {
             )}
           </div>
         )}
-
       </main>
 
       {/* Confirmation suppression compte — Dialog renders via portal, position in tree doesn't matter */}
       <Dialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-destructive">Supprimer ce compte</DialogTitle>
-          <DialogDescription>
-            Cette action est <strong>irréversible</strong>. Le compte Firebase, les réponses d'onboarding, la routine et les données de progression seront supprimés définitivement.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="mt-2 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-          <strong>{profile?.displayName ?? profile?.email}</strong> — {profile?.email}
-        </div>
-        <div className="mt-4 flex justify-end gap-3">
-          <button
-            onClick={() => setConfirmDeleteOpen(false)}
-            disabled={deleting}
-            className="rounded-full border border-border px-5 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50"
-          >
-            Annuler
-          </button>
-          <button
-            onClick={handleDeleteAccount}
-            disabled={deleting}
-            className="flex items-center gap-2 rounded-full bg-destructive px-5 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
-          >
-            {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-            Supprimer définitivement
-          </button>
-        </div>
-      </DialogContent>
-    </Dialog>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-destructive">Supprimer ce compte</DialogTitle>
+            <DialogDescription>
+              Cette action est <strong>irréversible</strong>. Le compte Firebase, les réponses
+              d'onboarding, la routine et les données de progression seront supprimés
+              définitivement.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-2 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            <strong>{profile?.displayName ?? profile?.email}</strong> — {profile?.email}
+          </div>
+          <div className="mt-4 flex justify-end gap-3">
+            <button
+              onClick={() => setConfirmDeleteOpen(false)}
+              disabled={deleting}
+              className="rounded-full border border-border px-5 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50"
+            >
+              Annuler
+            </button>
+            <button
+              onClick={handleDeleteAccount}
+              disabled={deleting}
+              className="flex items-center gap-2 rounded-full bg-destructive px-5 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+            >
+              {deleting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+              Supprimer définitivement
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
@@ -1865,7 +2706,9 @@ function Tag({ children, variant }: { children: React.ReactNode; variant?: "warn
 function IntakeSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-soft">
-      <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</p>
+      <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </p>
       {children}
     </div>
   );
@@ -1917,23 +2760,68 @@ function LevelSelector({
   );
 }
 
-function AdminCircleMetric({ label, emoji, pct, inverted, description }: { label: string; emoji: string; pct: number; inverted?: boolean; description?: string }) {
+function AdminCircleMetric({
+  label,
+  emoji,
+  pct,
+  inverted,
+  description,
+}: {
+  label: string;
+  emoji: string;
+  pct: number;
+  inverted?: boolean;
+  description?: string;
+}) {
   const r = 30;
   const circ = 2 * Math.PI * r;
   const offset = circ - (pct / 100) * circ;
   const arcClass = inverted
-    ? pct >= 67 ? "text-red-400" : pct >= 34 ? "text-amber-400" : "text-emerald-500"
-    : pct >= 67 ? "text-emerald-500" : pct >= 34 ? "text-amber-400" : "text-red-400";
+    ? pct >= 67
+      ? "text-red-400"
+      : pct >= 34
+        ? "text-amber-400"
+        : "text-emerald-500"
+    : pct >= 67
+      ? "text-emerald-500"
+      : pct >= 34
+        ? "text-amber-400"
+        : "text-red-400";
   const numClass = inverted
-    ? pct >= 67 ? "text-red-500 dark:text-red-400" : pct >= 34 ? "text-amber-500 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
-    : pct >= 67 ? "text-emerald-600 dark:text-emerald-400" : pct >= 34 ? "text-amber-500 dark:text-amber-400" : "text-red-500 dark:text-red-400";
+    ? pct >= 67
+      ? "text-red-500 dark:text-red-400"
+      : pct >= 34
+        ? "text-amber-500 dark:text-amber-400"
+        : "text-emerald-600 dark:text-emerald-400"
+    : pct >= 67
+      ? "text-emerald-600 dark:text-emerald-400"
+      : pct >= 34
+        ? "text-amber-500 dark:text-amber-400"
+        : "text-red-500 dark:text-red-400";
   return (
     <div className="flex flex-col items-center gap-1">
       <div className="relative h-[80px] w-[80px]">
         <svg viewBox="0 0 80 80" className="-rotate-90 h-full w-full">
-          <circle cx="40" cy="40" r={r} fill="none" stroke="currentColor" strokeWidth="7" className="text-muted" />
-          <circle cx="40" cy="40" r={r} fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round"
-            className={arcClass} strokeDasharray={circ} strokeDashoffset={offset}
+          <circle
+            cx="40"
+            cy="40"
+            r={r}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="7"
+            className="text-muted"
+          />
+          <circle
+            cx="40"
+            cy="40"
+            r={r}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="7"
+            strokeLinecap="round"
+            className={arcClass}
+            strokeDasharray={circ}
+            strokeDashoffset={offset}
             style={{ transition: "stroke-dashoffset 0.7s ease" }}
           />
         </svg>
@@ -1943,7 +2831,9 @@ function AdminCircleMetric({ label, emoji, pct, inverted, description }: { label
         </div>
       </div>
       <span className="text-center text-[10px] font-medium text-foreground/70">{label}</span>
-      {description && <span className={`text-center text-[10px] font-semibold ${numClass}`}>{description}</span>}
+      {description && (
+        <span className={`text-center text-[10px] font-semibold ${numClass}`}>{description}</span>
+      )}
     </div>
   );
 }
@@ -1973,49 +2863,60 @@ function RoutineBlock({
           {steps.map((s, i) => {
             const reaction = reports[s.id];
             return (
-            <li key={s.id} className={`flex items-start gap-3 rounded-xl p-1.5 -mx-1.5 ${reaction ? "bg-orange-50/60 dark:bg-orange-950/10" : ""}`}>
-              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-soft text-[10px] font-semibold text-primary">
-                {i + 1}
-              </span>
-              {s.imageUrl ? (
-                <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-border/60 bg-muted">
-                  <img src={s.imageUrl} alt={s.product} className="h-full w-full rounded-xl object-cover" />
-                </div>
-              ) : (
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted">
-                  <Package className="h-4 w-4 text-muted-foreground/40" />
-                </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-medium leading-tight">{s.product}</p>
-                  {reaction && (
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                      reaction === "allergie"
-                        ? "bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400"
-                        : "bg-orange-100 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400"
-                    }`}>
-                      {reaction === "allergie" ? "⚠ Allergie" : "⚠ Irritant"}
-                    </span>
+              <li
+                key={s.id}
+                className={`flex items-start gap-3 rounded-xl p-1.5 -mx-1.5 ${reaction ? "bg-orange-50/60 dark:bg-orange-950/10" : ""}`}
+              >
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-soft text-[10px] font-semibold text-primary">
+                  {i + 1}
+                </span>
+                {s.imageUrl ? (
+                  <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-border/60 bg-muted">
+                    <img
+                      src={s.imageUrl}
+                      alt={s.product}
+                      className="h-full w-full rounded-xl object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted">
+                    <Package className="h-4 w-4 text-muted-foreground/40" />
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-sm font-medium leading-tight">{s.product}</p>
+                    {reaction && (
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                          reaction === "allergie"
+                            ? "bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400"
+                            : "bg-orange-100 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400"
+                        }`}
+                      >
+                        {reaction === "allergie" ? "⚠ Allergie" : "⚠ Irritant"}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{s.category}</p>
+                  {s.instructions && (
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground/80">
+                      {s.instructions}
+                    </p>
+                  )}
+                  {s.purchaseUrl && (
+                    <a
+                      href={s.purchaseUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                    >
+                      <ShoppingCart className="h-3 w-3" /> Acheter
+                    </a>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground">{s.category}</p>
-                {s.instructions && (
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground/80">{s.instructions}</p>
-                )}
-                {s.purchaseUrl && (
-                  <a
-                    href={s.purchaseUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                  >
-                    <ShoppingCart className="h-3 w-3" /> Acheter
-                  </a>
-                )}
-              </div>
-            </li>
-          );
+              </li>
+            );
           })}
         </ol>
       )}

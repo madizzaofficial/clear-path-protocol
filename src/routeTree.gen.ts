@@ -15,6 +15,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as QuestionnaireRouteImport } from './routes/questionnaire'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ProductsRouteImport } from './routes/products'
+import { Route as MaRoutineRouteImport } from './routes/ma-routine'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as JournalRouteImport } from './routes/journal'
 import { Route as IntakeRouteImport } from './routes/intake'
@@ -86,6 +87,11 @@ const ProfileRoute = ProfileRouteImport.update({
 const ProductsRoute = ProductsRouteImport.update({
   id: '/products',
   path: '/products',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MaRoutineRoute = MaRoutineRouteImport.update({
+  id: '/ma-routine',
+  path: '/ma-routine',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -316,6 +322,7 @@ export interface FileRoutesByFullPath {
   '/intake': typeof IntakeRoute
   '/journal': typeof JournalRoute
   '/login': typeof LoginRoute
+  '/ma-routine': typeof MaRoutineRoute
   '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
   '/questionnaire': typeof QuestionnaireRouteWithChildren
@@ -366,6 +373,7 @@ export interface FileRoutesByTo {
   '/intake': typeof IntakeRoute
   '/journal': typeof JournalRoute
   '/login': typeof LoginRoute
+  '/ma-routine': typeof MaRoutineRoute
   '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
@@ -415,6 +423,7 @@ export interface FileRoutesById {
   '/intake': typeof IntakeRoute
   '/journal': typeof JournalRoute
   '/login': typeof LoginRoute
+  '/ma-routine': typeof MaRoutineRoute
   '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
   '/questionnaire': typeof QuestionnaireRouteWithChildren
@@ -467,6 +476,7 @@ export interface FileRouteTypes {
     | '/intake'
     | '/journal'
     | '/login'
+    | '/ma-routine'
     | '/products'
     | '/profile'
     | '/questionnaire'
@@ -517,6 +527,7 @@ export interface FileRouteTypes {
     | '/intake'
     | '/journal'
     | '/login'
+    | '/ma-routine'
     | '/products'
     | '/profile'
     | '/register'
@@ -565,6 +576,7 @@ export interface FileRouteTypes {
     | '/intake'
     | '/journal'
     | '/login'
+    | '/ma-routine'
     | '/products'
     | '/profile'
     | '/questionnaire'
@@ -616,6 +628,7 @@ export interface RootRouteChildren {
   IntakeRoute: typeof IntakeRoute
   JournalRoute: typeof JournalRoute
   LoginRoute: typeof LoginRoute
+  MaRoutineRoute: typeof MaRoutineRoute
   ProductsRoute: typeof ProductsRoute
   ProfileRoute: typeof ProfileRoute
   QuestionnaireRoute: typeof QuestionnaireRouteWithChildren
@@ -681,6 +694,13 @@ declare module '@tanstack/react-router' {
       path: '/products'
       fullPath: '/products'
       preLoaderRoute: typeof ProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ma-routine': {
+      id: '/ma-routine'
+      path: '/ma-routine'
+      fullPath: '/ma-routine'
+      preLoaderRoute: typeof MaRoutineRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -1046,6 +1066,7 @@ const rootRouteChildren: RootRouteChildren = {
   IntakeRoute: IntakeRoute,
   JournalRoute: JournalRoute,
   LoginRoute: LoginRoute,
+  MaRoutineRoute: MaRoutineRoute,
   ProductsRoute: ProductsRoute,
   ProfileRoute: ProfileRoute,
   QuestionnaireRoute: QuestionnaireRouteWithChildren,

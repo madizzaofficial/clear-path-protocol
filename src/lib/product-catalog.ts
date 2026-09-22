@@ -1,6 +1,7 @@
 import { db } from "./firebase";
 import { collection, doc, getDocs, query, setDoc, where } from "firebase/firestore";
 import type { InciAnalysis } from "./inci-analysis";
+import type { FreqPhase } from "./routine-schedule";
 export type { InciAnalysis } from "./inci-analysis";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -23,6 +24,10 @@ export type CatalogProduct = {
   inciHash?: string;
   suitableForSkinTypes?: string[];
   inciAnalysis?: InciAnalysis;
+  // Contenu réutilisable — évite de re-taper à chaque routine.
+  whyThisProduct?: string;
+  amountPreset?: string;
+  schedule?: FreqPhase[];
   verified: boolean;
   isFeatured?: boolean;
   createdAt: number;

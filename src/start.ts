@@ -5,6 +5,7 @@ import { renderErrorPage } from "./lib/error-page";
 import { inngest } from "./lib/inngest";
 import { newStudentAdminAlert, intakeConfirmation, routineNotification } from "./lib/inngest-functions";
 import { handleStripeWebhook } from "./lib/stripe-webhook";
+import { handlePlacesRequest } from "./lib/places";
 
 const inngestHandler = serve({
   client: inngest,
@@ -20,6 +21,9 @@ const inngestMiddleware = createMiddleware({ type: "request" }).server(
     }
     if (path === "/api/stripe/webhook") {
       return handleStripeWebhook(request);
+    }
+    if (path === "/api/public/places") {
+      return handlePlacesRequest();
     }
     return next();
   }

@@ -6,7 +6,7 @@ import { db } from "@/lib/firebase";
 import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
-  Plus, Trash2, Loader2, GripVertical, Users, Save, Check, X,
+  Plus, Trash2, Loader2, GripVertical, Users, Save, Check, X, Pill, HeartPulse,
 } from "lucide-react";
 import {
   DndContext,
@@ -84,6 +84,17 @@ function NutritionContent() {
   const [newAvoidEmoji, setNewAvoidEmoji] = useState("❌");
   const [newAvoidLabel, setNewAvoidLabel] = useState("");
 
+  // Compléments (à privilégier / à éviter) + hygiène de vie — par élève
+  const [suppTake, setSuppTake] = useState<NutritionItem[]>([]);
+  const [suppAvoid, setSuppAvoid] = useState<NutritionItem[]>([]);
+  const [lifestyle, setLifestyle] = useState<Reminder[]>([]);
+  const [newTakeEmoji, setNewTakeEmoji] = useState("💊");
+  const [newTakeLabel, setNewTakeLabel] = useState("");
+  const [newAvoidSupEmoji, setNewAvoidSupEmoji] = useState("🚫");
+  const [newAvoidSupLabel, setNewAvoidSupLabel] = useState("");
+  const [newLifeEmoji, setNewLifeEmoji] = useState("🌙");
+  const [newLifeText, setNewLifeText] = useState("");
+
   // Global reminders
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loadingReminders, setLoadingReminders] = useState(true);
@@ -121,6 +132,9 @@ function NutritionContent() {
     setSelectedUser(u);
     setToEat([]);
     setToAvoid([]);
+    setSuppTake([]);
+    setSuppAvoid([]);
+    setLifestyle([]);
     setIsDirty(false);
     setSaveSuccess(false);
     setNewEatLabel("");
@@ -130,6 +144,9 @@ function NutritionContent() {
     if (snap.exists()) {
       setToEat(snap.data().toEat ?? []);
       setToAvoid(snap.data().toAvoid ?? []);
+      setSuppTake(snap.data().supplementsToTake ?? []);
+      setSuppAvoid(snap.data().supplementsToAvoid ?? []);
+      setLifestyle(snap.data().lifestyle ?? []);
     }
     setLoadingNutrition(false);
   }
@@ -139,7 +156,13 @@ function NutritionContent() {
   async function handleSave() {
     if (!selectedUser) return;
     setSaving(true);
-    await setDoc(doc(db, "nutrition", selectedUser.uid), { toEat, toAvoid });
+    await setDoc(doc(db, "nutrition", selectedUser.uid), {
+      toEat,
+      toAvoid,
+      supplementsToTake: suppTake,
+      supplementsToAvoid: suppAvoid,
+      lifestyle,
+    });
     setSaving(false);
     setIsDirty(false);
     setSaveSuccess(true);
@@ -181,6 +204,38 @@ function NutritionContent() {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
     setToAvoid((prev) => arrayMove(prev, prev.findIndex((i) => i.id === active.id), prev.findIndex((i) => i.id === over.id)));
+    setIsDirty(true);
+  }
+
+  // ── Compléments + hygiène de vie (par élève) ───────────────────────────────
+  function addSuppTake() {
+    if (!newTakeLabel.trim()) return;
+    setSuppTake((p) => [...p, { id: `st-${Date.now()}`, label: newTakeLabel.trim(), emoji: newTakeEmoji }]);
+    setNewTakeLabel("");
+    setIsDirty(true);
+  }
+  function removeSuppTake(id: string) {
+    setSuppTake((p) => p.filter((i) => i.id !== id));
+    setIsDirty(true);
+  }
+  function addSuppAvoid() {
+    if (!newAvoidSupLabel.trim()) return;
+    setSuppAvoid((p) => [...p, { id: `sa-${Date.now()}`, label: newAvoidSupLabel.trim(), emoji: newAvoidSupEmoji }]);
+    setNewAvoidSupLabel("");
+    setIsDirty(true);
+  }
+  function removeSuppAvoid(id: string) {
+    setSuppAvoid((p) => p.filter((i) => i.id !== id));
+    setIsDirty(true);
+  }
+  function addLifestyle() {
+    if (!newLifeText.trim()) return;
+    setLifestyle((p) => [...p, { id: `lf-${Date.now()}`, text: newLifeText.trim(), emoji: newLifeEmoji }]);
+    setNewLifeText("");
+    setIsDirty(true);
+  }
+  function removeLifestyle(id: string) {
+    setLifestyle((p) => p.filter((i) => i.id !== id));
     setIsDirty(true);
   }
 
@@ -347,6 +402,75 @@ function NutritionContent() {
                         onLabelChange={setNewAvoidLabel}
                         onAdd={addToAvoid}
                       />
+                    </div>
+                  </div>
+
+                  {/* Compléments — à privilégier */}
+                  <div>
+                    <div className="flex items-center gap-2 px-6 py-4">
+                      <Pill className="h-4 w-4 text-primary" />
+                      <span className="font-display text-base font-semibold">Compléments — à privilégier</span>
+                      <span className="ml-auto rounded-full bg-primary-soft px-2 py-0.5 text-xs text-primary">{suppTake.length}</span>
+                    </div>
+                    {suppTake.length > 0 && (
+                      <ul className="divide-y divide-border/40 border-t border-border/40">
+                        {suppTake.map((it) => (
+                          <li key={it.id} className="flex items-center gap-3 px-6 py-3">
+                            <span className="text-lg">{it.emoji}</span>
+                            <span className="flex-1 text-sm">{it.label}</span>
+                            <button onClick={() => removeSuppTake(it.id)} className="rounded-lg p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <div className="p-5">
+                      <AddItemRow emoji={newTakeEmoji} label={newTakeLabel} placeholder="ex. Zinc 15 mg/j, Oméga-3…" onEmojiChange={setNewTakeEmoji} onLabelChange={setNewTakeLabel} onAdd={addSuppTake} />
+                    </div>
+                  </div>
+
+                  {/* Compléments — à éviter */}
+                  <div>
+                    <div className="flex items-center gap-2 px-6 py-4">
+                      <X className="h-4 w-4 text-destructive" />
+                      <span className="font-display text-base font-semibold">Compléments — à éviter</span>
+                      <span className="ml-auto rounded-full bg-destructive/10 px-2 py-0.5 text-xs text-destructive">{suppAvoid.length}</span>
+                    </div>
+                    {suppAvoid.length > 0 && (
+                      <ul className="divide-y divide-border/40 border-t border-border/40">
+                        {suppAvoid.map((it) => (
+                          <li key={it.id} className="flex items-center gap-3 px-6 py-3">
+                            <span className="text-lg">{it.emoji}</span>
+                            <span className="flex-1 text-sm">{it.label}</span>
+                            <button onClick={() => removeSuppAvoid(it.id)} className="rounded-lg p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <div className="p-5">
+                      <AddItemRow emoji={newAvoidSupEmoji} label={newAvoidSupLabel} placeholder="ex. Biotine, whey…" onEmojiChange={setNewAvoidSupEmoji} onLabelChange={setNewAvoidSupLabel} onAdd={addSuppAvoid} />
+                    </div>
+                  </div>
+
+                  {/* Hygiène de vie */}
+                  <div>
+                    <div className="flex items-center gap-2 px-6 py-4">
+                      <HeartPulse className="h-4 w-4 text-primary" />
+                      <span className="font-display text-base font-semibold">Hygiène de vie</span>
+                      <span className="ml-auto rounded-full bg-primary-soft px-2 py-0.5 text-xs text-primary">{lifestyle.length}</span>
+                    </div>
+                    {lifestyle.length > 0 && (
+                      <ul className="divide-y divide-border/40 border-t border-border/40">
+                        {lifestyle.map((it) => (
+                          <li key={it.id} className="flex items-center gap-3 px-6 py-3">
+                            <span className="text-lg">{it.emoji}</span>
+                            <span className="flex-1 text-sm">{it.text}</span>
+                            <button onClick={() => removeLifestyle(it.id)} className="rounded-lg p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <div className="p-5">
+                      <AddItemRow emoji={newLifeEmoji} label={newLifeText} placeholder="ex. Dors 7-8h, change ta taie d'oreiller…" onEmojiChange={setNewLifeEmoji} onLabelChange={setNewLifeText} onAdd={addLifestyle} />
                     </div>
                   </div>
 

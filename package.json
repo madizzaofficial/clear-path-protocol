@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
+    "dev:emu": "VITE_USE_FIREBASE_EMULATOR=true vite dev",
+    "emulators": "firebase emulators:start --only auth,firestore,storage --project methode-clear --import=./.emulator-data --export-on-exit=./.emulator-data",
+    "seed:emu": "node scripts/seed-emulator.mjs",
     "build": "vite build",
     "build:vercel": "vite build && node scripts/prepare-vercel.mjs",
     "build:dev": "vite build --mode development",

@@ -1,8 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import { allLessons } from "@/lib/course-data";
 import {
-  BookOpen,
   Camera,
   CalendarDays,
   MessageSquare,
@@ -406,7 +404,6 @@ function Suivi() {
   const {
     loading,
     skinState,
-    completedLessons,
     enrolledAt,
     totalRoutineSteps,
     phases,
@@ -427,10 +424,6 @@ function Suivi() {
   // Active step index: 3 = "Routine en préparation" when admin starts building, else 2 = "Analyse en cours"
   const pendingActiveIdx = intakeStatus === "building" ? 3 : 2;
 
-  const lessons = allLessons();
-  const done = completedLessons.length;
-  const total = lessons.length;
-  const protocolPct = total > 0 ? Math.round((done / total) * 100) : 0;
   const dayCount = enrolledAt
     ? Math.max(1, Math.floor((Date.now() - enrolledAt) / 86_400_000) + 1)
     : 1;
@@ -446,7 +439,6 @@ function Suivi() {
   );
   const currentPhase =
     journeyRanges[currentPhaseIndex]?.phase ?? journey[journey.length - 1];
-  const nextLesson = lessons.find((l) => !completedLessons.includes(l.id));
   const daysUntilCall = skinState?.nextCallDate ? getDaysUntil(skinState.nextCallDate) : null;
   const todayKey = new Date().toISOString().slice(0, 10);
   const amDone = checkins28[todayKey]?.am?.length ?? 0;
@@ -874,40 +866,6 @@ function Suivi() {
                 )}
               </div>
 
-              {/* Protocole */}
-              <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
-                <div className="mb-3 flex items-center justify-between">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                    Protocole
-                  </p>
-                  <span className="text-xs font-semibold text-primary">
-                    {done}/{total} · {protocolPct}%
-                  </span>
-                </div>
-                <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-primary transition-all duration-700"
-                    style={{ width: `${protocolPct}%` }}
-                  />
-                </div>
-                {nextLesson && (
-                  <Link
-                    to="/lesson/$lessonId"
-                    params={{ lessonId: nextLesson.id }}
-                    className="flex items-center gap-2 rounded-2xl border border-border/60 bg-muted/20 px-3 py-2.5 transition-colors hover:bg-muted/40"
-                  >
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-soft">
-                      <BookOpen className="h-3.5 w-3.5 text-primary" />
-                    </div>
-                    <p className="min-w-0 flex-1 truncate text-xs font-medium">
-                      {nextLesson.title}
-                    </p>
-                    <span className="shrink-0 rounded-full bg-primary px-3 py-1 text-[10px] font-semibold text-primary-foreground">
-                      Continuer
-                    </span>
-                  </Link>
-                )}
-              </div>
             </div>
             {/* end right sidebar wrapper */}
 

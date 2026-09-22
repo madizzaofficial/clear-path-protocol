@@ -663,6 +663,9 @@ function RoutinesContent() {
         imageUrl: data.imageUrl,
         purchaseUrl: data.purchaseUrl,
         inciAnalysis: data.inciAnalysis,
+        whyThisProduct: data.whyThisProduct ?? existing?.whyThisProduct,
+        amountPreset: data.amountPreset ?? existing?.amountPreset,
+        schedule: data.schedule ?? existing?.schedule,
         verified: existing?.verified ?? true,
         createdAt: existing?.createdAt ?? Date.now(),
         updatedAt: Date.now(),
@@ -724,6 +727,9 @@ function RoutinesContent() {
         instructions: catalog?.instructions ?? "",
         imageUrl: catalog?.imageUrl,
         purchaseUrl: catalog?.purchaseLinks?.[0]?.url ?? (catalog as any)?.purchaseUrl,
+        whyThisProduct: catalog?.whyThisProduct,
+        amountPreset: catalog?.amountPreset,
+        schedule: catalog?.schedule,
       };
     };
     const updated: StudentRoutine = {
