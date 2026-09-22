@@ -11,6 +11,7 @@ import { db, auth } from "@/lib/firebase";
 import { inngest } from "@/lib/inngest";
 import { collection, doc, getDocs, getDoc, setDoc, addDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { useEffect, useState, useMemo } from "react";
+import { toast } from "sonner";
 import type { CatalogProduct } from "./admin_.products";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -529,13 +530,22 @@ function RoutinesContent() {
     }
   }
 
-  async function saveRoutine(updated: StudentRoutine) {
-    if (!selectedUser) return;
+  // Renvoie true si l'écriture Firestore a réussi. En cas d'échec on PRÉVIENT
+  // (toast) au lieu de perdre la modif en silence — cf. bug "ça n'a pas enregistré".
+  async function saveRoutine(updated: StudentRoutine): Promise<boolean> {
+    if (!selectedUser) return false;
     setSaving(true);
     try {
       const clean = JSON.parse(JSON.stringify(updated)) as StudentRoutine;
       await setDoc(doc(db, "routines", selectedUser.uid), clean);
       setRoutine(updated);
+      return true;
+    } catch (e: any) {
+      console.error("[routines] saveRoutine error:", e);
+      toast.error(
+        `Enregistrement échoué : ${e?.message ?? "réessaie"}. Ta modification n'est PAS sauvegardée.`,
+      );
+      return false;
     } finally {
       setSaving(false);
     }
@@ -620,7 +630,7 @@ function RoutinesContent() {
     saveRoutine(updated);
   }
 
-  function handleSaveStep(data: StepSaveData) {
+  async function handleSaveStep(data: StepSaveData) {
     if (!routine) return;
     let updated: StudentRoutine;
     if (editingExtrasBlockId !== null) {
@@ -642,7 +652,8 @@ function RoutinesContent() {
     setRoutine(updated);
     setEditingStep(null);
     setEditingExtrasBlockId(null);
-    saveRoutine(updated);
+    const ok = await saveRoutine(updated);
+    if (ok) toast.success("Modification enregistrée");
   }
 
   async function handleSaveToCatalog(data: StepSaveData) {
