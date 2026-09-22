@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import { useState, useEffect } from "react";
 import {
   Sun, Moon, Loader2, Check, Sparkles, ShoppingCart, PlayCircle, Info,
@@ -568,16 +568,21 @@ function MaRoutinePage() {
   useEffect(() => {
     if (!user) return;
     const todayKey = new Date().toISOString().slice(0, 10);
+
+    // Routine en écoute live : une modif publiée par le coach s'affiche sans
+    // recharger la page (et met à jour l'onglet déjà ouvert de l'élève).
+    const unsubRoutine = onSnapshot(doc(db, "routines", user.uid), (snap) => {
+      if (snap.exists()) setRoutine(snap.data() as UserRoutine);
+    });
+
+    // Le reste change rarement pendant la session → lecture ponctuelle.
     Promise.allSettled([
-      getDoc(doc(db, "routines", user.uid)),
       getDoc(doc(db, "routine_checkins", user.uid, "days", todayKey)),
       getDoc(doc(db, "users", user.uid)),
       getDoc(doc(db, "config", "nutrition")),
       getDoc(doc(db, "config", "reminders")),
       getDoc(doc(db, "admin_skin_state", user.uid)),
-    ]).then(([routineRes, checkinRes, userRes, nutritionRes, remindersRes, skinRes]) => {
-      if (routineRes.status === "fulfilled" && routineRes.value.exists())
-        setRoutine(routineRes.value.data() as UserRoutine);
+    ]).then(([checkinRes, userRes, nutritionRes, remindersRes, skinRes]) => {
       if (checkinRes.status === "fulfilled" && checkinRes.value.exists()) {
         setCheckedAm(checkinRes.value.data().am ?? []);
         setCheckedPm(checkinRes.value.data().pm ?? []);
@@ -600,6 +605,8 @@ function MaRoutinePage() {
         setCoachPhrase(skinRes.value.data().coachPhrase ?? "");
       setLoading(false);
     });
+
+    return () => unsubRoutine();
   }, [user]);
 
   async function toggleStep(session: "am" | "pm", stepId: string) {
