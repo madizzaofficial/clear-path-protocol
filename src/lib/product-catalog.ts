@@ -28,6 +28,7 @@ export type CatalogProduct = {
   whyThisProduct?: string;
   amountPreset?: string;
   amountImageUrl?: string;
+  videoUrl?: string;
   schedule?: FreqPhase[];
   verified: boolean;
   isFeatured?: boolean;

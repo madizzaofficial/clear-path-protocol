@@ -42,14 +42,36 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { CATEGORIES } from "@/lib/skincare-categories";
-import { uploadProductImageFn as uploadProductImageRaw } from "@/lib/upload-image";
+import {
+  uploadProductImageFn as uploadProductImageRaw,
+  uploadLessonResourceFn as uploadResourceRaw,
+} from "@/lib/upload-image";
 import { auth } from "@/lib/firebase";
+import { ScheduleBuilder } from "@/components/ScheduleBuilder";
+import { QuantityVisual } from "@/components/QuantityVisual";
+import { QTY_PRESETS, type FreqPhase } from "@/lib/routine-schedule";
 
 // Injects the admin's Firebase ID token so the server fn can authenticate.
 async function uploadProductImageFn({ data }: { data: { fileName: string; contentType: string; base64: string } }) {
   const callerToken = await auth.currentUser?.getIdToken();
   if (!callerToken) throw new Error("Session expirée — reconnecte-toi.");
   return uploadProductImageRaw({ data: { ...data, callerToken } });
+}
+
+// Upload générique (mp4/webm + images) pour la vidéo d'application du modèle.
+async function uploadResourceFn({ data }: { data: { fileName: string; contentType: string; base64: string } }) {
+  const callerToken = await auth.currentUser?.getIdToken();
+  if (!callerToken) throw new Error("Session expirée — reconnecte-toi.");
+  return uploadResourceRaw({ data: { ...data, callerToken } });
+}
+
+function fileToBase64(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve((reader.result as string).split(",")[1]);
+    reader.onerror = () => reject(new Error("File read error"));
+    reader.readAsDataURL(file);
+  });
 }
 
 async function extractInciFromUrlFn({ data }: { data: { url: string } }) {
@@ -839,6 +861,15 @@ function ProductDialog({
   const [description, setDescription] = useState("");
   const [instructions, setInstructions] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  // Contenu réutilisable du modèle produit (pré-rempli à l'import dans une routine).
+  const [whyThisProduct, setWhyThisProduct] = useState("");
+  const [schedule, setSchedule] = useState<FreqPhase[]>([]);
+  const [amountPreset, setAmountPreset] = useState("");
+  const [amountImageUrl, setAmountImageUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [amountUploading, setAmountUploading] = useState(false);
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [videoError, setVideoError] = useState<string | null>(null);
   const [purchaseLinks, setPurchaseLinks] = useState<import("@/lib/product-catalog").PurchaseLink[]>([]);
   const [suitableForSkinTypes, setSuitableForSkinTypes] = useState<string[]>([]);
   const [inciNormalized, setInciNormalized] = useState("");
@@ -863,6 +894,14 @@ function ProductDialog({
       setDescription(product.description ?? "");
       setInstructions(product.instructions);
       setImageUrl(product.imageUrl ?? "");
+      setWhyThisProduct(product.whyThisProduct ?? "");
+      setSchedule(product.schedule ?? []);
+      setAmountPreset(product.amountPreset ?? "");
+      setAmountImageUrl(product.amountImageUrl ?? "");
+      setVideoUrl(product.videoUrl ?? "");
+      setAmountUploading(false);
+      setVideoUploading(false);
+      setVideoError(null);
       setPurchaseLinks(
         product.purchaseLinks?.length
           ? product.purchaseLinks
@@ -900,6 +939,39 @@ function ProductDialog({
       setUploadError(err?.message ?? "Erreur lors de l'upload — réessaye.");
     } finally {
       setUploading(false);
+    }
+  }
+
+  async function handleAmountImageFile(file: File) {
+    setAmountUploading(true);
+    setUploadError(null);
+    try {
+      const base64 = await fileToBase64(file);
+      const { publicUrl } = await uploadProductImageFn({
+        data: { fileName: file.name, contentType: file.type || "image/jpeg", base64 },
+      });
+      setAmountImageUrl(publicUrl);
+      setAmountPreset("");
+    } catch (err: any) {
+      setUploadError(err?.message ?? "Erreur lors de l'upload — réessaye.");
+    } finally {
+      setAmountUploading(false);
+    }
+  }
+
+  async function handleVideoFile(file: File) {
+    setVideoUploading(true);
+    setVideoError(null);
+    try {
+      const base64 = await fileToBase64(file);
+      const { publicUrl } = await uploadResourceFn({
+        data: { fileName: file.name, contentType: file.type || "video/mp4", base64 },
+      });
+      setVideoUrl(publicUrl);
+    } catch (err: any) {
+      setVideoError(err?.message ?? "Erreur lors de l'upload — réessaye.");
+    } finally {
+      setVideoUploading(false);
     }
   }
 
@@ -993,6 +1065,11 @@ function ProductDialog({
       description: description.trim() || undefined,
       instructions,
       imageUrl: imageUrl.trim() || undefined,
+      whyThisProduct: whyThisProduct.trim() || undefined,
+      amountPreset: amountPreset || undefined,
+      amountImageUrl: amountImageUrl.trim() || undefined,
+      videoUrl: videoUrl.trim() || undefined,
+      schedule: schedule.length ? schedule : undefined,
       purchaseLinks: purchaseLinks.filter(l => l.url.trim()).map(l => ({ url: l.url.trim(), label: l.label.trim() || "Lien" })),
       purchaseUrl: undefined,
       brand: brand.trim() || undefined,
@@ -1229,6 +1306,135 @@ function ProductDialog({
                 {uploadError && (
                   <p className="mt-1.5 text-xs text-destructive">{uploadError}</p>
                 )}
+              </>
+            )}
+          </div>
+
+          {/* Pourquoi ce produit — réutilisable dans les routines */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-foreground/80">
+              Pourquoi ce produit <span className="font-normal text-muted-foreground">(visible par l'élève)</span>
+            </label>
+            <textarea
+              autoComplete="off"
+              value={whyThisProduct}
+              onChange={(e) => setWhyThisProduct(e.target.value)}
+              rows={3}
+              placeholder="ex. Régule le sébum et atténue les rougeurs."
+              className="w-full resize-none rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+
+          {/* Fréquence par défaut (paliers) */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-foreground/80">
+              Fréquence par défaut <span className="font-normal text-muted-foreground">(paliers, optionnel)</span>
+            </label>
+            <ScheduleBuilder value={schedule} onChange={setSchedule} />
+          </div>
+
+          {/* Quantité — visuel préréglé OU image uploadée */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-foreground/80">Quantité</label>
+            {amountImageUrl ? (
+              <div className="relative inline-block">
+                <img
+                  src={amountImageUrl}
+                  alt="Quantité"
+                  className="h-24 w-24 rounded-2xl border border-border object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => setAmountImageUrl("")}
+                  className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-white shadow"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-4">
+                  <select
+                    value={amountPreset}
+                    onChange={(e) => setAmountPreset(e.target.value)}
+                    className="h-11 flex-1 rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="">— Choisir un visuel —</option>
+                    {QTY_PRESETS.map((q) => (
+                      <option key={q.key} value={q.key}>{q.label}</option>
+                    ))}
+                  </select>
+                  {amountPreset && <QuantityVisual preset={amountPreset} />}
+                </div>
+                {amountUploading ? (
+                  <div className="mt-2 flex items-center gap-3 rounded-2xl border border-border bg-background px-4 py-3">
+                    <Loader2 className="h-4 w-4 shrink-0 animate-spin text-primary" />
+                    <span className="text-sm text-muted-foreground">Upload en cours…</span>
+                  </div>
+                ) : (
+                  <label className="mt-2 flex cursor-pointer items-center gap-2 rounded-2xl border border-dashed border-border px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary-soft/30 hover:text-foreground">
+                    <Upload className="h-4 w-4 shrink-0" />
+                    …ou uploader une image de quantité
+                    <input
+                      autoComplete="off"
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleAmountImageFile(file);
+                      }}
+                    />
+                  </label>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Vidéo d'application — upload */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-foreground/80">
+              Vidéo d'application <span className="font-normal text-muted-foreground">(mp4/webm, optionnelle)</span>
+            </label>
+            {videoUrl ? (
+              <div className="relative inline-block">
+                <video
+                  src={videoUrl}
+                  className="h-40 w-auto rounded-2xl border border-border object-cover"
+                  controls
+                  muted
+                  playsInline
+                />
+                <button
+                  type="button"
+                  onClick={() => setVideoUrl("")}
+                  className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-white shadow"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ) : videoUploading ? (
+              <div className="flex items-center gap-3 rounded-2xl border border-border bg-background px-4 py-3">
+                <Loader2 className="h-4 w-4 shrink-0 animate-spin text-primary" />
+                <span className="text-sm text-muted-foreground">Upload de la vidéo…</span>
+              </div>
+            ) : (
+              <>
+                <label className="flex cursor-pointer items-center gap-2 rounded-2xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary-soft/30 hover:text-foreground">
+                  <Upload className="h-4 w-4 shrink-0" />
+                  Choisir une vidéo
+                  <input
+                    autoComplete="off"
+                    type="file"
+                    accept="video/mp4,video/webm"
+                    className="sr-only"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleVideoFile(file);
+                    }}
+                  />
+                </label>
+                {videoError && <p className="mt-1.5 text-xs text-destructive">{videoError}</p>}
               </>
             )}
           </div>

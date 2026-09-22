@@ -666,6 +666,7 @@ function RoutinesContent() {
         whyThisProduct: data.whyThisProduct ?? existing?.whyThisProduct,
         amountPreset: data.amountPreset ?? existing?.amountPreset,
         amountImageUrl: data.amountImageUrl ?? existing?.amountImageUrl,
+        videoUrl: data.videoUrl ?? existing?.videoUrl,
         schedule: data.schedule ?? existing?.schedule,
         verified: existing?.verified ?? true,
         createdAt: existing?.createdAt ?? Date.now(),
@@ -731,6 +732,7 @@ function RoutinesContent() {
         whyThisProduct: catalog?.whyThisProduct,
         amountPreset: catalog?.amountPreset,
         amountImageUrl: catalog?.amountImageUrl,
+        videoUrl: catalog?.videoUrl,
         schedule: catalog?.schedule,
       };
     };

@@ -284,6 +284,7 @@ export function StepDialog({
     setWhyThisProduct(p.whyThisProduct ?? "");
     setAmountPreset(p.amountPreset ?? "");
     setAmountImageUrl(p.amountImageUrl ?? "");
+    setVideoUrl(p.videoUrl ?? "");
     setSchedule(p.schedule ?? []);
     setCatalogSearch("");
     setShowCatalogPicker(false);
