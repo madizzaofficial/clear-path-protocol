@@ -80,6 +80,7 @@ export type RoutineStep = {
   amountImageUrl?: string;
   schedule?: FreqPhase[];
   videoUrl?: string;
+  waitAfter?: string;
   inciAnalysis?: InciAnalysis;
 };
 
@@ -105,6 +106,7 @@ export type StepSaveData = {
   amountImageUrl?: string;
   schedule?: FreqPhase[];
   videoUrl?: string;
+  waitAfter?: string;
   inciAnalysis?: InciAnalysis;
 };
 
@@ -224,6 +226,7 @@ export function StepDialog({
   const [amountPreset, setAmountPreset] = useState("");
   const [amountImageUrl, setAmountImageUrl] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
+  const [waitAfter, setWaitAfter] = useState("");
   const [stepInciAnalysis, setStepInciAnalysis] = useState<InciAnalysis | undefined>(undefined);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -261,6 +264,7 @@ export function StepDialog({
       setAmountPreset(step.amountPreset ?? "");
       setAmountImageUrl(step.amountImageUrl ?? "");
       setVideoUrl(step.videoUrl ?? "");
+      setWaitAfter(step.waitAfter ?? "");
       setStepInciAnalysis(step.inciAnalysis);
       setUploadError(null);
       setUploading(false);
@@ -632,6 +636,24 @@ export function StepDialog({
               )}
             </div>
 
+            {/* Temps de pause après cette étape (affiché comme un connecteur chez l'élève) */}
+            <div>
+              <label className="mb-2 block text-sm font-medium text-foreground/80">
+                Pause avant l'étape suivante{" "}
+                <span className="font-normal text-muted-foreground">(optionnel)</span>
+              </label>
+              <input
+                autoComplete="off"
+                value={waitAfter}
+                onChange={(e) => setWaitAfter(e.target.value)}
+                placeholder="ex. Attendre 30 min · Laisser sécher la peau"
+                className="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Affiché comme une étape d'attente entre ce produit et le suivant. Vide = rien.
+              </p>
+            </div>
+
             {/* Pourquoi ce produit */}
             <div>
               <label className="mb-2 block text-sm font-medium text-foreground/80">
@@ -738,6 +760,7 @@ export function StepDialog({
                 amountImageUrl: amountImageUrl.trim() || undefined,
                 schedule: schedule.length ? schedule : undefined,
                 videoUrl: videoUrl.trim() || undefined,
+                waitAfter: waitAfter.trim() || undefined,
                 inciAnalysis: stepInciAnalysis,
               })
             }

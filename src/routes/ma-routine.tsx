@@ -3,10 +3,10 @@ import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import {
   Sun, Moon, Loader2, Check, Sparkles, ShoppingCart, PlayCircle, Info,
-  Printer, Salad, Pill, Lightbulb, Leaf, Ban, HeartPulse, Eye, Droplet,
+  Printer, Salad, Pill, Lightbulb, Leaf, Ban, HeartPulse, Eye, Droplet, Clock,
 } from "lucide-react";
 import { currentProtocolWeek } from "@/lib/routine-week";
 import { defaultPhases, phaseLabel, type RoutinePhase } from "@/lib/routine-phases";
@@ -37,6 +37,7 @@ type RoutineStep = {
   amount?: string;
   amountPreset?: string;
   amountImageUrl?: string;
+  waitAfter?: string;
   schedule?: FreqPhase[];
   purchaseUrl?: string;
   purchaseLinks?: PurchaseLink[];
@@ -107,8 +108,8 @@ function weekStripHtml(phase: FreqPhase): string {
 }
 
 function stepRowsHtml(steps: RoutineStep[], week: number): string {
-  return [...steps]
-    .sort((a, b) => a.order - b.order)
+  const ordered = [...steps].sort((a, b) => a.order - b.order);
+  return ordered
     .map((s, i) => {
       const phase = activePhase(s.schedule, week);
       const introWeek = firstWeek(s.schedule) ?? s.startWeek ?? null;
@@ -134,7 +135,11 @@ function stepRowsHtml(steps: RoutineStep[], week: number): string {
           ${s.instructions ? `<p class="instr">${escapeHtml(s.instructions)}</p>` : ""}
           ${s.whyThisProduct ? `<p class="why"><b>Pourquoi&nbsp;:</b> ${escapeHtml(s.whyThisProduct)}</p>` : ""}
         </div>
-      </div>`;
+      </div>${
+        s.waitAfter && i < ordered.length - 1
+          ? `<p class="wait">⏱ ${escapeHtml(s.waitAfter)}</p>`
+          : ""
+      }`;
     })
     .join("");
 }
@@ -206,6 +211,7 @@ function printRoutine(opts: {
       .amt-img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; vertical-align: middle; margin-left: 4px; }
       .instr { font-size: 12px; color: #514a43; line-height: 1.5; margin: 5px 0 0; }
       .why { font-size: 11px; color: #6b5a4d; background: #faf1ea; border-radius: 8px; padding: 6px 9px; margin: 5px 0 0; }
+      .wait { text-align: center; font-size: 11px; font-weight: 600; color: #b5613c; margin: 2px 0; }
       .conseils { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
       .advice { break-inside: avoid; border: 1px solid #f0e9e2; border-radius: 12px; padding: 12px 14px; }
       .advice h3 { font-size: 13px; margin: 0 0 4px; }
@@ -512,15 +518,25 @@ function RoutineSection({
       </div>
       <div className="space-y-4">
         {ordered.map((step, i) => (
-          <StepCard
-            key={step.id}
-            step={step}
-            index={i + 1}
-            checked={checked.includes(step.id)}
-            currentWeek={currentWeek}
-            onToggle={() => onToggle(step.id)}
-            showCheck={trackable}
-          />
+          <Fragment key={step.id}>
+            <StepCard
+              step={step}
+              index={i + 1}
+              checked={checked.includes(step.id)}
+              currentWeek={currentWeek}
+              onToggle={() => onToggle(step.id)}
+              showCheck={trackable}
+            />
+            {step.waitAfter && i < ordered.length - 1 && (
+              <div className="flex items-center justify-center gap-2" aria-label={`Attendre : ${step.waitAfter}`}>
+                <span className="h-px w-6 bg-primary/30" />
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary-soft px-3 py-1.5 text-xs font-semibold text-primary">
+                  <Clock className="h-3.5 w-3.5 shrink-0" /> {step.waitAfter}
+                </span>
+                <span className="h-px w-6 bg-primary/30" />
+              </div>
+            )}
+          </Fragment>
         ))}
       </div>
     </section>
